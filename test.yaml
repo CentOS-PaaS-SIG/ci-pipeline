@@ -59,6 +59,8 @@
             git checkout $fed_branch
             # Checkout the commit from the fedmsg
             git checkout $fed_rev
+            # Create new branch because fedpkg wont build with detached head
+            git branch -b test_branch
             # Build the package into ./$ARCH/
             fedpkg --release $fed_branch mockbuild
             if [ "$?" != 0 ]; then echo "ERROR: FEDPKG MOCKBUILD\nSTATUS: $?"; exit 1; fi
