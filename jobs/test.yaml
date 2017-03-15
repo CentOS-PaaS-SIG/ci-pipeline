@@ -48,6 +48,7 @@
         - system-groovy:
            command: build.description = build.getEnvironment().get('fed_repo')
         - shell: |
+            set +e
             # Need to test to make sure fedpkg rpm is installed
             which fedpkg
             if [ "$?" != 0 ]; then echo "ERROR: FEDPKG RPM NOT INSTALLED\nSTATUS: $?"; exit 1; fi
