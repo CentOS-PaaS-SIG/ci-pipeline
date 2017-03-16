@@ -1,0 +1,104 @@
+- job-template:
+    name: 'TODO'
+    description: |
+        Managed by Jenkins Job Builder. Do not edit via web.
+#    concurrent: TODO
+#    node: TODO
+#    logrotate:
+#      numToKeep: 30
+#      artifactNumToKeep: 15
+    wrappers:
+      - ansicolor
+      - workspace-cleanup
+      - timestamps
+# TODO: trigger
+    parameters:
+        - string:
+            name: FEDMSG
+            description: |
+              fedmsg
+    builders:
+        - shell: |
+            #!/bin/bash
+            set -xuo pipefail
+
+            # Write script to parse fields (can likely be improved)
+            cat << EOF > ${{WORKSPACE}}/parse_fedmsg.py
+            #!/bin/env python
+            import json
+            import sys
+
+            message = json.load(sys.stdin)
+            if 'msg' in message:
+                if 'commit' in message['msg']
+                     msg = message['msg']['commit']
+            
+                for key in msg:
+                    print "fed_%s=%s" % (key, msg[key])
+            EOF
+            chmod +x ${{WORKSPACE}}/parse_fedmsg.py
+
+            # Write fedmsg fields to a file to inject them
+            if [ -n "$FEDMSG" ]; then
+                echo $FEDMSG | ${{WORKSPACE}}/parse_fedmsg.py > fedmsg_fields.txt
+            fi
+
+        - inject:
+            properties-file: ${{WORKSPACE}}/fedmsg_fields.txt
+        - system-groovy:
+           command: build.description = build.getEnvironment().get('fed_repo')
+        - shell: |
+            set +e
+            # Need to test to make sure fedpkg rpm is installed
+            which fedpkg
+            if [ "$?" != 0 ]; then echo "ERROR: FEDPKG RPM NOT INSTALLED\nSTATUS: $?"; exit 1; fi
+            # Clone the fedoraproject git repo
+            fedpkg clone -a $fed_repo
+            if [ "$?" != 0 ]; then echo "ERROR: FEDPKG CLONE\nSTATUS: $?"; exit 1; fi
+            pushd $fed_repo
+            # Checkout the proper branch
+            git checkout $fed_branch
+            # Checkout the commit from the fedmsg
+            git checkout $fed_rev
+            # Create new branch because fedpkg wont build with detached head
+            git branch -b test_branch
+            # fedpkg prep to unpack the tarball
+            fedpkg --release $fed_branch prep
+            # Make sure we have rpmspec before we call it
+            which rpmspec
+            if [ "$?" != 0 ]; then echo "ERROR: RPMSPEC RPM NOT INSTALLED\nSTATUS: $?"; exit 1; fi
+            VERSION=$(rpmspec --queryformat "${{VERSION}}\n" -q ${{fed_rev}}.spec | head -n 1)
+            pushd ${{fed_rev}}-$VERSION
+            ./configure
+            # Run tests if they are there
+            make test
+            MAKE_TEST_STATUS=$?
+            popd
+            if [ "$MAKE_TEST_STATUS" == 2 ]; then
+                 echo "description='$fed_repo - No tests'" >> ${{WORKSPACE}}/fedmsg_fields.txt
+            else
+                 echo "description=$fed_repo" >> ${{WORKSPACE}}/fedmsg_fields.txt
+            fi
+            # Build the package into ./results_$fed_repo/$VERSION/$RELEASE/
+            fedpkg --release $fed_branch mockbuild
+            if [ "$?" != 0 ]; then echo "ERROR: FEDPKG MOCKBUILD\nSTATUS: $?"; exit 1; fi
+            popd
+
+            # TODO: get rest of the rpms and build ostree
+            
+            exit 0
+        - inject:
+            properties-file: ${{WORKSPACE}}/fedmsg_fields.txt
+        - system-groovy:
+           command: build.description = build.getEnvironment().get('description')
+
+    publishers:
+      - archive:
+          artifacts: '*.*'
+          allow-empty: 'true'
+
+## Describes the project
+- project:
+    name: TODO
+    jobs:
+      - TODO
