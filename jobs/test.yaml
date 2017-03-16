@@ -49,6 +49,27 @@
            command: build.description = build.getEnvironment().get('fed_repo')
         - shell: |
             set +e
+            git clone https://github.com/CentOS-PaaS-SIG/aos-ci.git
+            # Verify this is a development branch
+            branch=$fed_branch
+            if [ "$branch" = "master" ]; then
+                branch="rawhide"
+            fi
+            curl -f -s http://dl.fedoraproject.org/pub/fedora/linux/development/$branch/Everything > /dev/null
+            if [ $? -ne 0 ]; then echo "Not a development branch"; exit; fi
+
+            # Verify this is a package we are interested in
+            valid=0
+            for package in $(cat aos-ci/config/package_list); do
+                if [ "$package" = "$fed_repo" ]; then
+                    valid=1
+                    break
+                fi
+            done
+            if [ $valid -eq 0 ]; then
+                echo "Not a package we are interested in"; exit; fi
+            fi
+
             # Need to test to make sure fedpkg rpm is installed
             which fedpkg
             if [ "$?" != 0 ]; then echo "ERROR: FEDPKG RPM NOT INSTALLED\nSTATUS: $?"; exit 1; fi
