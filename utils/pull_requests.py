@@ -124,6 +124,9 @@ def main(args):
     parser.add_option('-k', '--keyword', dest='keyword',
                       default='retest',
                       help='keyword to use to trigger retesting')
+    parser.add_option('-j', '--json', dest='json',
+                      action="store_true",
+                      help='Output in json format')
     options, arguments = parser.parse_args(args)
 
     try:
@@ -141,8 +144,17 @@ def main(args):
     update_prev_time(config, owner, repo)
     write_config(options.config_file, config)
 
-    for pr in prs:
-        print("%s" % pr.get('number'))
+    if options.json:
+        # {
+        #  'owner_repo': 'OWNER/REPO',
+        #  'prs': [ 123, 321, 4325 ]
+        # }
+        output = dict(owner_repo="%s/%s" % (owner, repo),
+                      prs=[pr.get('number') for pr in prs])
+        print(json.dumps(output))
+    else:
+        for pr in prs:
+            print("%s" % pr.get('number'))
 
 
 if __name__ == '__main__':
