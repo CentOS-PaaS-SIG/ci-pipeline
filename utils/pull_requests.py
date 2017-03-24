@@ -81,18 +81,18 @@ def get_active_prs(owner, repo, prev_time):
     return prs
 
 
-def get_config_json(config_file):
+def get_json(file):
     try:
-        with open(config_file) as json_data:
-            config = json.load(json_data)
+        with open(file) as json_data:
+            data = json.load(json_data)
     except (ValueError, IOError):
-        config = dict()
-    return config
+        data = dict()
+    return data
 
 
-def write_config(config_file, config):
-    with open(config_file, 'w') as json_data:
-        json.dump(config, json_data)
+def put_json(file, data):
+    with open(file, 'w') as json_data:
+        json.dump(data, json_data)
 
 
 def get_prev_time(config, owner, repo):
@@ -125,7 +125,7 @@ def main(args):
                       default='retest',
                       help='keyword to use to trigger retesting')
     parser.add_option('-j', '--json', dest='json',
-                      action="store_true",
+                      default=None,
                       help='Output in json format')
     options, arguments = parser.parse_args(args)
 
@@ -138,20 +138,17 @@ def main(args):
     if options.token:
         token_header = {'Authorization': 'token ' + options.token}
     keyword = options.keyword
-    config = get_config_json(options.config_file)
+    config = get_json(options.config_file)
     prev_time = get_prev_time(config, owner, repo)
     prs = get_active_prs(owner, repo, prev_time)
     update_prev_time(config, owner, repo)
-    write_config(options.config_file, config)
+    put_json(options.config_file, config)
 
     if options.json:
-        # {
-        #  'owner_repo': 'OWNER/REPO',
-        #  'prs': [ 123, 321, 4325 ]
-        # }
-        output = dict(owner_repo="%s/%s" % (owner, repo),
-                      prs=[pr.get('number') for pr in prs])
-        print(json.dumps(output))
+        # Read in json file, update, write out.
+        json_output = get_json(options.json)
+        json_output["%s/%s" % (owner, repo)] = [pr.get('number') for pr in prs]
+        put_json(options.json, json_output)
     else:
         for pr in prs:
             print("%s" % pr.get('number'))
