@@ -105,6 +105,11 @@
             if [ "$?" != 0 ]; then echo "ERROR: FEDPKG MOCKBUILD\nSTATUS: $?"; exit 1; fi
             popd
 
+            # Run fedabipkgdiff against the newly created rpm
+            git clone git://sourceware.org/git/libabigail.git
+            ABIGAIL_BRANCH=$(echo $fed_branch | sed 's/./&c/1')
+            libabigail/tools/fedabipkgdiff --from ${{ABIGAIL_BRANCH}} ${{fed_repo}}/results_${{fed_repo}}/${{VERSION}}/*/*.rpm > ${{WORKSPACE}}/fedabipkgdiff_out.txt
+
             # TODO: get rest of the rpms and build ostree
             
             exit 0
