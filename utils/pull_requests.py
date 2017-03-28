@@ -17,7 +17,8 @@ def eprint(*args, **kwargs):
 
 def has_retest_keyword(pr, prev_time):
     url = pr.get('comments_url')
-    while True:
+    # If keyword isn't defined we won't try and match
+    while keyword:
         request_comments = requests.get(url, headers=token_header)
         if request_comments.status_code != 200:
             eprint("Failed to retrieve")
@@ -58,7 +59,7 @@ def has_active_commits(pr, prev_time):
     return False
 
 
-def get_active_prs(owner, repo, prev_time):
+def get_active_prs(owner, repo, prev_time, limit):
     prs = list()
     url = "https://api.github.com/repos/%s/%s/pulls" % (owner, repo)
     while True:
@@ -72,7 +73,8 @@ def get_active_prs(owner, repo, prev_time):
             pr_time = time.strptime(pr.get('updated_at'), '%Y-%m-%dT%H:%M:%SZ')
             if pr_time > prev_time \
                     and (has_retest_keyword(pr, prev_time) or
-                         has_active_commits(pr, prev_time)):
+                         (has_active_commits(pr, prev_time) and
+                         not limit)):
                 prs.append(pr)
         if 'next' in request_pulls.links:
             url = request_pulls.links["next"]["url"]
@@ -122,8 +124,12 @@ def main(args):
                       default=None,
                       help='Authentication token to use.')
     parser.add_option('-k', '--keyword', dest='keyword',
-                      default='retest',
+                      default=None,
                       help='keyword to use to trigger retesting')
+    parser.add_option('-l', '--limit-keyword', dest='limit',
+                      action="store_true",
+                      help='Only trigger on PRs that have a'
+                           'comment with KEYWORD')
     parser.add_option('-j', '--json', dest='json',
                       default=None,
                       help='Output in json format')
@@ -138,9 +144,13 @@ def main(args):
     if options.token:
         token_header = {'Authorization': 'token ' + options.token}
     keyword = options.keyword
+    if options.limit and not keyword:
+        eprint("You are trying to limit PRs to KEYWORD"
+               "without specifying one")
+        sys.exit(1)
     config = get_json(options.config_file)
     prev_time = get_prev_time(config, owner, repo)
-    prs = get_active_prs(owner, repo, prev_time)
+    prs = get_active_prs(owner, repo, prev_time, options.limit)
     update_prev_time(config, owner, repo)
     put_json(options.config_file, config)
 
