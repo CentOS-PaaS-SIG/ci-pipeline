@@ -1,0 +1,35 @@
+- job-template:
+    name: 'ostree-compose'
+    description: |
+        Managed by Jenkins Job Builder. Do not edit via web.
+    concurrent: false
+#    node: TODO
+    logrotate:
+      numToKeep: 30
+      artifactNumToKeep: 15
+    wrappers:
+      - ansicolor
+      - workspace-cleanup:
+          exclude:
+          - "ostree-repo"
+          dirmatch: true
+      - timestamps
+    builders:
+        - shell: |
+            set +e
+            git clone https://github.com/CentOS-PaaS-SIG/aos-ci.git
+
+            if [ -d "./ostree-repo" ]; then
+                ostree --repo=./ostree-repo prune \
+                    --keep-younger-than='1 week ago' --refs-only
+            fi
+            rpm-ostree-toolbox treecompose -c aos-ci/config/ostree/config.ini \
+                --ostreerepo ./ostree-repo
+
+            # Rsync it somewhere...
+
+## Describes the project
+- project:
+    name: OSTreeCompose
+    jobs:
+      - ostree-compose
