@@ -1,0 +1,81 @@
+{
+    "comment": "Red Hat Enterprise Linux Atomic Host 7.0",
+
+    "osname": "rhel-atomic-host",
+    "ref": "rhel-atomic-host/7/x86_64/rkt",
+
+    "repos": ["fedora", "updates"],
+
+    "selinux": true,
+
+    "bootstrap_packages": ["filesystem", "glibc", "nss-altfiles", "shadow-utils"],
+
+    "install-langs": ["en_US"],
+
+    "documentation": false,
+
+    "initramfs-args": ["--no-hostonly", "--add", "iscsi"],
+
+    "postprocess-script": "treecompose-post.sh",
+
+    "etc-group-members": ["wheel", "docker"],
+
+    "ignore-removed-users": ["root"],
+    "ignore-removed-groups": ["root"],
+    "check-passwd": { "type": "file", "filename": "passwd" },
+    "check-groups": { "type": "file", "filename": "group" },
+
+    "packages": ["atomic",
+		 "systemd", "kernel",
+		 "dracut-network",
+		 "biosdevname",
+		 "coreutils",
+		 "lvm2",
+		 "grub2", "grub2-efi", "ostree-grub2",
+		 "efibootmgr", "shim",
+		 "e2fsprogs", "xfsprogs",
+		 "mdadm",
+		 "docker",
+		 "selinux-policy-targeted",
+		 "sssd-client",
+		 "cloud-init",
+		 "cloud-utils-growpart",
+		 "tar", "xz", "gzip", "bzip2",
+		 "less",
+		 "kexec-tools",
+		 "iscsi-initiator-utils",
+		 "bridge-utils",
+                 "nfs-utils",
+		 "subscription-manager",
+		 "subscription-manager-plugin-ostree",
+		 "subscription-manager-plugin-container",
+		 "openssh-server", "openssh-clients",
+		 "chrony",
+		 "logrotate",
+		 "passwd",
+		 "NetworkManager", "vim-minimal", "nano",
+		 "sudo",
+		 "tuned", "tuned-profiles-atomic",
+		 "kubernetes", "etcd",
+		 "flannel",
+		 "irqbalance",
+		 "bash-completion",
+		 "rsync", "tmux",
+		 "net-tools", "nmap-ncat",
+		 "bind-utils",
+		 "authconfig",
+		 "policycoreutils-python",
+	         "cockpit-shell",
+		 "setools-console"],
+
+    "remove-from-packages": [["yum", "/usr/bin/.*"],
+			     ["kernel", "/lib/modules/.*/drivers/gpu"],
+			     ["linux-firmware", "/usr/lib/firmware/radeon/.*"],
+			     ["filesystem", "/usr/share/backgrounds"],
+			     ["fedora-logos", "/usr/share/backgrounds", "/usr/share/kde4",
+			      "/usr/share/anaconda"]],
+
+    "units": ["docker.service", "tuned.service", "docker-storage-setup.service"],
+
+    "default_target": "multi-user.target"
+}
