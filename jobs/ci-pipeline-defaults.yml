@@ -1,0 +1,30 @@
+- defaults:
+    name: ci-pipeline-defaults
+    node: fedora-atomic
+    description: |
+        <p>See <a href="https://github.com/CentOS-PaaS-SIG/aos-ci">https://github.com/CentOS-PaaS-SIG/aos-ci</a> for more information.<p>
+    wrappers:
+        - ansicolor
+        - workspace-cleanup
+        - timestamps
+    scm:
+        - ci-pipeline-scms
+
+- scm:
+    name: ci-pipeline-scms
+    scm:
+        - git:
+            url: "https://github.com/cgwalters/centos-ci-skeleton"
+            basedir: cciskel
+            branches:
+                - master
+        - git:
+            url: "https://github.com/CentOS-PaaS-SIG/aos-ci"
+            basedir: aos-ci
+            branches:
+                - master
+        - git:
+            url: "https://github.com/CentOS/sig-atomic-buildscripts"
+            basedir: sig-atomic-buildscripts
+            branches:
+                - master
