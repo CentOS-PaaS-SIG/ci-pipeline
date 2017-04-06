@@ -114,3 +114,4 @@ ansible.cfg
 # generated docs
 docs/build/
 
+jobs/centos-ci-skeleton/

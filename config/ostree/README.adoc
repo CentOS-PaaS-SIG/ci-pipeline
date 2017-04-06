@@ -1,0 +1,6 @@
+# fedora-atomic-host
+Specs and control files for a custom Fedora base Atomic host
+
+````
+sudo rpm-ostree-toolbox treecompose -c config.ini
+````
