@@ -1,0 +1,68 @@
+#!/bin/bash
+set +e
+
+# Verify this is a development branch
+branch=$fed_branch
+if [ "$branch" = "master" ]; then
+    branch="rawhide"
+fi
+curl -f -s http://dl.fedoraproject.org/pub/fedora/linux/development/$branch/Everything > /dev/null
+if [ $? -ne 0 ]; then echo "Not a development branch"; exit; fi
+
+# Verify this is a package we are interested in
+valid=0
+for package in $(cat aos-ci/config/package_list); do
+    if [ "$package" = "$fed_repo" ]; then
+        valid=1
+        break
+    fi
+done
+if [ $valid -eq 0 ]; then
+    echo "Not a package we are interested in"; exit
+fi
+
+# Need to test to make sure fedpkg rpm is installed
+yum -y install fedpkg
+which fedpkg
+if [ "$?" != 0 ]; then echo "ERROR: FEDPKG RPM NOT INSTALLED\nSTATUS: $?"; exit 1; fi
+# Clone the fedoraproject git repo
+fedpkg clone -a $fed_repo
+if [ "$?" != 0 ]; then echo "ERROR: FEDPKG CLONE\nSTATUS: $?"; exit 1; fi
+pushd $fed_repo
+# Checkout the proper branch
+git checkout $fed_branch
+# Checkout the commit from the fedmsg
+git checkout $fed_rev
+# Create new branch because fedpkg wont build with detached head
+git branch -b test_branch
+# fedpkg prep to unpack the tarball
+fedpkg --release $fed_branch prep
+# Make sure we have rpmspec before we call it
+yum -y install rpmspec
+which rpmspec
+if [ "$?" != 0 ]; then echo "ERROR: RPMSPEC RPM NOT INSTALLED\nSTATUS: $?"; exit 1; fi
+VERSION=$(rpmspec --queryformat "${{VERSION}}\n" -q ${{fed_rev}}.spec | head -n 1)
+pushd ${{fed_rev}}-$VERSION
+./configure
+# Run tests if they are there
+make test
+MAKE_TEST_STATUS=$?
+popd
+if [ "$MAKE_TEST_STATUS" == 2 ]; then
+     echo "description='$fed_repo - No tests'" >> ${{WORKSPACE}}/fedmsg_fields.txt
+else
+     echo "description=$fed_repo" >> ${{WORKSPACE}}/fedmsg_fields.txt
+fi
+# Build the package into ./results_$fed_repo/$VERSION/$RELEASE/
+fedpkg --release $fed_branch mockbuild
+if [ "$?" != 0 ]; then echo "ERROR: FEDPKG MOCKBUILD\nSTATUS: $?"; exit 1; fi
+popd
+
+# Run fedabipkgdiff against the newly created rpm
+git clone git://sourceware.org/git/libabigail.git
+ABIGAIL_BRANCH=$(echo $fed_branch | sed 's/./&c/1')
+libabigail/tools/fedabipkgdiff --from ${{ABIGAIL_BRANCH}} ${{fed_repo}}/results_${{fed_repo}}/${{VERSION}}/*/*.rpm > ${{WORKSPACE}}/fedabipkgdiff_out.txt
+
+# TODO: get rest of the rpms and build ostree
+
+exit 0
