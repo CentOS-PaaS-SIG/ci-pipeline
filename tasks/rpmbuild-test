@@ -6,7 +6,7 @@ lsblk
 echo ""
 df -h
 pwd
-sudo yum -y install fedpkg gcc
+sudo yum -y install fedpkg gcc rpm-build
 which fedpkg
 if [ "$?" != 0 ]; then echo "ERROR: FEDPKG RPM NOT INSTALLED\nSTATUS: $?"; exit 1; fi
 # Clone the fedoraproject git repo
@@ -22,27 +22,27 @@ git checkout $fed_rev
 git checkout -b test_branch
 # fedpkg prep to unpack the tarball
 fedpkg --release $fed_branch prep
-ABIGAIL_BRANCH=$(echo $fed_branch | sed 's/./&c/1')
-if [ "${fed_branch}" = "master" ]; then
-    ABIGAIL_BRANCH="fc27"
-fi
 # Make sure we have rpmspec before we call it
 which rpmspec
 if [ "$?" != 0 ]; then echo "ERROR: RPMSPEC RPM NOT INSTALLED\nSTATUS: $?"; exit 1; fi
 VERSION=$(rpmspec --queryformat "%{VERSION}\n" -q ${fed_repo}.spec | head -n 1)
-ls -la
-pushd ${fed_repo}-*.${ABIGAIL_BRANCH}
+# Some packages are packagename-version-release, some packagename-sha
+pushd ${fed_repo}-*
+# Run configure if it exists, if not, no big deal
 ./configure
 # Run tests if they are there
 make test
 MAKE_TEST_STATUS=$?
 popd
 if [ "$MAKE_TEST_STATUS" == 2 ]; then
-     sudo echo "description='$fed_repo - No tests'" >> ${WORKSPACE}/fedmsg_fields.txt
+#     sudo echo "description='$fed_repo - No tests'" >> ${WORKSPACE}/fedmsg_fields.txt
+     sudo echo "description='$fed_repo - No tests'"
 else
-     sudo echo "description=$fed_repo" >> ${WORKSPACE}/fedmsg_fields.txt
+#     sudo echo "description=$fed_repo" >> ${WORKSPACE}/fedmsg_fields.txt
+     sudo echo "description=$fed_repo"
 fi
 # Build the package into ./results_$fed_repo/$VERSION/$RELEASE/
+export TMPDIR=/home/builder/${fed_repo}
 fedpkg --release $fed_branch mockbuild
 lsblk
 echo ""
@@ -51,8 +51,13 @@ if [ "$?" != 0 ]; then echo "ERROR: FEDPKG MOCKBUILD\nSTATUS: $?"; exit 1; fi
 popd
 
 # Run fedabipkgdiff against the newly created rpm
+ABIGAIL_BRANCH=$(echo $fed_branch | sed 's/./&c/1')
+if [ "${fed_branch}" = "master" ]; then
+    ABIGAIL_BRANCH="fc27"
+fi
 git clone git://sourceware.org/git/libabigail.git
-libabigail/tools/fedabipkgdiff --from ${ABIGAIL_BRANCH} ${fed_repo}/results_${fed_repo}/${VERSION}/*/*.rpm > ${WORKSPACE}/fedabipkgdiff_out.txt
+#libabigail/tools/fedabipkgdiff --from ${ABIGAIL_BRANCH} ${fed_repo}/results_${fed_repo}/${VERSION}/*/*.rpm > ${WORKSPACE}/fedabipkgdiff_out.txt
+libabigail/tools/fedabipkgdiff --from ${ABIGAIL_BRANCH} ${fed_repo}/results_${fed_repo}/${VERSION}/*/*.rpm
 
 # TODO: get rest of the rpms and build ostree
 
