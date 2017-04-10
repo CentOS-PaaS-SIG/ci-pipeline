@@ -19,10 +19,10 @@ git checkout -b test_branch
 # fedpkg prep to unpack the tarball
 fedpkg --release $fed_branch prep
 # Make sure we have rpmspec before we call it
-sudo yum -y install rpmspec
 which rpmspec
 if [ "$?" != 0 ]; then echo "ERROR: RPMSPEC RPM NOT INSTALLED\nSTATUS: $?"; exit 1; fi
 VERSION=$(rpmspec --queryformat "%{VERSION}\n" -q ${fed_repo}.spec | head -n 1)
+ls
 pushd ${fed_repo}-$VERSION
 ./configure
 # Run tests if they are there
