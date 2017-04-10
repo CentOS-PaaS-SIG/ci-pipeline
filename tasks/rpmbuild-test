@@ -5,6 +5,7 @@ set +e
 lsblk
 echo ""
 df -h
+pwd
 exit 0
 sudo yum -y install fedpkg gcc
 which fedpkg
