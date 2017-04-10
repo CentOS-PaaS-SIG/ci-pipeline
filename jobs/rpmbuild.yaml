@@ -49,38 +49,58 @@
 # TODO: trigger
     parameters:
         - string:
-            name: CI_MESSAGE
+            name: fed_username
             description: |
-              fedmsg msg
+              fedmsg username
+        - string:
+            name: fed_stats
+            description: |
+              fedmsg stats
+        - string:
+            name: fed_name
+            description: |
+              fedmsg name
+        - string:
+            name: fed_namespace
+            description: |
+              fedmsg namespace
+        - string:
+            name: fed_rev
+            description: |
+              fedmsg rev
+        - string:
+            name: fed_agent
+            description: |
+              fedmsg agent
+        - string:
+            name: fed_summary
+            description: |
+              fedmsg summary
+        - string:
+            name: fed_repo
+            description: |
+              fedmsg repo
+        - string:
+            name: fed_branch
+            description: |
+              fedmsg branch
+        - string:
+            name: fed_path
+            description: |
+              fedmsg path
+        - string:
+            name: fed_seen
+            description: |
+              fedmsg seen
+        - string:
+            name: fed_message
+            description: |
+              fedmsg message
+        - string:
+            name: fed_email
+            description: |
+              fedmsg email
     builders:
-        - shell: |
-            #!/bin/bash
-            set -xuo pipefail
-
-            # Write script to parse fields (can likely be improved)
-            cat << EOF > ${{WORKSPACE}}/parse_fedmsg.py
-            #!/bin/env python
-            import json
-            import sys
-
-            reload(sys)
-            sys.setdefaultencoding('utf-8')
-            message = json.load(sys.stdin)
-            if 'commit' in message:
-                msg = message['commit']
-            
-                for key in msg:
-                    print "fed_%s=%s" % (key, msg[key])
-            EOF
-            chmod +x ${{WORKSPACE}}/parse_fedmsg.py
-
-            # Write fedmsg fields to a file to inject them
-            if [ -n "$CI_MESSAGE" ]; then
-                echo $CI_MESSAGE | ${{WORKSPACE}}/parse_fedmsg.py > fedmsg_fields.txt
-            fi
-
-        - inject:
-            properties-file: ${{WORKSPACE}}/fedmsg_fields.txt
         - system-groovy:
            command: build.description = build.getEnvironment().get('fed_repo')
         - ci-pipeline-duffy-builder:
