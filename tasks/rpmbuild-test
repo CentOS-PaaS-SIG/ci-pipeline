@@ -6,7 +6,6 @@ lsblk
 echo ""
 df -h
 pwd
-exit 0
 sudo yum -y install fedpkg gcc
 which fedpkg
 if [ "$?" != 0 ]; then echo "ERROR: FEDPKG RPM NOT INSTALLED\nSTATUS: $?"; exit 1; fi
@@ -45,6 +44,9 @@ else
 fi
 # Build the package into ./results_$fed_repo/$VERSION/$RELEASE/
 fedpkg --release $fed_branch mockbuild
+lsblk
+echo ""
+df -h
 if [ "$?" != 0 ]; then echo "ERROR: FEDPKG MOCKBUILD\nSTATUS: $?"; exit 1; fi
 popd
 
