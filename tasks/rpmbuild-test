@@ -22,7 +22,7 @@ fedpkg --release $fed_branch prep
 which rpmspec
 if [ "$?" != 0 ]; then echo "ERROR: RPMSPEC RPM NOT INSTALLED\nSTATUS: $?"; exit 1; fi
 VERSION=$(rpmspec --queryformat "%{VERSION}\n" -q ${fed_repo}.spec | head -n 1)
-ls
+ls -la
 pushd ${fed_repo}-$VERSION
 ./configure
 # Run tests if they are there
