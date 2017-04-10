@@ -60,7 +60,7 @@
                 fi
             done
             if [ $valid -eq 0 ]; then
-                echo "Not a package we are interested in"; exit; fi
+                echo "Not a package we are interested in"; exit
             fi
 
             touch ${{WORKSPACE}}/trigger.downstream

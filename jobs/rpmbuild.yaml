@@ -12,6 +12,9 @@
             cat >>task.env <<EOF
             export JENKINS_JOB_NAME="${{JOB_NAME}}"
             export JENKINS_BUILD_TAG="${{BUILD_TAG}}"
+            export fed_repo="${{fed_repo}}"
+            export fed_branch="${{fed_branch}}"
+            export fed_rev="${{fed_rev}}"
             EOF
             cat task.env
             rsync -Hrlptv --stats -e ssh task.env rsync-password.sh builder@${{DUFFY_HOST}}:

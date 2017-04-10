@@ -14,7 +14,7 @@ git checkout $fed_branch
 # Checkout the commit from the fedmsg
 git checkout $fed_rev
 # Create new branch because fedpkg wont build with detached head
-git branch -b test_branch
+git checkout -b test_branch
 # fedpkg prep to unpack the tarball
 fedpkg --release $fed_branch prep
 # Make sure we have rpmspec before we call it
