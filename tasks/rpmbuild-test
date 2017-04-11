@@ -62,7 +62,7 @@ mkdir ${RSYNC_BRANCH}
 mkdir repo
 rsync -arv ${RSYNC_BRANCH}/ fedora-atomic@artifacts.ci.centos.org::fedora-atomic
 rsync -arv repo/ fedora-atomic@artifacts.ci.centos.org::fedora-atomic/${RSYNC_BRANCH}
-rsync --delete --stats -a ${fed_repo}_repo/ fedora-atomic@artifacts.ci.centos.org::fedora-atomic/${RSYNC_BRANCH}/repo
+rsync --delete --stats -a ${fed_repo}_repo fedora-atomic@artifacts.ci.centos.org::fedora-atomic/${RSYNC_BRANCH}/repo
 rm -rf ${RSYNC_BRANCH}
 rm -rf repo
 if [ "$?" != 0 ]; then echo "ERROR: RSYNC REPO\nSTATUS: $?"; exit 1; fi
