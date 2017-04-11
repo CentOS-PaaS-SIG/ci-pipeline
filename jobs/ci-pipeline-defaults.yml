@@ -38,4 +38,4 @@
             url: "https://github.com/p3ck/aos-ci"
             basedir: aos-ci
             branches:
-                - master
+                - develop

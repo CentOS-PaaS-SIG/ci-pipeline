@@ -8,7 +8,7 @@ if [ -d "./ostree" ]; then
     ostree --repo=./ostree prune \
         --keep-younger-than='1 week ago' --refs-only
 fi
-rpm-ostree-toolbox treecompose -c aos-ci/config/ostree/config.ini \
+sudo rpm-ostree-toolbox treecompose -c aos-ci/config/ostree/config.ini \
                 --ostreerepo ./ostree
 
 
