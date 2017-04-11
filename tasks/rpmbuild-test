@@ -56,7 +56,9 @@ ABIGAIL_BRANCH=$(echo $fed_branch | sed 's/./&c/1')
 if [ "${fed_branch}" = "master" ]; then
     ABIGAIL_BRANCH="fc27"
 fi
+rm -rf libabigail
 git clone git://sourceware.org/git/libabigail.git
+sudo yum -y install pyxdg
 #libabigail/tools/fedabipkgdiff --from ${ABIGAIL_BRANCH} ${fed_repo}/results_${fed_repo}/${VERSION}/*/*.rpm > ${WORKSPACE}/fedabipkgdiff_out.txt
 libabigail/tools/fedabipkgdiff --from ${ABIGAIL_BRANCH} ${fed_repo}/results_${fed_repo}/${VERSION}/*/*.rpm
 
