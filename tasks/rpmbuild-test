@@ -46,19 +46,21 @@ fedpkg --release $fed_branch mockbuild
 if [ "$?" != 0 ]; then echo "ERROR: FEDPKG MOCKBUILD\nSTATUS: $?"; exit 1; fi
 popd
 
+ABIGAIL_BRANCH=$(echo $fed_branch | sed 's/./&c/1')
+RSYNC_BRANCH=$ABIGAIL_BRANCH
+if [ "${fed_branch}" = "master" ]; then
+    ABIGAIL_BRANCH="fc27"
+    RSYNC_BRANCH=rawhide
+fi
 # Make repo with the newly created rpm
 rm -rf ${fed_repo}_repo
 mkdir ${fed_repo}_repo
 cp ${fed_repo}/results_${fed_repo}/${VERSION}/*/*.rpm ${fed_repo}_repo/
 pushd ${fed_repo}_repo && createrepo .
 popd
-rsync --delete --stats -a ${fed_repo}_repo/ fedora-atomic@artifacts.ci.centos.org::fedora-atomic/${JENKINS_JOB_NAME}/repo/
+rsync --delete --stats -a ${fed_repo}_repo/ fedora-atomic@artifacts.ci.centos.org::fedora-atomic/${RSYNC_BRANCH}/repo/
 if [ "$?" != 0 ]; then echo "ERROR: RSYNC REPO\nSTATUS: $?"; exit 1; fi
 # Run fedabipkgdiff against the newly created rpm
-ABIGAIL_BRANCH=$(echo $fed_branch | sed 's/./&c/1')
-if [ "${fed_branch}" = "master" ]; then
-    ABIGAIL_BRANCH="fc27"
-fi
 rm -rf libabigail
 git clone git://sourceware.org/git/libabigail.git
 RPM_TO_CHECK=$(find ${fed_repo}/results_${fed_repo}/${VERSION}/*/ -name "${fed_repo}-${VERSION}*" | grep -v src)
