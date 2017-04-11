@@ -23,7 +23,7 @@
             done
 
             build_success=true
-            if ! ssh -tt builder@${{DUFFY_HOST}} '. ${{JOB_NAME}}task.env && ./${{JOB_NAME}}/aos-ci/tasks/{task}'; then
+            if ! ssh -tt builder@${{DUFFY_HOST}} '. ${{JOB_NAME}}/task.env && ./${{JOB_NAME}}/aos-ci/tasks/{task}'; then
                 build_success=false
             fi
 
