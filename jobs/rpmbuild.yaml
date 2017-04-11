@@ -48,7 +48,6 @@
     logrotate:
       numToKeep: 30
       artifactNumToKeep: 15
-# TODO: trigger
     parameters:
         - string:
             name: fed_username
