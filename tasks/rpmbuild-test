@@ -1,12 +1,8 @@
 #!/bin/bash
 set +e
 
-# Need to test to make sure fedpkg rpm is installed
-lsblk
-echo ""
-df -h
-pwd
-sudo yum -y install fedpkg gcc rpm-build
+HOMEDIR=$(pwd)
+sudo yum -y install fedpkg gcc rpm-build createrepo pyxdg
 which fedpkg
 if [ "$?" != 0 ]; then echo "ERROR: FEDPKG RPM NOT INSTALLED\nSTATUS: $?"; exit 1; fi
 # Clone the fedoraproject git repo
@@ -36,21 +32,22 @@ make test
 MAKE_TEST_STATUS=$?
 popd
 if [ "$MAKE_TEST_STATUS" == 2 ]; then
-#     sudo echo "description='$fed_repo - No tests'" >> ${WORKSPACE}/fedmsg_fields.txt
-     sudo echo "description='$fed_repo - No tests'"
+     sudo echo "description='$fed_repo - No tests'" >> ${HOMEDIR}/description.txt
 else
-#     sudo echo "description=$fed_repo" >> ${WORKSPACE}/fedmsg_fields.txt
-     sudo echo "description=$fed_repo"
+     sudo echo "description=$fed_repo" >> ${HOMEDIR}/description.txt
 fi
 # Build the package into ./results_$fed_repo/$VERSION/$RELEASE/
-export TMPDIR=/home/builder/${fed_repo}
+export TMPDIR=${HOMEDIR}/${fed_repo}
 fedpkg --release $fed_branch mockbuild
-lsblk
-echo ""
-df -h
 if [ "$?" != 0 ]; then echo "ERROR: FEDPKG MOCKBUILD\nSTATUS: $?"; exit 1; fi
 popd
 
+# Make repo with the newly created rpm
+rm -rf ${fed_repo}_repo
+mkdir ${fed_repo}_repo
+cp ${fed_repo}/results_${fed_repo}/${VERSION}/*/*.rpm ${fed_repo}_repo/
+pushd ${fed_repo}_repo && createrepo .
+popd
 # Run fedabipkgdiff against the newly created rpm
 ABIGAIL_BRANCH=$(echo $fed_branch | sed 's/./&c/1')
 if [ "${fed_branch}" = "master" ]; then
@@ -58,10 +55,6 @@ if [ "${fed_branch}" = "master" ]; then
 fi
 rm -rf libabigail
 git clone git://sourceware.org/git/libabigail.git
-sudo yum -y install pyxdg
-#libabigail/tools/fedabipkgdiff --from ${ABIGAIL_BRANCH} ${fed_repo}/results_${fed_repo}/${VERSION}/*/*.rpm > ${WORKSPACE}/fedabipkgdiff_out.txt
-libabigail/tools/fedabipkgdiff --from ${ABIGAIL_BRANCH} ${fed_repo}/results_${fed_repo}/${VERSION}/*/*.rpm
-
-# TODO: get rest of the rpms and build ostree
+libabigail/tools/fedabipkgdiff --from ${ABIGAIL_BRANCH} ${fed_repo}/results_${fed_repo}/${VERSION}/*/*.rpm > ${HOMEDIR}/fedabipkgdiff_out.txt
 
 exit 0
