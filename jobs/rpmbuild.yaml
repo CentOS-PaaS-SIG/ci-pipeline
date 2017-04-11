@@ -108,7 +108,7 @@
         - ci-pipeline-duffy-builder:
             task: rpmbuild-test
         - inject:
-            properties-file: ${{WORKSPACE}}/description.txt
+            properties-file: ${{WORKSPACE}}/logs/description.txt
         - system-groovy:
            command: build.description = build.getEnvironment().get('description')
 
