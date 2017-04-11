@@ -1,5 +1,6 @@
 #!/bin/sh
 
+. rsync-password.sh
 for v in ostree; do
     rsync --delete --stats -a fedora-atomic@artifacts.ci.centos.org::fedora-atomic/${build}/${v}/ ${v}/
 done
