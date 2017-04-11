@@ -2,6 +2,7 @@
 set +e
 
 HOMEDIR=$(pwd)
+# The yum installs will be moved to duffy setup playbook eventually
 sudo yum -y install fedpkg gcc rpm-build createrepo pyxdg
 which fedpkg
 if [ "$?" != 0 ]; then echo "ERROR: FEDPKG RPM NOT INSTALLED\nSTATUS: $?"; exit 1; fi
@@ -51,6 +52,8 @@ mkdir ${fed_repo}_repo
 cp ${fed_repo}/results_${fed_repo}/${VERSION}/*/*.rpm ${fed_repo}_repo/
 pushd ${fed_repo}_repo && createrepo .
 popd
+rsync --delete --stats -a ${fed_repo}_repo/ fedora-atomic@artifacts.ci.centos.org::fedora-atomic/${JENKINS_JOB_NAME}/repo/
+if [ "$?" != 0 ]; then echo "ERROR: RSYNC REPO\nSTATUS: $?"; exit 1; fi
 # Run fedabipkgdiff against the newly created rpm
 ABIGAIL_BRANCH=$(echo $fed_branch | sed 's/./&c/1')
 if [ "${fed_branch}" = "master" ]; then
