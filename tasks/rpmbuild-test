@@ -5,6 +5,9 @@ HOMEDIR=$(pwd)
 sudo yum -y install fedpkg gcc rpm-build createrepo pyxdg
 which fedpkg
 if [ "$?" != 0 ]; then echo "ERROR: FEDPKG RPM NOT INSTALLED\nSTATUS: $?"; exit 1; fi
+# Put all output files into logs/ for rsync
+rm -rf ${HOMEDIR}/logs
+mkdir ${HOMEDIR}/logs
 # Clone the fedoraproject git repo
 rm -rf $fed_repo
 fedpkg clone -a $fed_repo
@@ -32,9 +35,9 @@ make test
 MAKE_TEST_STATUS=$?
 popd
 if [ "$MAKE_TEST_STATUS" == 2 ]; then
-     sudo echo "description='$fed_repo - No tests'" >> ${HOMEDIR}/description.txt
+     sudo echo "description='$fed_repo - No tests'" >> ${HOMEDIR}/logs/description.txt
 else
-     sudo echo "description=$fed_repo" >> ${HOMEDIR}/description.txt
+     sudo echo "description=$fed_repo" >> ${HOMEDIR}/logs/description.txt
 fi
 # Build the package into ./results_$fed_repo/$VERSION/$RELEASE/
 export TMPDIR=${HOMEDIR}/${fed_repo}
@@ -56,6 +59,9 @@ fi
 rm -rf libabigail
 git clone git://sourceware.org/git/libabigail.git
 RPM_TO_CHECK=$(find ${fed_repo}/results_${fed_repo}/${VERSION}/*/ -name "${fed_repo}-${VERSION}*" | grep -v src)
-libabigail/tools/fedabipkgdiff --from ${ABIGAIL_BRANCH} ${RPM_TO_CHECK} &> ${HOMEDIR}/fedabipkgdiff_out.txt
+libabigail/tools/fedabipkgdiff --from ${ABIGAIL_BRANCH} ${RPM_TO_CHECK} &> ${HOMEDIR}/logs/fedabipkgdiff_out.txt
+# Put all output files into logs/ for rsync
+rm -rf ${HOMEDIR}/logs
+mkdir ${HOMEDIR}/logs
 
 exit 0
