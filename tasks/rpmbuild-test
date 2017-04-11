@@ -2,6 +2,7 @@
 set +e
 
 HOMEDIR=$(pwd)/${JOB_NAME}
+cd $HOMEDIR
 # The yum installs will be moved to duffy setup playbook eventually
 sudo yum -y install fedpkg gcc rpm-build createrepo pyxdg
 which fedpkg
