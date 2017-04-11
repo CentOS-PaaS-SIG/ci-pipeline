@@ -55,6 +55,7 @@ if [ "${fed_branch}" = "master" ]; then
 fi
 rm -rf libabigail
 git clone git://sourceware.org/git/libabigail.git
-libabigail/tools/fedabipkgdiff --from ${ABIGAIL_BRANCH} ${fed_repo}/results_${fed_repo}/${VERSION}/*/*.rpm > ${HOMEDIR}/fedabipkgdiff_out.txt
+RPM_TO_CHECK=$(find ${fed_repo}/results_${fed_repo}/${VERSION}/*/ -name "${fed_repo}-${VERSION}*" | grep -v src)
+libabigail/tools/fedabipkgdiff --from ${ABIGAIL_BRANCH} ${RPM_TO_CHECK} > ${HOMEDIR}/fedabipkgdiff_out.txt
 
 exit 0
