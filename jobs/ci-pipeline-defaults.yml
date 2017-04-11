@@ -1,6 +1,7 @@
 - defaults:
     name: ci-pipeline-defaults
     node: fedora-atomic
+    concurrent: false
     description: |
         <p>See <a href="https://github.com/CentOS-PaaS-SIG/aos-ci">https://github.com/CentOS-PaaS-SIG/aos-ci</a> for more information.<p>
     wrappers:
@@ -9,6 +10,11 @@
         - timestamps
     scm:
         - ci-pipeline-scms
+    logrotate:
+        daysToKeep: -1
+        numToKeep: 20
+        artifactDaysToKeep: -1
+        artifactNumToKeep: -1
 
 - scm:
     name: ci-pipeline-scms
@@ -26,5 +32,10 @@
         - git:
             url: "https://github.com/CentOS/sig-atomic-buildscripts"
             basedir: sig-atomic-buildscripts
+            branches:
+                - master
+        - git:
+            url: "https://github.com/p3ck/aos-ci"
+            basedir: aos-ci
             branches:
                 - master

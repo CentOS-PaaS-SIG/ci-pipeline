@@ -1,7 +1,17 @@
 #!/bin/sh
-if [ -d "./ostree-repo" ]; then
-    ostree --repo=./ostree-repo prune \
+
+for v in ostree; do
+    rsync --delete --stats -a fedora-atomic@artifacts.ci.centos.org::fedora-atomic/${build}/${v}/ ${v}/
+done
+
+if [ -d "./ostree" ]; then
+    ostree --repo=./ostree prune \
         --keep-younger-than='1 week ago' --refs-only
 fi
 rpm-ostree-toolbox treecompose -c aos-ci/config/ostree/config.ini \
-                --ostreerepo ./ostree-repo
+                --ostreerepo ./ostree
+
+
+for v in ostree; do
+    rsync --delete --stats -a ${v}/ fedora-atomic@artifacts.ci.centos.org::fedora-atomic/${build}/${v}/
+done
