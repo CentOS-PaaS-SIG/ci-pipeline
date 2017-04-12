@@ -6,7 +6,7 @@ done
 
 # get list of repos
 # eventually we will be passed the list from the rpm build job
-repos=$(rsync fedora-atomic@artifacts.ci.centos.org::fedora-atomic/${BUILD}/repo/ | awk '/^d?????????/ { if ($5 != ".") print $5 }')
+repos=$(rsync fedora-atomic@artifacts.ci.centos.org::fedora-atomic/${BUILD}/repo/ | awk '/^d/ { if ($5 != ".") print $5 }')
 
 > aos-ci/config/ostree/testing.repo
 for repo in $repos; do
