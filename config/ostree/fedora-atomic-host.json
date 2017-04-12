@@ -14,7 +14,7 @@
 
     "documentation": false,
 
-    "initramfs-args": ["--no-hostonly", "--add", "iscsi"],
+    "initramfs-args": ["--no-hostonly"],
 
     "postprocess-script": "treecompose-post.sh",
 
