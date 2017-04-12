@@ -28,7 +28,7 @@ done
 cat << EOF > aos-ci/config/ostree/fedora-atomic-testing.json
 {
     "include": "fedora-atomic-host.json",
-    "repos": ["fedora", "updates", $f_repos]
+    "repos": ["rawhide", $f_repos]
 }
 EOF
 

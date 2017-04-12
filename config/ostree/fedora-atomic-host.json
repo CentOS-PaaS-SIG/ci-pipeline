@@ -4,7 +4,7 @@
     "osname": "rhel-atomic-host",
     "ref": "rhel-atomic-host/7/x86_64/rkt",
 
-    "repos": ["fedora", "updates"],
+    "repos": ["rawhide"],
 
     "selinux": true,
 
