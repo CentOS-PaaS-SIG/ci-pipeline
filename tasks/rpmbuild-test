@@ -40,7 +40,8 @@ else
 fi
 # Build the package into ./results_$fed_repo/$VERSION/$RELEASE/
 fedpkg --release $fed_branch mockbuild
-if [ "$?" != 0 ]; then echo "ERROR: FEDPKG MOCKBUILD\nSTATUS: $?"; exit 1; fi
+MOCKBUILD_STATUS=$?
+if [ "$MOCKBUILD_STATUS" != 0 ]; then echo "ERROR: FEDPKG MOCKBUILD\nSTATUS: $MOCKBUILD_STATUS"; exit 1; fi
 popd
 
 ABIGAIL_BRANCH=$(echo $fed_branch | sed 's/./&c/1')
