@@ -14,7 +14,7 @@
       - git:
           url: 'https://git.openstack.org/openstack-infra/jenkins-job-builder'
           branches:
-              - ${jjbsha1}
+              - {jjbsha1}
           basedir: jenkins-job-builder
           skip-tag: true
     builders:
