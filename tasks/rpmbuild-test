@@ -2,7 +2,6 @@
 set +e
 
 HOMEDIR=$(pwd)/${JENKINS_JOB_NAME}
-pushd $HOMEDIR
 which fedpkg
 if [ "$?" != 0 ]; then echo "ERROR: FEDPKG RPM NOT INSTALLED\nSTATUS: $?"; exit 1; fi
 # Put all output files into logs/ for rsync
