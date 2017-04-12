@@ -2,8 +2,7 @@
 set +e
 
 HOMEDIR=$(pwd)/${JENKINS_JOB_NAME}
-# The yum installs will be moved to duffy setup playbook eventually
-sudo yum -y install fedpkg gcc rpm-build createrepo pyxdg
+pushd $HOMEDIR
 which fedpkg
 if [ "$?" != 0 ]; then echo "ERROR: FEDPKG RPM NOT INSTALLED\nSTATUS: $?"; exit 1; fi
 # Put all output files into logs/ for rsync
@@ -41,7 +40,6 @@ else
      sudo echo "description=$fed_repo" >> ${HOMEDIR}/logs/description.txt
 fi
 # Build the package into ./results_$fed_repo/$VERSION/$RELEASE/
-export TMPDIR=${HOMEDIR}/${fed_repo}
 fedpkg --release $fed_branch mockbuild
 if [ "$?" != 0 ]; then echo "ERROR: FEDPKG MOCKBUILD\nSTATUS: $?"; exit 1; fi
 popd
