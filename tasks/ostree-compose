@@ -8,18 +8,29 @@ done
 # eventually we will be passed the list from the rpm build job
 repos=$(rsync fedora-atomic@artifacts.ci.centos.org::fedora-atomic/${BUILD}/repo/ | awk '/^d/ { if ($5 != ".") print $5 }')
 
-> aos-ci/config/ostree/testing.repo
+f_repos=""
 for repo in $repos; do
-    cat << EOF >> aos-ci/config/ostree/testing.repo
-[testing-${repo}]
+    if [ -z "$f_repos" ];then
+        f_repos="\"${repo}\""
+    else
+        f_repos="$f_repos, \"${repo}\""
+    fi
+    cat << EOF > aos-ci/config/ostree/${repo}.repo
+[${repo}]
 name=Testing ${repo}
 baseurl=http://artifacts.ci.centos.org/fedora-atomic/${BUILD}/repo/${repo}
 enabled=1
 gpgcheck=0
 skip_if_unavailable=False
-
 EOF
 done
+
+cat << EOF > aos-ci/config/ostree/fedora-atomic-testing.json
+{
+    "include": "fedora-atomic-host.json",
+    "repos": ["fedora", "updates", $f_repos]
+}
+EOF
 
 if [ -d "./ostree" ]; then
     ostree --repo=./ostree prune \
