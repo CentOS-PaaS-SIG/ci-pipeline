@@ -37,6 +37,9 @@
         - archive:
             artifacts: 'logs/**'
             allow-empty: 'true'
+        - trigger:
+            project: 'ci-pipeline-ostree-compose'
+            threshold: SUCCESS
         - macro-cciskel-duffy-deallocate
 
 - job-template:
