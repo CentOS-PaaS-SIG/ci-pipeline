@@ -33,7 +33,7 @@
     - "config_opts['use_nspawn'] = True"
     - "config_opts['plugin_conf']['lvm_root_opts']['size'] = '32G'"
 
-- user: name={{ item }} groups=mock,wheel,libvirt
+- user: name={{ item }} groups=mock,wheel
   with_items:
     - builder
     - prbuilder
