@@ -1,0 +1,44 @@
+- job-template:
+    name: 'ci-pipeline-service-job'
+    defaults: ci-pipeline-defaults
+    retry-count: 3
+    triggers:
+      - pollscm:
+          cron: "H/30 * * * *"
+    scm:
+      - git:
+          url: "https://github.com/CentOS-PaaS-SIG/aos-ci"
+          basedir: aos-ci
+          branches:
+              - master
+      - git:
+          url: 'https://git.openstack.org/openstack-infra/jenkins-job-builder'
+          branches:
+              - ${jjbsha1}
+          basedir: jenkins-job-builder
+          skip-tag: true
+    builders:
+        - shell: |
+            # Setup centos-ci-skeleton
+            pushd aos-ci/jobs
+            make all
+            popd
+
+            # Get proper jjb config
+            export JJB_CONFIG=$HOME/.jjb/centos-config.ini
+
+            # Setup Jenkins Job 2.0.0 {jjbsha1}
+            pip install -r jenkins-job-builder/requirements.txt
+            pushd jenkins-job-builder
+            python setup.py install
+            jenkins_jobs/jjb-dev-latest/bin/jenkins-jobs --conf $JJB_CONFIG update $WORKSPACE/aos-ci/jobs/:$WORKSPACE/aos-ci/jobs/centos-ci-skeleton/jjb
+            popd
+    publishers:
+        - ci-pipeline-email
+
+
+- project:
+    name: service-jobs
+    jjbsha1: 7e1e54633f835d1c6ecd989452c9125c1ea9a921
+    jobs:
+      - ci-pipeline-service-job
