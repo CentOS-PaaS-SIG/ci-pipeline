@@ -62,6 +62,12 @@ rsync -arv repo/ fedora-atomic@artifacts.ci.centos.org::fedora-atomic/${RSYNC_BR
 rsync --delete --stats -a ${fed_repo}_repo fedora-atomic@artifacts.ci.centos.org::fedora-atomic/${RSYNC_BRANCH}/repo
 rm -rf ${RSYNC_BRANCH}
 rm -rf repo
+# Update repo manifest file on artifacts.ci.centos.org
+rsync --delete --stats -a fedora-atomic@artifacts.ci.centos.org::fedora-atomic/${RSYNC_BRANCH}/repo/manifest.txt .
+# Remove repo name from file if it exists so it isn't there twice
+sed -i "/${fed_repo}_repo/d" manifest.txt
+echo "${fed_repo}_repo" >> manifest.txt
+rsync --delete -stats -a manifest.txt fedora-atomic@artifacts.ci.centos.org::fedora-atomic/${RSYNC_BRANCH}/repo
 if [ "$?" != 0 ]; then echo "ERROR: RSYNC REPO\nSTATUS: $?"; exit 1; fi
 # Run fedabipkgdiff against the newly created rpm
 rm -rf libabigail
