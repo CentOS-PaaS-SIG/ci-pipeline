@@ -33,6 +33,8 @@
             python setup.py install
             jenkins_jobs/jjb-dev-latest/bin/jenkins-jobs --conf $JJB_CONFIG update $WORKSPACE/aos-ci/jobs/:$WORKSPACE/aos-ci/jobs/centos-ci-skeleton/jjb
             popd
+    publishers:
+        - ci-pipeline-email
 
 
 - project:

@@ -37,3 +37,31 @@
           basedir: sig-atomic-buildscripts
           branches:
               - master
+
+- publisher:
+    name: ci-pipeline-email
+    publishers:
+      - email-ext:
+          recipients: continuous-infra@redhat.com
+          reply-to: $DEFAULT_REPLYTO
+          content-type: default
+          subject: fedora-atomic jobs - Build Number - $BUILD_NUMBER - STATUS - $BUILD_STATUS
+          body: $DEFAULT_CONTENT
+          attach-build-log: true
+          always: true
+          unstable: true
+          first-failure: true
+          not-built: false
+          aborted: true
+          regression: true
+          failure: true
+          improvement: true
+          still-failing: true
+          success: true
+          fixed: true
+          still-unstable: false
+          pre-build: false
+          matrix-trigger: only-configurations
+          send-to:
+            - requester
+            - recipients
