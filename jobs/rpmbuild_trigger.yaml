@@ -2,9 +2,6 @@
     name: ci-pipeline-rpmbuild-trigger
     defaults: ci-pipeline-defaults
     concurrent: false
-    logrotate:
-      numToKeep: 30
-      artifactNumToKeep: 15
 # TODO: trigger
     parameters:
         - string:

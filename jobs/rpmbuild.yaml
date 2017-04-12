@@ -46,9 +46,6 @@
     name: ci-pipeline-rpmbuild
     defaults: ci-pipeline-defaults
     concurrent: false
-    logrotate:
-      numToKeep: 30
-      artifactNumToKeep: 15
     parameters:
         - string:
             name: fed_username
