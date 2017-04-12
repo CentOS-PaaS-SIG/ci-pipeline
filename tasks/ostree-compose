@@ -42,6 +42,7 @@ fi
 sudo rpm-ostree-toolbox treecompose -c aos-ci/config/ostree/config.ini \
                 --ostreerepo ./ostree || exit 1
 
+ostree --repo=./ostree summary -u
 
 for v in ostree; do
     rsync --delete --stats -a ${v}/ fedora-atomic@artifacts.ci.centos.org::fedora-atomic/${BUILD}/${v}/
