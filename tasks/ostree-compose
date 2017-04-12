@@ -40,7 +40,7 @@ else
 fi
 
 sudo rpm-ostree-toolbox treecompose -c aos-ci/config/ostree/config.ini \
-                --ostreerepo ./ostree
+                --ostreerepo ./ostree || exit 1
 
 
 for v in ostree; do
