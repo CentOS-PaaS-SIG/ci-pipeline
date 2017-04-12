@@ -45,7 +45,7 @@
           recipients: continuous-infra@redhat.com
           reply-to: $DEFAULT_REPLYTO
           content-type: default
-          subject: fedora-atomic jobs - Build Number - $BUILD_NUMBER - STATUS - $BUILD_STATUS
+          subject: ci-pipeline jobs - Build Number - $BUILD_NUMBER - STATUS - $BUILD_STATUS
           body: $DEFAULT_CONTENT
           attach-build-log: true
           always: true
