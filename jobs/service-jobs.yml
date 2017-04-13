@@ -8,17 +8,24 @@
     scm:
       - git:
           url: "https://github.com/CentOS-PaaS-SIG/aos-ci"
-          basedir: aos-ci
           branches:
               - master
+          basedir: aos-ci
+          skip-tag: true
       - git:
           url: 'https://git.openstack.org/openstack-infra/jenkins-job-builder'
           branches:
-              - {jjbsha1}
+              - '{jjbsha1}'
           basedir: jenkins-job-builder
           skip-tag: true
     builders:
-        - shell: |
+      - shining-panda:
+          build-environment: virtualenv
+          python-version: system-CPython-2.7
+          name: service-jobs-venv
+          nature: shell
+          clear: true
+          command: |
             # Setup centos-ci-skeleton
             pushd aos-ci/jobs
             make all
@@ -31,7 +38,7 @@
             pip install -r jenkins-job-builder/requirements.txt
             pushd jenkins-job-builder
             python setup.py install
-            jenkins_jobs/jjb-dev-latest/bin/jenkins-jobs --conf $JJB_CONFIG update $WORKSPACE/aos-ci/jobs/:$WORKSPACE/aos-ci/jobs/centos-ci-skeleton/jjb
+            jenkins-jobs --conf $JJB_CONFIG update $WORKSPACE/aos-ci/jobs/:$WORKSPACE/aos-ci/jobs/centos-ci-skeleton/jjb
             popd
     publishers:
         - ci-pipeline-email
