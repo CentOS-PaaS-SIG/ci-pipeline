@@ -63,5 +63,4 @@
           pre-build: false
           matrix-trigger: only-configurations
           send-to:
-            - requester
             - recipients
