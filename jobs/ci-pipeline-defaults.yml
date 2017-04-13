@@ -42,7 +42,7 @@
     name: ci-pipeline-email
     publishers:
       - email-ext:
-          recipients: ci@lists.fedoraproject.org, ari@redhat.com, bpeck@redhat.com, srallaba@redhat.com, jburke@redhat.com
+          recipients: ari@redhat.com, bpeck@redhat.com, srallaba@redhat.com, jburke@redhat.com, bstinson@redhat.com
           reply-to: $DEFAULT_REPLYTO
           content-type: default
           subject: ci-pipeline jobs - Build Number - $BUILD_NUMBER - STATUS - $BUILD_STATUS
