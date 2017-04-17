@@ -48,23 +48,23 @@
     name: ci-pipeline-email
     publishers:
       - email-ext:
-          recipients: ari@redhat.com, bpeck@redhat.com, srallaba@redhat.com, jburke@redhat.com, bstinson@redhat.com
+          recipients: ari@redhat.com, bpeck@redhat.com, jbieren@redhat.com, srallaba@redhat.com, jburke@redhat.com, bstinson@redhat.com
           reply-to: $DEFAULT_REPLYTO
           content-type: default
           subject: ci-pipeline jobs - Build Number - $BUILD_NUMBER - STATUS - $BUILD_STATUS
           body: $DEFAULT_CONTENT
           attach-build-log: true
           always: true
-          unstable: true
-          first-failure: true
+          unstable: false
+          first-failure: false
           not-built: false
-          aborted: true
-          regression: true
-          failure: true
-          improvement: true
-          still-failing: true
-          success: true
-          fixed: true
+          aborted: false
+          regression: false
+          failure: false
+          improvement: false
+          still-failing: false
+          success: false
+          fixed: false
           still-unstable: false
           pre-build: false
           matrix-trigger: only-configurations
