@@ -1,0 +1,88 @@
+- job-template:
+    name: ci-pipeline-rpmbuild-trigger
+    defaults: ci-pipeline-defaults
+    triggers:
+      - jms-messaging:
+          selector: topic = "org.fedoraproject.prod.git.receive"
+          provider-name: fedora-fedmsg
+    parameters:
+        - string:
+            name: CI_MESSAGE
+            description: |
+              fedmsg msg
+    builders:
+        - shell: |
+            #!/bin/bash
+            set -xuo pipefail
+
+            # Write script to parse fields (can likely be improved)
+            cat << EOF > ${{WORKSPACE}}/parse_fedmsg.py
+            #!/bin/env python
+            import json
+            import sys
+
+            reload(sys)
+            sys.setdefaultencoding('utf-8')
+            message = json.load(sys.stdin)
+            if 'commit' in message:
+                msg = message['commit']
+            
+                for key in msg:
+                    print "fed_%s=%s" % (key, msg[key])
+            EOF
+            chmod +x ${{WORKSPACE}}/parse_fedmsg.py
+
+            # Write fedmsg fields to a file to inject them
+            if [ -n "$CI_MESSAGE" ]; then
+                echo $CI_MESSAGE | ${{WORKSPACE}}/parse_fedmsg.py > fedmsg_fields.txt
+            fi
+
+        - inject:
+            properties-file: ${{WORKSPACE}}/fedmsg_fields.txt
+        - system-groovy:
+           command: build.description = build.getEnvironment().get('fed_repo')
+        - shell: |
+            set +e
+            # Verify this is a development branch
+            branch=$fed_branch
+            if [ "$branch" = "master" ]; then
+                branch="rawhide"
+            fi
+            curl -f -s http://dl.fedoraproject.org/pub/fedora/linux/development/$branch/Everything > /dev/null
+            if [ $? -ne 0 ]; then echo "Not a development branch"; exit; fi
+            # Verify this is a package we are interested in
+            valid=0
+            for package in $(cat aos-ci/config/package_list); do
+                if [ "$package" = "$fed_repo" ]; then
+                    valid=1
+                    break
+                fi
+            done
+            if [ $valid -eq 0 ]; then
+                echo "Not a package we are interested in"; exit
+            fi
+
+            touch ${{WORKSPACE}}/trigger.downstream
+        - inject:
+            properties-file: ${{WORKSPACE}}/fedmsg_fields.txt
+        - system-groovy:
+           command: build.description = build.getEnvironment().get('description')
+
+    publishers:
+      - archive:
+          artifacts: '*.*'
+          allow-empty: 'true'
+      - conditional-publisher:
+          - condition-kind: file-exists
+            condition-filename: trigger.downstream
+            action:
+              - trigger-parameterized-builds:
+                - project: 'ci-pipeline-rpmbuild'
+                  property-file: fedmsg_fields.txt
+                  fail-on-missing: true
+
+## Describes the project
+- project:
+    name: ci-pipeline-rpmbuild-trigger-jobs
+    jobs:
+      - ci-pipeline-rpmbuild-trigger
