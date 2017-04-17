@@ -32,7 +32,7 @@
             fi
 
 - publisher:
-    name: ci-pipeline-duffy-publisher
+    name: ci-pipeline-duffy-rpmpublisher
     publishers:
         - archive:
             artifacts: 'logs/**'
@@ -112,7 +112,7 @@
       - archive:
           artifacts: '*.*, */*, */*/*'
           allow-empty: 'true'
-      - ci-pipeline-duffy-publisher
+      - ci-pipeline-duffy-rpmpublisher
 
 ## Describes the project
 - project:
