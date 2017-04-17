@@ -1,7 +1,6 @@
 - job-template:
     name: ci-pipeline-rpmbuild-trigger
     defaults: ci-pipeline-defaults
-    concurrent: false
 # TODO: trigger
     parameters:
         - string:
