@@ -1,5 +1,5 @@
 - builder:
-    name: ci-pipeline-duffy-builder
+    name: ci-pipeline-duffy-rpmbuilder
     builders:
         - macro-cciskel-duffy-prepared-allocate:
             jobclass: builder
@@ -101,7 +101,7 @@
     builders:
         - system-groovy:
            command: build.description = build.getEnvironment().get('fed_repo')
-        - ci-pipeline-duffy-builder:
+        - ci-pipeline-duffy-rpmbuilder:
             task: rpmbuild-test
         - inject:
             properties-file: ${{WORKSPACE}}/logs/description.txt
