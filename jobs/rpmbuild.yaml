@@ -1,16 +1,10 @@
 - job-template:
-    name: 'TODO'
-    description: |
-        Managed by Jenkins Job Builder. Do not edit via web.
-#    concurrent: TODO
-#    node: TODO
-#    logrotate:
-#      numToKeep: 30
-#      artifactNumToKeep: 15
-    wrappers:
-      - ansicolor
-      - workspace-cleanup
-      - timestamps
+    name: ci-pipeline-rpmbuild
+    defaults: ci-pipeline-defaults
+    concurrent: false
+    logrotate:
+      numToKeep: 30
+      artifactNumToKeep: 15
 # TODO: trigger
     parameters:
         - string:
@@ -49,7 +43,7 @@
            command: build.description = build.getEnvironment().get('fed_repo')
         - shell: |
             set +e
-            git clone https://github.com/CentOS-PaaS-SIG/aos-ci.git
+
             # Verify this is a development branch
             branch=$fed_branch
             if [ "$branch" = "master" ]; then
@@ -125,6 +119,6 @@
 
 ## Describes the project
 - project:
-    name: TODO
+    name: ci-pipeline-rpmbuild-jobs
     jobs:
-      - TODO
+      - ci-pipeline-rpmbuild
