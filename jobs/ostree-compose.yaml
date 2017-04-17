@@ -11,24 +11,25 @@
 
             (echo -n "export RSYNC_PASSWORD=" && cat ~/duffy.key | cut -c '-13') > rsync-password.sh
             cat >>task.env <<EOF
+            export BUILD="rawhide"
             export JENKINS_JOB_NAME="${{JOB_NAME}}"
             export JENKINS_BUILD_TAG="${{BUILD_TAG}}"
             export OSTREE_BRANCH="${{OSTREE_BRANCH:-}}"
             EOF
             cat task.env
 
-            rsync -Hrlptv --stats -e ssh task.env rsync-password.sh builder@${{DUFFY_HOST}}:
+            rsync -Hrlptv --stats -e ssh task.env rsync-password.sh builder@${{DUFFY_HOST}}:${{JOB_NAME}}
             for repo in aos-ci sig-atomic-buildscripts; do
-                rsync -Hrlptv --stats --delete -e ssh $repo/ builder@${{DUFFY_HOST}}:$repo
+                rsync -Hrlptv --stats --delete -e ssh $repo/ builder@${{DUFFY_HOST}}:${{JOB_NAME}}/$repo
             done
 
             build_success=true
-            if ! ssh -tt builder@${{DUFFY_HOST}} '. task.env && ./aos-ci/tasks/{task}'; then
+            if ! ssh -tt builder@${{DUFFY_HOST}} "pushd ${{JOB_NAME}} && . rsync-password.sh && . task.env && ./aos-ci/tasks/{task}"; then
                 build_success=false
             fi
 
             # Currently we don't have any logs being generated
-            #rsync -Hrlptv --stats -e ssh builder@${{DUFFY_HOST}}:logs/ $WORKSPACE/logs || true
+            #rsync -Hrlptv --stats -e ssh builder@${{DUFFY_HOST}}:${{JOB_NAME}}/logs/ $WORKSPACE/logs || true
             # Exit with code from the build
             if test "${{build_success}}" = "false"; then
                 echo 'Build failed, see logs above'; exit 1

@@ -1,5 +1,6 @@
 - defaults:
     name: ci-pipeline-defaults
+    concurrent: false
     description: |
         Maintainer: <a href="mailto:bpeck@redhat.com">Bill Peck</a><br>
         Backup Maintainer: <a href="mailto:jbieren@redhat.com">Johnny Bieren</a><br>
@@ -18,6 +19,11 @@
         - timestamps
     scm:
         - ci-pipeline-scms
+    logrotate:
+        daysToKeep: -1
+        numToKeep: 20
+        artifactDaysToKeep: -1
+        artifactNumToKeep: -1
 
 - scm:
     name: ci-pipeline-scms
