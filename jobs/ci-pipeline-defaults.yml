@@ -1,30 +1,72 @@
 - defaults:
     name: ci-pipeline-defaults
-    node: fedora-atomic
+    concurrent: false
     description: |
-        <p>See <a href="https://github.com/CentOS-PaaS-SIG/aos-ci">https://github.com/CentOS-PaaS-SIG/aos-ci</a> for more information.<p>
+        Maintainer: <a href="mailto:bpeck@redhat.com">Bill Peck</a><br>
+        Backup Maintainer: <a href="mailto:jbieren@redhat.com">Johnny Bieren</a><br>
+        Backup Maintainer: <a href="mailto:ari@redhat.com">Ari LiVigni</a><br>
+        Team Contact: <a href="mailto:continuous-infra@redhat.com">continuous-infra</a><br><br>
+        JJB Code Location: https://github.com/CentOS-PaaS-SIG/aos-ci/jobs/<br>
+        Managed by Jenkins Job Builder. Do not edit via web.<br>
+    properties:
+        - build-discarder:
+            num-to-keep: 30
+            artifact-num-to-keep: 15
+    node: fedora-atomic
     wrappers:
         - ansicolor
         - workspace-cleanup
         - timestamps
     scm:
         - ci-pipeline-scms
+    logrotate:
+        daysToKeep: -1
+        numToKeep: 20
+        artifactDaysToKeep: -1
+        artifactNumToKeep: -1
 
 - scm:
     name: ci-pipeline-scms
     scm:
-        - git:
-            url: "https://github.com/cgwalters/centos-ci-skeleton"
-            basedir: cciskel
-            branches:
-                - master
-        - git:
-            url: "https://github.com/CentOS-PaaS-SIG/aos-ci"
-            basedir: aos-ci
-            branches:
-                - master
-        - git:
-            url: "https://github.com/CentOS/sig-atomic-buildscripts"
-            basedir: sig-atomic-buildscripts
-            branches:
-                - master
+      - git:
+          url: "https://github.com/cgwalters/centos-ci-skeleton"
+          basedir: cciskel
+          branches:
+              - master
+      - git:
+          url: "https://github.com/CentOS-PaaS-SIG/aos-ci"
+          basedir: aos-ci
+          branches:
+              - master
+      - git:
+          url: "https://github.com/CentOS/sig-atomic-buildscripts"
+          basedir: sig-atomic-buildscripts
+          branches:
+              - master
+
+- publisher:
+    name: ci-pipeline-email
+    publishers:
+      - email-ext:
+          recipients: ari@redhat.com, bpeck@redhat.com, jbieren@redhat.com, srallaba@redhat.com, jburke@redhat.com, bstinson@redhat.com
+          reply-to: $DEFAULT_REPLYTO
+          content-type: default
+          subject: ci-pipeline jobs - Build Number - $BUILD_NUMBER - STATUS - $BUILD_STATUS
+          body: $DEFAULT_CONTENT
+          attach-build-log: true
+          always: true
+          unstable: false
+          first-failure: false
+          not-built: false
+          aborted: false
+          regression: false
+          failure: false
+          improvement: false
+          still-failing: false
+          success: false
+          fixed: false
+          still-unstable: false
+          pre-build: false
+          matrix-trigger: only-configurations
+          send-to:
+            - recipients

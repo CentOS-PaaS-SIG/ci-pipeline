@@ -1,7 +1,49 @@
 #!/bin/sh
-if [ -d "./ostree-repo" ]; then
-    ostree --repo=./ostree-repo prune \
+
+for v in ostree; do
+    rsync --delete --stats -a fedora-atomic@artifacts.ci.centos.org::fedora-atomic/${BUILD}/${v}/ ${v}/
+done
+
+# get list of repos
+# eventually we will be passed the list from the rpm build job
+repos=$(rsync fedora-atomic@artifacts.ci.centos.org::fedora-atomic/${BUILD}/repo/ | awk '/^d/ { if ($5 != ".") print $5 }')
+
+f_repos=""
+for repo in $repos; do
+    if [ -z "$f_repos" ];then
+        f_repos="\"${repo}\""
+    else
+        f_repos="$f_repos, \"${repo}\""
+    fi
+    cat << EOF > aos-ci/config/ostree/${repo}.repo
+[${repo}]
+name=Testing ${repo}
+baseurl=http://artifacts.ci.centos.org/fedora-atomic/${BUILD}/repo/${repo}
+enabled=1
+gpgcheck=0
+skip_if_unavailable=False
+EOF
+done
+
+cat << EOF > aos-ci/config/ostree/fedora-atomic-testing.json
+{
+    "include": "fedora-atomic-host.json",
+    "repos": ["rawhide", $f_repos]
+}
+EOF
+
+if [ -d "./ostree" ]; then
+    ostree --repo=./ostree prune \
         --keep-younger-than='1 week ago' --refs-only
+else
+    ostree --repo=./ostree init --mode=archive-z2
 fi
-rpm-ostree-toolbox treecompose -c aos-ci/config/ostree/config.ini \
-                --ostreerepo ./ostree-repo
+
+sudo rpm-ostree-toolbox treecompose -c aos-ci/config/ostree/config.ini \
+                --ostreerepo ./ostree || exit 1
+
+ostree --repo=./ostree summary -u
+
+for v in ostree; do
+    rsync --delete --stats -a ${v}/ fedora-atomic@artifacts.ci.centos.org::fedora-atomic/${BUILD}/${v}/
+done
