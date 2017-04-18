@@ -20,7 +20,7 @@
     - ansible
     - virt-install
 
-- user: name={{ item }} groups=mock,wheel
+- user: name={{ item }} groups=wheel
   with_items:
     - builder
     - prbuilder
