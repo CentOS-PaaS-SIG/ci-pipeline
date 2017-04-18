@@ -13,25 +13,12 @@
 - yum: name={{ item }} state=latest disablerepo=epel-testing
   with_items:
     - rsync
-    - mock
+    - docker
     - libsolv
     - glib2
-    - fedpkg
     - PyYAML
     - ansible
     - virt-install
-    - gcc
-    - rpm-build
-    - createrepo
-    - pyxdg
-
-# nspawn is better, also https://lists.fedoraproject.org/pipermail/buildsys/2015-July/004833.html
-# Also https://bugzilla.redhat.com/show_bug.cgi?id=1328212
-- lineinfile: dest=/etc/mock/site-defaults.cfg line={{ item }}
-  with_items:
-    - "config_opts['plugin_conf']['tmpfs_enable'] = True"
-    - "config_opts['use_nspawn'] = True"
-    - "config_opts['plugin_conf']['lvm_root_opts']['size'] = '32G'"
 
 - user: name={{ item }} groups=mock,wheel
   with_items:
