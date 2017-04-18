@@ -8,10 +8,12 @@ RUN dnf -y update && dnf clean all
 RUN dnf -y install ansible \
         @buildsys-build \
         createrepo \
+        docker \
         fedpkg \
         gcc \
         git \
         glib2 \
+        go \
         libsolv \
         mock \
         pyxdg \
@@ -19,6 +21,7 @@ RUN dnf -y install ansible \
         rpm-build \
         rsync \
         sed \
+        sudo \
         virt-install \
         which \
         && dnf clean all
