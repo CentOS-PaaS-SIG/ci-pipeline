@@ -33,3 +33,9 @@
   with_items:
     - builder
     - prbuilder
+
+- name: Start docker service
+  service:
+    name: docker
+    state: restarted
+    enabled: yes

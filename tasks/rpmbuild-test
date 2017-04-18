@@ -3,7 +3,7 @@ set +e
 
 HOMEDIR=$(pwd)
 rm -rf ${HOMEDIR}/${fed_repo}/output
-mkdir ${HOMEDIR}/${fed_repo}/output
+mkdir -p ${HOMEDIR}/${fed_repo}/output
 pushd aos-ci/config/Dockerfiles/rpmbuild
 # Install docker
 which docker

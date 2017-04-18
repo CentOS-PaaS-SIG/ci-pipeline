@@ -102,7 +102,7 @@
         - system-groovy:
            command: build.description = build.getEnvironment().get('fed_repo')
         - ci-pipeline-duffy-rpmbuilder:
-            task: rpmbuild
+            task: rpmbuild-test
         - inject:
             properties-file: ${{WORKSPACE}}/logs/description.txt
         - system-groovy:
