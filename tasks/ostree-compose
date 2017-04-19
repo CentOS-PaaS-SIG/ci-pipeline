@@ -1,8 +1,8 @@
 #!/bin/sh
 
-#for v in ostree; do
-#    rsync --delete --stats -a fedora-atomic@artifacts.ci.centos.org::fedora-atomic/${BUILD}/${v}/ ${v}/
-#done
+for v in ostree; do
+    rsync --delete --stats -a fedora-atomic@artifacts.ci.centos.org::fedora-atomic/${BUILD}/${v}/ ${v}/
+done
 
 # get list of repos
 # eventually we will be passed the list from the rpm build job
