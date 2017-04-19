@@ -29,6 +29,8 @@ RUN dnf -y install ansible \
 # Change some mock settings
 RUN echo "config_opts['package_manager'] = 'dnf'" >> /etc/mock/site-defaults.cfg
 RUN echo "config_opts['plugin_conf']['lvm_root_opts']['size'] = '16G'" >> /etc/mock/site-defaults.cfg
+RUN echo "config_opts['plugin_conf']['lvm_root_opts']['poolmetadatasize'] = '30G'" >> /etc/mock/site-defaults.cfg
+RUN echo "config_opts['basedir'] = '/home/rpmbuild/'" >> /etc/mock/site-defaults.cfg
 
 # Copy the build script to the container
 COPY rpmbuild-test.sh /home/rpmbuild-test.sh
