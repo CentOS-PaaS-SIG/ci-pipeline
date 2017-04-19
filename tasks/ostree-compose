@@ -1,11 +1,8 @@
 #!/bin/sh
 
-# Workaround https://github.com/projectatomic/rpm-ostree/issues/727
-sudo yum upgrade -y http://cbs.centos.org/kojifiles/work/tasks/6729/176729/rpm-ostree-2017.4-2.el7.centos.x86_64.rpm
-
-for v in ostree; do
-    rsync --delete --stats -a fedora-atomic@artifacts.ci.centos.org::fedora-atomic/${BUILD}/${v}/ ${v}/
-done
+#for v in ostree; do
+#    rsync --delete --stats -a fedora-atomic@artifacts.ci.centos.org::fedora-atomic/${BUILD}/${v}/ ${v}/
+#done
 
 # get list of repos
 # eventually we will be passed the list from the rpm build job
