@@ -14,7 +14,7 @@
 
     "documentation": false,
 
-    "initramfs-args": ["--no-hostonly"],
+    "initramfs-args": ["--no-hostonly", "--add", "iscsi"],
 
     "postprocess-script": "treecompose-post.sh",
 
@@ -26,7 +26,7 @@
     "check-groups": { "type": "file", "filename": "group" },
 
     "packages": ["atomic",
-		 "systemd", "kernel",
+		 "systemd", "kernel-core",
 		 "dracut-network",
 		 "biosdevname",
 		 "coreutils",
