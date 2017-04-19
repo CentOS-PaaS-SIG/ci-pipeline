@@ -1,4 +1,4 @@
-[rawhide]
+[fedora-rawhide]
 name=Fedora $releasever - $basearch
 failovermethod=priority
 #baseurl=http://download.fedoraproject.org/pub/fedora/linux/releases/$releasever/Everything/$basearch/os/
