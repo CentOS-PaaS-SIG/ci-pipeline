@@ -3,7 +3,7 @@
     defaults: ci-pipeline-defaults
     triggers:
       - jms-messaging:
-          selector: topic = "org.fedoraproject.prod.git.receive"
+          selector: topic = 'org.fedoraproject.prod.git.receive'
           provider-name: fedora-fedmsg
     parameters:
         - string:
