@@ -104,8 +104,6 @@ grep
 grub2
 gsettings-desktop-schemas
 gssproxy
-gtk2
-gtk3
 guile
 gzip
 harfbuzz
