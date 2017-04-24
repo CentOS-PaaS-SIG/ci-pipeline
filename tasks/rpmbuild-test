@@ -32,7 +32,8 @@ rm -rf repo
 rsync --delete --stats -a fedora-atomic@artifacts.ci.centos.org::fedora-atomic/${RSYNC_BRANCH}/repo/manifest.txt .
 # Remove repo name from file if it exists so it isn't there twice
 sed -i "/${fed_repo}_repo/d" manifest.txt
-echo "${fed_repo}_repo" >> manifest.txt
+echo "${fed_repo}_repo $(date --utc +%FT%T%Z)" >> manifest.txt
+sort manifest.txt -o manifest.txt
 rsync --delete -stats -a manifest.txt fedora-atomic@artifacts.ci.centos.org::fedora-atomic/${RSYNC_BRANCH}/repo
 
 exit 0
