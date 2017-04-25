@@ -30,7 +30,7 @@ pushd $DIR_TO_GO
 # Run configure if it exists, if not, no big deal
 ./configure
 # Run tests if they are there
-make test
+make test >> ${OUTPUTDIR}/logs/make_test_output.txt
 MAKE_TEST_STATUS=$?
 popd
 if [ "$MAKE_TEST_STATUS" == 2 ]; then
