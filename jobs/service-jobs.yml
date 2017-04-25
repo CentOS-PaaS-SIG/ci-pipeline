@@ -7,10 +7,10 @@
           cron: "H/30 * * * *"
     scm:
       - git:
-          url: "https://github.com/CentOS-PaaS-SIG/aos-ci"
+          url: "https://github.com/CentOS-PaaS-SIG/{repo-name}"
           branches:
               - master
-          basedir: aos-ci
+          basedir: '{repo-name}'
           skip-tag: true
       - git:
           url: 'https://git.openstack.org/openstack-infra/jenkins-job-builder'
@@ -27,7 +27,7 @@
           clear: true
           command: |
             # Setup centos-ci-skeleton
-            pushd aos-ci/jobs
+            pushd ci-pipeline/jobs
             make all
             popd
 
@@ -38,7 +38,7 @@
             pip install -r jenkins-job-builder/requirements.txt
             pushd jenkins-job-builder
             python setup.py install
-            jenkins-jobs --conf $JJB_CONFIG update $WORKSPACE/aos-ci/jobs/:$WORKSPACE/aos-ci/jobs/centos-ci-skeleton/jjb
+            jenkins-jobs --conf $JJB_CONFIG update $WORKSPACE/{repo-name}/jobs/:$WORKSPACE/{repo-name}/jobs/centos-ci-skeleton/jjb
             popd
     publishers:
         - ci-pipeline-email
@@ -46,6 +46,7 @@
 
 - project:
     name: service-jobs
+    repo-name: ci-pipeline
     jjbsha1: 7e1e54633f835d1c6ecd989452c9125c1ea9a921
     jobs:
       - ci-pipeline-service-job
