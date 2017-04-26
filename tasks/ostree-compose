@@ -1,5 +1,7 @@
 #!/bin/sh
 
+base_dir="$(dirname $0)/.."
+
 for v in ostree; do
     rsync --delete --stats -a fedora-atomic@artifacts.ci.centos.org::fedora-atomic/${BUILD}/${v}/ ${v}/
 done
@@ -15,7 +17,7 @@ for repo in $repos; do
     else
         f_repos="$f_repos, \"${repo}\""
     fi
-    cat << EOF > ci-pipeline/config/ostree/${repo}.repo
+    cat << EOF > $base_dir/config/ostree/${repo}.repo
 [${repo}]
 name=Testing ${repo}
 baseurl=http://artifacts.ci.centos.org/fedora-atomic/${BUILD}/repo/${repo}
@@ -25,7 +27,7 @@ skip_if_unavailable=False
 EOF
 done
 
-cat << EOF > ci-pipeline/config/ostree/fedora-atomic-testing.json
+cat << EOF > $base_dir/config/ostree/fedora-atomic-testing.json
 {
     "include": "fedora-atomic-testing-docker-host.json",
     "repos": ["fedora-rawhide", $f_repos]
@@ -39,7 +41,7 @@ else
     ostree --repo=./ostree init --mode=archive-z2
 fi
 
-sudo rpm-ostree-toolbox treecompose -c ci-pipeline/config/ostree/config.ini \
+sudo rpm-ostree-toolbox treecompose -c $base_dir/config/ostree/config.ini \
                 --ostreerepo ./ostree || exit 1
 
 ostree --repo=./ostree summary -u

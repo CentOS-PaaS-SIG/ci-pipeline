@@ -1,12 +1,14 @@
 #!/bin/bash
 set +e
 
+base_dir="$(dirname $0)/.."
+
 HOMEDIR=$(pwd)
 rm -rf ${HOMEDIR}/${fed_repo}/output
 mkdir -p ${HOMEDIR}/${fed_repo}/output
 rm -rf ${HOMEDIR}/${fed_repo}/rpmbuild
 mkdir -p ${HOMEDIR}/${fed_repo}/rpmbuild
-pushd ci-pipeline/config/Dockerfiles/rpmbuild
+pushd $base_dir/config/Dockerfiles/rpmbuild
 # Install docker
 which docker
 if [ "$?" != 0 ]; then echo "ERROR: DOCKER NOT INSTALLED\nSTATUS: $?"; exit 1; fi
