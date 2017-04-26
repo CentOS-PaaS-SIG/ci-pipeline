@@ -1,6 +1,5 @@
-## Describes the project
-- project:
-    name: ci-pipeline-rpmbuild-jobs
+- job:
+    name: ci-pipeline-rpmbuild
     defaults: ci-pipeline-defaults
     parameters:
         - string:
@@ -73,5 +72,3 @@
             project: 'ci-pipeline-ostree-compose'
             threshold: SUCCESS
         - ci-pipeline-duffy-publisher
-    jobs:
-      - ci-pipeline-rpmbuild
