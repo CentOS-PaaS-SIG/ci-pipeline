@@ -6,7 +6,7 @@
         Backup Maintainer: <a href="mailto:jbieren@redhat.com">Johnny Bieren</a><br>
         Backup Maintainer: <a href="mailto:ari@redhat.com">Ari LiVigni</a><br>
         Team Contact: <a href="mailto:continuous-infra@redhat.com">continuous-infra</a><br><br>
-        JJB Code Location: https://github.com/CentOS-PaaS-SIG/aos-ci/jobs/<br>
+        JJB Code Location: https://github.com/CentOS-PaaS-SIG/ci-pipeline/jobs/<br>
         Managed by Jenkins Job Builder. Do not edit via web.<br>
     properties:
         - build-discarder:
@@ -34,8 +34,8 @@
           branches:
               - master
       - git:
-          url: "https://github.com/CentOS-PaaS-SIG/aos-ci"
-          basedir: aos-ci
+          url: "https://github.com/CentOS-PaaS-SIG/ci-pipeline"
+          basedir: 'ci-pipeline'
           branches:
               - master
       - git:

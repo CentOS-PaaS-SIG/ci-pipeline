@@ -4,7 +4,7 @@
         - macro-cciskel-duffy-prepared-allocate:
             jobclass: builder
             duffytimeoutsecs: 3600
-            playbook: aos-ci/config/duffy-setup/setup-rpmbuild-system.yml
+            playbook: ci-pipeline/config/duffy-setup/setup-rpmbuild-system.yml
         - shell: |
             #!/bin/bash
             set -xeuo pipefail
@@ -18,10 +18,10 @@
             EOF
             cat task.env
             rsync -Hrlptv --stats -e ssh task.env rsync-password.sh builder@${{DUFFY_HOST}}:${{JOB_NAME}}
-            rsync -Hrlptv --stats --delete -e ssh aos-ci/ builder@${{DUFFY_HOST}}:${{JOB_NAME}}/aos-ci
+            rsync -Hrlptv --stats --delete -e ssh ci-pipeline/ builder@${{DUFFY_HOST}}:${{JOB_NAME}}/ci-pipeline
 
             build_success=true
-            if ! ssh -tt builder@${{DUFFY_HOST}} "pushd ${{JOB_NAME}} && . rsync-password.sh && . task.env && ./aos-ci/tasks/{task}"; then
+            if ! ssh -tt builder@${{DUFFY_HOST}} "pushd ${{JOB_NAME}} && . rsync-password.sh && . task.env && ./ci-pipeline/tasks/{task}"; then
                 build_success=false
             fi
 
@@ -117,5 +117,6 @@
 ## Describes the project
 - project:
     name: ci-pipeline-rpmbuild-jobs
+    repo-name: ci-pipeline
     jobs:
       - ci-pipeline-rpmbuild

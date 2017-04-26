@@ -19,12 +19,12 @@
             cat task.env
 
             rsync -Hrlptv --stats -e ssh task.env rsync-password.sh builder@${{DUFFY_HOST}}:${{JOB_NAME}}
-            for repo in aos-ci sig-atomic-buildscripts; do
+            for repo in ci-pipeline sig-atomic-buildscripts; do
                 rsync -Hrlptv --stats --delete -e ssh $repo/ builder@${{DUFFY_HOST}}:${{JOB_NAME}}/$repo
             done
 
             build_success=true
-            if ! ssh -tt builder@${{DUFFY_HOST}} "pushd ${{JOB_NAME}} && . rsync-password.sh && . task.env && ./aos-ci/tasks/{task}"; then
+            if ! ssh -tt builder@${{DUFFY_HOST}} "pushd ${{JOB_NAME}} && . rsync-password.sh && . task.env && ./ci-pipeline/tasks/{task}"; then
                 build_success=false
             fi
 
