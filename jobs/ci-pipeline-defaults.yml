@@ -34,8 +34,8 @@
           branches:
               - master
       - git:
-          url: "https://github.com/CentOS-PaaS-SIG/{repo-name}"
-          basedir: '{repo-name}'
+          url: "https://github.com/CentOS-PaaS-SIG/ci-pipeline"
+          basedir: 'ci-pipeline'
           branches:
               - master
       - git:
