@@ -6,9 +6,9 @@
             task: ostree-compose
             variables: |
                 export BUILD="rawhide"
-                export JENKINS_JOB_NAME="${{JOB_NAME}}"
-                export JENKINS_BUILD_TAG="${{BUILD_TAG}}"
-                export OSTREE_BRANCH="${{OSTREE_BRANCH:-}}"
+                export JENKINS_JOB_NAME="${JOB_NAME}"
+                export JENKINS_BUILD_TAG="${BUILD_TAG}"
+                export OSTREE_BRANCH="${OSTREE_BRANCH:-}"
             playbook: sig-atomic-buildscripts/centos-ci/setup/setup-system.yml
 
     publishers:
