@@ -6,6 +6,14 @@ for v in ostree; do
     rsync --delete --stats -a fedora-atomic@artifacts.ci.centos.org::fedora-atomic/${BUILD}/${v}/ ${v}/
 done
 
+if [[ ! -e ./ostree ]]; then
+    mkdir ostree
+    ostree --repo=ostree init --mode=archive-z2
+fi
+
+ostree --repo=./ostree prune \
+    --keep-younger-than='1 week ago' --refs-only
+
 # get list of repos
 # eventually we will be passed the list from the rpm build job
 repos=$(rsync fedora-atomic@artifacts.ci.centos.org::fedora-atomic/${BUILD}/repo/ | awk '/^d/ { if ($5 != ".") print $5 }')
@@ -33,13 +41,6 @@ cat << EOF > $base_dir/config/ostree/fedora-atomic-testing.json
     "repos": ["fedora-rawhide", $f_repos]
 }
 EOF
-
-if [ -d "./ostree" ]; then
-    ostree --repo=./ostree prune \
-        --keep-younger-than='1 week ago' --refs-only
-else
-    ostree --repo=./ostree init --mode=archive-z2
-fi
 
 sudo rpm-ostree-toolbox treecompose -c $base_dir/config/ostree/config.ini \
                 --ostreerepo ./ostree || exit 1
