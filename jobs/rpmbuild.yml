@@ -55,15 +55,15 @@
             description: |
               fedmsg email
     builders:
-        - system-groovy:
-            command: build.description = build.getEnvironment().get('fed_repo')
+#        - system-groovy:
+#            command: build.description = build.getEnvironment().get('fed_repo')
         - ci-pipeline-duffy-builder:
             task: rpmbuild-test
             playbook: aos-ci/config/duffy-setup/setup-rpmbuild-system.yml
         - inject:
             properties-file: ${{WORKSPACE}}/logs/description.txt
-        - system-groovy:
-            command: build.description = build.getEnvironment().get('description')
+#        - system-groovy:
+#            command: build.description = build.getEnvironment().get('description')
     publishers:
         - archive:
             artifacts: '*.*, */*, */*/*'
