@@ -61,7 +61,7 @@
             task: rpmbuild-test
             playbook: ci-pipeline/config/duffy-setup/setup-rpmbuild-system.yml
         - inject:
-            properties-file: ${{WORKSPACE}}/logs/description.txt
+            properties-file: ${WORKSPACE}/logs/description.txt
 #        - system-groovy:
 #            command: build.description = build.getEnvironment().get('description')
     publishers:
