@@ -77,7 +77,7 @@
         - macro-cciskel-duffy-prepared-allocate:
             jobclass: builder
             duffytimeoutsecs: 3600
-            playbook: {playbook}
+            playbook: '{playbook}'
         - shell: |
             #!/bin/bash
             set -xeuo pipefail
