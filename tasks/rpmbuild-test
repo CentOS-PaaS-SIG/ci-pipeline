@@ -1,12 +1,14 @@
 #!/bin/bash
 set +e
 
+base_dir="$(dirname $0)/.."
+
 HOMEDIR=$(pwd)
 rm -rf ${HOMEDIR}/${fed_repo}/output
 mkdir -p ${HOMEDIR}/${fed_repo}/output
 rm -rf ${HOMEDIR}/${fed_repo}/rpmbuild
 mkdir -p ${HOMEDIR}/${fed_repo}/rpmbuild
-pushd aos-ci/config/Dockerfiles/rpmbuild
+pushd $base_dir/config/Dockerfiles/rpmbuild
 # Install docker
 which docker
 if [ "$?" != 0 ]; then echo "ERROR: DOCKER NOT INSTALLED\nSTATUS: $?"; exit 1; fi
@@ -14,6 +16,8 @@ if [ "$?" != 0 ]; then echo "ERROR: DOCKER NOT INSTALLED\nSTATUS: $?"; exit 1; f
 if [ "$(docker ps -a | grep rpmbuild-container)" == "" ]; then sudo docker build -t rpmbuild-container . ; fi
 sudo docker run --privileged --cap-add=SYS_ADMIN -v ${HOMEDIR}/${fed_repo}/output:/home/${fed_repo}/output -v ${HOMEDIR}/${fed_repo}/rpmbuild:/home/rpmbuild -t -i -e fed_repo="${fed_repo}" -e fed_branch="${fed_branch}" -e fed_rev="${fed_rev}" rpmbuild-container
 popd
+# Move logs to location which can be rsynced
+mv -rp ${HOMEDIR}/${fed_repo}/output/logs ${HOMEDIR}
 # Find out RSYNC_BRANCH name so we can rsync over an empty repo if it DNE
 RSYNC_BRANCH=$(echo ${fed_branch} | sed 's/./&c/1')
 if [ "${fed_branch}" = "master" ]; then

@@ -1,5 +1,5 @@
 FROM fedora:25
-LABEL maintainer "https://github.com/CentOS-PaaS-SIG/aos-ci"
+LABEL maintainer "https://github.com/CentOS-PaaS-SIG/ci-pipeline"
 LABEL description="This container is meant to \
 use fedpkg mock to create rpms."
 

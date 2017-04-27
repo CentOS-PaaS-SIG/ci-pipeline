@@ -1,0 +1,10 @@
+- job:
+    name: ci-pipeline-ostree-compose
+    defaults: ci-pipeline-defaults
+    builders:
+        - ci-pipeline-duffy-builder:
+            task: ostree-compose
+            playbook: sig-atomic-buildscripts/centos-ci/setup/setup-system.yml
+
+    publishers:
+        - ci-pipeline-duffy-publisher

@@ -1,0 +1,74 @@
+- job:
+    name: ci-pipeline-rpmbuild
+    defaults: ci-pipeline-defaults
+    parameters:
+        - string:
+            name: fed_username
+            description: |
+              fedmsg username
+        - string:
+            name: fed_stats
+            description: |
+              fedmsg stats
+        - string:
+            name: fed_name
+            description: |
+              fedmsg name
+        - string:
+            name: fed_namespace
+            description: |
+              fedmsg namespace
+        - string:
+            name: fed_rev
+            description: |
+              fedmsg rev
+        - string:
+            name: fed_agent
+            description: |
+              fedmsg agent
+        - string:
+            name: fed_summary
+            description: |
+              fedmsg summary
+        - string:
+            name: fed_repo
+            description: |
+              fedmsg repo
+        - string:
+            name: fed_branch
+            description: |
+              fedmsg branch
+        - string:
+            name: fed_path
+            description: |
+              fedmsg path
+        - string:
+            name: fed_seen
+            description: |
+              fedmsg seen
+        - string:
+            name: fed_message
+            description: |
+              fedmsg message
+        - string:
+            name: fed_email
+            description: |
+              fedmsg email
+    builders:
+        - system-groovy:
+            command: build.description = build.getEnvironment().get('fed_repo')
+        - ci-pipeline-duffy-builder:
+            task: rpmbuild-test
+            playbook: aos-ci/config/duffy-setup/setup-rpmbuild-system.yml
+        - inject:
+            properties-file: ${{WORKSPACE}}/logs/description.txt
+        - system-groovy:
+            command: build.description = build.getEnvironment().get('description')
+    publishers:
+        - archive:
+            artifacts: '*.*, */*, */*/*'
+            allow-empty: 'true'
+        - trigger:
+            project: 'ci-pipeline-ostree-compose'
+            threshold: SUCCESS
+        - ci-pipeline-duffy-publisher
