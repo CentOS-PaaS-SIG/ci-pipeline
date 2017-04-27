@@ -84,13 +84,7 @@
 
             (echo -n "export RSYNC_PASSWORD=" && cat ~/duffy.key | cut -c '-13') > rsync-password.sh
             cat >>task.env <<EOF
-            export BUILD="rawhide"
-            export JENKINS_JOB_NAME="${{JOB_NAME}}"
-            export JENKINS_BUILD_TAG="${{BUILD_TAG}}"
-            export OSTREE_BRANCH="${{OSTREE_BRANCH:-}}"
-            export fed_repo="${{fed_repo}}"
-            export fed_branch="${{fed_branch}}"
-            export fed_rev="${{fed_rev}}"
+            {variables}
             EOF
             cat task.env
 
