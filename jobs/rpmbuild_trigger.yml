@@ -39,8 +39,8 @@
 
         - inject:
             properties-file: ${{WORKSPACE}}/fedmsg_fields.txt
-        - system-groovy:
-           command: build.description = build.getEnvironment().get('fed_repo')
+#        - system-groovy:
+#           command: build.description = build.getEnvironment().get('fed_repo')
         - shell: |
             set +e
             # Verify this is a development branch
@@ -65,8 +65,8 @@
             touch ${{WORKSPACE}}/trigger.downstream
         - inject:
             properties-file: ${{WORKSPACE}}/fedmsg_fields.txt
-        - system-groovy:
-           command: build.description = build.getEnvironment().get('description')
+#        - system-groovy:
+#           command: build.description = build.getEnvironment().get('description')
 
     publishers:
       - archive:
