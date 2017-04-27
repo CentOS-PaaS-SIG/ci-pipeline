@@ -1,48 +1,4 @@
-- builder:
-    name: ci-pipeline-duffy-rpmbuilder
-    builders:
-        - macro-cciskel-duffy-prepared-allocate:
-            jobclass: builder
-            duffytimeoutsecs: 3600
-            playbook: ci-pipeline/config/duffy-setup/setup-rpmbuild-system.yml
-        - shell: |
-            #!/bin/bash
-            set -xeuo pipefail
-            (echo -n "export RSYNC_PASSWORD=" && cat ~/duffy.key | cut -c '-13') > rsync-password.sh
-            cat >>task.env <<EOF
-            export JENKINS_JOB_NAME="${{JOB_NAME}}"
-            export JENKINS_BUILD_TAG="${{BUILD_TAG}}"
-            export fed_repo="${{fed_repo}}"
-            export fed_branch="${{fed_branch}}"
-            export fed_rev="${{fed_rev}}"
-            EOF
-            cat task.env
-            rsync -Hrlptv --stats -e ssh task.env rsync-password.sh builder@${{DUFFY_HOST}}:${{JOB_NAME}}
-            rsync -Hrlptv --stats --delete -e ssh ci-pipeline/ builder@${{DUFFY_HOST}}:${{JOB_NAME}}/ci-pipeline
-
-            build_success=true
-            if ! ssh -tt builder@${{DUFFY_HOST}} "pushd ${{JOB_NAME}} && . rsync-password.sh && . task.env && ./ci-pipeline/tasks/{task}"; then
-                build_success=false
-            fi
-
-            rsync -Hrlptv --stats -e ssh builder@${{DUFFY_HOST}}:${{JOB_NAME}}/${{fed_repo}}/output/logs/ $WORKSPACE/logs || true
-            # Exit with code from the build
-            if test "${{build_success}}" = "false"; then
-                echo 'Build failed, see logs above'; exit 1
-            fi
-
-- publisher:
-    name: ci-pipeline-duffy-rpmpublisher
-    publishers:
-        - archive:
-            artifacts: 'logs/**'
-            allow-empty: 'true'
-        - trigger:
-            project: 'ci-pipeline-ostree-compose'
-            threshold: SUCCESS
-        - macro-cciskel-duffy-deallocate
-
-- job-template:
+- job:
     name: ci-pipeline-rpmbuild
     defaults: ci-pipeline-defaults
     parameters:
@@ -100,23 +56,19 @@
               fedmsg email
     builders:
         - system-groovy:
-           command: build.description = build.getEnvironment().get('fed_repo')
-        - ci-pipeline-duffy-rpmbuilder:
+            command: build.description = build.getEnvironment().get('fed_repo')
+        - ci-pipeline-duffy-builder:
             task: rpmbuild-test
+            playbook: aos-ci/config/duffy-setup/setup-rpmbuild-system.yml
         - inject:
             properties-file: ${{WORKSPACE}}/logs/description.txt
         - system-groovy:
-           command: build.description = build.getEnvironment().get('description')
-
+            command: build.description = build.getEnvironment().get('description')
     publishers:
-      - archive:
-          artifacts: '*.*, */*, */*/*'
-          allow-empty: 'true'
-      - ci-pipeline-duffy-rpmpublisher
-
-## Describes the project
-- project:
-    name: ci-pipeline-rpmbuild-jobs
-    repo-name: ci-pipeline
-    jobs:
-      - ci-pipeline-rpmbuild
+        - archive:
+            artifacts: '*.*, */*, */*/*'
+            allow-empty: 'true'
+        - trigger:
+            project: 'ci-pipeline-ostree-compose'
+            threshold: SUCCESS
+        - ci-pipeline-duffy-publisher
