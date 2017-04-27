@@ -59,7 +59,7 @@
 #            command: build.description = build.getEnvironment().get('fed_repo')
         - ci-pipeline-duffy-builder:
             task: rpmbuild-test
-            playbook: aos-ci/config/duffy-setup/setup-rpmbuild-system.yml
+            playbook: ci-pipeline/config/duffy-setup/setup-rpmbuild-system.yml
         - inject:
             properties-file: ${{WORKSPACE}}/logs/description.txt
 #        - system-groovy:
