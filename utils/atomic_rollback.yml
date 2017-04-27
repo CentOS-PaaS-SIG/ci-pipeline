@@ -1,0 +1,23 @@
+# This playbook rolls the atomic host back to the
+# original ostree
+- hosts: all
+  tasks:
+  - name: Copying wait for reboot logic from projectatomic/atomic-host-tests/common
+    set_fact:
+      real_ansible_host: "{{ ansible_host }}"
+  - name: Rollback the atomic host
+    shell: "atomic host rollback"
+  - name: Reboot the atomic host
+    shell: "sleep 3 && systemctl reboot"
+    async: 1
+    poll: 0
+  - name: Wait for host to go down
+    local_action:
+      wait_for host={{ real_ansible_host }}
+      port=22 state=absent delay=1 timeout=120
+    become: false
+  - name: Wait for the system to come back up
+    local_action:
+      wait_for host={{ real_ansible_host }}
+      port=22 state=started delay=30 timeout=120
+    become: false

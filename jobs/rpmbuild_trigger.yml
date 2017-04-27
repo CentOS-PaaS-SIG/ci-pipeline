@@ -63,10 +63,6 @@
             fi
 
             touch ${{WORKSPACE}}/trigger.downstream
-        - inject:
-            properties-file: ${{WORKSPACE}}/fedmsg_fields.txt
-#        - system-groovy:
-#           command: build.description = build.getEnvironment().get('description')
 
     publishers:
       - archive:
