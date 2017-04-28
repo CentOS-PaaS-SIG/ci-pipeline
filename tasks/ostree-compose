@@ -48,7 +48,7 @@ sudo rpm-ostree-toolbox treecompose -c $base_dir/config/ostree/config.ini \
 ostree --repo=./ostree summary -u
 
 if ostree --repo=ostree rev-parse fedora/rawhide/x86_64/atomic-host^ >/dev/null 2>&1; then
-    package_diff=$(rpm-ostree db --repo=ostree diff fedora/rawhide/x86_64/atomic-host{^,}
+    package_diff=$(rpm-ostree db --repo=ostree diff fedora/rawhide/x86_64/atomic-host{^,})
     echo $package_diff
 fi
 
