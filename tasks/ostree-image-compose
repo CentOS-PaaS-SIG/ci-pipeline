@@ -7,10 +7,6 @@ for v in ostree images; do
     rsync --delete --stats -a fedora-atomic@artifacts.ci.centos.org::fedora-atomic/${BUILD}/${v}/ ${v}/
 done
 
-if [ ! -d "images" ]; then
-    mkdir images
-fi
-
 currentdir=$(pwd)
 
 # Clean up the imagefactory storage directory
@@ -32,13 +28,24 @@ if [ ! -e "Fedora-Everything-netinst-x86_64-26-20170404.n.0.iso" ]; then
     curl -O http://artifacts.ci.centos.org/sig-atomic/expires-7-days/Fedora-Everything-netinst-x86_64-26-20170404.n.0.iso
 fi
 
+version=$(ostree --repo=ostree show --print-metadata-key=version fedora/rawhide/x86_64/atomic-host
+release=$(ostree --repo=ostree rev-parse fedora/rawhide/x86_64/atomic-host | cut -c -15)
+if [ -d "images" ]; then
+    # Find the last image we pushed
+    prev_img=$(ls -tr images/*.qcow2 | tail -n 1)
+    prev_rel=$(echo $prev_img | sed -e 's/.*-\([^-]*\).qcow2/\1/')
+    package_diff=$(rpm-ostree db --repo=ostree diff $prev_rel $release)
+    echo $package_diff
+else
+    mkdir images
+fi
+
 # First argument is the path to the ostree repo share that over httpd now
 pushd ostree
 python -m SimpleHTTPServer &
 popd
 
 # Change into tmpdir
-#cp fedora-atomic.ks $tmpdir/
 pushd $tmpdir
 
 # Grab the kickstart file
@@ -60,7 +67,7 @@ cat <<EOF >./fedora-rawhide.tdl
     <name>rawhide</name>
     <os>
         <name>Fedora</name>
-        <version>22</version>
+        <version>27</version>
         <arch>x86_64</arch>
         <install type='iso'>
             <iso>file://${currentdir}/Fedora-Everything-netinst-x86_64-26-20170404.n.0.iso</iso>
@@ -81,7 +88,7 @@ sudo imagefactory --debug --imgdir $imgdir --timeout 3000 base_image ./fedora-ra
 popd
 
 # convert to qcow
-imgname=$(basename $imgdir/*body)
+imgname="fedora-atomic-$version-$release"
 qemu-img convert -c -p -O qcow2 $imgdir/*body ./images/$imgname.qcow2
 
 # delete images over 3 days old
