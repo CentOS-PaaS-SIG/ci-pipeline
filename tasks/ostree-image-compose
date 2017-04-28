@@ -28,7 +28,7 @@ if [ ! -e "Fedora-Everything-netinst-x86_64-26-20170404.n.0.iso" ]; then
     curl -O http://artifacts.ci.centos.org/sig-atomic/expires-7-days/Fedora-Everything-netinst-x86_64-26-20170404.n.0.iso
 fi
 
-version=$(ostree --repo=ostree show --print-metadata-key=version fedora/rawhide/x86_64/atomic-host
+version=$(ostree --repo=ostree show --print-metadata-key=version fedora/rawhide/x86_64/atomic-host)
 release=$(ostree --repo=ostree rev-parse fedora/rawhide/x86_64/atomic-host | cut -c -15)
 if [ -d "images" ]; then
     # Find the last image we pushed
