@@ -7,6 +7,10 @@ for v in ostree images; do
     rsync --delete --stats -a fedora-atomic@artifacts.ci.centos.org::fedora-atomic/${BUILD}/${v}/ ${v}/
 done
 
+if [ ! -d "images" ]; then
+    mkdir images
+fi
+
 currentdir=$(pwd)
 
 # Clean up the imagefactory storage directory
