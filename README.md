@@ -12,7 +12,11 @@ The CI-Pipeline is not an automation framework or automated tests.  CI in genera
 
 Setup and invoking of tests will be done using ansible as outlined in [Invoking Tests Using Ansible](https://fedoraproject.org/wiki/Changes/InvokingTestsAnsible)
 
-We assume that there will be tests available to execute otherwise there is nothing besides building, composing, and configuring an Openshift cluster to validate the OStrees and images.  There is currently tests available for many of the Atomic components as well as the Kubernetes e2e conformance tests.  Jenkins pipeline can be defined using [Jenkins Job Builder](https://docs.openstack.org/infra/jenkins-job-builder/) short-term or [Jenkins Pipeline](https://jenkins.io/doc/book/pipeline/) (Jenkinsfile) long-term.
+Setup and invoking of tests will be done using ansible as outlined in Invoking Tests Using Ansible
+
+We assume that there will be tests available to execute otherwise there is nothing besides building, composing, and configuring an Openshift cluster to validate the OStrees and images.  There is currently tests available for many of the Atomic components as well as the Kubernetes e2e conformance tests.
+
+The CI-Pipeline can be defined using Jenkins Job Builder short-term and Jenkins Pipeline (Jenkinsfile) long-term.  This will be the Jenkins 2.0 Pipeline that is already integrated in Openshift [(Openshift Pipelines Deep Dive)](https://blog.openshift.com/openshift-3-3-pipelines-deep-dive/).
 
 We are dependent on the CentOS CI infrastructure for Openshift, Jenkins resources, test resources (bare metal machines, VMs, containers), datahub, and the fedmsg hub.
 
@@ -74,7 +78,7 @@ Communication between Fedora, CentOS, and Red Hat infrastructures will be done v
 ### Message Types
 Below are the different message types that we listen and publish.  There will be different subtopics so we can keep things organized under the org.centos.prod.ci.pipeline.* umbrella. The fact that ‘org.centos’ is contained in the messages is a side effect of the way fedmsg enforces message naming.
 
-Each change passing through the pipeline is uniquely identified by an identifier. This identifier is a URL. The content at that URL may change over time, while the fact that the URL is the unique identifier will remain constant.
+Each change passing through the pipeline is uniquely identified by repo, rev, and namespace. 
 
 #### Trigger - org.fedoraproject.prod.git.receive
 
@@ -98,337 +102,479 @@ email=jchaloup@redhat.com
 
 #### Dist-git message example
 ````
-{ 'i': 1,
-  'msg': { 'commit': { 'branch': 'master',
-                       'email': 'mjw@redhat.com',
-                       'message': 'Clear CFLAGS CXXFLAGS LDFLAGS.\n                This is a bit of a hammer.',
-                       'name': 'Mark Wielaard',
-                       'repo': 'valgrind',
-                       'rev': '7a98f80d9b61ce167e4ef8129c81ed9284ecf4e1',
-                       'seen': True,
-                       'stats': { 'files': { 'valgrind.spec': { 'deletions': 2,
-                                                                'insertions': 1,
-                                                                'lines': 3}},
-                                  'total': { 'deletions': 2,
-                                             'files': 1,
-                                             'insertions': 1,
-                                             'lines': 3}},
-                       'summary': 'Clear CFLAGS CXXFLAGS LDFLAGS.',
-                       'username': 'mjw'}},
-  'timestamp': 1344350850.886738,
-  'topic': 'org.fedoraproject.prod.git.receive'}
+{
+  "source_name": "datanommer",  
+  "i": 1, 
+  "timestamp": 1493386183.0, 
+  "msg_id": "2017-b29fa2b4-0600-4f08-9475-5f82f6684bd4", 
+  "topic": "org.fedoraproject.prod.git.receive", 
+  "source_version": "0.6.5", 
+  "signature": "MbQSb1uwzh6UIFKVm+Uxt+56nW/QRH1nOehifxUrbZfiEDEscRdHtb8dj1Skdv7fcZGHhNlR3PGI\nz/4YqPFJjoAM/k60FsnBIIG1gklJaFBM8MloEYauzo/fUK//W99ojk3UPK0lGTIBijG2knbD9t3T\nUMRuDjt45zmGBXHPlR8=\n", 
+  "msg": {
+    "commit": {
+      "username": "trasher", 
+      "stats": {
+        "files": {
+          "sources": {
+            "deletions": 1, 
+            "additions": 1, 
+            "lines": 2
+          }, 
+          "php-simplepie.spec": {
+            "deletions": 5, 
+            "additions": 8, 
+            "lines": 13
+          }, 
+          ".gitignore": {
+            "deletions": 0, 
+            "additions": 1, 
+            "lines": 1
+          }
+        }, 
+        "total": {
+          "deletions": 6, 
+          "files": 3, 
+          "additions": 10, 
+          "lines": 16
+        }
+      }, 
+      "name": "Johan Cwiklinski", 
+      "rev": "81e09b9c83e8550b54a64c7bdb4e5d7b534df058", 
+      "namespace": "rpms", 
+      "agent": "trasher", 
+      "summary": "Last upstream release", 
+      "repo": "php-simplepie", 
+      "branch": "f24", 
+      "seen": false, 
+      "path": "/srv/git/repositories/rpms/php-simplepie.git", 
+      "message": "Last upstream release\n", 
+      "email": "johan@x-tnd.be"
+    }
+  }
+}
 ````
 
 #### org.centos.prod.ci.pipeline.package.complete
 
 ````
-{ u'i': 1,
+{ 
+  u'i': 1,
   u'msg': { u'build_url': u'<full-jenkins-url-to-build>',
             u'package_url': u'<full-url-to-package>',
-            u'ref': u'fedora/rawhide/${basearch}/atomic-host',
             u'build_id': <Jenkins-build-id-number>,
-            u'release': u'<sha1>’',
-            u'status': u'<success/failure/aborted>'},
+            u'ref': u'fedora/rawhide/${basearch}/atomic-host',
+      	u'rev': u'<sha of the commit from dist-git>', 
+      	u'namespace': u'rpms', 
+      	u'repo': u'php-simplepie',
+            u'status': u'<success/failure/aborted>',
+            u'test_guidance': u'<comma-separated-list-of-test-suites-to-run>'},
   u'msg_id': u'2015-4b5aae66-b713-4c22-bb4a-1277d4402375',
   u'timestamp': 1379638157.759283,
   u'topic': u'org.centos.prod.ci.pipeline.package.complete',
-  u'username': u'fedora-atomic'}
+  u'username': u'fedora-atomic'
+}
+````
+
+#### org.centos.prod.ci.pipeline.package.ignore
+
+````
+{ 
+  u'i': 1,
+  u'msg': { u'build_url': u'<full-jenkins-url-to-build>',
+            u'package_url': u'<full-url-to-package>',
+            u'build_id': <Jenkins-build-id-number>,
+            u'ref': u'fedora/rawhide/${basearch}/atomic-host',
+      	u'rev': u'<sha of the commit from dist-git>', 
+      	u'namespace': u'rpms', 
+      	u'repo': u'php-simplepie',
+            u'status': u'<ignored>',
+            u'test_guidance': u'<comma-separated-list-of-test-suites-to-run>'},
+  u'msg_id': u'2015-4b5aae66-b713-4c22-bb4a-1277d4402375',
+  u'timestamp': 1379638157.759283,
+  u'topic': u'org.centos.prod.ci.pipeline.package.complete',
+  u'username': u'fedora-atomic'
+}
 ````
 
 #### org.centos.prod.ci.pipeline.package.queued
 
 ````
-{ u'i': 1,
+{ 
+  u'i': 1,
   u'msg': { u'build_url': u'<full-jenkins-url-to-build>',
             u'package_url': u'<full-url-to-package>',
-            u'ref': u'fedora/rawhide/${basearch}/atomic-host',
             u'build_id': <Jenkins-build-id-number>,
-            u'release': u'<sha1>’',
-            u'status': u'<success/aborted>'},
+            u'ref': u'fedora/rawhide/${basearch}/atomic-host',
+      	u'rev': u'<sha of the commit from dist-git>', 
+      	u'namespace': u'rpms', 
+      	u'repo': u'php-simplepie', 
+            u'status': u'<success/aborted>',
+            u'test_guidance': u'<comma-separated-list-of-test-suites-to-run>'},
   u'msg_id': u'2015-4b5aae66-b713-4c22-bb4a-1277d4402375',
   u'timestamp': 1379638157.759283,
   u'topic': u'org.centos.prod.ci.pipeline.package.queued',
-  u'username': u'fedora-atomic'}
+  u'username': u'fedora-atomic'
+}
 ````
 
 #### org.centos.prod.ci.pipeline.package.running
 
 ````
-{ u'i': 1,
+{ 
+  u'i': 1,
   u'msg': { u'build_url': u'<full-jenkins-url-to-build>',
             u'package_url': u'<full-url-to-package>',
-            u'ref': u'fedora/rawhide/${basearch}/atomic-host',
             u'build_id': <Jenkins-build-id-number>,
-            u'release': u'<sha1>’',
-            u'status': u'<success/aborted>'},
+            u'ref': u'fedora/rawhide/${basearch}/atomic-host',
+      	u'rev': u'<sha of the commit from dist-git>', 
+      	u'namespace': u'rpms', 
+      	u'repo': u'php-simplepie', 
+            u'status': u'<success/aborted>',
+            u'test_guidance': u'<comma-separated-list-of-test-suites-to-run>'},
   u'msg_id': u'2015-4b5aae66-b713-4c22-bb4a-1277d4402375',
   u'timestamp': 1379638157.759283,
   u'topic': u'org.centos.prod.ci.pipeline.package.running',
-  u'username': u'fedora-atomic'}
+  u'username': u'fedora-atomic'
+}
 ````
 
 #### org.centos.prod.ci.pipeline.package.test.functional.complete
 
 ````
-{ u'i': 1,
+{ 
+  u'i': 1,
   u'msg': { u'build_url': u'<full-jenkins-url-to-build>',
             u'package_url': u'<full-url-to-package>',
-            u'ref': u'fedora/rawhide/${basearch}/atomic-host',
             u'build_id': <Jenkins-build-id-number>,
-            u'release': u'<sha1>’',
-            u'status': u'<success/failure/aborted>'},
+            u'ref': u'fedora/rawhide/${basearch}/atomic-host',
+      	u'rev': u'<sha of the commit from dist-git>', 
+      	u'namespace': u'rpms', 
+      	u'repo': u'php-simplepie', 
+            u'status': u'<success/failure/aborted>',
+            u'test_guidance': u'<comma-separated-list-of-test-suites-to-run>'},
   u'msg_id': u'2015-4b5aae66-b713-4c22-bb4a-1277d4402375',
   u'timestamp': 1379638157.759283,
   u'topic': u'org.centos.prod.ci.pipeline.package.test.functional.complete',
-  u'username': u'fedora-atomic'}
+  u'username': u'fedora-atomic'
+}
 ````
 
 #### org.centos.prod.ci.pipeline.package.test.functional.queued
 
 ````
-{ u'i': 1,
+{ 
+  u'i': 1,
   u'msg': { u'build_url': u'<full-jenkins-url-to-build>',
             u'package_url': u'<full-url-to-package>',
-            u'ref': u'fedora/rawhide/${basearch}/atomic-host',
             u'build_id': <Jenkins-build-id-number>,
-            u'release': u'<sha1>’',
-            u'status': u'<success/aborted>'},
+            u'ref': u'fedora/rawhide/${basearch}/atomic-host',
+      	u'rev': u'<sha of the commit from dist-git>', 
+      	u'namespace': u'rpms', 
+      	u'repo': u'php-simplepie', 
+            u'status': u'<success/aborted>',
+            u'test_guidance': u'<comma-separated-list-of-test-suites-to-run>'},
   u'msg_id': u'2015-4b5aae66-b713-4c22-bb4a-1277d4402375',
   u'timestamp': 1379638157.759283,
   u'topic': u'org.centos.prod.ci.pipeline.package.test.functional.queued',
-  u'username': u'fedora-atomic'}
+  u'username': u'fedora-atomic'
+}
 ````
 
 #### org.centos.prod.ci.pipeline.package.test.functional.running
 
 ````
-{ u'i': 1,
+{ 
+  u'i': 1,
   u'msg': { u'build_url': u'<full-jenkins-url-to-build>',
             u'package_url': u'<full-url-to-package>',
-            u'ref': u'fedora/rawhide/${basearch}/atomic-host',
             u'build_id': <Jenkins-build-id-number>,
-            u'release': u'<sha1>’',
-            u'status': u'<success/aborted>'},
+            u'ref': u'fedora/rawhide/${basearch}/atomic-host',
+      	u'rev': u'<sha of the commit from dist-git>', 
+      	u'namespace': u'rpms', 
+      	u'repo': u'php-simplepie', 
+            u'status': u'<success/aborted>',
+            u'test_guidance': u'<comma-separated-list-of-test-suites-to-run>'},
   u'msg_id': u'2015-4b5aae66-b713-4c22-bb4a-1277d4402375',
   u'timestamp': 1379638157.759283,
   u'topic': u'org.centos.prod.ci.pipeline.package.test.functional.running',
-  u'username': u'fedora-atomic'}
+  u'username': u'fedora-atomic'
+}
 ````
 
 #### org.centos.prod.ci.pipeline.compose.complete
 
 ````
-{ u'i': 1,
+{ 
+  u'i': 1,
   u'msg': { u'build_url': u'<full-jenkins-url-to-build>',
             u'compose_url': u'<full-url-to-compose>',
-            u'ref': u'fedora/rawhide/${basearch}/atomic-host',
             u'build_id': <Jenkins-build-id-number>,
-            u'release': u'<sha1>’',
-            u'status': u'<success/failure/aborted>'},
+            u'ref': u'fedora/rawhide/${basearch}/atomic-host',
+      	u'rev': u'<sha of the commit from dist-git>', 
+      	u'namespace': u'rpms', 
+      	u'repo': u'php-simplepie', 
+            u'status': u'<success/failure/aborted>',
+            u'test_guidance': u'<comma-separated-list-of-test-suites-to-run>'},
   u'msg_id': u'2015-4b5aae66-b713-4c22-bb4a-1277d4402375',
   u'timestamp': 1379638157.759283,
   u'topic': u'org.centos.prod.ci.pipeline.compose.complete',
-  u'username': u'fedora-atomic'}
+  u'username': u'fedora-atomic'
+}
 ````
 
 #### org.centos.prod.ci.pipeline.compose.queued
 
 ````
-{ u'i': 1,
+{ 
+  u'i': 1,
   u'msg': { u'build_url': u'<full-jenkins-url-to-build>',
             u'compose_url': u'<full-url-to-compose>',
-            u'ref': u'fedora/rawhide/${basearch}/atomic-host',
             u'build_id': <Jenkins-build-id-number>,
-            u'release': u'<sha1>’',
-            u'status': u'<success/aborted>'},
+            u'ref': u'fedora/rawhide/${basearch}/atomic-host',
+      	u'rev': u'<sha of the commit from dist-git>', 
+      	u'namespace': u'rpms', 
+      	u'repo': u'php-simplepie', 
+            u'status': u'<success/aborted>',
+            u'test_guidance': u'<comma-separated-list-of-test-suites-to-run>'},
   u'msg_id': u'2015-4b5aae66-b713-4c22-bb4a-1277d4402375',
   u'timestamp': 1379638157.759283,
   u'topic': u'org.centos.prod.ci.pipeline.compose.queued',
-  u'username': u'fedora-atomic'}
+  u'username': u'fedora-atomic'
+}
 ````
 
 #### org.centos.prod.ci.pipeline.compose.running
 
 ````
-{ u'i': 1,
+{ 
+  u'i': 1,
   u'msg': { u'build_url': u'<full-jenkins-url-to-build>',
             u'compose_url': u'<full-url-to-compose>',
-            u'ref': u'fedora/rawhide/arch/atomic-host',
             u'build_id': <Jenkins-build-id-number>,
-            u'release': u'<sha1>’',
-            u'status': u'<success/aborted>'},
+            u'ref': u'fedora/rawhide/${basearch}/atomic-host',
+      	u'rev': u'<sha of the commit from dist-git>', 
+      	u'namespace': u'rpms', 
+      	u'repo': u'php-simplepie', 
+            u'status': u'<success/aborted>',
+            u'test_guidance': u'<comma-separated-list-of-test-suites-to-run>'},
   u'msg_id': u'2015-4b5aae66-b713-4c22-bb4a-1277d4402375',
   u'timestamp': 1379638157.759283,
   u'topic': u'org.centos.prod.ci.pipeline.compose.running',
-  u'username': u'fedora-atomic'}
+  u'username': u'fedora-atomic'
+}
 ````
 
 #### org.centos.prod.ci.pipeline.compose.test.integration.complete
 
 ````
-{ u'i': 1,
+{ 
+  u'i': 1,
   u'msg': { u'build_url': u'<full-jenkins-url-to-build>',
             u'compose_url': u'<full-url-to-compose>',
-            u'ref': u'fedora/rawhide/${basearch}/atomic-host',
             u'build_id': <Jenkins-build-id-number>,
-            u'release': u'<sha1>’',
-            u'status': u'<success/failure/aborted>'},
+            u'ref': u'fedora/rawhide/${basearch}/atomic-host',
+      	u'rev': u'<sha of the commit from dist-git>', 
+      	u'namespace': u'rpms', 
+      	u'repo': u'php-simplepie', 
+            u'status': u'<success/failure/aborted>',
+            u'test_guidance': u'<comma-separated-list-of-test-suites-to-run>'},
   u'msg_id': u'2015-4b5aae66-b713-4c22-bb4a-1277d4402375',
   u'timestamp': 1379638157.759283,
   u'topic': u'org.centos.prod.ci.pipeline.compose.test.integration.complete',
-  u'username': u'fedora-atomic'}
+  u'username': u'fedora-atomic'
+}
 ````
 
 #### org.centos.prod.ci.pipeline.compose.test.integration.queued
 
 ````
-{ u'i': 1,
+{ 
+  u'i': 1,
   u'msg': { u'build_url': u'<full-jenkins-url-to-build>',
             u'compose_url': u'<full-url-to-compose>',
-            u'ref': u'fedora/rawhide/${basearch}/atomic-host',
             u'build_id': <Jenkins-build-id-number>,
-            u'release': u'<sha1>’',
-            u'status': u'<success/aborted>'},
+            u'ref': u'fedora/rawhide/${basearch}/atomic-host',
+      	u'rev': u'<sha of the commit from dist-git>', 
+      	u'namespace': u'rpms', 
+      	u'repo': u'php-simplepie', 
+            u'status': u'<success/aborted>',
+            u'test_guidance': u'<comma-separated-list-of-test-suites-to-run>'},
   u'msg_id': u'2015-4b5aae66-b713-4c22-bb4a-1277d4402375',
   u'timestamp': 1379638157.759283,
   u'topic': u'org.centos.prod.ci.pipeline.compose.test.integration.queued',
-  u'username': u'fedora-atomic'}
+  u'username': u'fedora-atomic'
+}
 ````
 
 #### org.centos.prod.ci.pipeline.compose.test.integration.running
 
 ````
-{ u'i': 1,
+{ 
+  u'i': 1,
   u'msg': { u'build_url': u'<full-jenkins-url-to-build>',
             u'compose_url': u'<full-url-to-compose>',
-            u'ref': u'fedora/rawhide/arch/atomic-host',
             u'build_id': <Jenkins-build-id-number>,
-            u'release': u'<sha1>’',
-            u'status': u'<success/aborted>'},
+            u'ref': u'fedora/rawhide/${basearch}/atomic-host',
+      	u'rev': u'<sha of the commit from dist-git>', 
+      	u'namespace': u'rpms', 
+      	u'repo': u'php-simplepie', 
+            u'status': u'<success/aborted>',
+            u'test_guidance': u'<comma-separated-list-of-test-suites-to-run>'},
   u'msg_id': u'2015-4b5aae66-b713-4c22-bb4a-1277d4402375',
   u'timestamp': 1379638157.759283,
   u'topic': u'org.centos.prod.ci.pipeline.compose.test.integration.running',
-  u'username': u'fedora-atomic'}
+  u'username': u'fedora-atomic'
+}
 ````
 
 #### org.centos.prod.ci.pipeline.image.complete
 
 ````
-{ u'i': 1,
+{ 
+  u'i': 1,
   u'msg': { u'build_url': u'<full-jenkins-url-to-build>',
             u'image_url': u'<full-url-to-image>',
-            u'ref': u'fedora/rawhide/arch/atomic-host',
             u'image_name': u'<image-name-with-nvr>',
             u'build_id': <Jenkins-build-id-number>,
-            u'release': u'<sha1>',
+            u'ref': u'fedora/rawhide/${basearch}/atomic-host',
+      	u'rev': u'<sha of the commit from dist-git>', 
+      	u'namespace': u'rpms', 
+      	u'repo': u'php-simplepie', 
             u'compose_url': ‘<full-url-to-compose>’,
-            u'compose_release': ‘<sha1-compose-release>’,
+            u'compose_rev': ‘<sha1-compose-release>’,
             u'status': u'<success/failure/aborted>',
+            u'test_guidance': u'<comma-separated-list-of-test-suites-to-run>',
             u'type': u'qcow2'},
   u'msg_id': u'2015-4b5aae66-b713-4c22-bb4a-1277d4402375',
   u'timestamp': 1379638157.759283,
   u'topic': u'org.centos.prod.ci.pipeline.image.complete’,
-  u'username': u'fedora-atomic'}
+  u'username': u'fedora-atomic'
+}
 ````
 
 #### org.centos.prod.ci.pipeline.image.queued
 
 ````
-{ u'i': 1,
+{ 
+  u'i': 1,
   u'msg': { u'build_url': u'<full-jenkins-url-to-build>',
             u'image_url': u'<full-url-to-image>',
-            u'ref': u'fedora/rawhide/arch/atomic-host',
             u'image_name’': u'fedora-rawhide-arch-atomic-host-timestamp',
             u'build_id': <Jenkins-build-id-number>,
-            u'release': u'<sha1>',
+            u'ref': u'fedora/rawhide/${basearch}/atomic-host',
+      	u'rev': u'<sha of the commit from dist-git>', 
+      	u'namespace': u'rpms', 
+      	u'repo': u'php-simplepie', 
             u'compose_url': ‘<full-url-to-compose>’,
-            u'compose_release': ‘<sha1-compose-release>’,
+            u'compose_rev': ‘<sha1-compose-release>’,
             u'status': u'<success/aborted>',
+            u'test_guidance': u'<comma-separated-list-of-test-suites-to-run>',
             u'type': u'qcow2'},
   u'msg_id': u'2015-4b5aae66-b713-4c22-bb4a-1277d4402375',
   u'timestamp': 1379638157.759283,
   u'topic': u'org.centos.prod.ci.pipeline.image.queued',
-  u'username': u'fedora-atomic'}
+  u'username': u'fedora-atomic'
+}
 ````
 
 #### org.centos.prod.ci.pipeline.image.running
 
 ````
-{ u'i': 1,
+{ 
+  u'i': 1,
   u'msg': { u'build_url': u'<full-jenkins-url-to-build>',
             u'image_url': u'<full-url-to-image>',
-            u'ref': u'fedora/rawhide/arch/atomic-host',
             u'image_name’': u'fedora-rawhide-arch-atomic-host-timestamp',
             u'build_id': <Jenkins-build-id-number>,
-            u'release': u'<sha1>',
+            u'ref': u'fedora/rawhide/${basearch}/atomic-host',
+      	u'rev': u'<sha of the commit from dist-git>', 
+      	u'namespace': u'rpms', 
+      	u'repo': u'php-simplepie', 
             u'compose_url': ‘<full-url-to-compose>’,
-            u'compose_release': ‘<sha1-compose-release>’,
+            u'compose_rev': ‘<sha1-compose-release>’,
             u'status': u'<success/aborted>',
+            u'test_guidance': u'<comma-separated-list-of-test-suites-to-run>',
             u'type': u'qcow2'},
   u'msg_id': u'2015-4b5aae66-b713-4c22-bb4a-1277d4402375',
   u'timestamp': 1379638157.759283,
   u'topic': u'org.centos.prod.ci.pipeline.image.running',
-  u'username': u'fedora-atomic'}
+  u'username': u'fedora-atomic'
+}
 ````
 
 #### org.centos.prod.ci.pipeline.image.test.smoke.complete
 
 ````
-{ u'i': 1,
+{ 
+  u'i': 1,
   u'msg': { u'build_url': u'<full-jenkins-url-to-build>',
             u'image_url': u'<full-url-to-image>',
-            u'ref': u'fedora/rawhide/arch/atomic-host',
             u'image_name': u'<image-name-with-nvr>',
             u'build_id': <Jenkins-build-id-number>,
-            u'release': u'<sha1>',
+            u'ref': u'fedora/rawhide/${basearch}/atomic-host',
+      	u'rev': u'<sha of the commit from dist-git>', 
+      	u'namespace': u'rpms', 
+      	u'repo': u'php-simplepie', 
             u'compose_url': ‘<full-url-to-compose>’,
-            u'compose_release': ‘<sha1-compose-release>’,
+            u'compose_rev': ‘<sha1-compose-release>’,
             u'status': u'<success/failure/aborted>',
+            u'test_guidance': u'<comma-separated-list-of-test-suites-to-run>',
             u'type': u'qcow2'},
   u'msg_id': u'2015-4b5aae66-b713-4c22-bb4a-1277d4402375',
   u'timestamp': 1379638157.759283,
   u'topic': u'org.centos.prod.ci.pipeline.image.test.smoke.complete’,
-  u'username': u'fedora-atomic'}
+  u'username': u'fedora-atomic'
+}
 ````
 
 #### org.centos.prod.ci.pipeline.image.test.smoke.queued
 
 ````
-{ u'i': 1,
+{ 
+  u'i': 1,
   u'msg': { u'build_url': u'<full-jenkins-url-to-build>',
             u'image_url': u'<full-url-to-image>',
-            u'ref': u'fedora/rawhide/arch/atomic-host',
             u'image_name’': u'fedora-rawhide-arch-atomic-host-timestamp',
             u'build_id': <Jenkins-build-id-number>,
-            u'release': u'<sha1>',
+            u'ref': u'fedora/rawhide/${basearch}/atomic-host',
+      	u'rev': u'<sha of the commit from dist-git>', 
+      	u'namespace': u'rpms', 
+      	u'repo': u'php-simplepie', 
             u'compose_url': ‘<full-url-to-compose>’,
-            u'compose_release': ‘<sha1-compose-release>’,
+            u'compose_rev': ‘<sha1-compose-release>’,
             u'status': u'<success/aborted>',
+            u'test_guidance': u'<comma-separated-list-of-test-suites-to-run>',
             u'type': u'qcow2'},
   u'msg_id': u'2015-4b5aae66-b713-4c22-bb4a-1277d4402375',
   u'timestamp': 1379638157.759283,
   u'topic': u'org.centos.prod.ci.pipeline.image.test.smoke.queued',
-  u'username': u'fedora-atomic'}
+  u'username': u'fedora-atomic'
+}
 ````
 
 #### org.centos.prod.ci.pipeline.image.test.smoke.running
 
 ````
-{ u'i': 1,
+{ 
+  u'i': 1,
   u'msg': { u'build_url': u'<full-jenkins-url-to-build>',
             u'image_url': u'<full-url-to-image>',
-            u'ref': u'fedora/rawhide/arch/atomic-host',
             u'image_name’': u'fedora-rawhide-arch-atomic-host-timestamp',
             u'build_id': <Jenkins-build-id-number>,
-            u'release': u'<sha1>',
+            u'ref': u'fedora/rawhide/${basearch}/atomic-host',
+      	u'rev': u'<sha of the commit from dist-git>', 
+      	u'namespace': u'rpms', 
+      	u'repo': u'php-simplepie', 
             u'compose_url': ‘<full-url-to-compose>’,
-            u'compose_release': ‘<sha1-compose-release>’,
+            u'compose_rev': ‘<sha1-compose-release>’,
             u'status': u'<success/aborted>',
+            u'test_guidance': u'<comma-separated-list-of-test-suites-to-run>',
             u'type': u'qcow2'},
   u'msg_id': u'2015-4b5aae66-b713-4c22-bb4a-1277d4402375',
   u'timestamp': 1379638157.759283,
   u'topic': u'org.centos.prod.ci.pipeline.image.test.smoke.running',
-  u'username': u'fedora-atomic'}
+  u'username': u'fedora-atomic'
+}
 ````
 
 ### Reporting Results
