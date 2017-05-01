@@ -3,6 +3,8 @@
 # Find the base dir
 base_dir="$(dirname $0)/.."
 
+mkdir -p logs
+
 for v in ostree images; do
     rsync --delete --stats -a fedora-atomic@artifacts.ci.centos.org::fedora-atomic/${BUILD}/${v}/ ${v}/
 done
@@ -34,8 +36,7 @@ if [ -d "images" ]; then
     # Find the last image we pushed
     prev_img=$(ls -tr images/*.qcow2 | tail -n 1)
     prev_rel=$(echo $prev_img | sed -e 's/.*-\([^-]*\).qcow2/\1/')
-    package_diff=$(rpm-ostree db --repo=ostree diff $prev_rel $release)
-    echo $package_diff
+    rpm-ostree db --repo=ostree diff $prev_rel $release | tee $basedir/logs/packages.txt
 else
     mkdir images
 fi
