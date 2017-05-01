@@ -2,9 +2,19 @@
 
 base_dir="$(dirname $0)/.."
 
+mkdir -p logs
+
 for v in ostree; do
     rsync --delete --stats -a fedora-atomic@artifacts.ci.centos.org::fedora-atomic/${BUILD}/${v}/ ${v}/
 done
+
+if [[ ! -e ./ostree ]]; then
+    mkdir ostree
+    ostree --repo=ostree init --mode=archive-z2
+fi
+
+ostree --repo=./ostree prune \
+    --keep-younger-than='1 week ago' --refs-only
 
 # get list of repos
 # eventually we will be passed the list from the rpm build job
@@ -34,17 +44,14 @@ cat << EOF > $base_dir/config/ostree/fedora-atomic-testing.json
 }
 EOF
 
-if [ -d "./ostree" ]; then
-    ostree --repo=./ostree prune \
-        --keep-younger-than='1 week ago' --refs-only
-else
-    ostree --repo=./ostree init --mode=archive-z2
-fi
-
 sudo rpm-ostree-toolbox treecompose -c $base_dir/config/ostree/config.ini \
                 --ostreerepo ./ostree || exit 1
 
 ostree --repo=./ostree summary -u
+
+if ostree --repo=ostree rev-parse fedora/rawhide/x86_64/atomic-host^ >/dev/null 2>&1; then
+    rpm-ostree db --repo=ostree diff fedora/rawhide/x86_64/atomic-host{^,} | tee $base_dir/logs/packages.txt
+fi
 
 for v in ostree; do
     rsync --delete --stats -a ${v}/ fedora-atomic@artifacts.ci.centos.org::fedora-atomic/${BUILD}/${v}/
