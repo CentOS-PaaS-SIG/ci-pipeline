@@ -1,3 +1,48 @@
+<!-- START doctoc generated TOC please keep comment here to allow auto update -->
+<!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
+**Table of Contents**  *generated with [DocToc](https://github.com/thlorenz/doctoc)*
+
+- [CI-Pipeline Architecture and Design](#ci-pipeline-architecture-and-design)
+  - [Overview](#overview)
+  - [Dependencies and Assumptions](#dependencies-and-assumptions)
+  - [Infrastructure and Tools](#infrastructure-and-tools)
+  - [CI-Pipeline Complete View](#ci-pipeline-complete-view)
+  - [Pipeline Stages](#pipeline-stages)
+    - [Trigger](#trigger)
+    - [Build Package](#build-package)
+    - [Functional Tests on Package](#functional-tests-on-package)
+    - [Compose OStree](#compose-ostree)
+    - [Integration Tests on OStree](#integration-tests-on-ostree)
+    - [e2e Conformance Tests on Openshift Clusters](#e2e-conformance-tests-on-openshift-clusters)
+    - [Image Generated From Successful Integration Tests On OStree](#image-generated-from-successful-integration-tests-on-ostree)
+    - [Image Smoke Test Validation](#image-smoke-test-validation)
+  - [Message Bus](#message-bus)
+    - [Message Types](#message-types)
+      - [Trigger - org.fedoraproject.prod.git.receive](#trigger---orgfedoraprojectprodgitreceive)
+      - [Dist-git message example](#dist-git-message-example)
+      - [org.centos.prod.ci.pipeline.package.complete](#orgcentosprodcipipelinepackagecomplete)
+      - [org.centos.prod.ci.pipeline.package.ignore](#orgcentosprodcipipelinepackageignore)
+      - [org.centos.prod.ci.pipeline.package.queued](#orgcentosprodcipipelinepackagequeued)
+      - [org.centos.prod.ci.pipeline.package.running](#orgcentosprodcipipelinepackagerunning)
+      - [org.centos.prod.ci.pipeline.package.test.functional.complete](#orgcentosprodcipipelinepackagetestfunctionalcomplete)
+      - [org.centos.prod.ci.pipeline.package.test.functional.queued](#orgcentosprodcipipelinepackagetestfunctionalqueued)
+      - [org.centos.prod.ci.pipeline.package.test.functional.running](#orgcentosprodcipipelinepackagetestfunctionalrunning)
+      - [org.centos.prod.ci.pipeline.compose.complete](#orgcentosprodcipipelinecomposecomplete)
+      - [org.centos.prod.ci.pipeline.compose.queued](#orgcentosprodcipipelinecomposequeued)
+      - [org.centos.prod.ci.pipeline.compose.running](#orgcentosprodcipipelinecomposerunning)
+      - [org.centos.prod.ci.pipeline.compose.test.integration.complete](#orgcentosprodcipipelinecomposetestintegrationcomplete)
+      - [org.centos.prod.ci.pipeline.compose.test.integration.queued](#orgcentosprodcipipelinecomposetestintegrationqueued)
+      - [org.centos.prod.ci.pipeline.compose.test.integration.running](#orgcentosprodcipipelinecomposetestintegrationrunning)
+      - [org.centos.prod.ci.pipeline.image.complete](#orgcentosprodcipipelineimagecomplete)
+      - [org.centos.prod.ci.pipeline.image.queued](#orgcentosprodcipipelineimagequeued)
+      - [org.centos.prod.ci.pipeline.image.running](#orgcentosprodcipipelineimagerunning)
+      - [org.centos.prod.ci.pipeline.image.test.smoke.complete](#orgcentosprodcipipelineimagetestsmokecomplete)
+      - [org.centos.prod.ci.pipeline.image.test.smoke.queued](#orgcentosprodcipipelineimagetestsmokequeued)
+      - [org.centos.prod.ci.pipeline.image.test.smoke.running](#orgcentosprodcipipelineimagetestsmokerunning)
+    - [Reporting Results](#reporting-results)
+
+<!-- END doctoc generated TOC please keep comment here to allow auto update -->
+
 # CI-Pipeline Architecture and Design
 
 ## Overview
