@@ -44,8 +44,7 @@ cat << EOF > $base_dir/config/ostree/fedora-atomic-testing.json
 }
 EOF
 
-sudo rpm-ostree-toolbox treecompose -c $base_dir/config/ostree/config.ini \
-                --ostreerepo ./ostree || exit 1
+sudo rpm-ostree compose tree --repo=./ostree $base_dir/config/ostree/fedora-atomic-testing.json || exit 1
 
 ostree --repo=./ostree summary -u
 
