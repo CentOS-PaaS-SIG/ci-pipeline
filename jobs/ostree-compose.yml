@@ -11,12 +11,11 @@
                      exit 0
                   fi
                   exit 1
+              on-evaluation-failure: dont-run
               action:
-                  - trigger-parameterized-builds:
-                      - project: '{compose_job}'
-                        current-parameters: true
-                        block: true
-                        same-node: true
+                  - trigger:
+                      project: '{compose_job}'
+                      threshold: 'SUCCESS'
 
 - job:
     name: ci-pipeline-ostree-compose
