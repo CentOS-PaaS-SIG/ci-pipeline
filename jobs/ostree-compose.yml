@@ -30,7 +30,7 @@
                 export OSTREE_BRANCH="${OSTREE_BRANCH:-}"
             playbook: sig-atomic-buildscripts/centos-ci/setup/setup-system.yml
         - ci-pipeline-ostree-image-trigger:
-            compose_job: ci-pipeline-ostree-image-trigger
+            compose_job: ci-pipeline-ostree-image-compose
 
     publishers:
         - ci-pipeline-duffy-publisher
