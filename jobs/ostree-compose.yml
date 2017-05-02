@@ -1,21 +1,21 @@
-- publisher:
-    name: ci-pipeline-ostree-image-publisher
-    publishers:
-        - conditional-publisher:
-            - condition-kind: shell
-              condition-command: |
-                  prev=$(curl $JENKINS_URL/job/{compose_job}/lastBuild/api/json 2>/dev/null | jq '.timestamp' | cut -c1-10)
-                  cur=$(date +%s)
-                  elapsed=$((cur - prev))
-                  if [ $elapsed -gt 86400 ]; then
-                     exit 0
-                  fi
-                  exit 1
-              on-evaluation-failure: dont-run
-              action:
-                  - trigger:
-                      project: '{compose_job}'
-                      threshold: 'SUCCESS'
+- builder:
+    name: ci-pipeline-ostree-image-trigger
+    builders:
+        - conditional-step:
+            condition-kind: shell
+            condition-command: |
+                prev=$(curl $JENKINS_URL/job/{compose_job}/lastBuild/api/json 2>/dev/null | jq '.timestamp' | cut -c1-10)
+                cur=$(date +%s)
+                elapsed=$((cur - prev))
+                if [ $elapsed -gt 86400 ]; then
+                   exit 0
+                fi
+                exit 1
+            on-evaluation-failure: dont-run
+            steps:
+                  - trigger-builds:
+                    - project: '{compose_job}'
+                      current-parameters: false
 
 - job:
     name: ci-pipeline-ostree-compose
@@ -29,11 +29,11 @@
                 export JENKINS_BUILD_TAG="${BUILD_TAG}"
                 export OSTREE_BRANCH="${OSTREE_BRANCH:-}"
             playbook: sig-atomic-buildscripts/centos-ci/setup/setup-system.yml
+        - ci-pipeline-ostree-image-trigger:
+            compose_job: ci-pipeline-ostree-image-trigger
 
     publishers:
         - ci-pipeline-duffy-publisher
-        - ci-pipeline-ostree-image-publisher:
-            compose_job: ci-pipeline-ostree-image-compose
 
 - job:
     name: ci-pipeline-ostree-image-compose
