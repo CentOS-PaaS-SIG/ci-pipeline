@@ -1,6 +1,6 @@
 <!-- START doctoc generated TOC please keep comment here to allow auto update -->
 <!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
-**Table of Contents**  *generated with [DocToc](https://github.com/thlorenz/doctoc)*
+**Table of Contents**
 
 - [CI-Pipeline Architecture and Design](#ci-pipeline-architecture-and-design)
   - [Overview](#overview)
@@ -232,7 +232,7 @@ email=jchaloup@redhat.com
       	u'rev': u'<sha of the commit from dist-git>', 
       	u'namespace': u'rpms', 
       	u'repo': u'php-simplepie',
-            u'status': u'<ignored>',
+            u'status': u'<success>',
             u'test_guidance': u'<comma-separated-list-of-test-suites-to-run>'},
   u'msg_id': u'2015-4b5aae66-b713-4c22-bb4a-1277d4402375',
   u'timestamp': 1379638157.759283,
