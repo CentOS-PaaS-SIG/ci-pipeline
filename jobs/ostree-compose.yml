@@ -22,14 +22,14 @@
     defaults: ci-pipeline-defaults
     parameters:
         - string:
-            name: branch
+            name: fed_branch
             description: |
               which branch to build
     builders:
         - ci-pipeline-duffy-builder:
             task: ostree-compose
             variables: |
-                export BUILD="${branch}"
+                export BUILD="${fed_branch}"
                 export JENKINS_JOB_NAME="${JOB_NAME}"
                 export JENKINS_BUILD_TAG="${BUILD_TAG}"
                 export OSTREE_BRANCH="${OSTREE_BRANCH:-}"
@@ -45,14 +45,14 @@
     defaults: ci-pipeline-defaults
     parameters:
         - string:
-            name: branch
+            name: fed_branch
             description: |
               which branch to build
     builders:
         - ci-pipeline-duffy-builder:
             task: ostree-image-compose
             variables: |
-                export BUILD="${branch}"
+                export BUILD="${fed_branch}"
                 export JENKINS_JOB_NAME="${JOB_NAME}"
                 export JENKINS_BUILD_TAG="${BUILD_TAG}"
                 export OSTREE_BRANCH="${OSTREE_BRANCH:-}"
