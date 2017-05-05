@@ -45,7 +45,8 @@
             set +e
             # Verify this is a development branch
             branch=$fed_branch
-            if [[ $branch != "f25" ]] && [[ $branch != "f26" ]]; then echo "Don't care about this branch" ; exit; fi
+            targets="^(f25|f26)$"
+            if [[ ! "$branch" =~ $targets ]]; then echo "$branch is not in the list"; exit ; fi
             #if [ "$branch" = "master" ]; then
             #    branch="rawhide"
             #else
