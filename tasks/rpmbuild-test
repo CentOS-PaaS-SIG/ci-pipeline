@@ -19,7 +19,7 @@ popd
 # Move logs to location which can be rsynced
 cp -rp ${HOMEDIR}/${fed_repo}/output/logs ${HOMEDIR}
 # Find out RSYNC_BRANCH name so we can rsync over an empty repo if it DNE
-RSYNC_BRANCH=$(echo ${fed_branch} | sed 's/./&c/1')
+RSYNC_BRANCH=${fed_branch}
 if [ "${fed_branch}" = "master" ]; then
     RSYNC_BRANCH=rawhide
 fi
