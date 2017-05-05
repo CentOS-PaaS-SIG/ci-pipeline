@@ -76,7 +76,7 @@
             artifacts: '*.*, */*, */*/*'
             allow-empty: 'true'
         - trigger-parameterized-builds:
-            project: 'ci-pipeline-ostree-compose'
-            predefined-parameters: fed_branch=$fed_branch
-            condition: SUCCESS
+            - project: 'ci-pipeline-ostree-compose'
+              predefined-parameters: fed_branch=$fed_branch
+              condition: SUCCESS
         - ci-pipeline-duffy-publisher
