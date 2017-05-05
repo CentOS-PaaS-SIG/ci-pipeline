@@ -15,16 +15,21 @@
             steps:
                   - trigger-builds:
                     - project: '{compose_job}'
-                      current-parameters: false
+                      current-parameters: true
 
 - job:
     name: ci-pipeline-ostree-compose
     defaults: ci-pipeline-defaults
+    parameters:
+        - string:
+            name: branch
+            description: |
+              which branch to build
     builders:
         - ci-pipeline-duffy-builder:
             task: ostree-compose
             variables: |
-                export BUILD="rawhide"
+                export BUILD="${branch}"
                 export JENKINS_JOB_NAME="${JOB_NAME}"
                 export JENKINS_BUILD_TAG="${BUILD_TAG}"
                 export OSTREE_BRANCH="${OSTREE_BRANCH:-}"
@@ -38,11 +43,16 @@
 - job:
     name: ci-pipeline-ostree-image-compose
     defaults: ci-pipeline-defaults
+    parameters:
+        - string:
+            name: branch
+            description: |
+              which branch to build
     builders:
         - ci-pipeline-duffy-builder:
             task: ostree-image-compose
             variables: |
-                export BUILD="rawhide"
+                export BUILD="${branch}"
                 export JENKINS_JOB_NAME="${JOB_NAME}"
                 export JENKINS_BUILD_TAG="${BUILD_TAG}"
                 export OSTREE_BRANCH="${OSTREE_BRANCH:-}"
