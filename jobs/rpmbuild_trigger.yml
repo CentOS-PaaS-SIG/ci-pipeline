@@ -46,7 +46,9 @@
             # Verify this is a development branch
             branch=$fed_branch
             if [ "$branch" = "master" ]; then
-                branch="rawhide"
+                # Drop rawhide commits for now
+                branch="drop"
+                #branch="rawhide"
             else
                 # The url we are checking with has no f
                 # in the branch names so remove it
