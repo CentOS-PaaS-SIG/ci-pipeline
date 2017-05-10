@@ -55,9 +55,9 @@ cat << EOF > $base_dir/config/ostree/fedora-atomic-testing.json
 {
     "include": "fedora-atomic-testing-docker-host.json",
     "ref": "fedora/${BUILD}/${basearch}/atomic-host",
-    "repos": ["fedora-${VERSION}", $f_repos]
+    "repos": ["fedora-${VERSION}", $f_repos],
     "automatic_version_prefix": "${VERSION}",
-    "mutate-os-release": "${VERSION}",
+    "mutate-os-release": "${VERSION}"
 }
 EOF
 
