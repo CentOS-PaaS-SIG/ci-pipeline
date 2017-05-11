@@ -4,7 +4,18 @@
         - conditional-step:
             condition-kind: shell
             condition-command: |
-                prev=$(curl $JENKINS_URL/job/{compose_job}/lastBuild/api/json 2>/dev/null | jq '.timestamp' | cut -c1-10)
+                prev=0
+                number=$(curl $JENKINS_URL/job/{compose_job}/lastBuild/api/json 2>/dev/null | jq '.number')
+                for ((i=$number; i>0; i--)); do
+                    branch=$(curl $JENKINS_URL/job/{compose_job}/$i/api/json 2>/dev/null | jq -r '.actions[] | select(.parameters).parameters[] | select(.name | contains("fed_branch")).value')
+                    if [ "$branch" = "$fed_branch" ]; then
+                        result=$(curl $JENKINS_URL/job/{compose_job}/$i/api/json 2>/dev/null| jq -r '.result')
+                        if [ "$result" = "SUCCESS" ]; then
+                            prev=$(curl $JENKINS_URL/job/{compose_job}/$i/api/json 2>/dev/null| jq '.timestamp' | cut -c1-10)
+                            break
+                        fi
+                    fi
+                done
                 cur=$(date +%s)
                 elapsed=$((cur - prev))
                 if [ $elapsed -gt 86400 ]; then
