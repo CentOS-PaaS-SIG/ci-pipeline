@@ -1,8 +1,6 @@
 {
     "ref": "fedora/rawhide/${basearch}/atomic-host",
 
-    "repos": ["fedora-rawhide"],
-
     "selinux": true,
 
     "documentation": false,

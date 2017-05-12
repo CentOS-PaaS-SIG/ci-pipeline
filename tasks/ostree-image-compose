@@ -3,6 +3,9 @@
 # Find the base dir
 base_dir="$(dirname $0)/.."
 
+REF="fedora/${BUILD}/x86_64/atomic-host"
+VERSION=$(echo $BUILD | sed -e 's/[a-zA-Z]*//')
+
 mkdir -p logs
 
 for v in ostree images; do
@@ -30,8 +33,8 @@ if [ ! -e "Fedora-Everything-netinst-x86_64-26-20170404.n.0.iso" ]; then
     curl -O http://artifacts.ci.centos.org/sig-atomic/expires-7-days/Fedora-Everything-netinst-x86_64-26-20170404.n.0.iso
 fi
 
-version=$(ostree --repo=ostree show --print-metadata-key=version fedora/rawhide/x86_64/atomic-host | sed -e "s/'//g")
-release=$(ostree --repo=ostree rev-parse fedora/rawhide/x86_64/atomic-host | cut -c -15)
+version=$(ostree --repo=ostree show --print-metadata-key=version $REF| sed -e "s/'//g")
+release=$(ostree --repo=ostree rev-parse $REF| cut -c -15)
 if [ -d "images" ]; then
     # Find the last image we pushed
     prev_img=$(ls -tr images/*.qcow2 | tail -n 1)
@@ -55,20 +58,20 @@ curl -O -L https://pagure.io/fedora-kickstarts/raw/master/f/fedora-atomic.ks
 # Put new url into the kickstart file
 sed -i 's|url=https://kojipkgs.fedoraproject.org/atomic/rawhide/|url=http://192.168.122.1:8000/|' ./fedora-atomic.ks
 # Set the ref to be the right one
-sed -i 's|--ref=fedora-atomic/rawhide/x86_64/updates/docker-host|--ref=fedora/rawhide/x86_64/atomic-host|' ./fedora-atomic.ks
+sed -i "s|--ref=fedora-atomic/rawhide/x86_64/updates/docker-host|--ref=$REF|" ./fedora-atomic.ks
 # point to upstream
-sed -i 's|\(%post.*$\)|\1\nostree remote delete fedora-atomic\nostree remote add --set=gpg-verify=false fedora-atomic https://ci.centos.org/artifacts/fedora-atomic/rawhide/ostree|' ./fedora-atomic.ks
+sed -i "s|\(%post.*$\)|\1\nostree remote delete fedora-atomic\nostree remote add --set=gpg-verify=false fedora-atomic https://ci.centos.org/artifacts/fedora-atomic/${BUILD}/ostree|" ./fedora-atomic.ks
 
 # Create a tdl file for imagefactory
 #       <install type='url'>
 #           <url>http://download.fedoraproject.org/pub/fedora/linux/releases/25/Everything/x86_64/os/</url>
 #       </install>
-cat <<EOF >./fedora-rawhide.tdl
+cat <<EOF >./fedora-${BUILD}.tdl
 <template>
-    <name>rawhide</name>
+    <name>${BUILD}</name>
     <os>
         <name>Fedora</name>
-        <version>27</version>
+        <version>${VERSION}</version>
         <arch>x86_64</arch>
         <install type='iso'>
             <iso>file://${currentdir}/Fedora-Everything-netinst-x86_64-26-20170404.n.0.iso</iso>
@@ -83,7 +86,7 @@ EOF
 
 # –parameter results_location
 # run imagefactory to build disk image
-sudo imagefactory --debug --imgdir $imgdir --timeout 3000 base_image ./fedora-rawhide.tdl --parameter offline_icicle true --file-parameter install_script ./fedora-atomic.ks
+sudo imagefactory --debug --imgdir $imgdir --timeout 3000 base_image ./fedora-${BUILD}.tdl --parameter offline_icicle true --file-parameter install_script ./fedora-atomic.ks
 
 # Change out of temporary directory
 popd

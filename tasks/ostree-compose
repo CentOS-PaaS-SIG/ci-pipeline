@@ -2,6 +2,9 @@
 
 base_dir="$(dirname $0)/.."
 
+REF="fedora/${BUILD}/x86_64/atomic-host"
+VERSION=$(echo $BUILD | sed -e 's/^f//')
+
 mkdir -p logs
 
 for v in ostree; do
@@ -37,10 +40,29 @@ skip_if_unavailable=False
 EOF
 done
 
+if [ "$VERSION" = "rawhide" ]; then
+    fedora_repo="$VERSION"
+else
+    fedora_repo="fedora-$VERSION"
+fi
+cat << EOF > $base_dir/config/ostree/fedora-${VERSION}.repo
+[fedora-${VERSION}]
+name=Fedora ${BUILD}
+failovermethod=priority
+metalink=https://mirrors.fedoraproject.org/metalink?repo=${fedora_repo}&arch=x86_64
+enabled=1
+metadata_expire=7d
+gpgcheck=0
+skip_if_unavailable=False
+EOF
+
 cat << EOF > $base_dir/config/ostree/fedora-atomic-testing.json
 {
     "include": "fedora-atomic-testing-docker-host.json",
-    "repos": ["fedora-rawhide", $f_repos]
+    "ref": "fedora/${BUILD}/\${basearch}/atomic-host",
+    "repos": ["fedora-${VERSION}", $f_repos],
+    "automatic_version_prefix": "${VERSION}",
+    "mutate-os-release": "${VERSION}"
 }
 EOF
 
@@ -48,8 +70,8 @@ sudo rpm-ostree compose tree --repo=./ostree $base_dir/config/ostree/fedora-atom
 
 ostree --repo=./ostree summary -u
 
-if ostree --repo=ostree rev-parse fedora/rawhide/x86_64/atomic-host^ >/dev/null 2>&1; then
-    rpm-ostree db --repo=ostree diff fedora/rawhide/x86_64/atomic-host{^,} | tee logs/packages.txt
+if ostree --repo=ostree rev-parse ${REF}^ >/dev/null 2>&1; then
+    rpm-ostree db --repo=ostree diff ${REF}{^,} | tee logs/packages.txt
 fi
 
 for v in ostree; do
