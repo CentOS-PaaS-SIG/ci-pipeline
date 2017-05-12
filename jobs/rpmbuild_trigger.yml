@@ -46,13 +46,9 @@
             # Verify this is a development branch
             branch=$fed_branch
             if [[ ! "$branch" =~ {targets} ]]; then echo "$branch is not in the list"; exit ; fi
-            #if [ "$branch" = "master" ]; then
-            #    branch="rawhide"
-            #else
-            #    # The url we are checking with has no f
-            #    # in the branch names so remove it
-            #    branch=${{branch:1}}
-            #fi
+            if [ "$branch" = "master" ]; then
+                branch="rawhide"
+            fi
             #curl -f -s http://dl.fedoraproject.org/pub/fedora/linux/development/$branch/Everything > /dev/null
             #if [ $? -ne 0 ] && [[ $branch != {{target}} ]]; then echo "Not a development branch and not the target branch"; exit; fi
             # Verify this is a package we are interested in
@@ -86,6 +82,6 @@
 - project:
     name: ci-pipeline-rpmbuild-trigger-jobs
     repo-name: ci-pipeline
-    targets: '^(f25|f26)$'
+    targets: '^(f25|f26|master)$'
     jobs:
       - ci-pipeline-rpmbuild-trigger
