@@ -33,11 +33,9 @@ class PR_functions:
     def create_body(self, comment_list):
         body = ''
         for file_to_add in comment_list:
-            if not os.path.exists(file_to_add):
-                print ("The comment file did not exist: " + file_to_add)
-                return ''
-            with open(file_to_add) as infile:
-                body = body + infile.read() + '\n'
+            if os.path.exists(file_to_add):
+                with open(file_to_add) as infile:
+                    body = body + infile.read() + '\n'
         return body
 
     def get_field(self, prop_file, field):
