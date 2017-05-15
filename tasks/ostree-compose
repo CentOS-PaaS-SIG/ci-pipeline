@@ -2,12 +2,14 @@
 
 base_dir="$(dirname $0)/.."
 
-if [ "${BUILD}" = "master" ]; then
+if [ "${BUILD}" = "master" -o "${BUILD}" = "rawhide" ]; then
     BUILD="rawhide"
+    VERSION="rawhide"
+else
+    VERSION=$(echo $BUILD | sed -e 's/[a-zA-Z]*//')
 fi
 
 REF="fedora/${BUILD}/x86_64/atomic-host"
-VERSION=$(echo $BUILD | sed -e 's/^f//')
 
 mkdir -p logs
 
