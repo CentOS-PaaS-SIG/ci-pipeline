@@ -71,3 +71,31 @@
 
     publishers:
         - ci-pipeline-duffy-publisher
+
+- job:
+    name: ci-pipeline-ostree-boot-sanity
+    defaults: ci-pipeline-defaults
+    parameters:
+        - string:
+            name: fed_branch
+            description: |
+              which branch to test
+        - string:
+            name: image2boot
+            description: |
+              url pointing to the image to boot
+        - string:
+            name: commit
+            description: |
+              sha pointing to the particular commit we want to test
+    builders:
+        - ci-pipeline-duffy-builder:
+            task: ostree-boot-image
+            variables: |
+                export BUILD="${fed_branch}"
+                export image2boot="${image2boot}"
+                export commit="${commit}"
+                export JENKINS_JOB_NAME="${JOB_NAME}"
+                export JENKINS_BUILD_TAG="${BUILD_TAG}"
+                export OSTREE_BRANCH="${OSTREE_BRANCH:-}"
+            playbook: ci-pipeline/config/libvirt-setup/setup-libvirt.yml
