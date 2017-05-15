@@ -2,7 +2,7 @@
 
 base_dir="$(dirname $0)/.."
 
-if [ "${BUILD}" = "master" ]; then
+if [ "${BUILD}" = "master" -o "${BUILD}" = "rawhide" ]; then
     BUILD="rawhide"
     VERSION="rawhide"
 else
