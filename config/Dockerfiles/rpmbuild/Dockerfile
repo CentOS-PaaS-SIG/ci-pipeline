@@ -19,6 +19,7 @@ RUN for i in {1..5} ; do dnf -y install ansible \
         pyxdg \
         PyYAML \
         rpm-build \
+        rpmlint \
         rsync \
         sed \
         sudo \
