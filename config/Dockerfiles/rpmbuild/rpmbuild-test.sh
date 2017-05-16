@@ -35,8 +35,10 @@ MAKE_TEST_STATUS=$?
 popd
 if [ "$MAKE_TEST_STATUS" == 2 ]; then
      sudo echo "description='${fed_repo} - No tests'" >> ${OUTPUTDIR}/logs/description.txt
+elif [ "$MAKE_TEST_STATUS" == 0 ]; then
+     sudo echo "description='${fed_repo} - make test passed'" >> ${OUTPUTDIR}/logs/description.txt
 else
-     sudo echo "description=${fed_repo}" >> ${OUTPUTDIR}/logs/description.txt
+     sudo echo "description='${fed_repo} - make test failed'" >> ${OUTPUTDIR}/logs/description.txt
 fi
 # Build the package into ./results_${fed_repo}/$VERSION/$RELEASE/
 fedpkg --release ${fed_branch} mockbuild
@@ -52,6 +54,8 @@ fi
 rm -rf ${OUTPUTDIR}/${fed_repo}_repo
 mkdir ${OUTPUTDIR}/${fed_repo}_repo
 cp ${fed_repo}/results_${fed_repo}/${VERSION}/*/*.rpm ${OUTPUTDIR}/${fed_repo}_repo/
+# Run rpmlint
+rpmlint ${OUTPUTDIR}/${fed_repo}_repo/ > ${OUTPUTDIR}/logs/rpmlint_out.txt
 pushd ${OUTPUTDIR}/${fed_repo}_repo && createrepo .
 popd
 # Run fedabipkgdiff against the newly created rpm
