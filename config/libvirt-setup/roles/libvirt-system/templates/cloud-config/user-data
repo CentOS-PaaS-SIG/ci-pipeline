@@ -15,7 +15,7 @@ users:
     ssh-authorized-keys:
       - ssh-rsa {{ item.value.admin_ssh_rsa }}
 
-timezone: US/Eastern
+timezone: UTC
 
 runcmd:
  - systemctl disable cloud-init.service
