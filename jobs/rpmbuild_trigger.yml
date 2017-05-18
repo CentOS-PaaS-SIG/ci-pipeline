@@ -43,11 +43,22 @@
 #           command: build.description = build.getEnvironment().get('fed_repo')
         - shell: |
             set +e
-            # Verify this is a development branch
             branch=$fed_branch
-            if [[ ! "$branch" =~ {targets} ]]; then echo "$branch is not in the list"; exit ; fi
             if [ "$branch" = "master" ]; then
                 branch="rawhide"
+            fi
+            # Set some message properties that are true for all messages
+            echo "ref=fedora/${{branch}}/x86_64/atomic-host" >> ${{WORKSPACE}}/job.properties
+            echo "rev=$fed_rev" >> ${{WORKSPACE}}/job.properties
+            echo "namespace=rpms" >> ${{WORKSPACE}}/job.properties
+            echo "repo=$fed_repo" >> ${{WORKSPACE}}/job.properties
+            echo "status=success" >> ${{WORKSPACE}}/job.properties
+            echo "test_guidance=''" >> ${{WORKSPACE}}/job.properties
+            # Verify this is a development branch
+            if [[ ! "$fed_branch" =~ {targets} ]]; then
+                echo "$fed_branch is not in the list"
+                echo "topic=org.centos.prod.ci.pipeline.package.ignore" >> ${{WORKSPACE}}/job.properties
+                exit
             fi
             #curl -f -s http://dl.fedoraproject.org/pub/fedora/linux/development/$branch/Everything > /dev/null
             #if [ $? -ne 0 ] && [[ $branch != {{target}} ]]; then echo "Not a development branch and not the target branch"; exit; fi
@@ -60,15 +71,19 @@
                 fi
             done
             if [ $valid -eq 0 ]; then
-                echo "Not a package we are interested in"; exit
+                echo "Not a package we are interested in"
+                echo "topic=org.centos.prod.ci.pipeline.package.ignore" >> ${{WORKSPACE}}/job.properties
+                exit
             fi
 
+            echo "topic=org.centos.prod.ci.pipeline.package.queued" >> ${{WORKSPACE}}/job.properties
             touch ${{WORKSPACE}}/trigger.downstream
 
     publishers:
       - archive:
           artifacts: '*.*'
           allow-empty: 'true'
+      # Will need fedmsg publisher here once available
       - conditional-publisher:
           - condition-kind: file-exists
             condition-filename: trigger.downstream

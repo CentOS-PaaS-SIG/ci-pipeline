@@ -63,5 +63,6 @@ rm -rf libabigail
 git clone git://sourceware.org/git/libabigail.git
 RPM_TO_CHECK=$(find ${fed_repo}/results_${fed_repo}/${VERSION}/*/ -name "${fed_repo}-${VERSION}*" | grep -v src)
 libabigail/tools/fedabipkgdiff --from ${ABIGAIL_BRANCH} ${RPM_TO_CHECK} &> ${OUTPUTDIR}/logs/fedabipkgdiff_out.txt
+echo "$RPM_TO_CHECK" >> ${OUTPUTDIR}/logs/packagename.txt
 
 exit 0

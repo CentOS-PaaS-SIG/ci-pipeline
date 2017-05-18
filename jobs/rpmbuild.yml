@@ -57,6 +57,20 @@
     builders:
 #        - system-groovy:
 #            command: build.description = build.getEnvironment().get('fed_repo')
+        - shell: |
+            # Write ci message fields to a file
+            echo "topic=org.centos.prod.ci.pipeline.package.running" >> ${WORKSPACE}/job.properties_running
+            echo "build_url=$BUILD_URL" >> ${WORKSPACE}/job.properties_running
+            echo "build_id=$BUILD_ID" >> ${WORKSPACE}/job.properties_running
+            echo "ref=fedora/${fed_branch}/x86_64/atomic-host" >> ${WORKSPACE}/job.properties_running
+            echo "rev=$fed_rev" >> ${WORKSPACE}/job.properties_running
+            echo "namespace=rpms" >> ${WORKSPACE}/job.properties_running
+            echo "repo=$fed_repo" >> ${WORKSPACE}/job.properties_running
+            echo "status=success" >> ${WORKSPACE}/job.properties_running
+            echo "test_guidance=''" >> ${WORKSPACE}/job.properties_running
+        - inject:
+            properties-file: ${WORKSPACE}/job.properties_running
+# Will need a fedmsg here
         - ci-pipeline-duffy-builder:
             task: rpmbuild-test
             variables: |
@@ -71,6 +85,15 @@
             properties-file: ${WORKSPACE}/logs/description.txt
 #        - system-groovy:
 #            command: build.description = build.getEnvironment().get('description')
+        - shell: |
+            echo "topic=org.centos.prod.ci.pipeline.package.complete" >> ${WORKSPACE}/job.properties
+            package=$(cat ${WORKSPACE}/logs/packagename.txt)
+            status=$(curl $JENKINS_URL/job/$JOB_NAME/lastBuild/api/json 2>/dev/null | jq '.result')
+            echo "status=$status" >> ${WORKSPACE}/job.properties
+            echo "package_url=http://artifacts.ci.centos.org/fedora-atomic/rawhide/repo/${fed_repo}_repo/$package" >> ${WORKSPACE}/job.properties
+        - inject:
+            properties-file: ${WORKSPACE}/job.properties
+# Will need a fedmsg here
     publishers:
         - archive:
             artifacts: '*.*, */*, */*/*'
