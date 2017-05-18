@@ -14,10 +14,6 @@
         set_fact:
             booted_commit: installed_json['deployments'][0]['checksum']
         when: installed_json['deployments'][0]['booted']
-      - name: Installed commit 1
-        set_fact:
-            booted_commit: installed_json['deployments'][1]['checksum']
-        when: installed_json['deployments'][1]['booted']
       - name: Deploy specific commit
         command: "atomic host deploy {{ commit }}"
         when: commit is defined and booted_commit != commit
@@ -32,10 +28,6 @@
         set_fact:
             booted_commit: installed_json['deployments'][0]['checksum']
         when: installed_json['deployments'][0]['booted']
-      - name: Installed commit 1
-        set_fact:
-            booted_commit: installed_json['deployments'][1]['checksum']
-        when: installed_json['deployments'][1]['booted']
       - name: Verify specific commit
         command: "false"
         when: commit is defined and booted_commit != commit
