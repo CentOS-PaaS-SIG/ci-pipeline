@@ -113,4 +113,4 @@
                 export JENKINS_JOB_NAME="${JOB_NAME}"
                 export JENKINS_BUILD_TAG="${BUILD_TAG}"
                 export OSTREE_BRANCH="${OSTREE_BRANCH:-}"
-            playbook: ci-pipeline/config/libvirt-setup/setup-libvirt.yml
+            playbook: ci-pipeline/config/libvirt-setup/setup-system.yml
