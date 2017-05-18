@@ -108,8 +108,8 @@
             task: ostree-boot-image
             variables: |
                 export BUILD="${fed_branch}"
-                export image2boot="${image2boot}"
-                export commit="${commit}"
+                export image2boot="${image2boot:-}"
+                export commit="${commit:-}"
                 export JENKINS_JOB_NAME="${JOB_NAME}"
                 export JENKINS_BUILD_TAG="${BUILD_TAG}"
                 export OSTREE_BRANCH="${OSTREE_BRANCH:-}"
