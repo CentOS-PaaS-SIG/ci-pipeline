@@ -4,6 +4,7 @@
         - trigger-builds:
             - project: ci-pipeline-ostree-boot-sanity
               current-parameters: true
+              property-file: ${WORKSPACE}/logs/ostree.props
               block: true
               same-node: true
 
@@ -113,4 +114,5 @@
                 export JENKINS_JOB_NAME="${JOB_NAME}"
                 export JENKINS_BUILD_TAG="${BUILD_TAG}"
                 export OSTREE_BRANCH="${OSTREE_BRANCH:-}"
-            playbook: ci-pipeline/config/libvirt-setup/setup-system.yml
+                export ANSIBLE_HOST_KEY_CHECKING="False"
+            playbook: sig-atomic-buildscripts/centos-ci/setup/setup-system.yml

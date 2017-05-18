@@ -43,6 +43,7 @@ image2boot=${image2boot:-$IMG_URL}
 
 if ! [ -f ~/.ssh/id_rsa ]; then
     ssh-keygen -t rsa -f ~/.ssh/id_rsa -N ''
+    cat ~/.ssh/id_rsa.pub >> ~/.ssh/authorized_keys
 fi
 
 pubkey=$(cat ~/.ssh/id_rsa.pub)
@@ -54,17 +55,19 @@ bridge: virbr0
 libvirt_systems:
  atomic-host-fedoraah:
    admin_passwd: $5$uX5x24soDWv3G2TH$BYxhEq4HmxjKmyChV0.VTpqxfhqMaRk8LCr34KOg2C7
-   admin_ssh_rsa: $pubkey
    memory: 3072
    disk: 100000
 EOF
 cat << EOF >> host_vars/ostree_compose_slave_baremetal.yml
    img_url: $image2boot
+   admin_ssh_rsa: $pubkey
 EOF
 cat << EOF > hosts
 [libvirt-hosts]
-ostree_compose_slave_baremetal ansible_ssh_host=127.0.0.1
+ostree_compose_slave_baremetal ansible_ssh_host=127.0.0.1 ansible_user=builder become=true
 EOF
+# Install net-tools
+sudo yum -y install net-tools
 # Start test VM
 ansible-playbook -i hosts ci-pipeline/config/libvirt-setup/setup-libvirt-image.yml -l ostree_compose_slave_baremetal -e 'state=present'
 
