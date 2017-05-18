@@ -1,4 +1,13 @@
 - builder:
+    name: ci-pipeline-ostree-boot-trigger
+    builders:
+        - trigger-builds:
+            - project: ci-pipeline-ostree-boot-sanity
+              current-parameters: true
+              block: true
+              same-node: true
+
+- builder:
     name: ci-pipeline-ostree-image-trigger
     builders:
         - conditional-step:
@@ -45,6 +54,9 @@
                 export JENKINS_BUILD_TAG="${BUILD_TAG}"
                 export OSTREE_BRANCH="${OSTREE_BRANCH:-}"
             playbook: sig-atomic-buildscripts/centos-ci/setup/setup-system.yml
+        - inject:
+            properties-file: ${WORKSPACE}/logs/ostree.props
+        - ci-pipeline-ostree-boot-trigger
         - ci-pipeline-ostree-image-trigger:
             compose_job: ci-pipeline-ostree-image-compose
 
@@ -68,6 +80,37 @@
                 export JENKINS_BUILD_TAG="${BUILD_TAG}"
                 export OSTREE_BRANCH="${OSTREE_BRANCH:-}"
             playbook: sig-atomic-buildscripts/centos-ci/setup/setup-system.yml
+        - inject:
+            properties-file: ${WORKSPACE}/logs/ostree.props
+        - ci-pipeline-ostree-boot-trigger
 
     publishers:
         - ci-pipeline-duffy-publisher
+
+- job:
+    name: ci-pipeline-ostree-boot-sanity
+    defaults: ci-pipeline-defaults
+    parameters:
+        - string:
+            name: fed_branch
+            description: |
+              which branch to test
+        - string:
+            name: image2boot
+            description: |
+              url pointing to the image to boot
+        - string:
+            name: commit
+            description: |
+              sha pointing to the particular commit we want to test
+    builders:
+        - ci-pipeline-duffy-builder:
+            task: ostree-boot-image
+            variables: |
+                export BUILD="${fed_branch}"
+                export image2boot="${image2boot}"
+                export commit="${commit}"
+                export JENKINS_JOB_NAME="${JOB_NAME}"
+                export JENKINS_BUILD_TAG="${BUILD_TAG}"
+                export OSTREE_BRANCH="${OSTREE_BRANCH:-}"
+            playbook: ci-pipeline/config/libvirt-setup/setup-libvirt.yml
