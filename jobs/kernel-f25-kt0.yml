@@ -1,0 +1,31 @@
+- job:
+    name: ci-pipeline-kernel-f25-kt0
+    defaults: ci-pipeline-defaults
+    parameters:
+        - string:
+            name: fed_branch
+            default: f25
+            description: |
+              which branch the kernel comes from
+        - string:
+            name: kernel_nvr
+            description: |
+              the entire kernel rpm nvr
+    builders:
+        - shell: |
+            #!/bin/bash
+            # Remove kernel- and .rpm from kernel_nvr
+            kernel_vr=$(echo $kernel_nvr | cut -d '-' -f 2- | sed -r 's/(.*)\..*/\1/')
+            echo "kernel_vr=$kernel_vr" >> ${WORKSPACE}/job.properties
+        - inject:
+            properties-file: ${WORKSPACE}/job.properties
+        - ci-pipeline-duffy-builder:
+            task: TODO
+            variables: |
+                export fed_branch="${fed_branch}"
+                export kernel_vr="${kernel_vr}"
+                export JENKINS_JOB_NAME="${JOB_NAME}"
+                export JENKINS_BUILD_TAG="${BUILD_TAG}"
+            playbook: ci-pipeline/config/libvirt-setup/setup-system.yml
+    publishers:
+        - ci-pipeline-duffy-publisher

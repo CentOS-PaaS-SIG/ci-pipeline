@@ -1,0 +1,47 @@
+- job-template:
+    name: ci-pipeline-kernel-trigger
+    defaults: ci-pipeline-defaults
+    triggers:
+      - timed: "*/5 * * * *"
+    builders:
+        - shell: |
+            #!/bin/bash
+            # I should be able to switch this to use a jms trigger
+            # from the rpmbuild job, but waiting until we are satisfied
+            # with fedmsg for that
+            set -xuo pipefail
+
+            # This relies on no rpm builds finishing successfully before this
+            # trigger happens.  This will be greatly improved when I switch
+            # to a jms trigger
+            packagename=$(curl $JENKINS_URL/job/ci-pipeline-rpmbuild/lastSuccessfulBuild/artifact/logs/packagename.txt)
+
+            NEW_TIMESTAMP=$(curl http://artifacts.ci.centos.org/fedora-atomic/{os_major}/repo/ | grep kernel_repo | tr -d -c 0-9)
+            if [ -e "/tmp/kernel-{os_major}-trigger.txt" ]; then
+                  OLD_TIMESTAMP=$(cat /tmp/kernel-{os_major}-trigger.txt)
+                  if [ "$NEW_TIMESTAMP" != "$OLD_TIMESTAMP" ]; then
+                         touch $WORKSPACE/trigger.txt
+                  fi
+            fi
+            echo $NEW_TIMESTAMP > /tmp/kernel-{os_major}-trigger.txt
+
+            echo "packagename=$packagename" >> ${{WORKSPACE}}/job.properties
+            echo "fed_branch={os_major}" >> ${{WORKSPACE}}/job.properties
+
+    publishers:
+      - conditional-publisher:
+          - condition-kind: file-exists
+            condition-filename: trigger.txt
+            action:
+              - trigger-parameterized-builds:
+                  - project: 'ci-pipeline-kernel-{os_major}-kt0'
+                    property-file: ${{WORKSPACE}}/job.properties
+                    fail-on-missing: true
+                    condition: SUCCESS
+
+## Describes the project
+- project:
+    name: ci-pipeline-kernel-trigger-job
+    os_major: f25
+    jobs:
+      - ci-pipeline-kernel-trigger
