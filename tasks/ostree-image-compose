@@ -104,6 +104,13 @@ qemu-img convert -c -p -O qcow2 $imgdir/*body ./images/$imgname.qcow2
 # delete images over 3 days old
 find ./images -mtime +3 -exec rm {} \;
 
+# Record the commit so we can test it later
+commit=$(ostree --repo=ostree rev-parse ${REF})
+cat << EOF > logs/ostree.props
+commit=$commit
+image2boot="http://artifacts.ci.centos.org/artifacts/fedora-atomic/${BUILD}/images/$imgname.qcow2"
+EOF
+
 # We don't need to rsync ostree back since we just used it for cache
 for v in images; do
     rsync --delete --stats -a ${v}/ fedora-atomic@artifacts.ci.centos.org::fedora-atomic/${BUILD}/${v}/

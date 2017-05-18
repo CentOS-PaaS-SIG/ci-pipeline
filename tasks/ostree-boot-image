@@ -37,6 +37,10 @@ if [ -d "images" ]; then
     IMG_URL="http://artifacts.ci.centos.org/artifacts/fedora-atomic/${BUILD}/$prev_img"
 fi
 
+# If image2boot is defined use that image, but if not fall back to the
+# previous image built
+image2boot=${image2boot:-$IMG_URL}
+
 if ! [ -f ~/.ssh/id_rsa ]; then
     ssh-keygen -t rsa -f ~/.ssh/id_rsa -N ''
 fi
@@ -55,7 +59,7 @@ libvirt_systems:
    disk: 100000
 EOF
 cat << EOF >> host_vars/ostree_compose_slave_baremetal.yml
-   img_url: $IMG_URL
+   img_url: $image2boot
 EOF
 cat << EOF > hosts
 [libvirt-hosts]

@@ -4,8 +4,57 @@
   become_user: '{{ become_user | default("root") }}'
   remote_user: '{{ remote_user | default("root") }}'
   tasks:
-      - name: Check which version we are running
-        command: "/bin/sh -c 'atomic host status'"
-        ignore_errors: True
-        register: atomic_version
-        changed_when: False
+      - name: Get rpm-ostree status --json output
+        command: rpm-ostree status --json
+        register: installed
+      - name: Convert rpm-ostree status output to jinja2 json
+        set_fact:
+            installed_json: "{{ installed.stdout | from_json }}"
+      - name: Installed commit 0
+        set_fact:
+            booted_commit: installed_json['deployments'][0]['checksum']
+        when: installed_json['deployments'][0]['booted']
+      - name: Installed commit 1
+        set_fact:
+            booted_commit: installed_json['deployments'][1]['checksum']
+        when: installed_json['deployments'][1]['booted']
+      - name: Deploy specific commit
+        command: "atomic host deploy {{ commit }}"
+        when: commit is defined and booted_commit != commit
+        notify: restart system
+      - name: Get rpm-ostree status --json output
+        command: rpm-ostree status --json
+        register: installed
+      - name: Convert rpm-ostree status output to jinja2 json
+        set_fact:
+            installed_json: "{{ installed.stdout | from_json }}"
+      - name: Installed commit 0
+        set_fact:
+            booted_commit: installed_json['deployments'][0]['checksum']
+        when: installed_json['deployments'][0]['booted']
+      - name: Installed commit 1
+        set_fact:
+            booted_commit: installed_json['deployments'][1]['checksum']
+        when: installed_json['deployments'][1]['booted']
+      - name: Verify specific commit
+        command: "false"
+        when: commit is defined and booted_commit != commit
+  handlers:
+      - name: restart system
+        command: shutdown -r +1 "Ansible reboot triggered"
+        async: 1
+        poll: 0
+        ignore_errors: true
+        notify: ssh stopped
+      - name: ssh stopped
+        local_action:
+            wait_for host={{ ansible_ssh_host | default(inventory_hostname) }}
+            port=22 state=stopped
+        notify: ssh started
+      - name: ssh started
+        local_action:
+            wait_for host={{ ansible_ssh_host | default(inventory_hostname) }}
+            port=22 state=started
+        notify: pause 5 seconds
+      - name: pause 5 seconds
+        pause: seconds=5
