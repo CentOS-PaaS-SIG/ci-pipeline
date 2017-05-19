@@ -55,6 +55,9 @@ else
     mkdir images
 fi
 
+# Stop the firewall
+sudo systemctl stop firewalld
+
 # First argument is the path to the ostree repo share that over httpd now
 pushd ostree
 python -m SimpleHTTPServer &
