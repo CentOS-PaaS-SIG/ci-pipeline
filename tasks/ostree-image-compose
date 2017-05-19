@@ -31,8 +31,10 @@ tmpdir=$(mktemp -d)
 # Kill backgrounded jobs on exit
 function clean_up {
     kill $(jobs -p)
-    cp /var/lib/oz/screenshots/*.ppm $currentdir/logs
-    cp $tmpdir/fedora-atomic.ks $currentdir/logs
+    for screenshot in /var/lib/oz/screenshots/*.ppm; do
+        [ -e "$screenshot" ] && cp $screenshot $currentdir/logs
+    done
+    [ -e "$tmpdir/fedora-atomic.ks" ] && cp $tmpdir/fedora-atomic.ks $currentdir/logs
     sudo rm -f $imgdir/*
     sudo rm -rf $tmpdir
 }
