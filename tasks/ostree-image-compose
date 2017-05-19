@@ -64,7 +64,7 @@ curl -O -L https://pagure.io/fedora-kickstarts/raw/master/f/fedora-atomic.ks
 # Put new url into the kickstart file
 sed -i 's|url=https://kojipkgs.fedoraproject.org/atomic/rawhide/|url=http://192.168.122.1:8000/|' ./fedora-atomic.ks
 # Set the ref to be the right one
-sed -i "s|--ref=fedora-atomic/rawhide/x86_64/updates/docker-host|--ref=$REF|" ./fedora-atomic.ks
+sed -i "s|--ref=.*|--ref=$REF|" ./fedora-atomic.ks
 # point to upstream
 sed -i "s|\(%post.*$\)|\1\nostree remote delete fedora-atomic\nostree remote add --set=gpg-verify=false fedora-atomic http://artifacts.ci.centos.org/artifacts/fedora-atomic/${BUILD}/ostree|" ./fedora-atomic.ks
 
