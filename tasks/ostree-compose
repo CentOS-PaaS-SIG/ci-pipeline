@@ -80,6 +80,12 @@ if ostree --repo=ostree rev-parse ${REF}^ >/dev/null 2>&1; then
     rpm-ostree db --repo=ostree diff ${REF}{^,} | tee logs/packages.txt
 fi
 
+# Record the commit so we can test it later
+commit=$(ostree --repo=ostree rev-parse ${REF})
+cat << EOF > logs/ostree.props
+commit=$commit
+EOF
+
 for v in ostree; do
     rsync --delete --stats -a ${v}/ fedora-atomic@artifacts.ci.centos.org::fedora-atomic/${BUILD}/${v}/
 done

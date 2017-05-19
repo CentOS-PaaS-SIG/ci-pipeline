@@ -1,0 +1,2 @@
+[libvirt]
+{{ item.key }} ansible_ssh_host={{ ip_address.stdout }}

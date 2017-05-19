@@ -1,0 +1,95 @@
+#!/bin/sh
+
+# Find the base dir
+base_dir="$(dirname $0)/.."
+
+if [ "${BUILD}" = "master" -o "${BUILD}" = "rawhide" ]; then
+    BUILD="rawhide"
+    VERSION="rawhide"
+else
+    VERSION=$(echo $BUILD | sed -e 's/[a-zA-Z]*//')
+fi
+
+REF="fedora/${BUILD}/x86_64/atomic-host"
+
+mkdir -p logs
+
+for v in ostree images; do
+    rsync --delete --stats -a fedora-atomic@artifacts.ci.centos.org::fedora-atomic/${BUILD}/${v}/ ${v}/
+done
+
+currentdir=$(pwd)
+
+# Create directory for temporary files
+tmpdir=$(mktemp -d)
+
+# Kill backgrounded jobs on exit
+function clean_up {
+    kill $(jobs -p)
+    sudo rm -rf $tmpdir
+}
+trap clean_up EXIT SIGHUP SIGINT SIGTERM
+
+version=$(ostree --repo=ostree show --print-metadata-key=version $REF| sed -e "s/'//g")
+if [ -d "images" ]; then
+    # Find the last image we pushed
+    prev_img=$(ls -tr images/*.qcow2 | tail -n 1)
+    IMG_URL="http://artifacts.ci.centos.org/artifacts/fedora-atomic/${BUILD}/$prev_img"
+fi
+
+# If image2boot is defined use that image, but if not fall back to the
+# previous image built
+image2boot=${image2boot:-$IMG_URL}
+
+if ! [ -f ~/.ssh/id_rsa ]; then
+    ssh-keygen -t rsa -f ~/.ssh/id_rsa -N ''
+    cat ~/.ssh/id_rsa.pub >> ~/.ssh/authorized_keys
+fi
+
+pubkey=$(cat ~/.ssh/id_rsa.pub)
+
+mkdir host_vars
+cat << 'EOF' > host_vars/ostree_compose_slave_baremetal.yml
+qemu_img_path: /var/lib/libvirt/images
+bridge: virbr0
+libvirt_systems:
+ atomic-host-fedoraah:
+   admin_passwd: $5$uX5x24soDWv3G2TH$BYxhEq4HmxjKmyChV0.VTpqxfhqMaRk8LCr34KOg2C7
+   memory: 3072
+   disk: 100000
+EOF
+cat << EOF >> host_vars/ostree_compose_slave_baremetal.yml
+   img_url: $image2boot
+   admin_ssh_rsa: $pubkey
+EOF
+cat << EOF > hosts
+[libvirt-hosts]
+ostree_compose_slave_baremetal ansible_ssh_host=127.0.0.1 ansible_user=builder become=true
+EOF
+# Install net-tools
+sudo yum -y install net-tools
+# Start test VM
+ansible-playbook -i hosts ci-pipeline/config/libvirt-setup/setup-libvirt-image.yml -l ostree_compose_slave_baremetal -e 'state=present'
+
+PROVISION_STATUS=$?
+if [ "$PROVISION_STATUS" != 0 ]; then
+    echo "ERROR: Provisioning\nSTATUS: $PROVISION_STATUS"
+    exit 1
+fi
+
+# Get libvirt IP
+IP=$(cat libvirt-hosts | tail -n 1 | cut -d '=' -f 2)
+
+cat << EOF > inventory
+[ostree_compose_slave]
+$IP ansible_user=admin ansible_ssh_pass=admin ansible_become=true ansible_become_pass=admin
+EOF
+
+ansible-playbook -i inventory ci-pipeline/tasks/ostree-boot-verify.yml -l ostree_compose_slave -e "commit=$commit" -v
+
+BOOT_STATUS=$?
+if [ "$BOOT_STATUS" != 0 ]; then
+    echo "ERROR: Provisioning\nSTATUS: $BOOT_STATUS"
+    exit 1
+fi
+

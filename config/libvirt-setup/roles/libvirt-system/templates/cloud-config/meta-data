@@ -1,0 +1,2 @@
+instance-id: {{ item.key }};
+local-hostname: {{ item.key }}

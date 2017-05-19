@@ -1,0 +1,10 @@
+---
+- include: vm-init.yml
+- include: vm-storage.yml
+  when: state == 'present'
+- include: vm-import.yml
+  with_dict: '{{ libvirt_systems }}'
+  when: "state == 'present' and '{{ item.key }}' not in virt_vms.list_vms"
+- include: vm-destroy.yml
+  with_dict: '{{ libvirt_systems }}'
+  when: "state == 'absent' and '{{ item.key }}' in virt_vms.list_vms"
