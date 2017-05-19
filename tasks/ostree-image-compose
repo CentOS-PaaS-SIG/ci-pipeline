@@ -66,7 +66,7 @@ sed -i 's|url=https://kojipkgs.fedoraproject.org/atomic/rawhide/|url=http://192.
 # Set the ref to be the right one
 sed -i "s|--ref=fedora-atomic/rawhide/x86_64/updates/docker-host|--ref=$REF|" ./fedora-atomic.ks
 # point to upstream
-sed -i "s|\(%post.*$\)|\1\nostree remote delete fedora-atomic\nostree remote add --set=gpg-verify=false fedora-atomic https://ci.centos.org/artifacts/fedora-atomic/${BUILD}/ostree|" ./fedora-atomic.ks
+sed -i "s|\(%post.*$\)|\1\nostree remote delete fedora-atomic\nostree remote add --set=gpg-verify=false fedora-atomic http://artifacts.ci.centos.org/artifacts/fedora-atomic/${BUILD}/ostree|" ./fedora-atomic.ks
 
 # Create a tdl file for imagefactory
 #       <install type='url'>
