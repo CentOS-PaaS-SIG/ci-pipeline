@@ -1,0 +1,53 @@
+## This playbook takes in a desired kernel
+## and the url of where the repo for it is located.
+## It then ensures the SUT is not currently
+## running that kernel, and proceeds to install
+## and boot it.  It takes in --extra-vars
+## "kernel=<VR>" and "url=<repo location>"
+## Note: Include everything from kernel rpm name
+## except kernel- and .rpm
+- hosts: all
+  tasks:
+  - name: Get running kernel version
+    shell: "uname -r"
+    register: currentkernel
+  - name: Abort playbook if desired kernel == running kernel
+    fail:
+      msg: "You asked to install the kernel that is already running."
+    when: currentkernel.stdout == kernel
+  - name: Add repo for the kernel
+    blockinfile:
+      dest: /etc/yum.repos.d/newkernel.repo
+      create: yes
+      block: |
+        [newkernel]
+        name=newkernel
+        baseurl={{ url }}
+        enabled=1
+        gpgcheck=0
+  - name: Install the new kernel on RHEL or CentOS
+    yum:
+      name: "kernel-{{ kernel }}"
+      state: present
+    when: (ansible_distribution == 'RedHat' or ansible_distribution == 'CentOS')
+  - name: Install the new kernel on Fedora
+    dnf:
+      name: "kernel-{{ kernel }}"
+      state: present
+    when: ansible_distribution == 'Fedora'
+  - name: Reboot the guest
+    shell: "sleep 3 && reboot"
+    async: 1
+    poll: 0
+  - name: Wait for the guest to come back up
+    local_action:
+      wait_for host={{ ansible_host }}
+      port=22 state=started delay=30 timeout=120
+    become: false
+  - name: Make sure we are running the desired kernel
+    shell: "uname -r"
+    register: newkernel
+  - name: Fail if we are not running new kernel
+    fail:
+      msg: "Playbook ran, but the desired kernel is not booted."
+    when: newkernel.stdout != kernel
