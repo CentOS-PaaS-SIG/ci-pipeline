@@ -1,4 +1,5 @@
 #!/bin/sh
+set -xeuo pipefail
 
 # Find the base dir
 base_dir="$(dirname $0)/.."
@@ -30,6 +31,8 @@ tmpdir=$(mktemp -d)
 # Kill backgrounded jobs on exit
 function clean_up {
     kill $(jobs -p)
+    cp /var/lib/oz/screenshots/*.ppm $currentdir/logs
+    cp $tmpdir/fedora-atomic.ks $currentdir/logs
     sudo rm -f $imgdir/*
     sudo rm -rf $tmpdir
 }
