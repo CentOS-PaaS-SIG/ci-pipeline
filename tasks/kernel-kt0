@@ -34,7 +34,6 @@ bridge: virbr0
 libvirt_systems:
  atomic-host-fedoraah:
    admin_passwd: $5$uX5x24soDWv3G2TH$BYxhEq4HmxjKmyChV0.VTpqxfhqMaRk8LCr34KOg2C7
-   admin_ssh_rsa: $pubkey
    memory: 3072
    disk: 100000
 EOF
