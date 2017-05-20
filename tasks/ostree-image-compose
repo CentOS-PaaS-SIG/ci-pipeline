@@ -73,7 +73,7 @@ curl -O -L https://pagure.io/fedora-kickstarts/raw/master/f/fedora-atomic.ks
 sed -i "s|^ostreesetup.*|ostreesetup --nogpg --osname=fedora-atomic --remote=fedora-atomic --url=http://192.168.122.1:8000/ --ref=$REF|" ./fedora-atomic.ks
 
 # point to upstream
-sed -i "s|\(%post.*$\)|\1\nostree remote delete fedora-atomic\nostree remote add --set=gpg-verify=false fedora-atomic http://artifacts.ci.centos.org/artifacts/fedora-atomic/${BUILD}/ostree|" ./fedora-atomic.ks
+sed -i "s|\(%end.*$\)|ostree remote delete fedora-atomic\nostree remote add --set=gpg-verify=false fedora-atomic http://artifacts.ci.centos.org/artifacts/fedora-atomic/${BUILD}/ostree\n\1|" ./fedora-atomic.ks
 
 # Create a tdl file for imagefactory
 #       <install type='url'>
