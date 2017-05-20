@@ -18,12 +18,6 @@
             ros_not_booted: "{{ ros_json['deployments'][1] if ros_json['deployments'][1] is defined else false }}"
             when: ros_json['deployments'][0] is defined and ros_json['deployments'][0]['booted']
 
-      - name: Set ros variable if deployment 1 is booted
-        set_fact:
-            ros_booted: "{{ ros_json['deployments'][1] if ros_json['deployments'][1] is defined else false }} "
-            ros_not_booted: "{{ ros_json['deployments'][0] if ros_json['deployments'][0] is defined else false }}"
-            when: ros_json['deployments'][1] is defined and ros_json['deployments'][1]['booted']
-
       - name: Deploy specific commit
         command: "atomic host deploy {{ commit }}"
         when: ros_booted['checksum'] != commit
