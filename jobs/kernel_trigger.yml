@@ -2,7 +2,48 @@
     name: ci-pipeline-kernel-trigger
     defaults: ci-pipeline-defaults
     triggers:
+#      - jms-messaging:
+#          selector: topic = 'org.centos.prod.ci.pipeline.package.complete'
+#          provider-name: fedora-fedmsg
       - timed: "*/5 * * * *"
+#    builders:
+#        - shell: |
+#            #!/bin/bash
+#            set -xuo pipefail
+#
+#            # Write script to parse fields (can likely be improved)
+#            cat << EOF > ${{WORKSPACE}}/parse_fedmsg.py
+#            #!/bin/env python
+#            import json
+#            import sys
+#
+#            reload(sys)
+#            sys.setdefaultencoding('utf-8')
+#            message = json.load(sys.stdin)
+#            if 'commit' in message:
+#                msg = message['commit']
+#
+#                for key in msg:
+#                    print "fed_%s=%s" % (key, msg[key])
+#            EOF
+#            chmod +x ${{WORKSPACE}}/parse_fedmsg.py
+#
+#            # Write fedmsg fields to a file to inject them
+#            if [ -n "$CI_MESSAGE" ]; then
+#                echo $CI_MESSAGE | ${{WORKSPACE}}/parse_fedmsg.py > fedmsg_fields.txt
+#            fi
+#
+#        - inject:
+#            properties-file: ${{WORKSPACE}}/fedmsg_fields.txt
+#        - shell: |
+#            set +e
+#            branch=$fed_branch
+#            if [ "$fed_repo" = "kernel" ] && [[ "$fed_ref" = *"{os_major}"* ]]; then
+#                touch ${{WORKSPACE}}/trigger.downstream
+#            fi
+#            packagename=$(basename $fed_package_url)
+#            echo "packagename=$packagename" >> ${{WORKSPACE}}/job.properties
+#            echo "fed_branch={os_major}" >> ${{WORKSPACE}}/job.properties
     builders:
         - shell: |
             #!/bin/bash
@@ -20,7 +61,7 @@
             if [ -e "/tmp/kernel-{os_major}-trigger.txt" ]; then
                   OLD_TIMESTAMP=$(cat /tmp/kernel-{os_major}-trigger.txt)
                   if [ "$NEW_TIMESTAMP" != "$OLD_TIMESTAMP" ]; then
-                         touch $WORKSPACE/trigger.txt
+                         touch $WORKSPACE/trigger.downstream
                   fi
             fi
             echo $NEW_TIMESTAMP > /tmp/kernel-{os_major}-trigger.txt
@@ -31,7 +72,7 @@
     publishers:
       - conditional-publisher:
           - condition-kind: file-exists
-            condition-filename: trigger.txt
+            condition-filename: trigger.downstream
             action:
               - trigger-parameterized-builds:
                   - project: 'ci-pipeline-kernel-{os_major}-kt0'
