@@ -27,6 +27,6 @@
                 export JENKINS_JOB_NAME="${JOB_NAME}"
                 export JENKINS_BUILD_TAG="${BUILD_TAG}"
                 export ANSIBLE_HOST_KEY_CHECKING="False"
-            playbook: ci-pipeline/config/libvirt-setup/setup-system.yml
+            playbook: sig-atomic-buildscripts/centos-ci/setup/setup-system.yml
     publishers:
         - ci-pipeline-duffy-publisher
