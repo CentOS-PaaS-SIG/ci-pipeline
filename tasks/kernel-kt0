@@ -32,7 +32,7 @@ cat << 'EOF' > host_vars/kernel_install_slave_baremetal.yml
 qemu_img_path: /var/lib/libvirt/images
 bridge: virbr0
 libvirt_systems:
- atomic-host-fedoraah:
+ fedora-kernel-host:
    admin_passwd: $5$uX5x24soDWv3G2TH$BYxhEq4HmxjKmyChV0.VTpqxfhqMaRk8LCr34KOg2C7
    memory: 3072
    disk: 100000
