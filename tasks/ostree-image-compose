@@ -15,7 +15,7 @@ REF="fedora/${BUILD}/x86_64/atomic-host"
 
 mkdir -p logs
 
-for v in ostree images; do
+for v in netinst ostree images; do
     rsync --delete --stats -a fedora-atomic@artifacts.ci.centos.org::fedora-atomic/${BUILD}/${v}/ ${v}/
 done
 
@@ -39,10 +39,6 @@ function clean_up {
     sudo rm -rf $tmpdir
 }
 trap clean_up EXIT SIGHUP SIGINT SIGTERM
-
-if [ ! -e "Fedora-Everything-netinst-x86_64-26-20170404.n.0.iso" ]; then
-    curl -O http://artifacts.ci.centos.org/sig-atomic/expires-7-days/Fedora-Everything-netinst-x86_64-26-20170404.n.0.iso
-fi
 
 version=$(ostree --repo=ostree show --print-metadata-key=version $REF| sed -e "s/'//g")
 release=$(ostree --repo=ostree rev-parse $REF| cut -c -15)
@@ -87,7 +83,7 @@ cat <<EOF >./fedora-${BUILD}.tdl
         <version>${VERSION}</version>
         <arch>x86_64</arch>
         <install type='iso'>
-            <iso>file://${currentdir}/Fedora-Everything-netinst-x86_64-26-20170404.n.0.iso</iso>
+            <iso>file://${currentdir}/netinst/Fedora-Everything-netinst-x86_64.iso</iso>
         </install>
         <rootpw>password</rootpw>
         <kernelparam>console=ttyS0</kernelparam>
