@@ -6,31 +6,47 @@
   tasks:
       - name: Get rpm-ostree status --json output
         command: rpm-ostree status --json
-        register: installed
-      - name: Convert rpm-ostree status output to jinja2 json
+        register: ros
+
+      - name: Convert to JSON
         set_fact:
-            installed_json: "{{ installed.stdout | from_json }}"
-      - name: Installed commit 0
+            ros_json: "{{ ros.stdout|from_json }}"
+
+      - name: Set ros variable if deployment 0 is booted
         set_fact:
-            booted_commit: installed_json['deployments'][0]['checksum']
-        when: installed_json['deployments'][0]['booted']
+            ros_booted: "{{ ros_json['deployments'][0] }}"
+            ros_not_booted: "{{ ros_json['deployments'][1] if ros_json['deployments'][1] is defined else false }}"
+            when: ros_json['deployments'][0] is defined and ros_json['deployments'][0]['booted']
+
       - name: Deploy specific commit
         command: "atomic host deploy {{ commit }}"
-        when: commit is defined and booted_commit != commit
+        when: ros_booted['checksum'] != commit
         notify: restart system
+
       - name: Get rpm-ostree status --json output
         command: rpm-ostree status --json
-        register: installed
-      - name: Convert rpm-ostree status output to jinja2 json
+        register: ros
+
+      - name: Convert to JSON
         set_fact:
-            installed_json: "{{ installed.stdout | from_json }}"
-      - name: Installed commit 0
+            ros_json: "{{ ros.stdout|from_json }}"
+
+      - name: Set ros variable if deployment 0 is booted
         set_fact:
-            booted_commit: installed_json['deployments'][0]['checksum']
-        when: installed_json['deployments'][0]['booted']
+            ros_booted: "{{ ros_json['deployments'][0] }}"
+            ros_not_booted: "{{ ros_json['deployments'][1] if ros_json['deployments'][1] is defined else false }}"
+        when: ros_json['deployments'][0] is defined and ros_json['deployments'][0]['booted']
+
+      - name: Set ros variable if deployment 1 is booted
+        set_fact:
+            ros_booted: "{{ ros_json['deployments'][1] }}"
+            ros_not_booted: "{{ ros_json['deployments'][0] if ros_json['deployments'][0] is defined else false }}"
+        when: ros_json['deployments'][1] is defined and ros_json['deployments'][1]['booted']
+
       - name: Verify specific commit
-        command: "false"
-        when: commit is defined and booted_commit != commit
+        fail:
+            msg: "{{ ros_booted['checksum'] }} != {{ commit }}"
+        when: ros_booted['checksum'] != commit
   handlers:
       - name: restart system
         command: shutdown -r +1 "Ansible reboot triggered"
