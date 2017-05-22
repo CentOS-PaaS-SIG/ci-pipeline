@@ -1,6 +1,7 @@
 acl
 atk
 atomic
+atomic-devmode
 attr
 audit
 audit-libs
