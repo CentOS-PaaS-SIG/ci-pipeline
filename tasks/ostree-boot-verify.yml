@@ -45,7 +45,7 @@
 
       - name: Verify specific commit
         fail:
-            msg: "{{ ros_booted }} != {{ commit }}"
+            msg: "{{ ros_booted['checksum'] }} != {{ commit }}"
         when: ros_booted['checksum'] != commit
   handlers:
       - name: restart system
