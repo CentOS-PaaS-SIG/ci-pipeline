@@ -20,7 +20,7 @@
         - inject:
             properties-file: ${WORKSPACE}/job.properties
         - ci-pipeline-duffy-builder:
-            task: TODO
+            task: kernel-kt0
             variables: |
                 export fed_branch="${fed_branch}"
                 export kernel_vr="${kernel_vr}"
