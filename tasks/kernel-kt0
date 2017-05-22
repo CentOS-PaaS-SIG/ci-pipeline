@@ -27,7 +27,7 @@ fi
 
 pubkey=$(cat ~/.ssh/id_rsa.pub)
 
-mkdir host_vars
+mkdir -p host_vars
 cat << 'EOF' > host_vars/kernel_install_slave_baremetal.yml
 qemu_img_path: /var/lib/libvirt/images
 bridge: virbr0
