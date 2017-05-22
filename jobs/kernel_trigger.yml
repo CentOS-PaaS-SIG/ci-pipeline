@@ -38,9 +38,12 @@
 #        - shell: |
 #            set +e
 #            branch=$fed_branch
-#            if [ "$fed_repo" = "kernel" ] && [[ "$fed_ref" = *"f25"* ]]; then
+#            if [ "$fed_repo" = "kernel" ] && [[ "$fed_ref" = *"{os_major}"* ]]; then
 #                touch ${{WORKSPACE}}/trigger.downstream
 #            fi
+#            packagename=$(basename $fed_package_url)
+#            echo "packagename=$packagename" >> ${{WORKSPACE}}/job.properties
+#            echo "fed_branch={os_major}" >> ${{WORKSPACE}}/job.properties
     builders:
         - shell: |
             #!/bin/bash
