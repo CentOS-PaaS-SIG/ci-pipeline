@@ -123,6 +123,7 @@
               {
                 "build_url": "${BUILD_URL}",
                 "build_id": "${BUILD_ID}",
+                "package_url": "${package_url}",
                 "ref": "${ref}",
                 "rev": "${rev}",
                 "namespace": "${namespace}",
