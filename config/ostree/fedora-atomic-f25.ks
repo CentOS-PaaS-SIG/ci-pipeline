@@ -37,19 +37,6 @@ ostreesetup --nogpg --osname=fedora-atomic --remote=fedora-atomic --url=https://
 reboot
 
 %post --erroronfail
-# Set the ref we are tracking to the be fedora-atomic/25/x86_64/docker-host
-# one, which is what we are using for the two week releases. We want consumers
-# of this image to track the two week releases
-ostree admin set-origin --index 0 fedora-atomic https://kojipkgs.fedoraproject.org/atomic/25/ fedora-atomic/25/x86_64/docker-host
-
-# Make sure the ref we're supposedly sitting on (according
-# to the updated origin) exists.
-ostree refs fedora-atomic:fedora-atomic/25/x86_64/updates/docker-host --create fedora-atomic:fedora-atomic/25/x86_64/docker-host
-
-# Remove the old ref so that the commit eventually gets
-# cleaned up.
-ostree refs fedora-atomic:fedora-atomic/25/x86_64/updates/docker-host --delete
-
 # older versions of livecd-tools do not follow "rootpw --lock" line above
 # https://bugzilla.redhat.com/show_bug.cgi?id=964299
 passwd -l root
