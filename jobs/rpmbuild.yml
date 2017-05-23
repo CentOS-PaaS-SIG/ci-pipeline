@@ -70,7 +70,25 @@
             echo "test_guidance=''" >> ${WORKSPACE}/job.properties_running
         - inject:
             properties-file: ${WORKSPACE}/job.properties_running
-# Will need a fedmsg here
+        - jms-messaging:
+            #override-topic: ${topic}
+            override-topic: org.centos.prod.ci.pipeline.package
+            provider-name: fedmsg
+            msg-type: Custom
+            msg-props: |
+              topic=${topic}
+              username=fedora-atomic
+            msg-content: |
+              {
+                "build_url": "${BUILD_URL}",
+                "build_id": "${BUILD_ID}",
+                "ref": "${ref}",
+                "rev": "${rev}",
+                "namespace": "${namespace}",
+                "repo": "${repo}",
+                "status": "${status}",
+                "test_guidance": "${test_guidance}"
+              }
         - ci-pipeline-duffy-builder:
             task: rpmbuild-test
             variables: |
@@ -93,7 +111,25 @@
             echo "package_url=http://artifacts.ci.centos.org/fedora-atomic/rawhide/repo/${fed_repo}_repo/$package" >> ${WORKSPACE}/job.properties
         - inject:
             properties-file: ${WORKSPACE}/job.properties
-# Will need a fedmsg here
+        - jms-messaging:
+            #override-topic: ${topic}
+            override-topic: org.centos.prod.ci.pipeline.package
+            provider-name: fedmsg
+            msg-type: Custom
+            msg-props: |
+              topic=${topic}
+              username=fedora-atomic
+            msg-content: |
+              {
+                "build_url": "${BUILD_URL}",
+                "build_id": "${BUILD_ID}",
+                "ref": "${ref}",
+                "rev": "${rev}",
+                "namespace": "${namespace}",
+                "repo": "${repo}",
+                "status": "${status}",
+                "test_guidance": "${test_guidance}"
+              }
     publishers:
         - archive:
             artifacts: '*.*, */*, */*/*'
