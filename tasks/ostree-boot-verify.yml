@@ -39,7 +39,7 @@
         become: false
         local_action:
             wait_for host={{ ansible_ssh_host | default(inventory_hostname) }}
-            port=22 state=started delay=65 search_regex=OpenSSH
+            port=22 state=started delay=70 search_regex=OpenSSH
         when: ros_booted['checksum'] != commit
 
       - name: pause 5 seconds
