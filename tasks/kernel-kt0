@@ -79,3 +79,16 @@ if [ "$KERNEL_INSTALL_STATUS" != 0 ]; then
     echo "ERROR: Upgrading Kernel\nSTATUS: $KERNEL_INSTALL_STATUS"
     exit 1
 fi
+
+# Run asavkov script to run ltp suite
+git clone https://pagure.io/ktests
+pushd ktests/misc/ltp
+ansible-playbook -i inventory test_local.yml -l kernel_install_slave -v > ${currentdir}/logs/ltp-playbook.out
+LTP_STATUS=$?
+# Copy logs to proper location
+cp -rp artifacts/logs/ ${currentdir}/logs/ltp
+if [ "$LTP_STATUS" != 0 ]; then
+    echo "ERROR: LTP Testing\nSTATUS: $LTP_STATUS"
+    exit 1
+fi
+popd
