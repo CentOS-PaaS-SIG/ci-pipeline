@@ -30,3 +30,10 @@
             playbook: sig-atomic-buildscripts/centos-ci/setup/setup-system.yml
     publishers:
         - ci-pipeline-duffy-publisher
+        - email-ext:
+            recipients: jbieren@redhat.com, asavkov@redhat.com
+            reply-to: jbieren@redhat.com
+            subject: Build ${BUILD_NUMER} completed for public F25 Kernel Testing
+            body: The build link is here: ${BUILD_URL}. Currently set to email for all runs, regardless of pass or fail.
+            always: true
+            failure: false
