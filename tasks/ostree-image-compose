@@ -51,8 +51,9 @@ else
     mkdir images
 fi
 
-# Stop the firewall
-sudo systemctl stop firewalld
+# Enable port 8000
+zone=$(firewall-cmd --get-default-zone)
+sudo firewall-cmd --zone=$zone --add-port=8000/tcp
 
 # First argument is the path to the ostree repo share that over httpd now
 pushd ostree
