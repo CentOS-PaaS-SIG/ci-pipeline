@@ -15,7 +15,7 @@ REF="fedora/${BUILD}/x86_64/atomic-host"
 
 mkdir -p logs
 
-for v in ostree images; do
+for v in netinst ostree images; do
     rsync --delete --stats -a fedora-atomic@artifacts.ci.centos.org::fedora-atomic/${BUILD}/${v}/ ${v}/
 done
 
@@ -40,10 +40,6 @@ function clean_up {
 }
 trap clean_up EXIT SIGHUP SIGINT SIGTERM
 
-if [ ! -e "Fedora-Everything-netinst-x86_64-26-20170404.n.0.iso" ]; then
-    curl -O http://artifacts.ci.centos.org/sig-atomic/expires-7-days/Fedora-Everything-netinst-x86_64-26-20170404.n.0.iso
-fi
-
 version=$(ostree --repo=ostree show --print-metadata-key=version $REF| sed -e "s/'//g")
 release=$(ostree --repo=ostree rev-parse $REF| cut -c -15)
 if [ -d "images" ]; then
@@ -55,8 +51,9 @@ else
     mkdir images
 fi
 
-# Stop the firewall
-sudo systemctl stop firewalld
+# Enable port 8000
+zone=$(firewall-cmd --get-default-zone)
+sudo firewall-cmd --zone=$zone --add-port=8000/tcp
 
 # First argument is the path to the ostree repo share that over httpd now
 pushd ostree
@@ -67,7 +64,8 @@ popd
 pushd $tmpdir
 
 # Grab the kickstart file
-curl -O -L https://pagure.io/fedora-kickstarts/raw/master/f/fedora-atomic.ks
+#curl -O -L https://pagure.io/fedora-kickstarts/raw/master/f/fedora-atomic.ks
+cp $currentdir/ci-pipeline/config/ostree/fedora-atomic-${BUILD}.ks fedora-atomic.ks
 
 # Put new url into the kickstart file
 sed -i "s|^ostreesetup.*|ostreesetup --nogpg --osname=fedora-atomic --remote=fedora-atomic --url=http://192.168.122.1:8000/ --ref=$REF|" ./fedora-atomic.ks
@@ -87,7 +85,7 @@ cat <<EOF >./fedora-${BUILD}.tdl
         <version>${VERSION}</version>
         <arch>x86_64</arch>
         <install type='iso'>
-            <iso>file://${currentdir}/Fedora-Everything-netinst-x86_64-26-20170404.n.0.iso</iso>
+            <iso>file://${currentdir}/netinst/Fedora-Everything-netinst-x86_64.iso</iso>
         </install>
         <rootpw>password</rootpw>
         <kernelparam>console=ttyS0</kernelparam>

@@ -47,6 +47,6 @@
 - project:
     name: service-jobs
     repo-name: ci-pipeline
-    jjbsha1: 7e1e54633f835d1c6ecd989452c9125c1ea9a921
+    jjbsha1: a02b20cd36e4836125b72d18fcd722cba09fa2b5
     jobs:
       - ci-pipeline-service-job
