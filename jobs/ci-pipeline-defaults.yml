@@ -19,11 +19,6 @@
         - timestamps
     scm:
         - ci-pipeline-scms
-    logrotate:
-        daysToKeep: -1
-        numToKeep: 20
-        artifactDaysToKeep: -1
-        artifactNumToKeep: -1
 
 - scm:
     name: ci-pipeline-scms
