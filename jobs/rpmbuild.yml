@@ -105,12 +105,14 @@
             properties-file: ${WORKSPACE}/logs/description.txt
 #        - system-groovy:
 #            command: build.description = build.getEnvironment().get('description')
-        - inject:
-            properties-file: ${WORKSPACE}/logs/package_props.txt
     publishers:
         - archive:
             artifacts: '*.*, */*, */*/*'
             allow-empty: 'true'
+        - postbuildscript:
+            builders:
+                - inject:
+                    properties-file: ${WORKSPACE}/logs/package_props.txt
         - jms-messaging:
             override-topic: org.centos.prod.ci.pipeline.package.complete
             provider-name: fedmsg
