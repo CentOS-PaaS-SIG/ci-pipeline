@@ -95,7 +95,7 @@
                 "namespace": "${{namespace}}",
                 "repo": "${{repo}}",
                 "status": "${{status}}",
-                "test_guidance": "${{test_guidance}}"
+                "test_guidance": ""
               }}
 
     publishers:

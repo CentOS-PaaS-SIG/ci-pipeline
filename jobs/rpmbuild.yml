@@ -87,7 +87,7 @@
                 "namespace": "${namespace}",
                 "repo": "${repo}",
                 "status": "${status}",
-                "test_guidance": "${test_guidance}"
+                "test_guidance": ""
               }
         - ci-pipeline-duffy-builder:
             task: rpmbuild-test
@@ -129,7 +129,7 @@
                 "namespace": "${namespace}",
                 "repo": "${repo}",
                 "status": "${status}",
-                "test_guidance": "${test_guidance}"
+                "test_guidance": ""
               }
     publishers:
         - archive:
