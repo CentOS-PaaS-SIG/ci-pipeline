@@ -43,6 +43,7 @@ fi
 # Build the package into ./results_${fed_repo}/$VERSION/$RELEASE/
 fedpkg --release ${fed_branch} mockbuild
 MOCKBUILD_STATUS=$?
+sudo echo "status=$MOCKBUILD_STATUS" >> ${OUTPUTDIR}/logs/package_props.txt
 if [ "$MOCKBUILD_STATUS" != 0 ]; then echo "ERROR: FEDPKG MOCKBUILD\nSTATUS: $MOCKBUILD_STATUS"; exit 1; fi
 popd
 
@@ -63,6 +64,7 @@ rm -rf libabigail
 git clone git://sourceware.org/git/libabigail.git
 RPM_TO_CHECK=$(find ${fed_repo}/results_${fed_repo}/${VERSION}/*/ -name "${fed_repo}-${VERSION}*" | grep -v src)
 libabigail/tools/fedabipkgdiff --from ${ABIGAIL_BRANCH} ${RPM_TO_CHECK} &> ${OUTPUTDIR}/logs/fedabipkgdiff_out.txt
-basename $RPM_TO_CHECK >> ${OUTPUTDIR}/logs/packagename.txt
+RPM_NAME=$(basename $RPM_TO_CHECK)
+echo "package_url=http://artifacts.ci.centos.org/fedora-atomic/${fed_branch}/repo/${fed_repo}_repo/$RPM_NAME" >> ${OUTPUTDIR}/logs/package_props.txt
 
 exit 0

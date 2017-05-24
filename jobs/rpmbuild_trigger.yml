@@ -80,31 +80,30 @@
 
             echo "topic=org.centos.prod.ci.pipeline.package.queued" >> ${{WORKSPACE}}/job.properties
             touch ${{WORKSPACE}}/trigger.downstream
-        - jms-messaging:
-            #override-topic: ${{topic}}
-            override-topic: org.centos.prod.ci.pipeline.package
-            provider-name: fedmsg
-            msg-type: Custom
-            msg-props: |
-              topic=${{topic}}
-              username=fedora-atomic
-            msg-content: |
-              {{
-                "build_url": "${{BUILD_URL}}",
-                "build_id": "${{BUILD_ID}}",
-                "ref": "${{ref}}",
-                "rev": "${{rev}}",
-                "namespace": "${{namespace}}",
-                "repo": "${{repo}}",
-                "status": "${{status}}",
-                "test_guidance": "${{test_guidance}}"
-              }}
 
     publishers:
       - archive:
           artifacts: '*.*'
           allow-empty: 'true'
-      # Will need fedmsg publisher here once available
+      - jms-messaging:
+          #override-topic: ${{topic}}
+          override-topic: org.centos.prod.ci.pipeline.package
+          provider-name: fedmsg
+          msg-type: Custom
+          msg-props: |
+            topic=${{topic}}
+            username=fedora-atomic
+          msg-content: |
+            {{
+              "build_url": "${{BUILD_URL}}",
+              "build_id": "${{BUILD_ID}}",
+              "ref": "${{ref}}",
+              "rev": "${{rev}}",
+              "namespace": "${{namespace}}",
+              "repo": "${{repo}}",
+              "status": "${{status}}",
+              "test_guidance": "${{test_guidance}}"
+            }}
       - conditional-publisher:
           - condition-kind: file-exists
             condition-filename: trigger.downstream
