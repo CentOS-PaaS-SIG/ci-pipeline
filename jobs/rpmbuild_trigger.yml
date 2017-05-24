@@ -48,12 +48,14 @@
                 branch="rawhide"
             fi
             # Set some message properties that are true for all messages
-            echo "ref=fedora/${{branch}}/x86_64/atomic-host" >> ${{WORKSPACE}}/job.properties
-            echo "rev=$fed_rev" >> ${{WORKSPACE}}/job.properties
-            echo "namespace=rpms" >> ${{WORKSPACE}}/job.properties
-            echo "repo=$fed_repo" >> ${{WORKSPACE}}/job.properties
-            echo "status=success" >> ${{WORKSPACE}}/job.properties
-            echo "test_guidance=''" >> ${{WORKSPACE}}/job.properties
+            cat << EOF >> ${{WORKSPACE}}/job.properties
+               ref=fedora/${{branch}}/x86_64/atomic-host
+               rev=$fed_rev
+               namespace=rpms
+               repo=$fed_repo
+               status=success
+               test_guidance=
+            EOF
             # Verify this is a development branch
             if [[ ! "$fed_branch" =~ {targets} ]]; then
                 echo "$fed_branch is not in the list"
@@ -95,7 +97,7 @@
                 "namespace": "${{namespace}}",
                 "repo": "${{repo}}",
                 "status": "${{status}}",
-                "test_guidance": ""
+                "test_guidance": "${{test_guidance}}"
               }}
 
     publishers:
