@@ -139,6 +139,9 @@
             allow-empty: 'true'
         - trigger-parameterized-builds:
             - project: 'ci-pipeline-ostree-compose'
-              predefined-parameters: fed_branch=$fed_branch
+              predefined-parameters: |
+                  fed_branch=${fed_branch}
+                  rev=${rev}
+                  fed_repo=${repo}
               condition: SUCCESS
         - ci-pipeline-duffy-publisher
