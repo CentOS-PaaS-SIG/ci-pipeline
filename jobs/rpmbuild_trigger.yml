@@ -54,7 +54,7 @@
                namespace=rpms
                repo=$fed_repo
                status=success
-               test_guidance=
+               test_guidance=""
             EOF
             # Verify this is a development branch
             if [[ ! "$fed_branch" =~ {targets} ]]; then
@@ -80,6 +80,8 @@
 
             echo "topic=org.centos.prod.ci.pipeline.package.queued" >> ${{WORKSPACE}}/job.properties
             touch ${{WORKSPACE}}/trigger.downstream
+        - inject:
+            properties-file: ${{WORKSPACE}}/job.properties
         - jms-messaging:
             #override-topic: ${{topic}}
             override-topic: org.centos.prod.ci.pipeline.package
