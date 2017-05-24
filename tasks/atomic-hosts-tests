@@ -1,0 +1,166 @@
+#!/bin/sh
+
+# set -x so I can see stuff for easier debug for now
+set -x
+# Find the base dir
+base_dir="$(dirname $0)/.."
+
+if [ "${BUILD}" = "master" -o "${BUILD}" = "rawhide" ]; then
+    BUILD="rawhide"
+    VERSION="rawhide"
+else
+    VERSION=$(echo $BUILD | sed -e 's/[a-zA-Z]*//')
+fi
+
+REF="fedora/${BUILD}/x86_64/atomic-host"
+
+rm -rf logs
+mkdir -p logs
+HOMEDIR=$(pwd)
+
+for v in ostree images; do
+    rsync --delete --stats -a fedora-atomic@artifacts.ci.centos.org::fedora-atomic/${BUILD}/${v}/ ${v}/
+done
+
+# Create directory for temporary files
+tmpdir=$(mktemp -d)
+
+# Kill backgrounded jobs on exit
+function clean_up {
+    ansible-playbook -i hosts ci-pipeline/config/libvirt-setup/setup-libvirt-image.yml -l atomic_host_tests_slave -e 'state=absent'
+    kill $(jobs -p)
+    sudo rm -rf $tmpdir
+}
+trap clean_up EXIT SIGHUP SIGINT SIGTERM
+
+version=$(ostree --repo=ostree show --print-metadata-key=version $REF| sed -e "s/'//g")
+if [ -d "images" ]; then
+    # Find the last image we pushed
+    prev_img=$(ls -tr images/*.qcow2 | tail -n 1)
+    IMG_URL="http://artifacts.ci.centos.org/artifacts/fedora-atomic/${BUILD}/$prev_img"
+fi
+
+# If image2boot is defined use that image, but if not fall back to the
+# previous image built
+image2boot=${image2boot:-$IMG_URL}
+
+if ! [ -f ~/.ssh/id_rsa ]; then
+    ssh-keygen -t rsa -f ~/.ssh/id_rsa -N ''
+    cat ~/.ssh/id_rsa.pub >> ~/.ssh/authorized_keys
+fi
+
+pubkey=$(cat ~/.ssh/id_rsa.pub)
+
+mkdir -p host_vars
+cat << 'EOF' > host_vars/atomic_host_tests_slave.yml
+qemu_img_path: /var/lib/libvirt/images
+bridge: virbr0
+libvirt_systems:
+ atomic-host-tests:
+   admin_passwd: $5$uX5x24soDWv3G2TH$BYxhEq4HmxjKmyChV0.VTpqxfhqMaRk8LCr34KOg2C7
+   memory: 3072
+   disk: 100000
+EOF
+cat << EOF >> host_vars/atomic_host_tests_slave.yml
+   img_url: $image2boot
+   admin_ssh_rsa: $pubkey
+EOF
+cat << EOF > hosts
+[libvirt-hosts]
+atomic_host_tests_slave ansible_ssh_host=127.0.0.1 ansible_user=builder become=true
+EOF
+# Install net-tools
+sudo yum -y install net-tools
+# Start test VM
+ansible-playbook -i hosts ci-pipeline/config/libvirt-setup/setup-libvirt-image.yml -l atomic_host_tests_slave -e 'state=present'
+
+PROVISION_STATUS=$?
+if [ "$PROVISION_STATUS" != 0 ]; then
+    echo "ERROR: Provisioning\nSTATUS: $PROVISION_STATUS"
+    exit 1
+fi
+
+# Get libvirt IP
+IP=$(cat libvirt-hosts | tail -n 1 | cut -d '=' -f 2)
+
+# Create ansible inventory for atomic host to test
+cat << EOF > ${HOMEDIR}/ansible_inventory.txt
+[testsystems]
+$IP ansible_user=admin ansible_ssh_pass=admin ansible_become=true ansible_become_pass=admin
+EOF
+
+# Set up the atomic host for testing
+which ansible
+if [ "$?" != 0 ]; then echo "ERROR: ansible unavailable: $?"; exit 1; fi
+ansible-playbook -i ${HOMEDIR}/ansible_inventory.txt -l testsystems ${base_dir}/utils/ostree_install_rpms.yml -u root
+if [ "$?" != 0 ]; then echo "ERROR: Failed to set up ostree with proper rpms: $?"; exit 1; fi
+
+# Declare output RC array
+declare -A OUTPUTARRAY
+
+# Test the atomic host with playbooks from https://github.com/projectatomic/atomic-host-tests
+git clone https://github.com/projectatomic/atomic-host-tests
+pushd atomic-host-tests
+
+ansible-playbook -i ${HOMEDIR}/ansible_inventory.txt -l testsystems tests/admin-unlock/main.yml -u root -v > ${HOMEDIR}/logs/admin-unlock.out
+ADMIN_UNLOCK_RC=$?
+OUTPUTARRAY[admin-unlock]=$ADMIN_UNLOCK_RC
+ansible-playbook -i ${HOMEDIR}/ansible_inventory.txt -l testsystems ${base_dir}/utils/atomic_rollback.yml -u root
+
+ansible-playbook -i ${HOMEDIR}/ansible_inventory.txt -l testsystems tests/docker-build-httpd/main.yml -u root -v > ${HOMEDIR}/logs/docker-build-httpd.out
+DOCKER_BUILD_HTTPD_RC=$?
+OUTPUTARRAY[docker-build-httpd]=$DOCKER_BUILD_HTTPD_RC
+ansible-playbook -i ${HOMEDIR}/ansible_inventory.txt -l testsystems ${base_dir}/utils/atomic_rollback.yml -u root
+
+# Test requires two images so it can upgrade/rollback
+ansible-playbook -i ${HOMEDIR}/ansible_inventory.txt -l testsystems tests/docker-swarm/main.yml -u root -v > ${HOMEDIR}/logs/docker-swarm.out
+DOCKER_SWARM_RC=$?
+OUTPUTARRAY[docker-swarm]=$DOCKER_SWARM_RC
+ansible-playbook -i ${HOMEDIR}/ansible_inventory.txt -l testsystems ${base_dir}/utils/atomic_rollback.yml -u root
+
+sed -i s/true/false/ tests/docker/vars.yml
+ansible-playbook -i ${HOMEDIR}/ansible_inventory.txt -l testsystems tests/docker/main.yml -u root -v > ${HOMEDIR}/logs/docker.out
+DOCKER_RC=$?
+OUTPUTARRAY[docker]=$DOCKER_RC
+ansible-playbook -i ${HOMEDIR}/ansible_inventory.txt -l testsystems ${base_dir}/utils/atomic_rollback.yml -u root
+
+# Test requires two images so it can upgrade/rollback
+ansible-playbook -i ${HOMEDIR}/ansible_inventory.txt -l testsystems tests/improved-sanity-test/main.yml -u root -v > ${HOMEDIR}/logs/improved-sanity-test.out
+IMPROVED_SANITY_TEST_RC=$?
+OUTPUTARRAY[improved-sanity-test]=$IMPROVED_SANITY_TEST_RC
+ansible-playbook -i ${HOMEDIR}/ansible_inventory.txt -l testsystems ${base_dir}/utils/atomic_rollback.yml -u root
+
+# Legitimate failure with this right now, need to figure out
+# - Timeout when waiting for apiserver on 127.0.0.1
+ansible-playbook -i ${HOMEDIR}/ansible_inventory.txt -l testsystems tests/k8-cluster/main.yml -u root -v > ${HOMEDIR}/logs/k8-cluster.out
+K8_CLUSTER_RC=$?
+OUTPUTARRAY[k8-cluster]=$K8_CLUSTER_RC
+ansible-playbook -i ${HOMEDIR}/ansible_inventory.txt -l testsystems ${base_dir}/utils/atomic_rollback.yml -u root
+
+# Test requires two images so it can upgrade/rollback
+# Have only seen this test pass on rawhide ostrees so far
+ansible-playbook -i ${HOMEDIR}/ansible_inventory.txt -l testsystems tests/pkg-layering/main.yml -u root -v > ${HOMEDIR}/logs/pkg-layering.out
+PKG_LAYERING_RC=$?
+OUTPUTARRAY[pkg-layering]=$PKG_LAYERING_RC
+ansible-playbook -i ${HOMEDIR}/ansible_inventory.txt -l testsystems ${base_dir}/utils/atomic_rollback.yml -u root
+
+# Testing hangs on fail so need more work around this
+#ansible-playbook -i ${HOMEDIR}/ansible_inventory.txt -l testsystems tests/runc/main.yml -u root -v > ${HOMEDIR}/logs/runc.out
+#RUNC_RC=$?
+#OUTPUTARRAY[runc]=$RUNC_RC
+#ansible-playbook -i ${HOMEDIR}/ansible_inventory.txt -l testsystems ${base_dir}/utils/atomic_rollback.yml -u root
+
+# Test requires two images so it can upgrade/rollback
+# Seems to be important this runs last because it leaves containers around
+ansible-playbook -i ${HOMEDIR}/ansible_inventory.txt -l testsystems tests/system-containers/main.yml -u root -v > ${HOMEDIR}/logs/system-containers.out
+SYSTEM_CONTAINERS_RC=$?
+OUTPUTARRAY[system-containers]=$SYSTEM_CONTAINERS_RC
+ansible-playbook -i ${HOMEDIR}/ansible_inventory.txt -l testsystems ${base_dir}/utils/atomic_rollback.yml -u root
+
+popd
+
+# Create xunit output file
+${base_dir}/utils/ansible_xunit.sh "${!OUTPUTARRAY[@]}" > ${HOMEDIR}/logs/ansible_xunit.xml
+if [ "$?" != 0 ]; then echo "ERROR: ansible xunit creation failed: $?"; exit 1; fi
+
+exit 0

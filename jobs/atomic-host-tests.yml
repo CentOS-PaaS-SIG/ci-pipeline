@@ -1,0 +1,42 @@
+- job:
+    name: ci-pipeline-atomic-host-tests
+    defaults: ci-pipeline-defaults
+    parameters:
+        - string:
+            name: fed_branch
+            description: |
+              fedmsg branch
+        - string:
+            name: image2boot
+            description: |
+              url pointing to the image to boot
+    builders:
+        - ci-pipeline-duffy-builder:
+            task: atomic-host-tests
+            variables: |
+                export JENKINS_JOB_NAME="${JOB_NAME}"
+                export JENKINS_BUILD_TAG="${BUILD_TAG}"
+                export OSTREE_BRANCH="${OSTREE_BRANCH:-}"
+                export ANSIBLE_HOST_KEY_CHECKING="False"
+                export fed_branch="${fed_branch}"
+                export image2boot="${image2boot:-}"
+            playbook: sig-atomic-buildscripts/centos-ci/setup/setup-system.yml
+    publishers:
+        - archive:
+            artifacts: '*.*, */*, */*/*'
+            allow-empty: 'true'
+        - xunit:
+            thresholdmode: 'number'
+            thresholds:
+              - failed:
+                    unstablenew: 0
+                    failurenew: 0
+              - skipped:
+                    unstablenew: 0
+                    failurenew: 0
+            types:
+                - junit:
+                    pattern: "$WORKSPACE/logs/ansible_xunit.xml"
+                    stoponerror: true
+                    deleteoutput: false
+        - ci-pipeline-duffy-publisher
