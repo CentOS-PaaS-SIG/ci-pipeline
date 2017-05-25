@@ -4,6 +4,7 @@ set -x
 # Find the base dir
 base_dir="$(dirname $0)/.."
 
+rm -rf logs
 mkdir -p logs
 
 currentdir=$(pwd)
@@ -81,9 +82,10 @@ if [ "$KERNEL_INSTALL_STATUS" != 0 ]; then
 fi
 
 # Run asavkov script to run ltp suite
+rm -rf ktests
 git clone https://pagure.io/ktests
 pushd ktests/misc/ltp
-ansible-playbook -i inventory test_local.yml -l kernel_install_slave -v > ${currentdir}/logs/ltp-playbook.out
+ansible-playbook -i ../../../inventory test_local.yml -l kernel_install_slave -v > ${currentdir}/logs/ltp-playbook.out
 LTP_STATUS=$?
 # Copy logs to proper location
 cp -rp artifacts/logs/ ${currentdir}/logs/ltp
