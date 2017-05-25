@@ -59,19 +59,19 @@
 #            command: build.description = build.getEnvironment().get('fed_repo')
         - shell: |
             # Write ci message fields to a file
-            cat << EOF >> ${WORKSPACE}/job.properties_running
-               topic=org.centos.prod.ci.pipeline.package.running
-               build_url=$BUILD_URL
-               build_id=$BUILD_ID
-               ref=fedora/${fed_branch}/x86_64/atomic-host
-               rev=$fed_rev
-               namespace=rpms
-               repo=$fed_repo
-               status=success
-               test_guidance=
+            cat << EOF >> ${WORKSPACE}/job.properties
+            topic=org.centos.prod.ci.pipeline.package.running
+            build_url=$BUILD_URL
+            build_id=$BUILD_ID
+            ref=fedora/${fed_branch}/x86_64/atomic-host
+            rev=$fed_rev
+            namespace=rpms
+            repo=$fed_repo
+            status=success
+            test_guidance=
             EOF
         - inject:
-            properties-file: ${WORKSPACE}/job.properties_running
+            properties-file: ${WORKSPACE}/job.properties
         - jms-messaging:
             #override-topic: ${topic}
             override-topic: org.centos.prod.ci.pipeline.package

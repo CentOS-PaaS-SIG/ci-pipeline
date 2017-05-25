@@ -47,15 +47,7 @@
             if [ "$branch" = "master" ]; then
                 branch="rawhide"
             fi
-            # Set some message properties that are true for all messages
-            cat << EOF >> ${{WORKSPACE}}/job.properties
-               ref=fedora/${{branch}}/x86_64/atomic-host
-               rev=$fed_rev
-               namespace=rpms
-               repo=$fed_repo
-               status=success
-               test_guidance=
-            EOF
+            echo "branch=$branch" >> ${{WORKSPACE}}/job.properties
             # Verify this is a development branch
             if [[ ! "$fed_branch" =~ {targets} ]]; then
                 echo "$fed_branch is not in the list"
@@ -101,12 +93,12 @@
             {{
               "build_url": "${{BUILD_URL}}",
               "build_id": "${{BUILD_ID}}",
-              "ref": "${{ref}}",
-              "rev": "${{rev}}",
-              "namespace": "${{namespace}}",
-              "repo": "${{repo}}",
-              "status": "${{status}}",
-              "test_guidance": "${{test_guidance}}"
+              "ref": "fedora/${{branch}}/x86_64/atomic-host",
+              "rev": "${{fed_rev}}",
+              "namespace": "rpms",
+              "repo": "${{fed_repo}}",
+              "status": "success",
+              "test_guidance": ""
             }}
       - conditional-publisher:
           - condition-kind: file-exists
