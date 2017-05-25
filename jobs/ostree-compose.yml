@@ -59,40 +59,30 @@
               which repo of the package being updated
     builders:
         - shell: |
-            cat << EOF > ${WORKSPACE}/job.properties_running
-                topic=org.centos.prod.ci.pipeline.compose.running
-                build_url=$BUILD_URL
-                compose_url=http://artifacts.ci.centos.org/artifacts/fedora-atomic/${fed_branch}/ostree
-                compose_rev=
-                build_id=$BUILD_ID
-                ref=fedora/${fed_branch}/x86_64/atomic-host
-                rev=${rev}
-                namespace=rpms
-                repo=$fed_repo
-                status=success
-                test_guidance=
-            EOF
+            if [ "$fed_branch" = "master" ]; then
+                echo "fed_branch=rawhide" > ${WORKSPACE}/job.properties
+            fi
         - inject:
-            properties-file: ${WORKSPACE}/job.properties_running
+            properties-file: ${WORKSPACE}/job.properties
         - jms-messaging:
             override-topic: org.centos.prod.ci.pipeline.compose
             provider-name: fedmsg
             msg-type: Custom
             msg-props: |
-                topic=${topic}
+                topic=org.centos.prod.ci.pipeline.compose.running
                 username=fedora-atomic
             msg-content: |
                 {
                     "build_url": "${BUILD_URL}",
-                    "compose_url": "${compose_url}",
-                    "compose_rev": "${compose_rev}",
+                    "compose_url": "http://artifacts.ci.centos.org/artifacts/fedora-atomic/${fed_branch}/ostree",
+                    "compose_rev": "",
                     "build_id": "${BUILD_ID}",
-                    "ref": "${ref}",
+                    "ref": "fedora/${fed_branch}/x86_64/atomic-host",
                     "rev": "${rev}",
-                    "namespace": "${namespace}",
-                    "repo": "${repo}",
-                    "status": "${status}",
-                    "test_guidance": "${test_guidance}"
+                    "namespace": "rpms",
+                    "repo": "${fed_repo}",
+                    "status": "success",
+                    "test_guidance": ""
                 }
         - ci-pipeline-duffy-builder:
             task: ostree-compose
@@ -106,37 +96,26 @@
             properties-file: ${WORKSPACE}/logs/ostree.props
     publishers:
         - ci-pipeline-duffy-publisher
-        - postbuildscript:
-            builders:
-                - shell: |
-                    cat << EOF > ${WORKSPACE}/job.properties
-                        topic=org.centos.prod.ci.pipeline.compose.complete
-                        status=${BUILD_STATUS}
-                        compose_rev=${commit}
-                    EOF
-                - inject:
-                    properties-file: ${WORKSPACE}/job.properties
-                - jms-messaging:
-                    override-topic: org.centos.prod.ci.pipeline.compose
-                    provider-name: fedmsg
-                    msg-type: Custom
-                    msg-props: |
-                        topic=${topic}
-                        username=fedora-atomic
-                    msg-content: |
-                        {
-                            "build_url": "${BUILD_URL}",
-                            "compose_url": "${compose_url}",
-                            "compose_rev": "${compose_rev}",
-                            "build_id": "${BUILD_ID}",
-                            "ref": "${ref}",
-                            "rev": "${rev}",
-                            "namespace": "${namespace}",
-                            "repo": "${repo}",
-                            "status": "${status}",
-                            "test_guidance": "${test_guidance}"
-                        }
-            script-only-if-succeeded: false
+        - jms-messaging:
+            override-topic: org.centos.prod.ci.pipeline.compose
+            provider-name: fedmsg
+            msg-type: Custom
+            msg-props: |
+                topic=org.centos.prod.ci.pipeline.compose.complete
+                username=fedora-atomic
+            msg-content: |
+                {
+                    "build_url": "${BUILD_URL}",
+                    "compose_url": "http://artifacts.ci.centos.org/artifacts/fedora-atomic/${fed_branch}/ostree",
+                    "compose_rev": "${commit}",
+                    "build_id": "${BUILD_ID}",
+                    "ref": "fedora/${fed_branch}/x86_64/atomic-host",
+                    "rev": "${rev}",
+                    "namespace": "rpms",
+                    "repo": "${fed_repo}",
+                    "status": "${BUILD_STATUS}",
+                    "test_guidance": ""
+                }
         - ci-pipeline-ostree-boot-trigger
         - ci-pipeline-ostree-image-trigger:
             compose_job: ci-pipeline-ostree-image-compose
@@ -155,46 +134,33 @@
               sha pointing to the particular commit we want to test
     builders:
         - shell: |
-            cat << EOF > ${WORKSPACE}/job.properties_running
-                topic=org.centos.prod.ci.pipeline.image.running
-                build_url=$BUILD_URL
-                image_url=
-                image_name=
-                build_id=$BUILD_ID
-                ref=fedora/${fed_branch}/x86_64/atomic-host
-                rev=N/A
-                namespace=rpms
-                repo=N/A
-                compose_url=http://artifacts.ci.centos.org/artifacts/fedora-atomic/${fed_branch}/ostree
-                compose_rev=${commit}
-                status=success
-                test_guidance=
-                type=qcow2
-            EOF
+            if [ "$fed_branch" = "master" ]; then
+                echo "fed_branch=rawhide" > ${WORKSPACE}/job.properties
+            fi
         - inject:
-            properties-file: ${WORKSPACE}/job.properties_running
+            properties-file: ${WORKSPACE}/job.properties
         - jms-messaging:
             override-topic: org.centos.prod.ci.pipeline.image
             provider-name: fedmsg
             msg-type: Custom
             msg-props: |
-                topic=${topic}
+                topic=org.centos.prod.ci.pipeline.image.running
                 username=fedora-atomic
             msg-content: |
                 {
                     "build_url": "${BUILD_URL}",
-                    "image_url": "${image_url}",
-                    "image_name": "${image_name}",
+                    "image_url": "",
+                    "image_name": "",
                     "build_id": "${BUILD_ID}",
-                    "ref": "${ref}",
-                    "rev": "${rev}",
-                    "namespace": "${namespace}",
-                    "repo": "${repo}",
-                    "compose_url": "${compose_url}",
-                    "compose_rev": "${compose_rev}",
-                    "status": "${status}",
-                    "test_guidance": "${test_guidance}",
-                    "type": "${type}"
+                    "ref": "fedora/${fed_branch}/x86_64/atomic-host",
+                    "rev": "N/A",
+                    "namespace": "rpms",
+                    "repo": "N/A",
+                    "compose_url": "http://artifacts.ci.centos.org/artifacts/fedora-atomic/${fed_branch}/ostree",
+                    "compose_rev": "${commit}",
+                    "status": "success",
+                    "test_guidance": "",
+                    "type": "qcow2"
                 }
         - ci-pipeline-duffy-builder:
             task: ostree-image-compose
@@ -208,42 +174,29 @@
             properties-file: ${WORKSPACE}/logs/ostree.props
     publishers:
         - ci-pipeline-duffy-publisher
-        - postbuildscript:
-            builders:
-                - shell: |
-                    cat << EOF > ${WORKSPACE}/job.properties
-                        topic=org.centos.prod.ci.pipeline.image.complete
-                        status=${BUILD_STATUS}
-                        image_url=${image2boot}
-                        image_name=${image_name}
-                        compose_rev=${commit}
-                    EOF
-                - inject:
-                    properties-file: ${WORKSPACE}/job.properties
-                - jms-messaging:
-                    override-topic: org.centos.prod.ci.pipeline.image
-                    provider-name: fedmsg
-                    msg-type: Custom
-                    msg-props: |
-                        topic=${topic}
-                        username=fedora-atomic
-                    msg-content: |
-                        {
-                            "build_url": "${BUILD_URL}",
-                            "image_url": "${image_url}",
-                            "image_name": "${image_name}",
-                            "build_id": "${BUILD_ID}",
-                            "ref": "${ref}",
-                            "rev": "${rev}",
-                            "namespace": "${namespace}",
-                            "repo": "${repo}",
-                            "compose_url": "${compose_url}",
-                            "compose_rev": "${compose_rev}",
-                            "status": "${status}",
-                            "test_guidance": "${test_guidance}",
-                            "type": "${type}"
-                        }
-            script-only-if-succeeded: false
+        - jms-messaging:
+            override-topic: org.centos.prod.ci.pipeline.image
+            provider-name: fedmsg
+            msg-type: Custom
+            msg-props: |
+                topic=org.centos.prod.ci.pipeline.image.complete
+                username=fedora-atomic
+            msg-content: |
+                {
+                    "build_url": "${BUILD_URL}",
+                    "image_url": "${image2boot}",
+                    "image_name": "${image_name}",
+                    "build_id": "${BUILD_ID}",
+                    "ref": "fedora/${fed_branch}/x86_64/atomic-host",
+                    "rev": "N/A",
+                    "namespace": "rpms",
+                    "repo": "N/A",
+                    "compose_url": "http://artifacts.ci.centos.org/artifacts/fedora-atomic/${fed_branch}/ostree",
+                    "compose_rev": "${commit}",
+                    "status": "${BUILD_STATUS}",
+                    "test_guidance": "",
+                    "type": "qcow2"
+                }
         - ci-pipeline-ostree-boot-trigger
 
 - job:
@@ -268,46 +221,33 @@
               sha pointing to the particular commit we want to test
     builders:
         - shell: |
-            cat << EOF > ${WORKSPACE}/job.properties_running
-                topic=org.centos.prod.ci.pipeline.image.test.smoke.running
-                build_url=$BUILD_URL
-                image_url=${image2boot}
-                image_name=${image_name}
-                build_id=$BUILD_ID
-                ref=fedora/${fed_branch}/x86_64/atomic-host
-                rev=N/A
-                namespace=rpms
-                repo=N/A
-                compose_url=http://artifacts.ci.centos.org/artifacts/fedora-atomic/${fed_branch}/ostree
-                compose_rev=${commit}
-                status=success
-                test_guidance=
-                type=qcow2
-            EOF
+            if [ "$fed_branch" = "master" ]; then
+                echo "fed_branch=rawhide" > ${WORKSPACE}/job.properties
+            fi
         - inject:
-            properties-file: ${WORKSPACE}/job.properties_running
+            properties-file: ${WORKSPACE}/job.properties
         - jms-messaging:
             override-topic: org.centos.prod.ci.pipeline.image.test.smoke
             provider-name: fedmsg
             msg-type: Custom
             msg-props: |
-                topic=${topic}
+                topic=org.centos.prod.ci.pipeline.image.test.smoke.running
                 username=fedora-atomic
             msg-content: |
                 {
                     "build_url": "${BUILD_URL}",
-                    "image_url": "${image_url}",
+                    "image_url": "${image2boot}",
                     "image_name": "${image_name}",
                     "build_id": "${BUILD_ID}",
-                    "ref": "${ref}",
-                    "rev": "${rev}",
-                    "namespace": "${namespace}",
-                    "repo": "${repo}",
-                    "compose_url": "${compose_url}",
-                    "compose_rev": "${compose_rev}",
-                    "status": "${status}",
-                    "test_guidance": "${test_guidance}",
-                    "type": "${type}"
+                    "ref": "fedora/${fed_branch}/x86_64/atomic-host",
+                    "rev": "N/A",
+                    "namespace": "rpms",
+                    "repo": "N/A",
+                    "compose_url": "http://artifacts.ci.centos.org/artifacts/fedora-atomic/${fed_branch}/ostree",
+                    "compose_rev": "${commit}",
+                    "status": "success",
+                    "test_guidance": "",
+                    "type": "qcow2"
                 }
         - ci-pipeline-duffy-builder:
             task: ostree-boot-image
@@ -322,39 +262,29 @@
             playbook: sig-atomic-buildscripts/centos-ci/setup/setup-system.yml
     publishers:
         - ci-pipeline-duffy-publisher
-        - postbuildscript:
-            builders:
-                - shell: |
-                    cat << EOF > ${WORKSPACE}/job.properties
-                        topic=org.centos.prod.ci.pipeline.image.test.smoke.complete
-                        status=${BUILD_STATUS}
-                    EOF
-                - inject:
-                    properties-file: ${WORKSPACE}/job.properties
-                - jms-messaging:
-                    override-topic: org.centos.prod.ci.pipeline.image.test.smoke
-                    provider-name: fedmsg
-                    msg-type: Custom
-                    msg-props: |
-                        topic=${topic}
-                        username=fedora-atomic
-                    msg-content: |
-                        {
-                            "build_url": "${BUILD_URL}",
-                            "image_url": "${image_url}",
-                            "image_name": "${image_name}",
-                            "build_id": "${BUILD_ID}",
-                            "ref": "${ref}",
-                            "rev": "${rev}",
-                            "namespace": "${namespace}",
-                            "repo": "${repo}",
-                            "compose_url": "${compose_url}",
-                            "compose_rev": "${compose_rev}",
-                            "status": "${status}",
-                            "test_guidance": "${test_guidance}",
-                            "type": "${type}"
-                        }
-            script-only-if-succeeded: false
+        - jms-messaging:
+            override-topic: org.centos.prod.ci.pipeline.image.test.smoke
+            provider-name: fedmsg
+            msg-type: Custom
+            msg-props: |
+                topic=org.centos.prod.ci.pipeline.image.test.smoke.complete
+                username=fedora-atomic
+            msg-content: |
+                {
+                    "build_url": "${BUILD_URL}",
+                    "image_url": "${image2boot}",
+                    "image_name": "${image_name}",
+                    "build_id": "${BUILD_ID}",
+                    "ref": "fedora/${fed_branch}/x86_64/atomic-host",
+                    "rev": "N/A",
+                    "namespace": "rpms",
+                    "repo": "N/A",
+                    "compose_url": "http://artifacts.ci.centos.org/artifacts/fedora-atomic/${fed_branch}/ostree",
+                    "compose_rev": "${commit}",
+                    "status": "${BUILD_STATUS}",
+                    "test_guidance": "",
+                    "type": "qcow2"
+                }
         - trigger-parameterized-builds:
           - project: 'ci-pipeline-atomic-host-tests'
             current-parameters: true
