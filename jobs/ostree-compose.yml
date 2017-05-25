@@ -7,6 +7,7 @@
               property-file: ${WORKSPACE}/logs/ostree.props
               block: false
               same-node: true
+              condition: SUCCESS
 
 - publisher:
     name: ci-pipeline-ostree-image-trigger
