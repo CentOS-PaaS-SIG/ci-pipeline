@@ -105,21 +105,20 @@
             properties-file: ${WORKSPACE}/logs/description.txt
 #        - system-groovy:
 #            command: build.description = build.getEnvironment().get('description')
-        - shell: |
-            echo "topic=org.centos.prod.ci.pipeline.package.complete" >> ${WORKSPACE}/job.properties
-            package=$(cat ${WORKSPACE}/logs/packagename.txt)
-            status=$(curl $JENKINS_URL/job/$JOB_NAME/lastBuild/api/json 2>/dev/null | jq '.result')
-            echo "status=$status" >> ${WORKSPACE}/job.properties
-            echo "package_url=http://artifacts.ci.centos.org/fedora-atomic/rawhide/repo/${fed_repo}_repo/$package" >> ${WORKSPACE}/job.properties
-        - inject:
-            properties-file: ${WORKSPACE}/job.properties
+    publishers:
+        - archive:
+            artifacts: '*.*, */*, */*/*'
+            allow-empty: 'true'
+        - postbuildscript:
+            builders:
+                - inject:
+                    properties-file: ${WORKSPACE}/logs/package_props.txt
         - jms-messaging:
-            #override-topic: ${topic}
-            override-topic: org.centos.prod.ci.pipeline.package
+            override-topic: org.centos.prod.ci.pipeline.package.complete
             provider-name: fedmsg
             msg-type: Custom
             msg-props: |
-              topic=${topic}
+              topic=org.centos.prod.ci.pipeline.package.complete
               username=fedora-atomic
             msg-content: |
               {
@@ -133,10 +132,6 @@
                 "status": "${status}",
                 "test_guidance": "${test_guidance}"
               }
-    publishers:
-        - archive:
-            artifacts: '*.*, */*, */*/*'
-            allow-empty: 'true'
         - trigger-parameterized-builds:
             - project: 'ci-pipeline-ostree-compose'
               predefined-parameters: fed_branch=$fed_branch
