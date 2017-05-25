@@ -54,7 +54,7 @@
                namespace=rpms
                repo=$fed_repo
                status=success
-               test_guidance=
+               test_guidance=""
             EOF
             # Verify this is a development branch
             if [[ ! "$fed_branch" =~ {targets} ]]; then

@@ -68,7 +68,7 @@
                namespace=rpms
                repo=$fed_repo
                status=success
-               test_guidance=
+               test_guidance=""
             EOF
         - inject:
             properties-file: ${WORKSPACE}/job.properties_running
