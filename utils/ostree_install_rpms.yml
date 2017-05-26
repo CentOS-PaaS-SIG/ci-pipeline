@@ -10,7 +10,7 @@
     shell: "rpm-ostree install {{ item }}"
     with_items:
       - etcd
-      - kubernetes
+#      - kubernetes
   - name: Reboot the atomic host
     shell: "sleep 3 && systemctl reboot"
     async: 1
