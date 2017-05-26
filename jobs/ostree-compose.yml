@@ -60,6 +60,7 @@
               which repo of the package being updated
     builders:
         - shell: |
+            > ${WORKSPACE}/job.properties
             if [ "$fed_branch" = "master" ]; then
                 echo "fed_branch=rawhide" > ${WORKSPACE}/job.properties
             fi
@@ -135,6 +136,7 @@
               sha pointing to the particular commit we want to test
     builders:
         - shell: |
+            > ${WORKSPACE}/job.properties
             if [ "$fed_branch" = "master" ]; then
                 echo "fed_branch=rawhide" > ${WORKSPACE}/job.properties
             fi
@@ -222,6 +224,7 @@
               sha pointing to the particular commit we want to test
     builders:
         - shell: |
+            > ${WORKSPACE}/job.properties
             if [ "$fed_branch" = "master" ]; then
                 echo "fed_branch=rawhide" > ${WORKSPACE}/job.properties
             fi
