@@ -60,6 +60,7 @@
               which repo of the package being updated
     builders:
         - shell: |
+            > ${WORKSPACE}/job.properties
             if [ "$fed_branch" = "master" ]; then
                 echo "fed_branch=rawhide" > ${WORKSPACE}/job.properties
             fi
@@ -67,7 +68,7 @@
             properties-file: ${WORKSPACE}/job.properties
         - jms-messaging:
             override-topic: org.centos.prod.ci.pipeline.compose
-            provider-name: fedmsg
+            provider-name: fedora-fedmsg
             msg-type: Custom
             msg-props: |
                 topic=org.centos.prod.ci.pipeline.compose.running
@@ -99,7 +100,7 @@
         - ci-pipeline-duffy-publisher
         - jms-messaging:
             override-topic: org.centos.prod.ci.pipeline.compose
-            provider-name: fedmsg
+            provider-name: fedora-fedmsg
             msg-type: Custom
             msg-props: |
                 topic=org.centos.prod.ci.pipeline.compose.complete
@@ -135,6 +136,7 @@
               sha pointing to the particular commit we want to test
     builders:
         - shell: |
+            > ${WORKSPACE}/job.properties
             if [ "$fed_branch" = "master" ]; then
                 echo "fed_branch=rawhide" > ${WORKSPACE}/job.properties
             fi
@@ -142,7 +144,7 @@
             properties-file: ${WORKSPACE}/job.properties
         - jms-messaging:
             override-topic: org.centos.prod.ci.pipeline.image
-            provider-name: fedmsg
+            provider-name: fedora-fedmsg
             msg-type: Custom
             msg-props: |
                 topic=org.centos.prod.ci.pipeline.image.running
@@ -177,7 +179,7 @@
         - ci-pipeline-duffy-publisher
         - jms-messaging:
             override-topic: org.centos.prod.ci.pipeline.image
-            provider-name: fedmsg
+            provider-name: fedora-fedmsg
             msg-type: Custom
             msg-props: |
                 topic=org.centos.prod.ci.pipeline.image.complete
@@ -222,6 +224,7 @@
               sha pointing to the particular commit we want to test
     builders:
         - shell: |
+            > ${WORKSPACE}/job.properties
             if [ "$fed_branch" = "master" ]; then
                 echo "fed_branch=rawhide" > ${WORKSPACE}/job.properties
             fi
@@ -229,7 +232,7 @@
             properties-file: ${WORKSPACE}/job.properties
         - jms-messaging:
             override-topic: org.centos.prod.ci.pipeline.image.test.smoke
-            provider-name: fedmsg
+            provider-name: fedora-fedmsg
             msg-type: Custom
             msg-props: |
                 topic=org.centos.prod.ci.pipeline.image.test.smoke.running
@@ -265,7 +268,7 @@
         - ci-pipeline-duffy-publisher
         - jms-messaging:
             override-topic: org.centos.prod.ci.pipeline.image.test.smoke
-            provider-name: fedmsg
+            provider-name: fedora-fedmsg
             msg-type: Custom
             msg-props: |
                 topic=org.centos.prod.ci.pipeline.image.test.smoke.complete
