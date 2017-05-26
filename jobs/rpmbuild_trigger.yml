@@ -84,7 +84,7 @@
       - jms-messaging:
           #override-topic: ${{topic}}
           override-topic: org.centos.prod.ci.pipeline.package
-          provider-name: fedmsg
+          provider-name: fedora-fedmsg
           msg-type: Custom
           msg-props: |
             topic=${{topic}}
