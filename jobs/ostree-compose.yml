@@ -66,6 +66,7 @@
             fi
         - inject:
             properties-file: ${WORKSPACE}/job.properties
+            override-build-parameters: true
         - jms-messaging:
             override-topic: org.centos.prod.ci.pipeline.compose
             provider-name: fedora-fedmsg
@@ -96,6 +97,7 @@
             playbook: sig-atomic-buildscripts/centos-ci/setup/setup-system.yml
         - inject:
             properties-file: ${WORKSPACE}/logs/ostree.props
+            override-build-parameters: true
     publishers:
         - ci-pipeline-duffy-publisher
         - jms-messaging:
@@ -142,6 +144,7 @@
             fi
         - inject:
             properties-file: ${WORKSPACE}/job.properties
+            override-build-parameters: true
         - jms-messaging:
             override-topic: org.centos.prod.ci.pipeline.image
             provider-name: fedora-fedmsg
@@ -175,6 +178,7 @@
             playbook: sig-atomic-buildscripts/centos-ci/setup/setup-system.yml
         - inject:
             properties-file: ${WORKSPACE}/logs/ostree.props
+            override-build-parameters: true
     publishers:
         - ci-pipeline-duffy-publisher
         - jms-messaging:
@@ -230,6 +234,7 @@
             fi
         - inject:
             properties-file: ${WORKSPACE}/job.properties
+            override-build-parameters: true
         - jms-messaging:
             override-topic: org.centos.prod.ci.pipeline.image.test.smoke
             provider-name: fedora-fedmsg
