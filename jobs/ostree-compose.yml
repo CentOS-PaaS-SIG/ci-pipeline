@@ -68,7 +68,7 @@
             properties-file: ${WORKSPACE}/job.properties
         - jms-messaging:
             override-topic: org.centos.prod.ci.pipeline.compose
-            provider-name: fedmsg
+            provider-name: fedora-fedmsg
             msg-type: Custom
             msg-props: |
                 topic=org.centos.prod.ci.pipeline.compose.running
@@ -100,7 +100,7 @@
         - ci-pipeline-duffy-publisher
         - jms-messaging:
             override-topic: org.centos.prod.ci.pipeline.compose
-            provider-name: fedmsg
+            provider-name: fedora-fedmsg
             msg-type: Custom
             msg-props: |
                 topic=org.centos.prod.ci.pipeline.compose.complete
@@ -144,7 +144,7 @@
             properties-file: ${WORKSPACE}/job.properties
         - jms-messaging:
             override-topic: org.centos.prod.ci.pipeline.image
-            provider-name: fedmsg
+            provider-name: fedora-fedmsg
             msg-type: Custom
             msg-props: |
                 topic=org.centos.prod.ci.pipeline.image.running
@@ -179,7 +179,7 @@
         - ci-pipeline-duffy-publisher
         - jms-messaging:
             override-topic: org.centos.prod.ci.pipeline.image
-            provider-name: fedmsg
+            provider-name: fedora-fedmsg
             msg-type: Custom
             msg-props: |
                 topic=org.centos.prod.ci.pipeline.image.complete
@@ -232,7 +232,7 @@
             properties-file: ${WORKSPACE}/job.properties
         - jms-messaging:
             override-topic: org.centos.prod.ci.pipeline.image.test.smoke
-            provider-name: fedmsg
+            provider-name: fedora-fedmsg
             msg-type: Custom
             msg-props: |
                 topic=org.centos.prod.ci.pipeline.image.test.smoke.running
@@ -268,7 +268,7 @@
         - ci-pipeline-duffy-publisher
         - jms-messaging:
             override-topic: org.centos.prod.ci.pipeline.image.test.smoke
-            provider-name: fedmsg
+            provider-name: fedora-fedmsg
             msg-type: Custom
             msg-props: |
                 topic=org.centos.prod.ci.pipeline.image.test.smoke.complete
