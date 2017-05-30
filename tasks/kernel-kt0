@@ -38,7 +38,7 @@ libvirt_systems:
  fedora-kernel-host:
    admin_passwd: $5$uX5x24soDWv3G2TH$BYxhEq4HmxjKmyChV0.VTpqxfhqMaRk8LCr34KOg2C7
    memory: 3072
-   disk: 100000
+   disk: 10000
 EOF
 # Cannot be part of last EOF since IMG_URL needs to resolve
 cat << EOF >> host_vars/kernel_install_slave_baremetal.yml
