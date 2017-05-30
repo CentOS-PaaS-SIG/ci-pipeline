@@ -11,6 +11,25 @@
             description: |
               url pointing to the image to boot
     builders:
+        - jms-messaging:
+            override-topic: org.centos.prod.ci.pipeline.compose.test.integration.running
+            provider-name: fedora-fedmsg
+            msg-type: Custom
+            msg-props: |
+                topic=org.centos.prod.ci.pipeline.compose.test.integration.running
+                username=fedora-atomic
+            msg-content: |
+                {
+                    "build_url": "${BUILD_URL}",
+                    "compose_url": "http://artifacts.ci.centos.org/artifacts/fedora-atomic/${fed_branch}/ostree",
+                    "build_id": "${BUILD_ID}",
+                    "ref": "fedora/${fed_branch}/x86_64/atomic-host",
+                    "rev": "${rev}",
+                    "namespace": "rpms",
+                    "repo": "${fed_repo}",
+                    "status": "success",
+                    "test_guidance": ""
+                }
         - ci-pipeline-duffy-builder:
             task: atomic-host-tests
             variables: |
@@ -36,3 +55,22 @@
                     pattern: "$WORKSPACE/logs/ansible_xunit.xml"
                     stoponerror: true
                     deleteoutput: false
+        - jms-messaging:
+            override-topic: org.centos.prod.ci.pipeline.compose.test.integration.complete
+            provider-name: fedora-fedmsg
+            msg-type: Custom
+            msg-props: |
+                topic=org.centos.prod.ci.pipeline.compose.test.integration.complete
+                username=fedora-atomic
+            msg-content: |
+                {
+                    "build_url": "${BUILD_URL}",
+                    "compose_url": "http://artifacts.ci.centos.org/artifacts/fedora-atomic/${fed_branch}/ostree",
+                    "build_id": "${BUILD_ID}",
+                    "ref": "fedora/${fed_branch}/x86_64/atomic-host",
+                    "rev": "${rev}",
+                    "namespace": "rpms",
+                    "repo": "${fed_repo}",
+                    "status": "TODO",
+                    "test_guidance": ""
+                }

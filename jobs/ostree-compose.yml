@@ -248,6 +248,34 @@
             playbook: sig-atomic-buildscripts/centos-ci/setup/setup-system.yml
     publishers:
         - ci-pipeline-duffy-publisher
+        - trigger-parameterized-builds:
+          - project: 'ci-pipeline-atomic-host-tests'
+            current-parameters: true
+            condition: SUCCESS
+        - conditional-publisher:
+            - condition-kind: current-status
+              condition-worst: SUCCESS
+              condition-best: SUCCESS
+              action:
+                  - jms-messaging:
+                      override-topic: org.centos.prod.ci.pipeline.compose.test.integration.queued
+                      provider-name: fedora-fedmsg
+                      msg-type: Custom
+                      msg-props: |
+                          topic=org.centos.prod.ci.pipeline.compose.test.integration.queued
+                          username=fedora-atomic
+                      msg-content: |
+                          {
+                              "build_url": "${BUILD_URL}",
+                              "compose_url": "http://artifacts.ci.centos.org/artifacts/fedora-atomic/${fed_branch}/ostree",
+                              "build_id": "${BUILD_ID}",
+                              "ref": "fedora/${fed_branch}/x86_64/atomic-host",
+                              "rev": "${rev}",
+                              "namespace": "rpms",
+                              "repo": "${fed_repo}",
+                              "status": "success",
+                              "test_guidance": ""
+                          }
 
 - job:
     name: ci-pipeline-ostree-image-boot-sanity
@@ -337,7 +365,3 @@
                     "test_guidance": "",
                     "type": "qcow2"
                 }
-        - trigger-parameterized-builds:
-          - project: 'ci-pipeline-atomic-host-tests'
-            current-parameters: true
-            condition: SUCCESS
