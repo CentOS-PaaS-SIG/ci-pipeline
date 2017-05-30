@@ -110,6 +110,7 @@
             artifacts: '*.*, */*, */*/*'
             allow-empty: 'true'
         - postbuildscript:
+            script-only-if-succeeded: false
             builders:
                 - inject:
                     properties-file: ${WORKSPACE}/logs/package_props.txt
