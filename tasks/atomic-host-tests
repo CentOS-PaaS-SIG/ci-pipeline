@@ -125,10 +125,11 @@ OUTPUTARRAY[docker]=$DOCKER_RC
 ansible-playbook -i ${HOMEDIR}/ansible_inventory.txt -l testsystems ../${base_dir}/utils/atomic_rollback.yml -u root
 
 # Test requires two images so it can upgrade/rollback
-ansible-playbook -i ${HOMEDIR}/ansible_inventory.txt -l testsystems tests/improved-sanity-test/main.yml -u root -v > ${HOMEDIR}/logs/improved-sanity-test.out
-IMPROVED_SANITY_TEST_RC=$?
-OUTPUTARRAY[improved-sanity-test]=$IMPROVED_SANITY_TEST_RC
-ansible-playbook -i ${HOMEDIR}/ansible_inventory.txt -l testsystems ../${base_dir}/utils/atomic_rollback.yml -u root
+# Test currently taking 9+ hours. Disable for now, debug soon
+#ansible-playbook -i ${HOMEDIR}/ansible_inventory.txt -l testsystems tests/improved-sanity-test/main.yml -u root -v > ${HOMEDIR}/logs/improved-sanity-test.out
+#IMPROVED_SANITY_TEST_RC=$?
+#OUTPUTARRAY[improved-sanity-test]=$IMPROVED_SANITY_TEST_RC
+#ansible-playbook -i ${HOMEDIR}/ansible_inventory.txt -l testsystems ../${base_dir}/utils/atomic_rollback.yml -u root
 
 # Legitimate failure with this right now, need to figure out
 # - Timeout when waiting for apiserver on 127.0.0.1
