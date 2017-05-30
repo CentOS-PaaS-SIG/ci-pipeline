@@ -31,6 +31,10 @@
            cp "/tmp/{{ base_image }}" "{{ qemu_img_path }}/{{ item.key }}.img"
   when: qemu_img_path is defined
 
+- name: Resize {{ item.key }}.img to {{ disk }}
+  command: qemu-img resize "{{ qemu_img_path }}/{{ item.key }}.img" {{ item.value.disk }}
+  when: qemu_img_path is defined
+
 - name: Remove {{ base_image }}
   file: path="/tmp/{{ base_image }}" state=absent
 
