@@ -21,9 +21,7 @@
                 export image2boot="${image2boot:-}"
             playbook: sig-atomic-buildscripts/centos-ci/setup/setup-system.yml
     publishers:
-        - archive:
-            artifacts: '*.*, */*, */*/*'
-            allow-empty: 'true'
+        - ci-pipeline-duffy-publisher
         - xunit:
             thresholdmode: 'number'
             thresholds:
@@ -38,4 +36,3 @@
                     pattern: "$WORKSPACE/logs/ansible_xunit.xml"
                     stoponerror: true
                     deleteoutput: false
-        - ci-pipeline-duffy-publisher
