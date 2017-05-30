@@ -113,7 +113,7 @@ cat << EOF >> ${HOMEDIR}/logs/ansible_xunit.xml
 EOF
 
 for test in $ENABLED_TESTS; do
-     ansible-playbook -i ${HOMEDIR}/ansible_inventory -l testsystems tests/$test/main.yml -u root -v > ${HOMEDIR}/logs/${test}.out
+     ansible-playbook -i ${HOMEDIR}/ansible_inventory.txt -l testsystems tests/$test/main.yml -u root -v > ${HOMEDIR}/logs/${test}.out
      RC=$?
      echo "    <testcase classname=\"ansible-playbook\" name=\"${test}\">" >> ${HOMEDIR}/logs/ansible_xunit.xml
      if [ ${RC} != "0" ]; then
@@ -123,6 +123,8 @@ for test in $ENABLED_TESTS; do
      echo "    </testcase>" >> ${HOMEDIR}/logs/ansible_xunit.xml
      ansible-playbook -i ${HOMEDIR}/ansible_inventory.txt -l testsystems ../${base_dir}/utils/atomic_rollback.yml
 done
+echo "  </testsuite>" >> ${HOMEDIR}/logs/ansible_xunit.xml
+echo "</testsuites>" >> ${HOMEDIR}/logs/ansible_xunit.xml
 
 popd
 
