@@ -95,74 +95,35 @@ if [ "$?" != 0 ]; then echo "ERROR: ansible unavailable: $?"; exit 1; fi
 ansible-playbook -i ${HOMEDIR}/ansible_inventory.txt -l testsystems ${base_dir}/utils/ostree_install_rpms.yml -u root
 if [ "$?" != 0 ]; then echo "ERROR: Failed to set up ostree with proper rpms: $?"; exit 1; fi
 
-# Declare output RC array
-declare -A OUTPUTARRAY
+# All tests currently available are admin-unlock, docker-build-httpd, docker-swarm, docker, improved-sanity-test, k8-cluster, pkg-layering, runc, system-containers, unique-machine-id
+ENABLED_TESTS="admin-unlock docker-swarm docker pkg-layering system-containers"
 
 # Test the atomic host with playbooks from https://github.com/projectatomic/atomic-host-tests
 git clone https://github.com/projectatomic/atomic-host-tests
 pushd atomic-host-tests
 
-ansible-playbook -i ${HOMEDIR}/ansible_inventory.txt -l testsystems tests/admin-unlock/main.yml -u root -v > ${HOMEDIR}/logs/admin-unlock.out
-ADMIN_UNLOCK_RC=$?
-OUTPUTARRAY[admin-unlock]=$ADMIN_UNLOCK_RC
-ansible-playbook -i ${HOMEDIR}/ansible_inventory.txt -l testsystems ../${base_dir}/utils/atomic_rollback.yml -u root
-
-#ansible-playbook -i ${HOMEDIR}/ansible_inventory.txt -l testsystems tests/docker-build-httpd/main.yml -u root -v > ${HOMEDIR}/logs/docker-build-httpd.out
-#DOCKER_BUILD_HTTPD_RC=$?
-#OUTPUTARRAY[docker-build-httpd]=$DOCKER_BUILD_HTTPD_RC
-#ansible-playbook -i ${HOMEDIR}/ansible_inventory.txt -l testsystems ../${base_dir}/utils/atomic_rollback.yml -u root
-
-# Test requires two images so it can upgrade/rollback
-ansible-playbook -i ${HOMEDIR}/ansible_inventory.txt -l testsystems tests/docker-swarm/main.yml -u root -v > ${HOMEDIR}/logs/docker-swarm.out
-DOCKER_SWARM_RC=$?
-OUTPUTARRAY[docker-swarm]=$DOCKER_SWARM_RC
-ansible-playbook -i ${HOMEDIR}/ansible_inventory.txt -l testsystems ../${base_dir}/utils/atomic_rollback.yml -u root
-
+# Do setup steps
 sed -i s/true/false/ tests/docker/vars.yml
-ansible-playbook -i ${HOMEDIR}/ansible_inventory.txt -l testsystems tests/docker/main.yml -u root -v > ${HOMEDIR}/logs/docker.out
-DOCKER_RC=$?
-OUTPUTARRAY[docker]=$DOCKER_RC
-ansible-playbook -i ${HOMEDIR}/ansible_inventory.txt -l testsystems ../${base_dir}/utils/atomic_rollback.yml -u root
 
-# Test requires two images so it can upgrade/rollback
-# Test currently taking 9+ hours. Disable for now, debug soon
-#ansible-playbook -i ${HOMEDIR}/ansible_inventory.txt -l testsystems tests/improved-sanity-test/main.yml -u root -v > ${HOMEDIR}/logs/improved-sanity-test.out
-#IMPROVED_SANITY_TEST_RC=$?
-#OUTPUTARRAY[improved-sanity-test]=$IMPROVED_SANITY_TEST_RC
-#ansible-playbook -i ${HOMEDIR}/ansible_inventory.txt -l testsystems ../${base_dir}/utils/atomic_rollback.yml -u root
+# Initiate xunit file
+cat << EOF >> ${HOMEDIR}/logs/ansible_xunit.xml
+<?xml version='1.0' encoding='utf8'?>
+<testsuites>
+  <testsuite tests="0">
+EOF
 
-# Legitimate failure with this right now, need to figure out
-# - Timeout when waiting for apiserver on 127.0.0.1
-# This test also asks for a password mid test, disable until I figure that out
-#ansible-playbook -i ${HOMEDIR}/ansible_inventory.txt -l testsystems tests/k8-cluster/main.yml -u root -v > ${HOMEDIR}/logs/k8-cluster.out
-#K8_CLUSTER_RC=$?
-#OUTPUTARRAY[k8-cluster]=$K8_CLUSTER_RC
-#ansible-playbook -i ${HOMEDIR}/ansible_inventory.txt -l testsystems ../${base_dir}/utils/atomic_rollback.yml -u root
-
-# Test requires two images so it can upgrade/rollback
-# Have only seen this test pass on rawhide ostrees so far
-ansible-playbook -i ${HOMEDIR}/ansible_inventory.txt -l testsystems tests/pkg-layering/main.yml -u root -v > ${HOMEDIR}/logs/pkg-layering.out
-PKG_LAYERING_RC=$?
-OUTPUTARRAY[pkg-layering]=$PKG_LAYERING_RC
-ansible-playbook -i ${HOMEDIR}/ansible_inventory.txt -l testsystems ../${base_dir}/utils/atomic_rollback.yml -u root
-
-# Testing hangs on fail so need more work around this
-#ansible-playbook -i ${HOMEDIR}/ansible_inventory.txt -l testsystems tests/runc/main.yml -u root -v > ${HOMEDIR}/logs/runc.out
-#RUNC_RC=$?
-#OUTPUTARRAY[runc]=$RUNC_RC
-#ansible-playbook -i ${HOMEDIR}/ansible_inventory.txt -l testsystems ../${base_dir}/utils/atomic_rollback.yml -u root
-
-# Test requires two images so it can upgrade/rollback
-# Seems to be important this runs last because it leaves containers around
-ansible-playbook -i ${HOMEDIR}/ansible_inventory.txt -l testsystems tests/system-containers/main.yml -u root -v > ${HOMEDIR}/logs/system-containers.out
-SYSTEM_CONTAINERS_RC=$?
-OUTPUTARRAY[system-containers]=$SYSTEM_CONTAINERS_RC
-ansible-playbook -i ${HOMEDIR}/ansible_inventory.txt -l testsystems ../${base_dir}/utils/atomic_rollback.yml -u root
+for test in $ENABLED_TESTS; do
+     ansible-playbook -i ${HOMEDIR}/ansible_inventory -l testsystems tests/$test/main.yml -u root -v > ${HOMEDIR}/logs/${test}.out
+     RC=$?
+     echo "    <testcase classname=\"ansible-playbook\" name=\"${test}\">" >> ${HOMEDIR}/logs/ansible_xunit.xml
+     if [ ${RC} != "0" ]; then
+          echo "      <error type=\"${RC}\"/>" >> ${HOMEDIR}/logs/ansible_xunit.xml
+     fi
+     echo "      <system-out></system-out>" >> ${HOMEDIR}/logs/ansible_xunit.xml
+     echo "    </testcase>" >> ${HOMEDIR}/logs/ansible_xunit.xml
+     ansible-playbook -i ${HOMEDIR}/ansible_inventory.txt -l testsystems ../${base_dir}/utils/atomic_rollback.yml
+done
 
 popd
-
-# Create xunit output file
-${base_dir}/utils/ansible_xunit.sh "${!OUTPUTARRAY[@]}" > ${HOMEDIR}/logs/ansible_xunit.xml
-if [ "$?" != 0 ]; then echo "ERROR: ansible xunit creation failed: $?"; exit 1; fi
 
 exit 0
