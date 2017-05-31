@@ -59,7 +59,7 @@ libvirt_systems:
  atomic-host-tests:
    admin_passwd: $5$uX5x24soDWv3G2TH$BYxhEq4HmxjKmyChV0.VTpqxfhqMaRk8LCr34KOg2C7
    memory: 3072
-   disk: 10000
+   disk: 10G
 EOF
 cat << EOF >> host_vars/atomic_host_tests_slave.yml
    img_url: $image2boot
