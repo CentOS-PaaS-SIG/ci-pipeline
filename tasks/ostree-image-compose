@@ -119,8 +119,8 @@ popd
 commit=$(ostree --repo=ostree rev-parse ${REF})
 cat << EOF > logs/ostree.props
 builtcommit=$commit
-image2boot="http://artifacts.ci.centos.org/artifacts/fedora-atomic/${BUILD}/images/$imgname.qcow2"
-image_name="$imgname.qcow2"
+image2boot=http://artifacts.ci.centos.org/artifacts/fedora-atomic/${BUILD}/images/$imgname.qcow2
+image_name=$imgname.qcow2
 EOF
 
 # We don't need to rsync ostree back since we just used it for cache
