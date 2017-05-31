@@ -52,7 +52,7 @@
                     failurenew: 0
             types:
                 - junit:
-                    pattern: "$WORKSPACE/logs/ansible_xunit.xml"
+                    pattern: "logs/ansible_xunit.xml"
                     stoponerror: true
                     deleteoutput: false
         - jms-messaging:
