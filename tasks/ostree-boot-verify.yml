@@ -46,6 +46,13 @@
         pause: seconds=5
         when: ros_booted['checksum'] != commit
 
+      - name: ssh started {{ ansible_ssh_host | default(inventory_hostname) }}
+        become: false
+        local_action:
+            wait_for host={{ ansible_ssh_host | default(inventory_hostname) }}
+            port=22 state=started search_regex=OpenSSH
+        when: ros_booted['checksum'] != commit
+
       - name: Get rpm-ostree status --json output
         command: rpm-ostree status --json
         register: ros
