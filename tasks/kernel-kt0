@@ -88,7 +88,9 @@ pushd ktests/misc/ltp
 ansible-playbook -i ../../../inventory test_local.yml -l kernel_install_slave -v > ${currentdir}/logs/ltp-playbook.out
 LTP_STATUS=$?
 # Copy logs to proper location
-cp -rp artifacts/logs/ ${currentdir}/logs/ltp
+sshpass -p admin scp -rp admin@$IP:/mnt/testarea/ltp/logs ${currentdir}/logs/ltp
+# Grep dmesg as that won't happen in in the playbook currently
+./dmesg_grep.sh ${currentdir}/logs/ltp/ltp-dmesg* ./artifacts/ctlogs
 if [ "$LTP_STATUS" != 0 ]; then
     echo "ERROR: LTP Testing\nSTATUS: $LTP_STATUS"
     exit 1
