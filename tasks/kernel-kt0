@@ -87,9 +87,9 @@ git clone https://pagure.io/ktests
 pushd ktests/misc/ltp
 ansible-playbook -i ../../../inventory test_local.yml -l kernel_install_slave -v > ${currentdir}/logs/ltp-playbook.out
 LTP_STATUS=$?
-# Wait 2 mins for host to come back before scp
-for i in {1..8}; do
-     ping -c 1 -W $IP
+# Wait 20 mins for host to come back before scp
+for i in {1..80}; do
+     ping -c 1 -W 5 $IP
      if [ $? -eq 0 ]; then
           break
      fi
