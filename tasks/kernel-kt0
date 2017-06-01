@@ -87,6 +87,14 @@ git clone https://pagure.io/ktests
 pushd ktests/misc/ltp
 ansible-playbook -i ../../../inventory test_local.yml -l kernel_install_slave -v > ${currentdir}/logs/ltp-playbook.out
 LTP_STATUS=$?
+# Wait 2 mins for host to come back before scp
+for i in {1..8}; do
+     ping -c 1 -W $IP
+     if [ $? -eq 0 ]; then
+          break
+     fi
+     sleep 10
+done
 # Copy logs to proper location
 sshpass -p admin scp -rp admin@$IP:/mnt/testarea/ltp/logs ${currentdir}/logs/ltp
 # Grep dmesg as that won't happen in in the playbook currently
