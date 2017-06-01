@@ -44,7 +44,7 @@ version=$(ostree --repo=ostree show --print-metadata-key=version $REF| sed -e "s
 release=$(ostree --repo=ostree rev-parse $REF| cut -c -15)
 if [ -d "images" ]; then
     # Find the last image we pushed
-    prev_img=$(ls -tr images/*.qcow2 | tail -n 1)
+    prev_img=$(ls -tr images/fedora-atomic-*.qcow2 | tail -n 1)
     prev_rel=$(echo $prev_img | sed -e 's/.*-\([^-]*\).qcow2/\1/')
     rpm-ostree db --repo=ostree diff $prev_rel $release | tee logs/packages.txt
 else
@@ -119,8 +119,8 @@ popd
 commit=$(ostree --repo=ostree rev-parse ${REF})
 cat << EOF > logs/ostree.props
 builtcommit=$commit
-image2boot="http://artifacts.ci.centos.org/artifacts/fedora-atomic/${BUILD}/images/$imgname.qcow2"
-image_name="$imgname.qcow2"
+image2boot=http://artifacts.ci.centos.org/artifacts/fedora-atomic/${BUILD}/images/$imgname.qcow2
+image_name=$imgname.qcow2
 EOF
 
 # We don't need to rsync ostree back since we just used it for cache
