@@ -44,7 +44,7 @@ version=$(ostree --repo=ostree show --print-metadata-key=version $REF| sed -e "s
 release=$(ostree --repo=ostree rev-parse $REF| cut -c -15)
 if [ -d "images" ]; then
     # Find the last image we pushed
-    prev_img=$(ls -tr images/*.qcow2 | tail -n 1)
+    prev_img=$(ls -tr images/fedora-atomic-*.qcow2 | tail -n 1)
     prev_rel=$(echo $prev_img | sed -e 's/.*-\([^-]*\).qcow2/\1/')
     rpm-ostree db --repo=ostree diff $prev_rel $release | tee logs/packages.txt
 else
