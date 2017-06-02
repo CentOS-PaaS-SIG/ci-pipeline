@@ -90,17 +90,14 @@
           msg-props: |
             topic=${{topic}}
             username=fedora-atomic
-          msg-content: |
-            {{
-              "build_url": "${{BUILD_URL}}",
-              "build_id": "${{BUILD_ID}}",
-              "ref": "fedora/${{branch}}/x86_64/atomic-host",
-              "rev": "${{fed_rev}}",
-              "namespace": "rpms",
-              "repo": "${{fed_repo}}",
-              "status": "success",
-              "test_guidance": ""
-            }}
+            build_url=${{BUILD_URL}}
+            build_id=${{BUILD_ID}}
+            ref=fedora/${{branch}}/x86_64/atomic-host
+            rev=${{fed_rev}}
+            namespace=rpms
+            repo=${{fed_repo}}
+            status=success
+            test_guidance=
       - conditional-publisher:
           - condition-kind: file-exists
             condition-filename: trigger.downstream
