@@ -74,6 +74,7 @@
                 username=fedora-atomic
                 build_url=${BUILD_URL}
                 compose_url=http://artifacts.ci.centos.org/artifacts/fedora-atomic/${fed_branch}/ostree
+                compose_rev=
                 build_id=${BUILD_ID}
                 branch=${fed_branch}
                 ref=fedora/${fed_branch}/x86_64/atomic-host
