@@ -72,19 +72,17 @@
             msg-props: |
                 topic=org.centos.prod.ci.pipeline.compose.running
                 username=fedora-atomic
-            msg-content: |
-                {
-                    "build_url": "${BUILD_URL}",
-                    "compose_url": "http://artifacts.ci.centos.org/artifacts/fedora-atomic/${fed_branch}/ostree",
-                    "compose_rev": "",
-                    "build_id": "${BUILD_ID}",
-                    "ref": "fedora/${fed_branch}/x86_64/atomic-host",
-                    "rev": "${rev}",
-                    "namespace": "rpms",
-                    "repo": "${fed_repo}",
-                    "status": "success",
-                    "test_guidance": ""
-                }
+                build_url=${BUILD_URL}
+                compose_url=http://artifacts.ci.centos.org/artifacts/fedora-atomic/${fed_branch}/ostree
+                compose_rev=
+                build_id=${BUILD_ID}
+                branch=${fed_branch}
+                ref=fedora/${fed_branch}/x86_64/atomic-host
+                rev=${rev}
+                namespace=rpms
+                repo=${fed_repo}
+                status=success
+                test_guidance=
         - ci-pipeline-duffy-builder:
             task: ostree-compose
             variables: |
@@ -107,19 +105,17 @@
             msg-props: |
                 topic=org.centos.prod.ci.pipeline.compose.complete
                 username=fedora-atomic
-            msg-content: |
-                {
-                    "build_url": "${BUILD_URL}",
-                    "compose_url": "http://artifacts.ci.centos.org/artifacts/fedora-atomic/${fed_branch}/ostree",
-                    "compose_rev": "${commit}",
-                    "build_id": "${BUILD_ID}",
-                    "ref": "fedora/${fed_branch}/x86_64/atomic-host",
-                    "rev": "${rev}",
-                    "namespace": "rpms",
-                    "repo": "${fed_repo}",
-                    "status": "${BUILD_STATUS}",
-                    "test_guidance": ""
-                }
+                build_url=${BUILD_URL}
+                compose_url=http://artifacts.ci.centos.org/artifacts/fedora-atomic/${fed_branch}/ostree
+                compose_rev=${commit}
+                build_id=${BUILD_ID}
+                branch=${fed_branch}
+                ref=fedora/${fed_branch}/x86_64/atomic-host
+                rev=${rev}
+                namespace=rpms
+                repo=${fed_repo}
+                status=${BUILD_STATUS}
+                test_guidance=
         - ci-pipeline-ostree-boot-trigger:
             boot_job: ci-pipeline-ostree-boot-sanity
 
@@ -151,22 +147,20 @@
             msg-props: |
                 topic=org.centos.prod.ci.pipeline.image.running
                 username=fedora-atomic
-            msg-content: |
-                {
-                    "build_url": "${BUILD_URL}",
-                    "image_url": "",
-                    "image_name": "",
-                    "build_id": "${BUILD_ID}",
-                    "ref": "fedora/${fed_branch}/x86_64/atomic-host",
-                    "rev": "N/A",
-                    "namespace": "rpms",
-                    "repo": "N/A",
-                    "compose_url": "http://artifacts.ci.centos.org/artifacts/fedora-atomic/${fed_branch}/ostree",
-                    "compose_rev": "${commit}",
-                    "status": "success",
-                    "test_guidance": "",
-                    "type": "qcow2"
-                }
+                build_url=${BUILD_URL}
+                image_url=
+                image_name=
+                build_id=${BUILD_ID}
+                ref=fedora/${fed_branch}/x86_64/atomic-host
+                rev=N/A
+                namespace=rpms
+                repo=N/A
+                branch=${fed_branch}
+                compose_url=http://artifacts.ci.centos.org/artifacts/fedora-atomic/${fed_branch}/ostree
+                compose_rev=${commit}
+                status=success
+                test_guidance=
+                type=qcow2
         - ci-pipeline-duffy-builder:
             task: ostree-image-compose
             variables: |
@@ -187,22 +181,20 @@
             msg-props: |
                 topic=org.centos.prod.ci.pipeline.image.complete
                 username=fedora-atomic
-            msg-content: |
-                {
-                    "build_url": "${BUILD_URL}",
-                    "image_url": "${image2boot}",
-                    "image_name": "${image_name}",
-                    "build_id": "${BUILD_ID}",
-                    "ref": "fedora/${fed_branch}/x86_64/atomic-host",
-                    "rev": "N/A",
-                    "namespace": "rpms",
-                    "repo": "N/A",
-                    "compose_url": "http://artifacts.ci.centos.org/artifacts/fedora-atomic/${fed_branch}/ostree",
-                    "compose_rev": "${commit}",
-                    "status": "${BUILD_STATUS}",
-                    "test_guidance": "",
-                    "type": "qcow2"
-                }
+                build_url=${BUILD_URL}
+                image_url=${image2boot}
+                image_name=${image_name}
+                build_id=${BUILD_ID}
+                ref=fedora/${fed_branch}/x86_64/atomic-host
+                rev=N/A
+                namespace=rpms
+                repo=N/A
+                branch=${fed_branch}
+                compose_url=http://artifacts.ci.centos.org/artifacts/fedora-atomic/${fed_branch}/ostree
+                compose_rev=${commit}
+                status=${BUILD_STATUS}
+                test_guidance=
+                type=qcow2
         - ci-pipeline-ostree-boot-trigger:
             boot_job: ci-pipeline-ostree-image-boot-sanity
 
@@ -264,18 +256,16 @@
                       msg-props: |
                           topic=org.centos.prod.ci.pipeline.compose.test.integration.queued
                           username=fedora-atomic
-                      msg-content: |
-                          {
-                              "build_url": "${BUILD_URL}",
-                              "compose_url": "http://artifacts.ci.centos.org/artifacts/fedora-atomic/${fed_branch}/ostree",
-                              "build_id": "${BUILD_ID}",
-                              "ref": "fedora/${fed_branch}/x86_64/atomic-host",
-                              "rev": "${rev}",
-                              "namespace": "rpms",
-                              "repo": "${fed_repo}",
-                              "status": "success",
-                              "test_guidance": ""
-                          }
+                          build_url=${BUILD_URL}
+                          compose_url=http://artifacts.ci.centos.org/artifacts/fedora-atomic/${fed_branch}/ostree
+                          build_id=${BUILD_ID}
+                          ref=fedora/${fed_branch}/x86_64/atomic-host
+                          rev=${rev}
+                          branch=${fed_branch}
+                          namespace=rpms
+                          repo=${fed_repo}
+                          status=success
+                          test_guidance=
 
 - job:
     name: ci-pipeline-ostree-image-boot-sanity
@@ -313,22 +303,20 @@
             msg-props: |
                 topic=org.centos.prod.ci.pipeline.image.test.smoke.running
                 username=fedora-atomic
-            msg-content: |
-                {
-                    "build_url": "${BUILD_URL}",
-                    "image_url": "${image2boot}",
-                    "image_name": "${image_name}",
-                    "build_id": "${BUILD_ID}",
-                    "ref": "fedora/${fed_branch}/x86_64/atomic-host",
-                    "rev": "N/A",
-                    "namespace": "rpms",
-                    "repo": "N/A",
-                    "compose_url": "http://artifacts.ci.centos.org/artifacts/fedora-atomic/${fed_branch}/ostree",
-                    "compose_rev": "${commit}",
-                    "status": "success",
-                    "test_guidance": "",
-                    "type": "qcow2"
-                }
+                build_url=${BUILD_URL}
+                image_url=${image2boot}
+                image_name=${image_name}
+                build_id=${BUILD_ID}
+                ref=fedora/${fed_branch}/x86_64/atomic-host
+                rev=N/A
+                namespace=rpms
+                repo=N/A
+                branch=${fed_branch}
+                compose_url=http://artifacts.ci.centos.org/artifacts/fedora-atomic/${fed_branch}/ostree
+                compose_rev=${commit}
+                status=success
+                test_guidance=
+                type=qcow2
         - ci-pipeline-duffy-builder:
             task: ostree-boot-image
             variables: |
@@ -349,19 +337,17 @@
             msg-props: |
                 topic=org.centos.prod.ci.pipeline.image.test.smoke.complete
                 username=fedora-atomic
-            msg-content: |
-                {
-                    "build_url": "${BUILD_URL}",
-                    "image_url": "${image2boot}",
-                    "image_name": "${image_name}",
-                    "build_id": "${BUILD_ID}",
-                    "ref": "fedora/${fed_branch}/x86_64/atomic-host",
-                    "rev": "N/A",
-                    "namespace": "rpms",
-                    "repo": "N/A",
-                    "compose_url": "http://artifacts.ci.centos.org/artifacts/fedora-atomic/${fed_branch}/ostree",
-                    "compose_rev": "${commit}",
-                    "status": "${BUILD_STATUS}",
-                    "test_guidance": "",
-                    "type": "qcow2"
-                }
+                build_url=${BUILD_URL}
+                image_url=${image2boot}
+                image_name=${image_name}
+                build_id=${BUILD_ID}
+                ref=fedora/${fed_branch}/x86_64/atomic-host
+                rev=N/A
+                namespace=rpms
+                repo=N/A
+                branch=${fed_branch}
+                compose_url=http://artifacts.ci.centos.org/artifacts/fedora-atomic/${fed_branch}/ostree
+                compose_rev=${commit}
+                status=${BUILD_STATUS}
+                test_guidance=
+                type=qcow2

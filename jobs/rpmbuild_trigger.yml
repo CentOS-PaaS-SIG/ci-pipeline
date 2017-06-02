@@ -92,6 +92,7 @@
             username=fedora-atomic
             build_url=${{BUILD_URL}}
             build_id=${{BUILD_ID}}
+            branch=${{branch}}
             ref=fedora/${{branch}}/x86_64/atomic-host
             rev=${{fed_rev}}
             namespace=rpms
