@@ -80,17 +80,14 @@
             msg-props: |
               topic=${topic}
               username=fedora-atomic
-            msg-content: |
-              {
-                "build_url": "${BUILD_URL}",
-                "build_id": "${BUILD_ID}",
-                "ref": "${ref}",
-                "rev": "${rev}",
-                "namespace": "${namespace}",
-                "repo": "${repo}",
-                "status": "${status}",
-                "test_guidance": "${test_guidance}"
-              }
+              build_url=${BUILD_URL}
+              build_id=${BUILD_ID}
+              ref=${ref}
+              rev=${rev}
+              namespace=${namespace}
+              repo=${repo}
+              status=${status}
+              test_guidance=${test_guidance}
         - ci-pipeline-duffy-builder:
             task: rpmbuild-test
             variables: |
@@ -121,18 +118,15 @@
             msg-props: |
               topic=org.centos.prod.ci.pipeline.package.complete
               username=fedora-atomic
-            msg-content: |
-              {
-                "build_url": "${BUILD_URL}",
-                "build_id": "${BUILD_ID}",
-                "package_url": "${package_url}",
-                "ref": "${ref}",
-                "rev": "${rev}",
-                "namespace": "${namespace}",
-                "repo": "${repo}",
-                "status": "${status}",
-                "test_guidance": "${test_guidance}"
-              }
+              build_url=${BUILD_URL}
+              build_id=${BUILD_ID}
+              package_url=${package_url}
+              ref=${ref}
+              rev=${rev}
+              namespace=${namespace}
+              repo=${repo}
+              status=${status}
+              test_guidance=${test_guidance}
         - trigger-parameterized-builds:
             - project: 'ci-pipeline-ostree-compose'
               predefined-parameters: |
