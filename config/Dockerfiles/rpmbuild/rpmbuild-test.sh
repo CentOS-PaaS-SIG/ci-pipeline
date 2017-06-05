@@ -21,7 +21,7 @@ git checkout -b test_branch
 # Find number of git commits in log to append to RELEASE
 commits=$(git log --pretty=format:'' | wc -l)
 # Append to release in spec file
-sed -i "/^Release:/s/\$/.${commits}.${fed_rev}/" ${fed_repo}.spec
+sed -i "/^Release:/s/\$/.${commits}.${fed_rev:0:7}/" ${fed_repo}.spec
 # fedpkg prep to unpack the tarball
 fedpkg --release ${fed_branch} prep
 # Make sure we have rpmspec before we call it
