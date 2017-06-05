@@ -299,7 +299,6 @@ email=jchaloup@redhat.com
         "topic": "org.centos.prod.ci.pipeline.package.running",
         "build_id": "79", 
         "build_url": "https://ci.centos.org/job/ci-pipeline-rpmbuild/79/",
-        "package_url": "<full-url-to-package>",
         "branch": "rawhide",
         "ref": "fedora/rawhide/x86_64/atomic-host",
         "rev": "0546fa18041a8ca223f4f441dc1868fc81ddce0f", 
@@ -357,6 +356,7 @@ email=jchaloup@redhat.com
         "topic": "org.centos.prod.ci.pipeline.test.functional.queued",
         "build_id": "79", 
         "build_url": "https://ci.centos.org/job/ci-pipeline-atomic-host-tests/79/",
+        "package_url": "http://artifacts.ci.centos.org/artifacts/fedora-atomic/rawhide/repo/perl_repo/perl-5.26.0-392.fc27.x86_64.rpm"
         "branch": "rawhide",
         "ref": "fedora/rawhide/x86_64/atomic-host",
         "rev": "0546fa18041a8ca223f4f441dc1868fc81ddce0f", 
@@ -385,6 +385,7 @@ email=jchaloup@redhat.com
         "topic": "org.centos.prod.ci.pipeline.test.functional.running",
         "build_id": "79", 
         "build_url": "https://ci.centos.org/job/ci-pipeline-atomic-host-tests/79/",
+        "package_url": "http://artifacts.ci.centos.org/artifacts/fedora-atomic/rawhide/repo/perl_repo/perl-5.26.0-392.fc27.x86_64.rpm"
         "branch": "rawhide",
         "ref": "fedora/rawhide/x86_64/atomic-host",
         "rev": "0546fa18041a8ca223f4f441dc1868fc81ddce0f", 
