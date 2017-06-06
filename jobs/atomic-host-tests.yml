@@ -36,6 +36,7 @@
                 export ANSIBLE_HOST_KEY_CHECKING="False"
                 export BUILD="${fed_branch}"
                 export image2boot="${image2boot:-}"
+            timeout: 3600
             playbook: sig-atomic-buildscripts/centos-ci/setup/setup-system.yml
     publishers:
         - ci-pipeline-duffy-publisher
