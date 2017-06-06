@@ -83,8 +83,7 @@
               - inject:
                  properties-file: ${{WORKSPACE}}/job.properties
       - jms-messaging:
-          #override-topic: ${{topic}}
-          override-topic: org.centos.prod.ci.pipeline.package
+          override-topic: ${{topic}}
           provider-name: fedora-fedmsg
           msg-type: Custom
           msg-props: |

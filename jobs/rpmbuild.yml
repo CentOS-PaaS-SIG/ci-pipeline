@@ -60,7 +60,6 @@
         - shell: |
             # Write ci message fields to a file
             cat << EOF >> ${WORKSPACE}/job.properties
-            topic=org.centos.prod.ci.pipeline.package.running
             build_url=$BUILD_URL
             build_id=$BUILD_ID
             branch=${fed_branch}
@@ -74,12 +73,11 @@
         - inject:
             properties-file: ${WORKSPACE}/job.properties
         - jms-messaging:
-            #override-topic: ${topic}
-            override-topic: org.centos.prod.ci.pipeline.package
+            override-topic: org.centos.prod.ci.pipeline.package.running
             provider-name: fedora-fedmsg
             msg-type: Custom
             msg-props: |
-              topic=${topic}
+              topic=org.centos.prod.ci.pipeline.package.running
               username=fedora-atomic
               build_url=${BUILD_URL}
               build_id=${BUILD_ID}
