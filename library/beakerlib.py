@@ -134,12 +134,12 @@ def main():
         argument_spec=dict(
           _raw_params = dict(),
           _uses_shell = dict(type='bool', default=False),
-          command = dict(),
+          command = dict(default=None),
           function = dict(required=True, type='str'),
           chdir = dict(type='path'),
           returncode = dict(type='int', default=0),
-          string = dict(type='str'),
-          file = dict(type='path')
+          string = dict(type='str', default=None),
+          file = dict(type='path', default=None)
         )
     )
 
