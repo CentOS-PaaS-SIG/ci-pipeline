@@ -71,7 +71,7 @@
     builders:
         - macro-cciskel-duffy-prepared-allocate:
             jobclass: builder
-            duffytimeoutsecs: 3600
+            duffytimeoutsecs: '{timeout}'
             playbook: '{playbook}'
         - shell: |
             #!/bin/bash

@@ -203,20 +203,28 @@ email=jchaloup@redhat.com
 
 ````
 { 
-  u'i': 1,
-  u'msg': { u'build_url': u'<full-jenkins-url-to-build>',
-            u'package_url': u'<full-url-to-package>',
-            u'build_id': <Jenkins-build-id-number>,
-            u'ref': u'fedora/rawhide/${basearch}/atomic-host',
-      	u'rev': u'<sha of the commit from dist-git>', 
-      	u'namespace': u'rpms', 
-      	u'repo': u'php-simplepie',
-            u'status': u'<success/failure/aborted>',
-            u'test_guidance': u'<comma-separated-list-of-test-suites-to-run>'},
-  u'msg_id': u'2015-4b5aae66-b713-4c22-bb4a-1277d4402375',
-  u'timestamp': 1379638157.759283,
-  u'topic': u'org.centos.prod.ci.pipeline.package.complete',
-  u'username': u'fedora-atomic'
+  "i": 1,
+  "timestamp": 1496382015, 
+  "msg_id": "2017-f2b46ca1-1b07-4539-8d86-f7d3cb1b5934", 
+  "crypto": "x509", 
+  "topic": "org.centos.prod.ci.pipeline.package.complete",   
+  'msg': { 
+        "CI_TYPE": "custom", 
+        "CI_NAME": "ci-pipeline-duffy-allocate-new",
+        "topic": "org.centos.prod.ci.pipeline.package.complete",
+        "build_id": "79", 
+        "build_url": "https://ci.centos.org/job/ci-pipeline-duffy-allocate-new/79/",
+        "package_url": "http://artifacts.ci.centos.org/artifacts/fedora-atomic/rawhide/repo/perl_repo/perl-5.26.0-392.fc27.x86_64.rpm",
+        "branch": "rawhide",
+        "ref": "fedora/rawhide/x86_64/atomic-host",
+        "rev": "0546fa18041a8ca223f4f441dc1868fc81ddce0f", 
+        "repo": "perl", 
+        "namespace": "rpms", 
+        "username": "fedora-atomic", 
+        "test_guidance": "''",
+        "message-content": "",
+        "status": "<success/failure>"
+  }
 }
 ````
 
@@ -224,20 +232,27 @@ email=jchaloup@redhat.com
 
 ````
 { 
-  u'i': 1,
-  u'msg': { u'build_url': u'<full-jenkins-url-to-build>',
-            u'package_url': u'<full-url-to-package>',
-            u'build_id': <Jenkins-build-id-number>,
-            u'ref': u'fedora/rawhide/${basearch}/atomic-host',
-      	u'rev': u'<sha of the commit from dist-git>', 
-      	u'namespace': u'rpms', 
-      	u'repo': u'php-simplepie',
-            u'status': u'<success>',
-            u'test_guidance': u'<comma-separated-list-of-test-suites-to-run>'},
-  u'msg_id': u'2015-4b5aae66-b713-4c22-bb4a-1277d4402375',
-  u'timestamp': 1379638157.759283,
-  u'topic': u'org.centos.prod.ci.pipeline.package.complete',
-  u'username': u'fedora-atomic'
+  "i": 1,
+  "timestamp": 1496382015, 
+  "msg_id": "2017-f2b46ca1-1b07-4539-8d86-f7d3cb1b5934", 
+  "crypto": "x509", 
+  "topic": "org.centos.prod.ci.pipeline.package.ignore",   
+  'msg': { 
+        "CI_TYPE": "custom", 
+        "CI_NAME": "ci-pipeline-rpmbuild",
+        "topic": "org.centos.prod.ci.pipeline.package.ignore",
+        "build_id": "79", 
+        "build_url": "https://ci.centos.org/job/ci-pipeline-rpmbuild/79/",
+        "branch": "rawhide",
+        "ref": "fedora/rawhide/x86_64/atomic-host",
+        "rev": "0546fa18041a8ca223f4f441dc1868fc81ddce0f", 
+        "repo": "perl", 
+        "namespace": "rpms", 
+        "username": "fedora-atomic", 
+        "test_guidance": "<comma-separated-list-of-test-suites-to-run>",
+        "message-content": "",
+        "status": "<success/failure>"
+  }
 }
 ````
 
@@ -245,20 +260,27 @@ email=jchaloup@redhat.com
 
 ````
 { 
-  u'i': 1,
-  u'msg': { u'build_url': u'<full-jenkins-url-to-build>',
-            u'package_url': u'<full-url-to-package>',
-            u'build_id': <Jenkins-build-id-number>,
-            u'ref': u'fedora/rawhide/${basearch}/atomic-host',
-      	u'rev': u'<sha of the commit from dist-git>', 
-      	u'namespace': u'rpms', 
-      	u'repo': u'php-simplepie', 
-            u'status': u'<success/aborted>',
-            u'test_guidance': u'<comma-separated-list-of-test-suites-to-run>'},
-  u'msg_id': u'2015-4b5aae66-b713-4c22-bb4a-1277d4402375',
-  u'timestamp': 1379638157.759283,
-  u'topic': u'org.centos.prod.ci.pipeline.package.queued',
-  u'username': u'fedora-atomic'
+  "i": 1,
+  "timestamp": 1496382015, 
+  "msg_id": "2017-f2b46ca1-1b07-4539-8d86-f7d3cb1b5934", 
+  "crypto": "x509", 
+  "topic": "org.centos.prod.ci.pipeline.package.queued",   
+  'msg': { 
+        "CI_TYPE": "custom", 
+        "CI_NAME": "ci-pipeline-rpmbuild",
+        "topic": "org.centos.prod.ci.pipeline.package.queued",
+        "build_id": "79", 
+        "build_url": "https://ci.centos.org/job/ci-pipeline-rpmbuild/79/",
+        "branch": "rawhide",
+        "ref": "fedora/rawhide/x86_64/atomic-host",
+        "rev": "0546fa18041a8ca223f4f441dc1868fc81ddce0f", 
+        "repo": "perl", 
+        "namespace": "rpms", 
+        "username": "fedora-atomic", 
+        "test_guidance": "<comma-separated-list-of-test-suites-to-run>",
+        "message-content": "",
+        "status": "<success/failure>"
+  }
 }
 ````
 
@@ -266,20 +288,27 @@ email=jchaloup@redhat.com
 
 ````
 { 
-  u'i': 1,
-  u'msg': { u'build_url': u'<full-jenkins-url-to-build>',
-            u'package_url': u'<full-url-to-package>',
-            u'build_id': <Jenkins-build-id-number>,
-            u'ref': u'fedora/rawhide/${basearch}/atomic-host',
-      	u'rev': u'<sha of the commit from dist-git>', 
-      	u'namespace': u'rpms', 
-      	u'repo': u'php-simplepie', 
-            u'status': u'<success/aborted>',
-            u'test_guidance': u'<comma-separated-list-of-test-suites-to-run>'},
-  u'msg_id': u'2015-4b5aae66-b713-4c22-bb4a-1277d4402375',
-  u'timestamp': 1379638157.759283,
-  u'topic': u'org.centos.prod.ci.pipeline.package.running',
-  u'username': u'fedora-atomic'
+  "i": 1,
+  "timestamp": 1496382015, 
+  "msg_id": "2017-f2b46ca1-1b07-4539-8d86-f7d3cb1b5934", 
+  "crypto": "x509", 
+  "topic": "org.centos.prod.ci.pipeline.package.running",   
+  'msg': { 
+        "CI_TYPE": "custom", 
+        "CI_NAME": "ci-pipeline-rpmbuild",
+        "topic": "org.centos.prod.ci.pipeline.package.running",
+        "build_id": "79", 
+        "build_url": "https://ci.centos.org/job/ci-pipeline-rpmbuild/79/",
+        "branch": "rawhide",
+        "ref": "fedora/rawhide/x86_64/atomic-host",
+        "rev": "0546fa18041a8ca223f4f441dc1868fc81ddce0f", 
+        "repo": "perl", 
+        "namespace": "rpms", 
+        "username": "fedora-atomic", 
+        "test_guidance": "<comma-separated-list-of-test-suites-to-run>",
+        "message-content": "",
+        "status": "<success/failure>"
+  }
 }
 ````
 
@@ -287,20 +316,28 @@ email=jchaloup@redhat.com
 
 ````
 { 
-  u'i': 1,
-  u'msg': { u'build_url': u'<full-jenkins-url-to-build>',
-            u'package_url': u'<full-url-to-package>',
-            u'build_id': <Jenkins-build-id-number>,
-            u'ref': u'fedora/rawhide/${basearch}/atomic-host',
-      	u'rev': u'<sha of the commit from dist-git>', 
-      	u'namespace': u'rpms', 
-      	u'repo': u'php-simplepie', 
-            u'status': u'<success/failure/aborted>',
-            u'test_guidance': u'<comma-separated-list-of-test-suites-to-run>'},
-  u'msg_id': u'2015-4b5aae66-b713-4c22-bb4a-1277d4402375',
-  u'timestamp': 1379638157.759283,
-  u'topic': u'org.centos.prod.ci.pipeline.package.test.functional.complete',
-  u'username': u'fedora-atomic'
+  "i": 1,
+  "timestamp": 1496382015, 
+  "msg_id": "2017-f2b46ca1-1b07-4539-8d86-f7d3cb1b5934", 
+  "crypto": "x509", 
+  "topic": "org.centos.prod.ci.pipeline.test.functional.complete",   
+  'msg': { 
+        "CI_TYPE": "custom", 
+        "CI_NAME": "ci-pipeline-atomic-host-tests",
+        "topic": "org.centos.prod.ci.pipeline.test.functional.complete",
+        "build_id": "79", 
+        "build_url": "https://ci.centos.org/job/ci-pipeline-atomic-host-tests/79/",
+        "package_url": "http://artifacts.ci.centos.org/artifacts/fedora-atomic/rawhide/repo/perl_repo/perl-5.26.0-392.fc27.x86_64.rpm"
+        "branch": "rawhide",
+        "ref": "fedora/rawhide/x86_64/atomic-host",
+        "rev": "0546fa18041a8ca223f4f441dc1868fc81ddce0f", 
+        "repo": "perl", 
+        "namespace": "rpms", 
+        "username": "fedora-atomic", 
+        "test_guidance": "<comma-separated-list-of-test-suites-to-run>",
+        "message-content": "",
+        "status": "<success/failure>"
+  }
 }
 ````
 
@@ -308,20 +345,28 @@ email=jchaloup@redhat.com
 
 ````
 { 
-  u'i': 1,
-  u'msg': { u'build_url': u'<full-jenkins-url-to-build>',
-            u'package_url': u'<full-url-to-package>',
-            u'build_id': <Jenkins-build-id-number>,
-            u'ref': u'fedora/rawhide/${basearch}/atomic-host',
-      	u'rev': u'<sha of the commit from dist-git>', 
-      	u'namespace': u'rpms', 
-      	u'repo': u'php-simplepie', 
-            u'status': u'<success/aborted>',
-            u'test_guidance': u'<comma-separated-list-of-test-suites-to-run>'},
-  u'msg_id': u'2015-4b5aae66-b713-4c22-bb4a-1277d4402375',
-  u'timestamp': 1379638157.759283,
-  u'topic': u'org.centos.prod.ci.pipeline.package.test.functional.queued',
-  u'username': u'fedora-atomic'
+  "i": 1,
+  "timestamp": 1496382015, 
+  "msg_id": "2017-f2b46ca1-1b07-4539-8d86-f7d3cb1b5934", 
+  "crypto": "x509", 
+  "topic": "org.centos.prod.ci.pipeline.test.functional.queued",   
+  'msg': { 
+        "CI_TYPE": "custom", 
+        "CI_NAME": "ci-pipeline-atomic-host-tests",
+        "topic": "org.centos.prod.ci.pipeline.test.functional.queued",
+        "build_id": "79", 
+        "build_url": "https://ci.centos.org/job/ci-pipeline-atomic-host-tests/79/",
+        "package_url": "http://artifacts.ci.centos.org/artifacts/fedora-atomic/rawhide/repo/perl_repo/perl-5.26.0-392.fc27.x86_64.rpm"
+        "branch": "rawhide",
+        "ref": "fedora/rawhide/x86_64/atomic-host",
+        "rev": "0546fa18041a8ca223f4f441dc1868fc81ddce0f", 
+        "repo": "perl", 
+        "namespace": "rpms", 
+        "username": "fedora-atomic", 
+        "test_guidance": "<comma-separated-list-of-test-suites-to-run>",
+        "message-content": "",
+        "status": "<success/failure>"
+  }
 }
 ````
 
@@ -329,20 +374,28 @@ email=jchaloup@redhat.com
 
 ````
 { 
-  u'i': 1,
-  u'msg': { u'build_url': u'<full-jenkins-url-to-build>',
-            u'package_url': u'<full-url-to-package>',
-            u'build_id': <Jenkins-build-id-number>,
-            u'ref': u'fedora/rawhide/${basearch}/atomic-host',
-      	u'rev': u'<sha of the commit from dist-git>', 
-      	u'namespace': u'rpms', 
-      	u'repo': u'php-simplepie', 
-            u'status': u'<success/aborted>',
-            u'test_guidance': u'<comma-separated-list-of-test-suites-to-run>'},
-  u'msg_id': u'2015-4b5aae66-b713-4c22-bb4a-1277d4402375',
-  u'timestamp': 1379638157.759283,
-  u'topic': u'org.centos.prod.ci.pipeline.package.test.functional.running',
-  u'username': u'fedora-atomic'
+  "i": 1,
+  "timestamp": 1496382015, 
+  "msg_id": "2017-f2b46ca1-1b07-4539-8d86-f7d3cb1b5934", 
+  "crypto": "x509", 
+  "topic": "org.centos.prod.ci.pipeline.test.functional.running",   
+  'msg': { 
+        "CI_TYPE": "custom", 
+        "CI_NAME": "ci-pipeline-atomic-host-tests",
+        "topic": "org.centos.prod.ci.pipeline.test.functional.running",
+        "build_id": "79", 
+        "build_url": "https://ci.centos.org/job/ci-pipeline-atomic-host-tests/79/",
+        "package_url": "http://artifacts.ci.centos.org/artifacts/fedora-atomic/rawhide/repo/perl_repo/perl-5.26.0-392.fc27.x86_64.rpm"
+        "branch": "rawhide",
+        "ref": "fedora/rawhide/x86_64/atomic-host",
+        "rev": "0546fa18041a8ca223f4f441dc1868fc81ddce0f", 
+        "repo": "perl", 
+        "namespace": "rpms", 
+        "username": "fedora-atomic", 
+        "test_guidance": "<comma-separated-list-of-test-suites-to-run>",
+        "message-content": "",
+        "status": "<success/failure>"
+  }
 }
 ````
 
@@ -350,20 +403,28 @@ email=jchaloup@redhat.com
 
 ````
 { 
-  u'i': 1,
-  u'msg': { u'build_url': u'<full-jenkins-url-to-build>',
-            u'compose_url': u'<full-url-to-compose>',
-            u'build_id': <Jenkins-build-id-number>,
-            u'ref': u'fedora/rawhide/${basearch}/atomic-host',
-      	u'rev': u'<sha of the commit from dist-git>', 
-      	u'namespace': u'rpms', 
-      	u'repo': u'php-simplepie', 
-            u'status': u'<success/failure/aborted>',
-            u'test_guidance': u'<comma-separated-list-of-test-suites-to-run>'},
-  u'msg_id': u'2015-4b5aae66-b713-4c22-bb4a-1277d4402375',
-  u'timestamp': 1379638157.759283,
-  u'topic': u'org.centos.prod.ci.pipeline.compose.complete',
-  u'username': u'fedora-atomic'
+  "i": 1,
+  "timestamp": 1496382015, 
+  "msg_id": "2017-f2b46ca1-1b07-4539-8d86-f7d3cb1b5934", 
+  "crypto": "x509", 
+  "topic": "org.centos.prod.ci.pipeline.compose.complete",   
+  'msg': { 
+        "CI_TYPE": "custom", 
+        "CI_NAME": "ci-pipeline-ostree-compose",
+        "topic": "org.centos.prod.ci.pipeline.compose.complete",
+        "build_id": "79", 
+        "build_url": "https://ci.centos.org/job/cci-pipeline-ostree-compose/79/",
+        "compose_url": "http://artifacts.ci.centos.org/artifacts/fedora-atomic/f26/ostree",
+        "branch": "f26",
+        "ref": "fedora/f26/x86_64/atomic-host",
+        "rev": "0546fa18041a8ca223f4f441dc1868fc81ddce0f", 
+        "repo": "perl", 
+        "namespace": "rpms", 
+        "username": "fedora-atomic", 
+        "test_guidance": "<comma-separated-list-of-test-suites-to-run>",
+        "message-content": "",
+        "status": "<success/failure>"
+  }
 }
 ````
 
@@ -371,20 +432,27 @@ email=jchaloup@redhat.com
 
 ````
 { 
-  u'i': 1,
-  u'msg': { u'build_url': u'<full-jenkins-url-to-build>',
-            u'compose_url': u'<full-url-to-compose>',
-            u'build_id': <Jenkins-build-id-number>,
-            u'ref': u'fedora/rawhide/${basearch}/atomic-host',
-      	u'rev': u'<sha of the commit from dist-git>', 
-      	u'namespace': u'rpms', 
-      	u'repo': u'php-simplepie', 
-            u'status': u'<success/aborted>',
-            u'test_guidance': u'<comma-separated-list-of-test-suites-to-run>'},
-  u'msg_id': u'2015-4b5aae66-b713-4c22-bb4a-1277d4402375',
-  u'timestamp': 1379638157.759283,
-  u'topic': u'org.centos.prod.ci.pipeline.compose.queued',
-  u'username': u'fedora-atomic'
+  "i": 1,
+  "timestamp": 1496382015, 
+  "msg_id": "2017-f2b46ca1-1b07-4539-8d86-f7d3cb1b5934", 
+  "crypto": "x509", 
+  "topic": "org.centos.prod.ci.pipeline.compose.queued",   
+  'msg': { 
+        "CI_TYPE": "custom", 
+        "CI_NAME": "ci-pipeline-ostree-compose",
+        "topic": "org.centos.prod.ci.pipeline.compose.queued",
+        "build_id": "79", 
+        "build_url": "https://ci.centos.org/job/ci-pipeline-ostree-compose/79/",
+        "branch": "f26",
+        "ref": "fedora/f26/x86_64/atomic-host",
+        "rev": "0546fa18041a8ca223f4f441dc1868fc81ddce0f", 
+        "repo": "perl", 
+        "namespace": "rpms", 
+        "username": "fedora-atomic", 
+        "test_guidance": "<comma-separated-list-of-test-suites-to-run>",
+        "message-content": "",
+        "status": "<success/failure>"
+  }
 }
 ````
 
@@ -392,20 +460,27 @@ email=jchaloup@redhat.com
 
 ````
 { 
-  u'i': 1,
-  u'msg': { u'build_url': u'<full-jenkins-url-to-build>',
-            u'compose_url': u'<full-url-to-compose>',
-            u'build_id': <Jenkins-build-id-number>,
-            u'ref': u'fedora/rawhide/${basearch}/atomic-host',
-      	u'rev': u'<sha of the commit from dist-git>', 
-      	u'namespace': u'rpms', 
-      	u'repo': u'php-simplepie', 
-            u'status': u'<success/aborted>',
-            u'test_guidance': u'<comma-separated-list-of-test-suites-to-run>'},
-  u'msg_id': u'2015-4b5aae66-b713-4c22-bb4a-1277d4402375',
-  u'timestamp': 1379638157.759283,
-  u'topic': u'org.centos.prod.ci.pipeline.compose.running',
-  u'username': u'fedora-atomic'
+  "i": 1,
+  "timestamp": 1496382015, 
+  "msg_id": "2017-f2b46ca1-1b07-4539-8d86-f7d3cb1b5934", 
+  "crypto": "x509", 
+  "topic": "org.centos.prod.ci.pipeline.compose.running",   
+  'msg': { 
+        "CI_TYPE": "custom", 
+        "CI_NAME": "ci-pipeline-ostree-compose",
+        "topic": "org.centos.prod.ci.pipeline.compose.running",
+        "build_id": "79", 
+        "build_url": "https://ci.centos.org/job/ci-pipeline-ostree-compose/79/",
+        "branch": "f26",
+        "ref": "fedora/f26/x86_64/atomic-host",
+        "rev": "0546fa18041a8ca223f4f441dc1868fc81ddce0f", 
+        "repo": "perl", 
+        "namespace": "rpms", 
+        "username": "fedora-atomic", 
+        "test_guidance": "<comma-separated-list-of-test-suites-to-run>",
+        "message-content": "",
+        "status": "<success/failure>"
+  }
 }
 ````
 
@@ -413,20 +488,28 @@ email=jchaloup@redhat.com
 
 ````
 { 
-  u'i': 1,
-  u'msg': { u'build_url': u'<full-jenkins-url-to-build>',
-            u'compose_url': u'<full-url-to-compose>',
-            u'build_id': <Jenkins-build-id-number>,
-            u'ref': u'fedora/rawhide/${basearch}/atomic-host',
-      	u'rev': u'<sha of the commit from dist-git>', 
-      	u'namespace': u'rpms', 
-      	u'repo': u'php-simplepie', 
-            u'status': u'<success/failure/aborted>',
-            u'test_guidance': u'<comma-separated-list-of-test-suites-to-run>'},
-  u'msg_id': u'2015-4b5aae66-b713-4c22-bb4a-1277d4402375',
-  u'timestamp': 1379638157.759283,
-  u'topic': u'org.centos.prod.ci.pipeline.compose.test.integration.complete',
-  u'username': u'fedora-atomic'
+  "i": 1,
+  "timestamp": 1496382015, 
+  "msg_id": "2017-f2b46ca1-1b07-4539-8d86-f7d3cb1b5934", 
+  "crypto": "x509", 
+  "topic": "org.centos.prod.ci.pipeline.test.integration.complete",   
+  'msg': { 
+        "CI_TYPE": "custom", 
+        "CI_NAME": "ci-pipeline-ostree-boot-sanity",
+        "topic": "org.centos.prod.ci.pipeline.test.integration.complete",
+        "build_id": "79", 
+        "build_url": "https://ci.centos.org/job/ci-pipeline-ostree-boot-sanity/79/",
+        "compose_url": "http://artifacts.ci.centos.org/artifacts/fedora-atomic/f26/ostree",
+        "branch": "f26",
+        "ref": "fedora/f26/x86_64/atomic-host",
+        "rev": "0546fa18041a8ca223f4f441dc1868fc81ddce0f", 
+        "repo": "perl", 
+        "namespace": "rpms", 
+        "username": "fedora-atomic", 
+        "test_guidance": "<comma-separated-list-of-test-suites-to-run>",
+        "message-content": "",
+        "status": "<success/failure>"
+  }
 }
 ````
 
@@ -434,20 +517,27 @@ email=jchaloup@redhat.com
 
 ````
 { 
-  u'i': 1,
-  u'msg': { u'build_url': u'<full-jenkins-url-to-build>',
-            u'compose_url': u'<full-url-to-compose>',
-            u'build_id': <Jenkins-build-id-number>,
-            u'ref': u'fedora/rawhide/${basearch}/atomic-host',
-      	u'rev': u'<sha of the commit from dist-git>', 
-      	u'namespace': u'rpms', 
-      	u'repo': u'php-simplepie', 
-            u'status': u'<success/aborted>',
-            u'test_guidance': u'<comma-separated-list-of-test-suites-to-run>'},
-  u'msg_id': u'2015-4b5aae66-b713-4c22-bb4a-1277d4402375',
-  u'timestamp': 1379638157.759283,
-  u'topic': u'org.centos.prod.ci.pipeline.compose.test.integration.queued',
-  u'username': u'fedora-atomic'
+  "i": 1,
+  "timestamp": 1496382015, 
+  "msg_id": "2017-f2b46ca1-1b07-4539-8d86-f7d3cb1b5934", 
+  "crypto": "x509", 
+  "topic": "org.centos.prod.ci.pipeline.test.integration.queued",   
+  'msg': { 
+        "CI_TYPE": "custom", 
+        "CI_NAME": "ci-pipeline-ostree-boot-sanity",
+        "topic": "org.centos.prod.ci.pipeline.test.integration.queued",
+        "build_id": "79", 
+        "build_url": "https://ci.centos.org/job/ci-pipeline-ostree-boot-sanity/79/",
+        "branch": "f26",
+        "ref": "fedora/f26/x86_64/atomic-host",
+        "rev": "0546fa18041a8ca223f4f441dc1868fc81ddce0f", 
+        "repo": "perl", 
+        "namespace": "rpms", 
+        "username": "fedora-atomic", 
+        "test_guidance": "<comma-separated-list-of-test-suites-to-run>",
+        "message-content": "",
+        "status": "<success/failure>"
+  }
 }
 ````
 
@@ -455,20 +545,27 @@ email=jchaloup@redhat.com
 
 ````
 { 
-  u'i': 1,
-  u'msg': { u'build_url': u'<full-jenkins-url-to-build>',
-            u'compose_url': u'<full-url-to-compose>',
-            u'build_id': <Jenkins-build-id-number>,
-            u'ref': u'fedora/rawhide/${basearch}/atomic-host',
-      	u'rev': u'<sha of the commit from dist-git>', 
-      	u'namespace': u'rpms', 
-      	u'repo': u'php-simplepie', 
-            u'status': u'<success/aborted>',
-            u'test_guidance': u'<comma-separated-list-of-test-suites-to-run>'},
-  u'msg_id': u'2015-4b5aae66-b713-4c22-bb4a-1277d4402375',
-  u'timestamp': 1379638157.759283,
-  u'topic': u'org.centos.prod.ci.pipeline.compose.test.integration.running',
-  u'username': u'fedora-atomic'
+  "i": 1,
+  "timestamp": 1496382015, 
+  "msg_id": "2017-f2b46ca1-1b07-4539-8d86-f7d3cb1b5934", 
+  "crypto": "x509", 
+  "topic": "org.centos.prod.ci.pipeline.test.integration.running",   
+  'msg': { 
+        "CI_TYPE": "custom", 
+        "CI_NAME": "ci-pipeline-ostree-boot-sanity",
+        "topic": "org.centos.prod.ci.pipeline.test.integration.running",
+        "build_id": "79", 
+        "build_url": "https://ci.centos.org/job/ci-pipeline-ostree-boot-sanity/79/",
+        "branch": "f26",
+        "ref": "fedora/f26/x86_64/atomic-host",
+        "rev": "0546fa18041a8ca223f4f441dc1868fc81ddce0f", 
+        "repo": "perl", 
+        "namespace": "rpms", 
+        "username": "fedora-atomic", 
+        "test_guidance": "<comma-separated-list-of-test-suites-to-run>",
+        "message-content": "",
+        "status": "<success/failure>"
+  }
 }
 ````
 
@@ -476,24 +573,32 @@ email=jchaloup@redhat.com
 
 ````
 { 
-  u'i': 1,
-  u'msg': { u'build_url': u'<full-jenkins-url-to-build>',
-            u'image_url': u'<full-url-to-image>',
-            u'image_name': u'<image-name-with-nvr>',
-            u'build_id': <Jenkins-build-id-number>,
-            u'ref': u'fedora/rawhide/${basearch}/atomic-host',
-      	u'rev': u'<sha of the commit from dist-git>', 
-      	u'namespace': u'rpms', 
-      	u'repo': u'php-simplepie', 
-            u'compose_url': ‘<full-url-to-compose>’,
-            u'compose_rev': ‘<sha1-compose-release>’,
-            u'status': u'<success/failure/aborted>',
-            u'test_guidance': u'<comma-separated-list-of-test-suites-to-run>',
-            u'type': u'qcow2'},
-  u'msg_id': u'2015-4b5aae66-b713-4c22-bb4a-1277d4402375',
-  u'timestamp': 1379638157.759283,
-  u'topic': u'org.centos.prod.ci.pipeline.image.complete’,
-  u'username': u'fedora-atomic'
+  "i": 1,
+  "timestamp": 1496382015, 
+  "msg_id": "2017-f2b46ca1-1b07-4539-8d86-f7d3cb1b5934", 
+  "crypto": "x509", 
+  "topic": "org.centos.prod.ci.pipeline.image.complete",   
+  'msg': { 
+        "CI_TYPE": "custom", 
+        "CI_NAME": "ci-pipeline-ostree-image-compose",
+        "topic": "org.centos.prod.ci.pipeline.image.complete",
+        "build_id": "82", 
+        "build_url": "https://ci.centos.org/job/ci-pipeline-ostree-image-compose/82/",
+        "image_url": "http://artifacts.ci.centos.org/artifacts/fedora-atomic/f26/images/fedora-atomic-26.85-c2dcff5e8d4637a.qcow2",
+        "image_name": "fedora-atomic-26.85-c2dcff5e8d4637a.qcow2",
+        "type": "qcow2",
+        "compose_url": "http://artifacts.ci.centos.org/artifacts/fedora-atomic/f26/ostree",
+        "compose_rev": "c2dcff5e8d4637a6cb19dd0f3e867b48b3d3b6fa0528dd2d64de23169f9221df",
+        "branch": "f26",
+        "ref": "fedora/f26/x86_64/atomic-host",
+        "rev": "N/A", 
+        "repo": "N/A", 
+        "namespace": "rpms", 
+        "username": "fedora-atomic", 
+        "test_guidance": "<comma-separated-list-of-test-suites-to-run>",
+        "message-content": "",
+        "status": "<success/failure>"
+  }
 }
 ````
 
@@ -501,24 +606,32 @@ email=jchaloup@redhat.com
 
 ````
 { 
-  u'i': 1,
-  u'msg': { u'build_url': u'<full-jenkins-url-to-build>',
-            u'image_url': u'<full-url-to-image>',
-            u'image_name’': u'fedora-rawhide-arch-atomic-host-timestamp',
-            u'build_id': <Jenkins-build-id-number>,
-            u'ref': u'fedora/rawhide/${basearch}/atomic-host',
-      	u'rev': u'<sha of the commit from dist-git>', 
-      	u'namespace': u'rpms', 
-      	u'repo': u'php-simplepie', 
-            u'compose_url': ‘<full-url-to-compose>’,
-            u'compose_rev': ‘<sha1-compose-release>’,
-            u'status': u'<success/aborted>',
-            u'test_guidance': u'<comma-separated-list-of-test-suites-to-run>',
-            u'type': u'qcow2'},
-  u'msg_id': u'2015-4b5aae66-b713-4c22-bb4a-1277d4402375',
-  u'timestamp': 1379638157.759283,
-  u'topic': u'org.centos.prod.ci.pipeline.image.queued',
-  u'username': u'fedora-atomic'
+  "i": 1,
+  "timestamp": 1496382015, 
+  "msg_id": "2017-f2b46ca1-1b07-4539-8d86-f7d3cb1b5934", 
+  "crypto": "x509", 
+  "topic": "org.centos.prod.ci.pipeline.image.queued",   
+  'msg': { 
+        "CI_TYPE": "custom", 
+        "CI_NAME": "ci-pipeline-ostree-image-compose",
+        "topic": "org.centos.prod.ci.pipeline.image.queued",
+        "build_id": "82", 
+        "build_url": "https://ci.centos.org/job/ci-pipeline-ostree-image-compose/82/",
+        "image_url": "N/A",
+        "image_name": "N/A",
+        "type": "qcow2",
+        "compose_url": "http://artifacts.ci.centos.org/artifacts/fedora-atomic/f26/ostree",
+        "compose_rev": "c2dcff5e8d4637a6cb19dd0f3e867b48b3d3b6fa0528dd2d64de23169f9221df",
+        "branch": "f26",
+        "ref": "fedora/f26/x86_64/atomic-host",
+        "rev": "N/A", 
+        "repo": "N/A", 
+        "namespace": "rpms", 
+        "username": "fedora-atomic", 
+        "test_guidance": "<comma-separated-list-of-test-suites-to-run>",
+        "message-content": "",
+        "status": "<success/failure>"
+  }
 }
 ````
 
@@ -526,24 +639,32 @@ email=jchaloup@redhat.com
 
 ````
 { 
-  u'i': 1,
-  u'msg': { u'build_url': u'<full-jenkins-url-to-build>',
-            u'image_url': u'<full-url-to-image>',
-            u'image_name’': u'fedora-rawhide-arch-atomic-host-timestamp',
-            u'build_id': <Jenkins-build-id-number>,
-            u'ref': u'fedora/rawhide/${basearch}/atomic-host',
-      	u'rev': u'<sha of the commit from dist-git>', 
-      	u'namespace': u'rpms', 
-      	u'repo': u'php-simplepie', 
-            u'compose_url': ‘<full-url-to-compose>’,
-            u'compose_rev': ‘<sha1-compose-release>’,
-            u'status': u'<success/aborted>',
-            u'test_guidance': u'<comma-separated-list-of-test-suites-to-run>',
-            u'type': u'qcow2'},
-  u'msg_id': u'2015-4b5aae66-b713-4c22-bb4a-1277d4402375',
-  u'timestamp': 1379638157.759283,
-  u'topic': u'org.centos.prod.ci.pipeline.image.running',
-  u'username': u'fedora-atomic'
+  "i": 1,
+  "timestamp": 1496382015, 
+  "msg_id": "2017-f2b46ca1-1b07-4539-8d86-f7d3cb1b5934", 
+  "crypto": "x509", 
+  "topic": "org.centos.prod.ci.pipeline.image.running",   
+  'msg': { 
+        "CI_TYPE": "custom", 
+        "CI_NAME": "ci-pipeline-ostree-image-compose",
+        "topic": "org.centos.prod.ci.pipeline.image.running",
+        "build_id": "82", 
+        "build_url": "https://ci.centos.org/job/ci-pipeline-ostree-image-compose/82/",
+        "image_url": "N/A",
+        "image_name": "N/A",
+        "type": "qcow2",
+        "compose_url": "http://artifacts.ci.centos.org/artifacts/fedora-atomic/f26/ostree",
+        "compose_rev": "c2dcff5e8d4637a6cb19dd0f3e867b48b3d3b6fa0528dd2d64de23169f9221df",
+        "branch": "f26",
+        "ref": "fedora/f26/x86_64/atomic-host",
+        "rev": "N/A", 
+        "repo": "N/A", 
+        "namespace": "rpms", 
+        "username": "fedora-atomic", 
+        "test_guidance": "<comma-separated-list-of-test-suites-to-run>",
+        "message-content": "",
+        "status": "<success/failure>"
+  }
 }
 ````
 
@@ -551,24 +672,32 @@ email=jchaloup@redhat.com
 
 ````
 { 
-  u'i': 1,
-  u'msg': { u'build_url': u'<full-jenkins-url-to-build>',
-            u'image_url': u'<full-url-to-image>',
-            u'image_name': u'<image-name-with-nvr>',
-            u'build_id': <Jenkins-build-id-number>,
-            u'ref': u'fedora/rawhide/${basearch}/atomic-host',
-      	u'rev': u'<sha of the commit from dist-git>', 
-      	u'namespace': u'rpms', 
-      	u'repo': u'php-simplepie', 
-            u'compose_url': ‘<full-url-to-compose>’,
-            u'compose_rev': ‘<sha1-compose-release>’,
-            u'status': u'<success/failure/aborted>',
-            u'test_guidance': u'<comma-separated-list-of-test-suites-to-run>',
-            u'type': u'qcow2'},
-  u'msg_id': u'2015-4b5aae66-b713-4c22-bb4a-1277d4402375',
-  u'timestamp': 1379638157.759283,
-  u'topic': u'org.centos.prod.ci.pipeline.image.test.smoke.complete’,
-  u'username': u'fedora-atomic'
+  "i": 1,
+  "timestamp": 1496382015, 
+  "msg_id": "2017-f2b46ca1-1b07-4539-8d86-f7d3cb1b5934", 
+  "crypto": "x509", 
+  "topic": "org.centos.prod.ci.pipeline.image.test.smoke.complete",   
+  'msg': { 
+        "CI_TYPE": "custom", 
+        "CI_NAME": "ci-pipeline-ostree-image-boot-sanity",
+        "topic": "org.centos.prod.ci.pipeline.image.test.smoke.complete",
+        "build_id": "82", 
+        "build_url": "https://ci.centos.org/job/cci-pipeline-ostree-image-boot-sanity/82/",
+        "image_url": "http://artifacts.ci.centos.org/artifacts/fedora-atomic/f26/images/fedora-atomic-26.85-c2dcff5e8d4637a.qcow2",
+        "image_name": "fedora-atomic-26.85-c2dcff5e8d4637a.qcow2",
+        "type": "qcow2",
+        "compose_url": "http://artifacts.ci.centos.org/artifacts/fedora-atomic/f26/ostree",
+        "compose_rev": "c2dcff5e8d4637a6cb19dd0f3e867b48b3d3b6fa0528dd2d64de23169f9221df",
+        "branch": "f26",
+        "ref": "fedora/f26/x86_64/atomic-host",
+        "rev": "N/A", 
+        "repo": "N/A", 
+        "namespace": "rpms", 
+        "username": "fedora-atomic", 
+        "test_guidance": "<comma-separated-list-of-test-suites-to-run>",
+        "message-content": "",
+        "status": "<success/failure>"
+  }
 }
 ````
 
@@ -576,24 +705,32 @@ email=jchaloup@redhat.com
 
 ````
 { 
-  u'i': 1,
-  u'msg': { u'build_url': u'<full-jenkins-url-to-build>',
-            u'image_url': u'<full-url-to-image>',
-            u'image_name’': u'fedora-rawhide-arch-atomic-host-timestamp',
-            u'build_id': <Jenkins-build-id-number>,
-            u'ref': u'fedora/rawhide/${basearch}/atomic-host',
-      	u'rev': u'<sha of the commit from dist-git>', 
-      	u'namespace': u'rpms', 
-      	u'repo': u'php-simplepie', 
-            u'compose_url': ‘<full-url-to-compose>’,
-            u'compose_rev': ‘<sha1-compose-release>’,
-            u'status': u'<success/aborted>',
-            u'test_guidance': u'<comma-separated-list-of-test-suites-to-run>',
-            u'type': u'qcow2'},
-  u'msg_id': u'2015-4b5aae66-b713-4c22-bb4a-1277d4402375',
-  u'timestamp': 1379638157.759283,
-  u'topic': u'org.centos.prod.ci.pipeline.image.test.smoke.queued',
-  u'username': u'fedora-atomic'
+  "i": 1,
+  "timestamp": 1496382015, 
+  "msg_id": "2017-f2b46ca1-1b07-4539-8d86-f7d3cb1b5934", 
+  "crypto": "x509", 
+  "topic": "org.centos.prod.ci.pipeline.image.test.smoke.queued",   
+  'msg': { 
+        "CI_TYPE": "custom", 
+        "CI_NAME": "ci-pipeline-ostree-image-boot-sanity",
+        "topic": "org.centos.prod.ci.pipeline.image.test.smoke.queued",
+        "build_id": "82", 
+        "build_url": "https://ci.centos.org/job/cci-pipeline-ostree-image-boot-sanity/82/",
+        "image_url": "N/A",
+        "image_name": "N/A",
+        "type": "qcow2",
+        "compose_url": "http://artifacts.ci.centos.org/artifacts/fedora-atomic/f26/ostree",
+        "compose_rev": "c2dcff5e8d4637a6cb19dd0f3e867b48b3d3b6fa0528dd2d64de23169f9221df",
+        "branch": "f26",
+        "ref": "fedora/f26/x86_64/atomic-host",
+        "rev": "N/A", 
+        "repo": "N/A", 
+        "namespace": "rpms", 
+        "username": "fedora-atomic", 
+        "test_guidance": "<comma-separated-list-of-test-suites-to-run>",
+        "message-content": "",
+        "status": "<success/failure>"
+  }
 }
 ````
 
@@ -601,24 +738,32 @@ email=jchaloup@redhat.com
 
 ````
 { 
-  u'i': 1,
-  u'msg': { u'build_url': u'<full-jenkins-url-to-build>',
-            u'image_url': u'<full-url-to-image>',
-            u'image_name’': u'fedora-rawhide-arch-atomic-host-timestamp',
-            u'build_id': <Jenkins-build-id-number>,
-            u'ref': u'fedora/rawhide/${basearch}/atomic-host',
-      	u'rev': u'<sha of the commit from dist-git>', 
-      	u'namespace': u'rpms', 
-      	u'repo': u'php-simplepie', 
-            u'compose_url': ‘<full-url-to-compose>’,
-            u'compose_rev': ‘<sha1-compose-release>’,
-            u'status': u'<success/aborted>',
-            u'test_guidance': u'<comma-separated-list-of-test-suites-to-run>',
-            u'type': u'qcow2'},
-  u'msg_id': u'2015-4b5aae66-b713-4c22-bb4a-1277d4402375',
-  u'timestamp': 1379638157.759283,
-  u'topic': u'org.centos.prod.ci.pipeline.image.test.smoke.running',
-  u'username': u'fedora-atomic'
+  "i": 1,
+  "timestamp": 1496382015, 
+  "msg_id": "2017-f2b46ca1-1b07-4539-8d86-f7d3cb1b5934", 
+  "crypto": "x509", 
+  "topic": "org.centos.prod.ci.pipeline.image.test.smoke.queued",   
+  'msg': { 
+        "CI_TYPE": "custom", 
+        "CI_NAME": "ci-pipeline-ostree-image-boot-sanity",
+        "topic": "org.centos.prod.ci.pipeline.image.test.smoke.queued",
+        "build_id": "82", 
+        "build_url": "https://ci.centos.org/job/cci-pipeline-ostree-image-boot-sanity/82/",
+        "image_url": "N/A",
+        "image_name": "N/A",
+        "type": "qcow2",
+        "compose_url": "http://artifacts.ci.centos.org/artifacts/fedora-atomic/f26/ostree",
+        "compose_rev": "c2dcff5e8d4637a6cb19dd0f3e867b48b3d3b6fa0528dd2d64de23169f9221df",
+        "branch": "f26",
+        "ref": "fedora/f26/x86_64/atomic-host",
+        "rev": "N/A", 
+        "repo": "N/A", 
+        "namespace": "rpms", 
+        "username": "fedora-atomic", 
+        "test_guidance": "<comma-separated-list-of-test-suites-to-run>",
+        "message-content": "",
+        "status": "<success/failure>"
+  }
 }
 ````
 

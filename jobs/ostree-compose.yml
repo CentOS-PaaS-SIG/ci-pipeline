@@ -90,6 +90,7 @@
                 export JENKINS_JOB_NAME="${JOB_NAME}"
                 export JENKINS_BUILD_TAG="${BUILD_TAG}"
                 export OSTREE_BRANCH="${OSTREE_BRANCH:-}"
+            timeout: 3600
             playbook: sig-atomic-buildscripts/centos-ci/setup/setup-system.yml
         - inject:
             properties-file: ${WORKSPACE}/logs/ostree.props
@@ -168,6 +169,7 @@
                 export JENKINS_JOB_NAME="${JOB_NAME}"
                 export JENKINS_BUILD_TAG="${BUILD_TAG}"
                 export OSTREE_BRANCH="${OSTREE_BRANCH:-}"
+            timeout: 3600
             playbook: sig-atomic-buildscripts/centos-ci/setup/setup-system.yml
         - inject:
             properties-file: ${WORKSPACE}/logs/ostree.props
@@ -237,6 +239,7 @@
                 export JENKINS_BUILD_TAG="${BUILD_TAG}"
                 export OSTREE_BRANCH="${OSTREE_BRANCH:-}"
                 export ANSIBLE_HOST_KEY_CHECKING="False"
+            timeout: 3600
             playbook: sig-atomic-buildscripts/centos-ci/setup/setup-system.yml
     publishers:
         - ci-pipeline-duffy-publisher
@@ -327,6 +330,7 @@
                 export JENKINS_BUILD_TAG="${BUILD_TAG}"
                 export OSTREE_BRANCH="${OSTREE_BRANCH:-}"
                 export ANSIBLE_HOST_KEY_CHECKING="False"
+            timeout: 3600
             playbook: sig-atomic-buildscripts/centos-ci/setup/setup-system.yml
     publishers:
         - ci-pipeline-duffy-publisher
