@@ -1,6 +1,7 @@
 - job:
     name: ci-pipeline-rpmbuild
     defaults: ci-pipeline-defaults
+    concurrent: true
     parameters:
         - string:
             name: fed_username
