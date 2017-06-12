@@ -10,6 +10,15 @@ else
     VERSION=$(echo $BUILD | sed -e 's/[a-zA-Z]*//')
 fi
 
+# Install and Configure Ansible Run Analysis
+sudo easy_install pip
+sudo pip install ara
+export ara_location=$(python -c "import os,ara; print(os.path.dirname(ara.__file__))")
+export ANSIBLE_CALLBACK_PLUGINS=$ara_location/plugins/callbacks
+export ANSIBLE_ACTION_PLUGINS=$ara_location/plugins/actions
+export ANSIBLE_LIBRARY=$ara_location/plugins/modules
+
+
 REF="fedora/${BUILD}/x86_64/atomic-host"
 
 mkdir -p logs
@@ -25,9 +34,11 @@ tmpdir=$(mktemp -d)
 
 # Kill backgrounded jobs on exit
 function clean_up {
-    ansible-playbook -i hosts ci-pipeline/config/libvirt-setup/setup-libvirt-image.yml -l ostree_compose_slave_baremetal -e 'state=absent'
+    ansible-playbook -i hosts ci-pipeline/playbooks/libvirt-setup/setup-libvirt-image.yml -l ostree_compose_slave_baremetal -e 'state=absent'
     kill $(jobs -p)
     sudo rm -rf $tmpdir
+    ara generate junit - > $currentdir/logs/build.junit
+    rm -rf $HOME/.ara
 }
 trap clean_up EXIT SIGHUP SIGINT SIGTERM
 
@@ -70,7 +81,7 @@ EOF
 # Install net-tools
 sudo yum -y install net-tools
 # Start test VM
-ansible-playbook -i hosts ci-pipeline/config/libvirt-setup/setup-libvirt-image.yml -l ostree_compose_slave_baremetal -e 'state=present'
+ansible-playbook -i hosts ci-pipeline/playbooks/libvirt-setup/setup-libvirt-image.yml -l ostree_compose_slave_baremetal -e 'state=present'
 
 PROVISION_STATUS=$?
 if [ "$PROVISION_STATUS" != 0 ]; then
@@ -86,7 +97,7 @@ cat << EOF > inventory
 $IP ansible_user=admin ansible_ssh_pass=admin ansible_become=true ansible_become_pass=admin
 EOF
 
-ansible-playbook -i inventory ci-pipeline/tasks/ostree-boot-verify.yml -l ostree_compose_slave -e "commit=$commit" -v
+ansible-playbook -i inventory ci-pipeline/playbooks/ostree-boot-verify.yml -l ostree_compose_slave -e "commit=$commit" -v
 
 BOOT_STATUS=$?
 if [ "$BOOT_STATUS" != 0 ]; then
