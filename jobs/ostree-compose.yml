@@ -13,14 +13,6 @@
     name: junit-report
     publishers:
         - xunit:
-            thresholdmode: 'number'
-            thresholds:
-              - failed:
-                    unstablenew: 0
-                    failurenew: 0
-              - skipped:
-                    unstablenew: 0
-                    failurenew: 0
             types:
                 - junit:
                     pattern: "logs/*.xml"
