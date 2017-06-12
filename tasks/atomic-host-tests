@@ -27,7 +27,7 @@ tmpdir=$(mktemp -d)
 
 # Kill backgrounded jobs on exit
 function clean_up {
-    ansible-playbook -i hosts ci-pipeline/config/libvirt-setup/setup-libvirt-image.yml -l atomic_host_tests_slave -e 'state=absent'
+    ansible-playbook -i hosts ci-pipeline/playbooks/libvirt-setup/setup-libvirt-image.yml -l atomic_host_tests_slave -e 'state=absent'
     kill $(jobs -p)
     sudo rm -rf $tmpdir
 }
@@ -72,7 +72,7 @@ EOF
 # Install net-tools
 sudo yum -y install net-tools
 # Start test VM
-ansible-playbook -i hosts ci-pipeline/config/libvirt-setup/setup-libvirt-image.yml -l atomic_host_tests_slave -e 'state=present'
+ansible-playbook -i hosts ci-pipeline/playbooks/libvirt-setup/setup-libvirt-image.yml -l atomic_host_tests_slave -e 'state=present'
 
 PROVISION_STATUS=$?
 if [ "$PROVISION_STATUS" != 0 ]; then
