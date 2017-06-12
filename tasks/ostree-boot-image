@@ -37,7 +37,7 @@ function clean_up {
     ansible-playbook -i hosts ci-pipeline/playbooks/libvirt-setup/setup-libvirt-image.yml -l ostree_compose_slave_baremetal -e 'state=absent'
     kill $(jobs -p)
     sudo rm -rf $tmpdir
-    ara generate junit - > $currentdir/logs/build.junit
+    ara generate junit - > $currentdir/logs/build_junit.xml
     rm -rf $HOME/.ara
 }
 trap clean_up EXIT SIGHUP SIGINT SIGTERM
