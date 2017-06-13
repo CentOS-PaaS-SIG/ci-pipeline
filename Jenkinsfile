@@ -22,6 +22,7 @@ node('fedora-atomic') {
                 deleteDir()
                 stage('ci-pipeline-rpmbuild-trigger') {
                     def current_stage = "ci-pipeline-rpmbuild-trigger"
+                    env.basearch = "x86_64"
 
                     // Python script to parse the ${CI_MESSAGE}
                     writeFile file: "${env.WORKSPACE}/parse_fedmsg.py",
@@ -46,6 +47,9 @@ node('fedora-atomic') {
                         # Write fedmsg fields to a file to inject them
                         if [ -n "${CI_MESSAGE}" ]; then
                             echo ${CI_MESSAGE} | ${WORKSPACE}/parse_fedmsg.py > fedmsg_fields.txt
+                            sed -i '/^\\\\s*$/d' ${WORKSPACE}/fedmsg_fields.txt
+                            grep fed ${WORKSPACE}/fedmsg_fields.txt > ${WORKSPACE}/fedmsg_fields.txt.tmp
+                            mv ${WORKSPACE}/fedmsg_fields.txt.tmp ${WORKSPACE}/fedmsg_fields.txt
                         fi
                     '''
 
@@ -63,13 +67,12 @@ node('fedora-atomic') {
                           branch="rawhide"
                         fi
                         echo "branch=${branch}" >> ${WORKSPACE}/job.properties
-                        #echo "namespace=${namespace}" >> ${WORKSPACE}/job.properties
                         
                         # Verify this is a branch in our list of targets defined above in the parameters
                         if [[ ! "${fed_branch}" =~ "${TARGETS}" ]]; then
                             echo "${fed_branch} is not in the list"
                             echo "topic=org.centos.prod.ci.pipeline.package.ignore" >> ${WORKSPACE}/job.properties
-                        elif                                           
+                        else                                           
                             # Verify this is a package we are interested in
                             valid=0
                             for package in $(cat ${PROJECT_REPO}/config/package_list); do
@@ -133,7 +136,6 @@ node('fedora-atomic') {
                         env.ref = "fedora/${branch}/${basearch}/atomic-host"
                         env.repo = "${fed_repo}"
                         env.rev = "${fed_rev}"
-                        env.basearch = "x86_64"
                         env.ANSIBLE_HOST_KEY_CHECKING = "False"
                         env.DUFFY_OP = "--allocate"
 
@@ -666,7 +668,7 @@ node('fedora-atomic') {
                 currentBuild.displayName = "Build# - ${env.BUILD_NUMBER}"
                 currentBuild.description = "${currentBuild.result}"
                 //emailext subject: "${env.JOB_NAME} - Build # ${env.BUILD_NUMBER} - STATUS = ${currentBuild.result}", to: "ari@redhat.com", body: "This pipeline was a ${currentBuild.result}"
-                step([$class: 'ArtifactArchiver', allowEmptyArchive: true, artifacts: '**/logs/**,*.txt,**/job.*,**/inventory.*', excludes: '**/*.example', fingerprint: true])
+                step([$class: 'ArtifactArchiver', allowEmptyArchive: true, artifacts: '**/logs/**,*.txt,*.groovy,**/job.*,**/inventory.*', excludes: '**/*.example', fingerprint: true])
             }
         }
     }
