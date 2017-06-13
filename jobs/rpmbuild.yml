@@ -98,7 +98,7 @@
                 export fed_branch="${fed_branch}"
                 export fed_rev="${fed_rev}"
             timeout: 3600
-            playbook: ci-pipeline/config/duffy-setup/setup-rpmbuild-system.yml
+            playbook: ci-pipeline/playbooks/duffy-setup/setup-rpmbuild-system.yml
         - inject:
             properties-file: ${WORKSPACE}/logs/description.txt
 #        - system-groovy:

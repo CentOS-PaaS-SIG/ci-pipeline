@@ -27,7 +27,7 @@ tmpdir=$(mktemp -d)
 
 # Kill backgrounded jobs on exit
 function clean_up {
-    ansible-playbook -i hosts ci-pipeline/config/libvirt-setup/setup-libvirt-image.yml -l atomic_host_tests_slave -e 'state=absent'
+    ansible-playbook -i hosts ci-pipeline/playbooks/libvirt-setup/setup-libvirt-image.yml -l atomic_host_tests_slave -e 'state=absent'
     kill $(jobs -p)
     sudo rm -rf $tmpdir
 }
@@ -72,7 +72,7 @@ EOF
 # Install net-tools
 sudo yum -y install net-tools
 # Start test VM
-ansible-playbook -i hosts ci-pipeline/config/libvirt-setup/setup-libvirt-image.yml -l atomic_host_tests_slave -e 'state=present'
+ansible-playbook -i hosts ci-pipeline/playbooks/libvirt-setup/setup-libvirt-image.yml -l atomic_host_tests_slave -e 'state=present'
 
 PROVISION_STATUS=$?
 if [ "$PROVISION_STATUS" != 0 ]; then
@@ -96,7 +96,7 @@ ansible-playbook -i ${HOMEDIR}/ansible_inventory.txt -l testsystems ${base_dir}/
 if [ "$?" != 0 ]; then echo "ERROR: Failed to set up ostree with proper rpms: $?"; exit 1; fi
 
 # All tests currently available are admin-unlock, docker-build-httpd, docker-swarm, docker, improved-sanity-test, k8-cluster, pkg-layering, runc, system-containers, unique-machine-id
-ENABLED_TESTS="admin-unlock docker-swarm docker pkg-layering system-containers"
+ENABLED_TESTS="admin-unlock docker-build-httpd docker-swarm docker pkg-layering rpm-ostree system-containers"
 
 # Test the atomic host with playbooks from https://github.com/projectatomic/atomic-host-tests
 git clone https://github.com/projectatomic/atomic-host-tests
@@ -113,7 +113,11 @@ cat << EOF >> ${HOMEDIR}/logs/ansible_xunit.xml
 EOF
 
 for test in $ENABLED_TESTS; do
-     ansible-playbook -i ${HOMEDIR}/ansible_inventory.txt -l testsystems tests/$test/main.yml -u root -v > ${HOMEDIR}/logs/${test}.out
+     EXTRA_OPTS=""
+     if [ "$test" = "docker-build-httpd" ]; then
+          EXTRA_OPTS="sshpass -p admin"
+     fi
+     $EXTRA_OPTS ansible-playbook -i ${HOMEDIR}/ansible_inventory.txt -l testsystems tests/$test/main.yml -u root -v > ${HOMEDIR}/logs/${test}.out
      RC=$?
      echo "    <testcase classname=\"ansible-playbook\" name=\"${test}\">" >> ${HOMEDIR}/logs/ansible_xunit.xml
      if [ ${RC} != "0" ]; then

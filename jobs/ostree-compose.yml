@@ -9,6 +9,16 @@
               same-node: true
               condition: SUCCESS
 
+- publisher:
+    name: junit-report
+    publishers:
+        - xunit:
+            types:
+                - junit:
+                    pattern: "logs/*.xml"
+                    stoponerror: true
+                    deleteoutput: false
+
 - builder:
     name: ci-pipeline-ostree-image-trigger
     builders:
@@ -247,6 +257,7 @@
           - project: 'ci-pipeline-atomic-host-tests'
             current-parameters: true
             condition: SUCCESS
+        - junit-report
         - conditional-publisher:
             - condition-kind: current-status
               condition-worst: SUCCESS
