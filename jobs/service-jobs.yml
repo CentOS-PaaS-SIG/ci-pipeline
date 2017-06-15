@@ -38,7 +38,7 @@
             pip install -r jenkins-job-builder/requirements.txt
             pushd jenkins-job-builder
             python setup.py install
-            jenkins-jobs --conf $JJB_CONFIG update $WORKSPACE/{repo-name}/jobs/:$WORKSPACE/{repo-name}/jobs/centos-ci-skeleton/jjb
+            jenkins-jobs --conf $JJB_CONFIG --ignore-cache update $WORKSPACE/{repo-name}/jobs/:$WORKSPACE/{repo-name}/jobs/centos-ci-skeleton/jjb
             popd
     publishers:
         - ci-pipeline-email
