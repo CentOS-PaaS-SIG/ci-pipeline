@@ -69,7 +69,7 @@ node('fedora-atomic') {
                         echo "branch=${branch}" >> ${WORKSPACE}/job.properties
                         
                         # Verify this is a branch in our list of targets defined above in the parameters
-                        if [[ ! "${fed_branch}" =~ "${TARGETS}" ]]; then
+                        if [[ ! "${fed_branch}" =~ ${TARGETS} ]]; then
                             echo "${fed_branch} is not in the list"
                             echo "topic=org.centos.prod.ci.pipeline.package.ignore" >> ${WORKSPACE}/job.properties
                         else                                           
@@ -282,8 +282,7 @@ node('fedora-atomic') {
                         convertProps(ostree_props, ostree_props_groovy)
                         load(ostree_props_groovy)
 
-                        // Teardown resources
-                        current_stage = "ci-pipeline-ostree-compose"
+                        // Teardown resource
                         env.DUFFY_OP="--teardown"
                         allocDuffy("${current_stage}")
 
@@ -545,7 +544,6 @@ node('fedora-atomic') {
                         rsyncResults("$current_stage")
 
                         // Teardown resources
-                        current_stage = "ci-pipeline-ostree-compose"
                         env.DUFFY_OP="--teardown"
                         allocDuffy("${current_stage}")
 
