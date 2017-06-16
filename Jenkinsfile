@@ -1,16 +1,16 @@
-properties(
-        [
-                buildDiscarder(logRotator(artifactDaysToKeepStr: '', artifactNumToKeepStr: '15', daysToKeepStr: '', numToKeepStr: '30')),
-                disableConcurrentBuilds(),
-                parameters(
-                    [
-                        string(description: 'fedmsg msg', name: 'CI_MESSAGE'),
-                        string(defaultValue: '^(f25|f26|master)$', description: 'fedora branch targets', name: 'TARGETS'),
-                        string(defaultValue: 'ci-pipeline', description: 'Main project repo', name: 'PROJECT_REPO'),
-                    ]
-                )
-        ]
-)
+//properties(
+//        [
+//                buildDiscarder(logRotator(artifactDaysToKeepStr: '', artifactNumToKeepStr: '15', daysToKeepStr: '', numToKeepStr: '30')),
+//                disableConcurrentBuilds(),
+//                parameters(
+//                    [
+//                        string(description: 'fedmsg msg', name: 'CI_MESSAGE'),
+//                        string(defaultValue: '^(f25|f26|master)$', description: 'fedora branch targets', name: 'TARGETS'),
+//                        string(defaultValue: 'ci-pipeline', description: 'Main project repo', name: 'PROJECT_REPO'),
+//                    ]
+//                )
+//        ]
+//)
 
 node('fedora-atomic') {
     ansiColor('xterm') {
