@@ -3,7 +3,7 @@
 #chpasswd: {expire: False}
 #ssh_pwauth: True
 ssh_authorized_keys:
-  - "ssh-rsa {{ item.value.admin_ssh_rsa }}"
+  - "{{ item.value.admin_ssh_rsa }}"
 
 # Add users to the system. Users are added after groups are added.
 users:
@@ -13,7 +13,7 @@ users:
     lock-passwd: false
     passwd: {{ item.value.admin_passwd }}
     ssh-authorized-keys:
-      - ssh-rsa {{ item.value.admin_ssh_rsa }}
+      - {{ item.value.admin_ssh_rsa }}
 
 timezone: UTC
 
