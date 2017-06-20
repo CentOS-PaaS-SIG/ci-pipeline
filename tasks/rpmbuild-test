@@ -28,19 +28,25 @@ mkdir repo
 # Write uuid to a lock file and store a backup
 uuidgen > file.lock
 cp file.lock uuid.saved
-while false; do
+while true; do
      # Check if lock exists on remote server
      while [[ $(rsync --dry-run -avz file.lock fedora-atomic@artifacts.ci.centos.org::fedora-atomic/${RSYNC_BRANCH}/repo/lockdir) != *"file.lock"* ]]; do
           sleep 60
      done
      # Push lock file with uuid to remote server
-     rsync -avz file.lock fedora-atomic@artifacts.ci.centos.org::fedora-atomic/${RSYNC_BRANCH}/repo/lockdir/
+     rsync -avz --ignore-existing file.lock fedora-atomic@artifacts.ci.centos.org::fedora-atomic/${RSYNC_BRANCH}/repo/lockdir/
      # Pull lock file back
      rsync -avz fedora-atomic@artifacts.ci.centos.org::fedora-atomic/${RSYNC_BRANCH}/repo/lockdir/file.lock file.lock
      # If uuid matches, we can proceed
      if [[ $(diff file.lock uuid.saved) == "" ]]; then
           break
      fi
+     # Kill backgrounded jobs on exit
+     function clean_up {
+     # Delete the rsync lock we placed
+     rsync -vr --delete $(mktemp -d)/ fedora-atomic@artifacts.ci.centos.org::fedora-atomic/${RSYNC_BRANCH}/repo/lockdir/
+     }
+     trap clean_up EXIT SIGHUP SIGINT SIGTERM
      sleep 60
 done
 # Rsync the empty directories over first, then the repo directory
@@ -57,7 +63,5 @@ sed -i "/${fed_repo}_repo/d" manifest.txt
 echo "${fed_repo}_repo $(date --utc +%FT%T%Z)" >> manifest.txt
 sort manifest.txt -o manifest.txt
 rsync --delete -stats -a manifest.txt fedora-atomic@artifacts.ci.centos.org::fedora-atomic/${RSYNC_BRANCH}/repo
-# Delete the rsync lock we placed
-rsync -vr --delete $(mktemp -d)/ fedora-atomic@artifacts.ci.centos.org::fedora-atomic/${RSYNC_BRANCH}/repo/lockdir/
 
 exit 0
