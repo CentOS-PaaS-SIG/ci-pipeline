@@ -1,5 +1,6 @@
 - job:
     name: ci-pipeline-atomic-host-tests
+    concurrent: true
     defaults: ci-pipeline-defaults
     parameters:
         - string:
