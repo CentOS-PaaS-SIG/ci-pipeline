@@ -12,6 +12,7 @@ users:
     groups: wheel
     lock-passwd: false
     passwd: {{ item.value.admin_passwd }}
+    sudo: ALL=(ALL) NOPASSWD:ALL
     ssh-authorized-keys:
       - {{ item.value.admin_ssh_rsa }}
 
