@@ -83,17 +83,17 @@
             EOF
             cat task.env
 
-            rsync -Hrlptv --stats -e ssh task.env rsync-password.sh builder@${{DUFFY_HOST}}:${{JOB_NAME}}/${{BUILD_NUMBER}}
+            rsync -Hrlptv --stats -e ssh task.env rsync-password.sh builder@${{DUFFY_HOST}}:${{JOB_NAME}}-${{BUILD_NUMBER}}
             for repo in ci-pipeline sig-atomic-buildscripts; do
-                rsync -Hrlptv --stats --delete -e ssh $repo/ builder@${{DUFFY_HOST}}:${{JOB_NAME}}/${{BUILD_NUMBER}}/$repo
+                rsync -Hrlptv --stats --delete -e ssh $repo/ builder@${{DUFFY_HOST}}:${{JOB_NAME}}-${{BUILD_NUMBER}}/$repo
             done
 
             build_success=true
-            if ! ssh -tt builder@${{DUFFY_HOST}} "pushd ${{JOB_NAME}}/${{BUILD_NUMBER}} && . rsync-password.sh && . task.env && ./ci-pipeline/tasks/{task}"; then
+            if ! ssh -tt builder@${{DUFFY_HOST}} "pushd ${{JOB_NAME}}-${{BUILD_NUMBER}} && . rsync-password.sh && . task.env && ./ci-pipeline/tasks/{task}"; then
                 build_success=false
             fi
 
-            rsync -Hrlptv --stats -e ssh builder@${{DUFFY_HOST}}:${{JOB_NAME}}/${{BUILD_NUMBER}}/logs/ $WORKSPACE/logs || true
+            rsync -Hrlptv --stats -e ssh builder@${{DUFFY_HOST}}:${{JOB_NAME}}-${{BUILD_NUMBER}}/logs/ $WORKSPACE/logs || true
             # Exit with code from the build
             if test "${{build_success}}" = "false"; then
                 echo 'Build failed, see logs above'; exit 1
