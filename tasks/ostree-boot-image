@@ -10,9 +10,6 @@ else
     VERSION=$(echo $BUILD | sed -e 's/[a-zA-Z]*//')
 fi
 
-# Install and Configure Ansible Run Analysis
-sudo easy_install pip
-sudo pip install ara
 export ara_location=$(python -c "import os,ara; print(os.path.dirname(ara.__file__))")
 export ANSIBLE_CALLBACK_PLUGINS=$ara_location/plugins/callbacks
 export ANSIBLE_ACTION_PLUGINS=$ara_location/plugins/actions
@@ -34,10 +31,10 @@ tmpdir=$(mktemp -d)
 
 # Kill backgrounded jobs on exit
 function clean_up {
-    ansible-playbook -i hosts ci-pipeline/playbooks/libvirt-setup/setup-libvirt-image.yml -l ostree_compose_slave_baremetal -e 'state=absent'
+    ansible-playbook -i hosts ci-pipeline/playbooks/setup-libvirt-image.yml -l ostree_compose_slave_baremetal -e 'state=absent'
     kill $(jobs -p)
     sudo rm -rf $tmpdir
-    ara generate junit - > $currentdir/logs/build_junit.xml
+    ara generate junit - > $currentdir/logs/ansible_xunit.xml
     rm -rf $HOME/.ara
 }
 trap clean_up EXIT SIGHUP SIGINT SIGTERM
@@ -81,7 +78,7 @@ EOF
 # Install net-tools
 sudo yum -y install net-tools
 # Start test VM
-ansible-playbook -i hosts ci-pipeline/playbooks/libvirt-setup/setup-libvirt-image.yml -l ostree_compose_slave_baremetal -e 'state=present'
+ansible-playbook -i hosts ci-pipeline/playbooks/setup-libvirt-image.yml -l ostree_compose_slave_baremetal -e 'state=present'
 
 PROVISION_STATUS=$?
 if [ "$PROVISION_STATUS" != 0 ]; then

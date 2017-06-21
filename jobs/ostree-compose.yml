@@ -101,7 +101,7 @@
                 export JENKINS_BUILD_TAG="${BUILD_TAG}"
                 export OSTREE_BRANCH="${OSTREE_BRANCH:-}"
             timeout: 3600
-            playbook: sig-atomic-buildscripts/centos-ci/setup/setup-system.yml
+            playbook: ci-pipeline/playbooks/rdgo-setup.yml
         - inject:
             properties-file: ${WORKSPACE}/logs/ostree.props
             override-build-parameters: true
@@ -180,7 +180,7 @@
                 export JENKINS_BUILD_TAG="${BUILD_TAG}"
                 export OSTREE_BRANCH="${OSTREE_BRANCH:-}"
             timeout: 3600
-            playbook: sig-atomic-buildscripts/centos-ci/setup/setup-system.yml
+            playbook: ci-pipeline/playbooks/rdgo-setup.yml
         - inject:
             properties-file: ${WORKSPACE}/logs/ostree.props
             override-build-parameters: true
@@ -250,7 +250,7 @@
                 export OSTREE_BRANCH="${OSTREE_BRANCH:-}"
                 export ANSIBLE_HOST_KEY_CHECKING="False"
             timeout: 3600
-            playbook: sig-atomic-buildscripts/centos-ci/setup/setup-system.yml
+            playbook: ci-pipeline/playbooks/system-setup.yml
     publishers:
         - ci-pipeline-duffy-publisher
         - trigger-parameterized-builds:
@@ -342,9 +342,10 @@
                 export OSTREE_BRANCH="${OSTREE_BRANCH:-}"
                 export ANSIBLE_HOST_KEY_CHECKING="False"
             timeout: 3600
-            playbook: sig-atomic-buildscripts/centos-ci/setup/setup-system.yml
+            playbook: ci-pipeline/playbooks/system-setup.yml
     publishers:
         - ci-pipeline-duffy-publisher
+        - junit-report
         - jms-messaging:
             override-topic: org.centos.prod.ci.pipeline.image.test.smoke.complete
             provider-name: fedora-fedmsg

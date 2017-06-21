@@ -12,6 +12,11 @@ else
     VERSION=$(echo $BUILD | sed -e 's/[a-zA-Z]*//')
 fi
 
+export ara_location=$(python -c "import os,ara; print(os.path.dirname(ara.__file__))")
+export ANSIBLE_CALLBACK_PLUGINS=$ara_location/plugins/callbacks
+export ANSIBLE_ACTION_PLUGINS=$ara_location/plugins/actions
+export ANSIBLE_LIBRARY=$ara_location/plugins/modules
+
 REF="fedora/${BUILD}/x86_64/atomic-host"
 
 rm -rf logs
@@ -27,9 +32,11 @@ tmpdir=$(mktemp -d)
 
 # Kill backgrounded jobs on exit
 function clean_up {
-    ansible-playbook -i hosts ci-pipeline/playbooks/libvirt-setup/setup-libvirt-image.yml -l atomic_host_tests_slave -e 'state=absent'
+    ansible-playbook -i hosts ci-pipeline/playbooks/setup-libvirt-image.yml -l atomic_host_tests_slave -e 'state=absent'
     kill $(jobs -p)
     sudo rm -rf $tmpdir
+    ara generate junit - > $currentdir/logs/ansible_xunit.xml
+    rm -rf $HOME/.ara
 }
 trap clean_up EXIT SIGHUP SIGINT SIGTERM
 
@@ -72,7 +79,7 @@ EOF
 # Install net-tools
 sudo yum -y install net-tools
 # Start test VM
-ansible-playbook -i hosts ci-pipeline/playbooks/libvirt-setup/setup-libvirt-image.yml -l atomic_host_tests_slave -e 'state=present'
+ansible-playbook -i hosts ci-pipeline/playbooks/setup-libvirt-image.yml -l atomic_host_tests_slave -e 'state=present'
 
 PROVISION_STATUS=$?
 if [ "$PROVISION_STATUS" != 0 ]; then
@@ -105,26 +112,10 @@ pushd atomic-host-tests
 # Do setup steps
 sed -i s/true/false/ tests/docker/vars.yml
 
-# Initiate xunit file
-cat << EOF >> ${HOMEDIR}/logs/ansible_xunit.xml
-<?xml version='1.0' encoding='utf8'?>
-<testsuites>
-  <testsuite tests="0">
-EOF
-
 for test in $ENABLED_TESTS; do
      ansible-playbook -i ${HOMEDIR}/ansible_inventory.txt -l testsystems tests/$test/main.yml -u root -v > ${HOMEDIR}/logs/${test}.out
-     RC=$?
-     echo "    <testcase classname=\"ansible-playbook\" name=\"${test}\">" >> ${HOMEDIR}/logs/ansible_xunit.xml
-     if [ ${RC} != "0" ]; then
-          echo "      <error type=\"${RC}\"/>" >> ${HOMEDIR}/logs/ansible_xunit.xml
-     fi
-     echo "      <system-out></system-out>" >> ${HOMEDIR}/logs/ansible_xunit.xml
-     echo "    </testcase>" >> ${HOMEDIR}/logs/ansible_xunit.xml
      ansible-playbook -i ${HOMEDIR}/ansible_inventory.txt -l testsystems ../${base_dir}/utils/atomic_rollback.yml
 done
-echo "  </testsuite>" >> ${HOMEDIR}/logs/ansible_xunit.xml
-echo "</testsuites>" >> ${HOMEDIR}/logs/ansible_xunit.xml
 
 popd
 

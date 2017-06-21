@@ -37,7 +37,7 @@
                 export BUILD="${fed_branch}"
                 export image2boot="${image2boot:-}"
             timeout: 3600
-            playbook: sig-atomic-buildscripts/centos-ci/setup/setup-system.yml
+            playbook: ci-pipeline/playbooks/system-setup.yml
     publishers:
         - ci-pipeline-duffy-publisher
         - xunit:
