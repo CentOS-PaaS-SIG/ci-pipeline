@@ -1,5 +1,6 @@
 - job:
     name: ci-pipeline-rpmbuild
+    concurrent: true
     defaults: ci-pipeline-defaults
     parameters:
         - string:

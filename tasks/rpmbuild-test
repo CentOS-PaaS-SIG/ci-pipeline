@@ -25,6 +25,30 @@ if [ "${fed_branch}" = "master" ]; then
 fi
 mkdir ${RSYNC_BRANCH}
 mkdir repo
+# Write uuid to a lock file and store a backup
+uuidgen > file.lock
+cp file.lock uuid.saved
+while true; do
+     # Check if lock exists on remote server
+     while [[ $(rsync --dry-run -avz file.lock fedora-atomic@artifacts.ci.centos.org::fedora-atomic/${RSYNC_BRANCH}/repo/lockdir) != *"file.lock"* ]]; do
+          sleep 60
+     done
+     # Push lock file with uuid to remote server
+     rsync -avz --ignore-existing file.lock fedora-atomic@artifacts.ci.centos.org::fedora-atomic/${RSYNC_BRANCH}/repo/lockdir/
+     # Pull lock file back
+     rsync -avz fedora-atomic@artifacts.ci.centos.org::fedora-atomic/${RSYNC_BRANCH}/repo/lockdir/file.lock file.lock
+     # If uuid matches, we can proceed
+     if [[ $(diff file.lock uuid.saved) == "" ]]; then
+          break
+     fi
+     # Kill backgrounded jobs on exit
+     function clean_up {
+     # Delete the rsync lock we placed
+     rsync -vr --delete $(mktemp -d)/ fedora-atomic@artifacts.ci.centos.org::fedora-atomic/${RSYNC_BRANCH}/repo/lockdir/
+     }
+     trap clean_up EXIT SIGHUP SIGINT SIGTERM
+     sleep 60
+done
 # Rsync the empty directories over first, then the repo directory
 rsync -arv ${RSYNC_BRANCH}/ fedora-atomic@artifacts.ci.centos.org::fedora-atomic
 rsync -arv repo/ fedora-atomic@artifacts.ci.centos.org::fedora-atomic/${RSYNC_BRANCH}
