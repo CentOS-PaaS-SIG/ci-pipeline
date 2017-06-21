@@ -16,7 +16,7 @@ objects:
       slave-directory: /var/lib/jenkins
     labels:
       role: jenkins-slave
-    name: jenkins-continuous-infra-slave
+    name: continuous-infra-slave
   spec: {}
 - apiVersion: v1
   kind: BuildConfig
