@@ -129,7 +129,7 @@ node('fedora-atomic') {
                         def current_stage = "ci-pipeline-rpmbuild"
                         env.task = "ci-pipeline/tasks/rpmbuild-test"
                         env.topic = "org.centos.prod.ci.pipeline.package.running"
-                        env.playbook = "ci-pipeline/config/duffy-setup/setup-rpmbuild-system.yml"
+                        env.playbook = "ci-pipeline/playbooks/setup-rpmbuild-system.yml"
                         env.ref = "fedora/${branch}/${basearch}/atomic-host"
                         env.repo = "${fed_repo}"
                         env.rev = "${fed_rev}"
@@ -221,7 +221,7 @@ node('fedora-atomic') {
                         def current_stage="ci-pipeline-ostree-compose"
                         env.task = "./ci-pipeline/tasks/ostree-compose"
                         env.topic = "org.centos.prod.ci.pipeline.compose.running"
-                        env.playbook = "sig-atomic-buildscripts/centos-ci/setup/setup-system.yml"
+                        env.playbook = "ci-pipeline/playbooks/rdgo-setup.yml"
                         env.ref = "fedora/${branch}/${basearch}/atomic-host"
                         env.repo = "${fed_repo}"
                         env.rev = "${fed_rev}"
@@ -294,7 +294,7 @@ node('fedora-atomic') {
                                 // Set groovy and env vars
                                 current_stage = "ci-pipeline-ostree-image-compose"
                                 env.task = "./ci-pipeline/tasks/ostree-image-compose"
-                                env.playbook = "sig-atomic-buildscripts/centos-ci/setup/setup-system.yml"
+                                env.playbook = "ci-pipeline/playbooks/rdgo-setup.yml"
                                 env.ANSIBLE_HOST_KEY_CHECKING = "False"
                                 env.DUFFY_OP = "--allocate"
 
@@ -388,8 +388,8 @@ node('fedora-atomic') {
                             stage("ci-pipeline-ostree-image-boot-sanity") {
                                 // Set groovy and env vars
                                 current_stage = "ci-pipeline-ostree-image-boot-sanity"
-                                env.task = "./ci-pipeline/tasks/ostree-image-compose"
-                                env.playbook = "sig-atomic-buildscripts/centos-ci/setup/setup-system.yml"
+                                env.task = "./ci-pipeline/tasks/ostree-boot-image"
+                                env.playbook = "ci-pipeline/playbooks/system-setup.yml"
                                 env.ANSIBLE_HOST_KEY_CHECKING = "False"
                                 env.DUFFY_OP = "--allocate"
 
@@ -511,7 +511,7 @@ node('fedora-atomic') {
                         // Set groovy and env vars
                         def current_stage = "ci-pipeline-ostree-boot-sanity"
                         env.task = "./ci-pipeline/tasks/ostree-boot-image"
-                        env.playbook = "sig-atomic-buildscripts/centos-ci/setup/setup-system.yml"
+                        env.playbook = "ci-pipeline/playbooks/system-setup.yml"
 
                         // Provision resources
                         env.DUFFY_OP = "--allocate"
@@ -580,7 +580,7 @@ node('fedora-atomic') {
                         // Set groovy and env vars
                         def current_stage="ci-pipeline-atomic-host-tests"
                         env.task = "./ci-pipeline/tasks/atomic-host-tests"
-                        env.playbook = "sig-atomic-buildscripts/centos-ci/setup/setup-system.yml"
+                        env.playbook = "ci-pipeline/playbooks/system-setup.yml"
 
                         // Send integration test running message on fedmsg
                         env.topic = "org.centos.prod.ci.pipeline.compose.test.integration.running"
