@@ -1,0 +1,7 @@
+PROJECT=continuous-infra
+oc new-project "${PROJECT}" --display-name="${PROJECT}"
+oc policy add-role-to-user edit -z default -n "${PROJECT}"
+oc create -f continuous-infra-jenkins-master-s2i-template.yaml
+oc new-app jenkins-persistent
+oc create -f continuous-infra-slave-template.yaml
+oc new-app jenkins-continuous-infra-slave-builder

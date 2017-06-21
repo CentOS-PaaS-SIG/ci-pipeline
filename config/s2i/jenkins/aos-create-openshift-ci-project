@@ -1,4 +1,0 @@
-oc new-project aos-ci --display-name="AOS CI"
-oc policy add-role-to-user edit -z default -n aos-ci
-oc create -f aos-jenkins-master-s2i-template.yaml
-oc new-app jenkins-persistent
