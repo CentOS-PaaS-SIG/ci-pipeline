@@ -27,7 +27,7 @@ ostree --repo=./ostree prune \
 
 # get list of repos
 # eventually we will be passed the list from the rpm build job
-repos=$(rsync fedora-atomic@artifacts.ci.centos.org::fedora-atomic/${BUILD}/repo/ | awk '/^d/ { if ($5 != ".") print $5 }')
+repos=$(rsync fedora-atomic@artifacts.ci.centos.org::fedora-atomic/${BUILD}/repo/ | awk '/^d/ && match($5, /_repo$/) { print $5 }')
 
 f_repos=""
 for repo in $repos; do
