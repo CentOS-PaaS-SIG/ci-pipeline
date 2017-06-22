@@ -6,7 +6,9 @@
             num-to-keep: 30
             artifact-num-to-keep: 15
         - throttle:
+            max-per-node: 8
             max-total: 8
+            option: project
     defaults: ci-pipeline-defaults
     parameters:
         - string:
