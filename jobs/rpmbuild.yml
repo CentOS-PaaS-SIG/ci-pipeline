@@ -1,6 +1,12 @@
 - job:
     name: ci-pipeline-rpmbuild
     concurrent: true
+    properties:
+        - build-discarder:
+            num-to-keep: 30
+            artifact-num-to-keep: 15
+        - throttle:
+            max-total: 8
     defaults: ci-pipeline-defaults
     parameters:
         - string:
