@@ -4,76 +4,76 @@
   become_user: '{{ become_user | default("root") }}'
   remote_user: '{{ remote_user | default("root") }}'
   tasks:
-      - name: Get rpm-ostree status --json output
+      - name: 01 Get rpm-ostree status --json output
         command: rpm-ostree status --json
         register: ros
 
-      - name: Convert to JSON
+      - name: 02 Convert to JSON
         set_fact:
             ros_json: "{{ ros.stdout|from_json }}"
 
-      - name: Set ros variable if deployment 0 is booted
+      - name: 03 Set ros variable if deployment 0 is booted
         set_fact:
             ros_booted: "{{ ros_json['deployments'][0] }}"
             ros_not_booted: "{{ ros_json['deployments'][1] if ros_json['deployments'][1] is defined else false }}"
         when: ros_json['deployments'][0] is defined and ros_json['deployments'][0]['booted']
 
-      - name: Set ros variable if deployment 1 is booted
+      - name: 04 Set ros variable if deployment 1 is booted
         set_fact:
             ros_booted: "{{ ros_json['deployments'][1] }}"
             ros_not_booted: "{{ ros_json['deployments'][0] if ros_json['deployments'][0] is defined else false }}"
         when: ros_json['deployments'][1] is defined and ros_json['deployments'][1]['booted']
 
-      - name: Deploy specific commit
+      - name: 05 Deploy specific commit
         command: "atomic host deploy {{ commit }}"
         when: ros_booted['checksum'] != commit
 
-      - name: restart system
+      - name: 06 restart system
         command: /usr/bin/systemd-run --on-active=5 /usr/bin/systemctl reboot
         async: 1
         poll: 0
         ignore_errors: true
         when: ros_booted['checksum'] != commit
 
-      - name: ssh started {{ ansible_ssh_host | default(inventory_hostname) }}
+      - name: 07 ssh started {{ ansible_ssh_host | default(inventory_hostname) }}
         become: false
         local_action:
             wait_for host={{ ansible_ssh_host | default(inventory_hostname) }}
             port=22 state=started delay=70 search_regex=OpenSSH
         when: ros_booted['checksum'] != commit
 
-      - name: pause 5 seconds
+      - name: 08 pause 5 seconds
         pause: seconds=5
         when: ros_booted['checksum'] != commit
 
-      - name: ssh started {{ ansible_ssh_host | default(inventory_hostname) }}
+      - name: 09 ssh started {{ ansible_ssh_host | default(inventory_hostname) }}
         become: false
         local_action:
             wait_for host={{ ansible_ssh_host | default(inventory_hostname) }}
             port=22 state=started search_regex=OpenSSH
         when: ros_booted['checksum'] != commit
 
-      - name: Get rpm-ostree status --json output
+      - name: 10 Get rpm-ostree status --json output
         command: rpm-ostree status --json
         register: ros
 
-      - name: Convert to JSON
+      - name: 11 Convert to JSON
         set_fact:
             ros_json: "{{ ros.stdout|from_json }}"
 
-      - name: Set ros variable if deployment 0 is booted
+      - name: 12 Set ros variable if deployment 0 is booted
         set_fact:
             ros_booted: "{{ ros_json['deployments'][0] }}"
             ros_not_booted: "{{ ros_json['deployments'][1] if ros_json['deployments'][1] is defined else false }}"
         when: ros_json['deployments'][0] is defined and ros_json['deployments'][0]['booted']
 
-      - name: Set ros variable if deployment 1 is booted
+      - name: 13 Set ros variable if deployment 1 is booted
         set_fact:
             ros_booted: "{{ ros_json['deployments'][1] }}"
             ros_not_booted: "{{ ros_json['deployments'][0] if ros_json['deployments'][0] is defined else false }}"
         when: ros_json['deployments'][1] is defined and ros_json['deployments'][1]['booted']
 
-      - name: Verify specific commit
+      - name: 14 Verify specific commit
         fail:
             msg: "{{ ros_booted['checksum'] }} != {{ commit }}"
         when: ros_booted['checksum'] != commit
