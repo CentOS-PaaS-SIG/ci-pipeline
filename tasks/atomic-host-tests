@@ -35,7 +35,7 @@ function clean_up {
     ansible-playbook -i hosts ci-pipeline/playbooks/setup-libvirt-image.yml -l atomic_host_tests_slave -e 'state=absent'
     kill $(jobs -p)
     sudo rm -rf $tmpdir
-    ara generate junit - > $currentdir/logs/ansible_xunit.xml
+    ara generate junit - > ${HOMEDIR}/logs/ansible_xunit.xml
     rm -rf $HOME/.ara
 }
 trap clean_up EXIT SIGHUP SIGINT SIGTERM
