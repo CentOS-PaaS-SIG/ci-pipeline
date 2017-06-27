@@ -101,6 +101,7 @@ node('fedora-atomic') {
                                 touch ${WORKSPACE}/trigger.downstream
                             fi
                         fi
+                        exit
                     '''
                     def job_props = "${env.WORKSPACE}/job.properties"
                     def job_props_groovy = "${env.WORKSPACE}/job.properties.groovy"
@@ -671,12 +672,14 @@ node('fedora-atomic') {
                 // if any exception occurs, mark the build as failed
                 currentBuild.result = 'FAILURE'
 
-                // Teardown resources
-                env.DUFFY_OP="--teardown"
-                echo "Duffy Deallocate ran for stage ${current_stage} with option ${env.DUFFY_OP}\r\n" +
-                        "RSYNC_PASSWORD=${env.RSYNC_PASSWORD}\r\n" +
-                        "DUFFY_HOST=${env.DUFFY_HOST}"
-                allocDuffy("${current_stage}")
+                if ("${current_stage}" != "ci-pipeline-rpmbuild-trigger" ) {
+                    // Teardown resources
+                    env.DUFFY_OP = "--teardown"
+                    echo "Duffy Deallocate ran for stage ${current_stage} with option ${env.DUFFY_OP}\r\n" +
+                            "RSYNC_PASSWORD=${env.RSYNC_PASSWORD}\r\n" +
+                            "DUFFY_HOST=${env.DUFFY_HOST}"
+                    allocDuffy("${current_stage}")
+                }
 
                 throw e
             } finally {
