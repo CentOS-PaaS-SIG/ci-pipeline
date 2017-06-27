@@ -13,7 +13,7 @@ objects:
   kind: ImageStream
   metadata:
     annotations:
-      slave-directory: /var/lib/jenkins
+      slave-label: fedora-atomic jenkins-continuous-infra-slave continuous-infra-slave
     labels:
       role: jenkins-slave
     name: jenkins-continuous-infra-slave
