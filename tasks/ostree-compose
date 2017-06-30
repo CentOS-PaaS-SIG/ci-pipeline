@@ -1,91 +1,28 @@
 #!/bin/sh
 
+if [ "${branch}" = "master" ]; then
+    branch="rawhide"
+fi
+
 base_dir="$(dirname $0)/.."
+HOMEDIR=$(pwd)
+rm -rf ${HOMEDIR}/output
+mkdir -p ${HOMEDIR}/output
 
-if [ "${BUILD}" = "master" -o "${BUILD}" = "rawhide" ]; then
-    BUILD="rawhide"
-    VERSION="rawhide"
-else
-    VERSION=$(echo $BUILD | sed -e 's/[a-zA-Z]*//')
+if [ "$(sudo docker images | grep rsync-container)" == "" ]; then
+    pushd $base_dir/config/Dockerfiles/rsync
+    sudo docker build -t rsync-container .
+    popd
 fi
 
-REF="fedora/${BUILD}/x86_64/atomic-host"
-
-mkdir -p logs
-
-for v in ostree; do
-    rsync --delete --stats -a fedora-atomic@artifacts.ci.centos.org::fedora-atomic/${BUILD}/${v}/ ${v}/
-done
-
-if [[ ! -e ./ostree ]]; then
-    mkdir ostree
-    ostree --repo=ostree init --mode=archive-z2
+if [ "$(sudo docker images | grep ostree_compose-container)" == "" ]; then
+    pushd $base_dir/config/Dockerfiles/ostree_compose
+    sudo docker build -t ostree_compose-container .
+    popd
 fi
 
-ostree --repo=./ostree prune \
-    --keep-younger-than='1 week ago' --refs-only
+sudo docker run --privileged --cap-add=SYS_ADMIN -v ${HOMEDIR}/output:/home/output -e rsync_paths="ostree" -e rsync_from="fedora-atomic@artifacts.ci.centos.org::fedora-atomic/${branch}/" -e rsync_to="/home/output" -e RSYNC_PASSWORD="$RSYNC_PASSWORD" rsync-container
 
-# get list of repos
-# eventually we will be passed the list from the rpm build job
-repos=$(rsync fedora-atomic@artifacts.ci.centos.org::fedora-atomic/${BUILD}/repo/ | awk '/^d/ && match($5, /_repo$/) { print $5 }')
+sudo docker run --privileged --cap-add=SYS_ADMIN -v ${HOMEDIR}/output:/home/output -e branch="${branch}" -e RSYNC_PASSWORD="$RSYNC_PASSWORD" ostree_compose-container
 
-f_repos=""
-for repo in $repos; do
-    if [ -z "$f_repos" ];then
-        f_repos="\"${repo}\""
-    else
-        f_repos="$f_repos, \"${repo}\""
-    fi
-    cat << EOF > $base_dir/config/ostree/${repo}.repo
-[${repo}]
-name=Testing ${repo}
-baseurl=http://artifacts.ci.centos.org/fedora-atomic/${BUILD}/repo/${repo}
-enabled=1
-gpgcheck=0
-skip_if_unavailable=False
-EOF
-done
-
-if [ "$VERSION" = "rawhide" ]; then
-    fedora_repo="$VERSION"
-else
-    fedora_repo="fedora-$VERSION"
-fi
-cat << EOF > $base_dir/config/ostree/fedora-${VERSION}.repo
-[fedora-${VERSION}]
-name=Fedora ${BUILD}
-failovermethod=priority
-metalink=https://mirrors.fedoraproject.org/metalink?repo=${fedora_repo}&arch=x86_64
-enabled=1
-metadata_expire=7d
-gpgcheck=0
-skip_if_unavailable=False
-EOF
-
-cat << EOF > $base_dir/config/ostree/fedora-atomic-testing.json
-{
-    "include": "fedora-atomic-testing-docker-host.json",
-    "ref": "fedora/${BUILD}/\${basearch}/atomic-host",
-    "repos": ["fedora-${VERSION}", $f_repos],
-    "automatic_version_prefix": "${VERSION}",
-    "mutate-os-release": "${VERSION}"
-}
-EOF
-
-sudo rpm-ostree compose tree --repo=./ostree $base_dir/config/ostree/fedora-atomic-testing.json || exit 1
-
-ostree --repo=./ostree summary -u
-
-if ostree --repo=ostree rev-parse ${REF}^ >/dev/null 2>&1; then
-    rpm-ostree db --repo=ostree diff ${REF}{^,} | tee logs/packages.txt
-fi
-
-# Record the commit so we can test it later
-commit=$(ostree --repo=ostree rev-parse ${REF})
-cat << EOF > logs/ostree.props
-commit=$commit
-EOF
-
-for v in ostree; do
-    rsync --delete --stats -a ${v}/ fedora-atomic@artifacts.ci.centos.org::fedora-atomic/${BUILD}/${v}/
-done
+sudo docker run --privileged --cap-add=SYS_ADMIN -v ${HOMEDIR}/output:/home/output -e rsync_paths="ostree" -e rsync_to="fedora-atomic@artifacts.ci.centos.org::fedora-atomic/${branch}/" -e rsync_from="/home/output" -e RSYNC_PASSWORD="$RSYNC_PASSWORD" rsync-container
