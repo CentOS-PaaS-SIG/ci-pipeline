@@ -1,5 +1,9 @@
 #!/bin/bash
 
+# This script requires that the docker run mounts the artifacts
+# dir to /tmp/artifacts, the ansible inventory file to /tmp/inventory,
+# and the ssh private key to /tmp/ssh_key
+
 # Check if there is an upstream first repo for this package
 curl -s --head https://upstreamfirst.fedorainfracloud.org/${package} | head -n 1 | grep "HTTP/1.[01] [23].." > /dev/null
 if [ $? -ne 0 ]; then
@@ -9,25 +13,10 @@ fi
 # Clone standard-test-roles repo
 git clone https://pagure.io/standard-test-roles.git
 pushd standard-test-roles
-# Write test_cloud.yml file
-cat << EOF > test_cloud.yml
+# Write test_atomic.yml header
+cat << EOF > test_atomic.yml
 ---
-- hosts: localhost
-  vars:
-    artifacts: ./
-    playbooks: ./test_local.yml
-  vars_prompt:
-  - name: subjects
-    prompt: "A QCow2/raw test subject file"
-    private: no
-
-  roles:
-  - standard-test-cloud
-EOF
-# Write test_local.yml header
-cat << EOF > test_local.yml
----
-- hosts: localhost
+- hosts: all
   roles:
   - role: standard-test-beakerlib
     tests:
@@ -39,8 +28,11 @@ if [ $(find ${package} -name "runtest.sh" | wc -l) -eq 0 ]; then
      exit 1
 fi
 for test in $(find ${package} -name "runtest.sh"); do
-     echo "    - $test" >> test_local.yml
+     echo "    - $test" >> test_atomic.yml
 done
+# Get ready to execute tests
+sed -i 's|^artifacts\:.*|artifacts\: /tmp/artifacts|' roles/standard-test-beakerlib/vars/main.yml
 # Execute the tests
-sudo ansible-playbook test_cloud.yml -e artifacts=/tmp/artifacts -e subjects=${image_location}
+export ANSIBLE_HOST_KEY_CHECKING=False
+ansible-playbook -i /tmp/inventory --private-key=/tmp/ssh_key --start-at-task='Define remote_artifacts if it is not already defined' test_atomic.yml
 exit $?
