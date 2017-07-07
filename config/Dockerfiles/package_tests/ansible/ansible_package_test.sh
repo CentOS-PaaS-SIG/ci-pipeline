@@ -10,11 +10,9 @@ if [ $? -ne 0 ]; then
      echo "No upstream repo for this package! Exiting..."
      exit 1
 fi
-# Clone jbieren fork of beakerlib role
-# Note: Once PR merged upstream, can just use upstream master
-git clone https://pagure.io/forks/jbieren/standard-test-roles.git
+# Clone standard-test-roles repo
+git clone https://pagure.io/standard-test-roles.git
 pushd standard-test-roles
-git checkout beakerlib_atomic
 # Write test_atomic.yml header
 cat << EOF > test_atomic.yml
 ---
@@ -25,6 +23,10 @@ cat << EOF > test_atomic.yml
 EOF
 # Find the tests
 git clone https://upstreamfirst.fedorainfracloud.org/${package}
+if [ $(find ${package} -name "runtest.sh" | wc -l) -eq 0 ]; then
+     echo "No runtest.sh files found in package's repo. Exiting..."
+     exit 1
+fi
 for test in $(find ${package} -name "runtest.sh"); do
      echo "    - $test" >> test_atomic.yml
 done
