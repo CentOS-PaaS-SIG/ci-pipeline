@@ -13,6 +13,7 @@ pushd $base_dir/config/Dockerfiles/rpmbuild
 which docker
 if [ "$?" != 0 ]; then echo "ERROR: DOCKER NOT INSTALLED\nSTATUS: $?"; exit 1; fi
 # Only build if it is not built already
+sudo systemctl start docker
 if [ "$(sudo docker images | grep rpmbuild-container)" == "" ]; then sudo docker build -t rpmbuild-container . ; fi
 sudo docker run --privileged --cap-add=SYS_ADMIN -v ${HOMEDIR}/${fed_repo}/output:/home/${fed_repo}/output -v ${HOMEDIR}/${fed_repo}/rpmbuild:/home/rpmbuild -t -i -e fed_repo="${fed_repo}" -e fed_branch="${fed_branch}" -e fed_rev="${fed_rev}" rpmbuild-container
 popd
