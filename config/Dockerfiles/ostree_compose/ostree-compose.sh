@@ -12,7 +12,7 @@ fi
 
 REF="fedora/${branch}/x86_64/atomic-host"
 
-mkdir -p logs
+mkdir -p /home/output/logs
 
 if [[ ! -e /home/output/ostree ]]; then
     mkdir /home/output/ostree
