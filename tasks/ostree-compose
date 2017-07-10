@@ -26,6 +26,6 @@ sudo docker run --privileged --cap-add=SYS_ADMIN -v ${HOMEDIR}/output:/home/outp
 sudo docker run --privileged --cap-add=SYS_ADMIN -v ${HOMEDIR}/output:/home/output -e branch="${branch}" -e RSYNC_PASSWORD="$RSYNC_PASSWORD" ostree_compose-container
 
 # Logs need to be in a specific place to be picked up.
-mv ${HOMEDIR}/output/logs ${HOMEDIR}
+sudo mv ${HOMEDIR}/output/logs ${HOMEDIR}
 
 sudo docker run --privileged --cap-add=SYS_ADMIN -v ${HOMEDIR}/output:/home/output -e rsync_paths="ostree" -e rsync_to="fedora-atomic@artifacts.ci.centos.org::fedora-atomic/${branch}/" -e rsync_from="/home/output/" -e RSYNC_PASSWORD="$RSYNC_PASSWORD" rsync-container
