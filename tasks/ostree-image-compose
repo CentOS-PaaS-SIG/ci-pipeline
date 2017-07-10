@@ -46,7 +46,8 @@ if [ -d "images" ]; then
     # Find the last image we pushed
     prev_img=$(ls -tr images/fedora-atomic-*.qcow2 | tail -n 1)
     prev_rel=$(echo $prev_img | sed -e 's/.*-\([^-]*\).qcow2/\1/')
-    rpm-ostree db --repo=ostree diff $prev_rel $release | tee logs/packages.txt
+    # Don't fail if the previous build has been pruned
+    rpm-ostree db --repo=ostree diff $prev_rel $release || echo "Previous build has been pruned" | tee logs/packages.txt
 else
     mkdir images
 fi
