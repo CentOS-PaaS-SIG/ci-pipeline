@@ -4,19 +4,19 @@ set -xeuo pipefail
 # Find the base dir
 base_dir="$(dirname $0)/.."
 
-if [ "${BUILD}" = "master" -o "${BUILD}" = "rawhide" ]; then
-    BUILD="rawhide"
+if [ "${branch}" = "master" -o "${branch}" = "rawhide" ]; then
+    branch="rawhide"
     VERSION="rawhide"
 else
-    VERSION=$(echo $BUILD | sed -e 's/[a-zA-Z]*//')
+    VERSION=$(echo $branch | sed -e 's/[a-zA-Z]*//')
 fi
 
-REF="fedora/${BUILD}/x86_64/atomic-host"
+REF="fedora/${branch}/x86_64/atomic-host"
 
 mkdir -p logs
 
 for v in netinst ostree images; do
-    rsync --delete --stats -a fedora-atomic@artifacts.ci.centos.org::fedora-atomic/${BUILD}/${v}/ ${v}/
+    rsync --delete --stats -a fedora-atomic@artifacts.ci.centos.org::fedora-atomic/${branch}/${v}/ ${v}/
 done
 
 currentdir=$(pwd)
@@ -65,21 +65,21 @@ pushd $tmpdir
 
 # Grab the kickstart file
 #curl -O -L https://pagure.io/fedora-kickstarts/raw/master/f/fedora-atomic.ks
-cp $currentdir/ci-pipeline/config/ostree/fedora-atomic-${BUILD}.ks fedora-atomic.ks
+cp $currentdir/ci-pipeline/config/ostree/fedora-atomic-${branch}.ks fedora-atomic.ks
 
 # Put new url into the kickstart file
 sed -i "s|^ostreesetup.*|ostreesetup --nogpg --osname=fedora-atomic --remote=fedora-atomic --url=http://192.168.122.1:8000/ --ref=$REF|" ./fedora-atomic.ks
 
 # point to upstream
-sed -i "s|\(%end.*$\)|ostree remote delete fedora-atomic\nostree remote add --set=gpg-verify=false fedora-atomic http://artifacts.ci.centos.org/artifacts/fedora-atomic/${BUILD}/ostree\n\1|" ./fedora-atomic.ks
+sed -i "s|\(%end.*$\)|ostree remote delete fedora-atomic\nostree remote add --set=gpg-verify=false fedora-atomic http://artifacts.ci.centos.org/artifacts/fedora-atomic/${branch}/ostree\n\1|" ./fedora-atomic.ks
 
 # Create a tdl file for imagefactory
 #       <install type='url'>
 #           <url>http://download.fedoraproject.org/pub/fedora/linux/releases/25/Everything/x86_64/os/</url>
 #       </install>
-cat <<EOF >./fedora-${BUILD}.tdl
+cat <<EOF >./fedora-${branch}.tdl
 <template>
-    <name>${BUILD}</name>
+    <name>${branch}</name>
     <os>
         <name>Fedora</name>
         <version>${VERSION}</version>
@@ -97,7 +97,7 @@ EOF
 
 # –parameter results_location
 # run imagefactory to build disk image
-sudo imagefactory --debug --imgdir $imgdir --timeout 3000 base_image ./fedora-${BUILD}.tdl --parameter offline_icicle true --file-parameter install_script ./fedora-atomic.ks
+sudo imagefactory --debug --imgdir $imgdir --timeout 3000 base_image ./fedora-${branch}.tdl --parameter offline_icicle true --file-parameter install_script ./fedora-atomic.ks
 
 # Change out of temporary directory
 popd
@@ -119,11 +119,11 @@ popd
 commit=$(ostree --repo=ostree rev-parse ${REF})
 cat << EOF > logs/ostree.props
 builtcommit=$commit
-image2boot=http://artifacts.ci.centos.org/artifacts/fedora-atomic/${BUILD}/images/$imgname.qcow2
+image2boot=http://artifacts.ci.centos.org/artifacts/fedora-atomic/${branch}/images/$imgname.qcow2
 image_name=$imgname.qcow2
 EOF
 
 # We don't need to rsync ostree back since we just used it for cache
 for v in images; do
-    rsync --delete --stats -a ${v}/ fedora-atomic@artifacts.ci.centos.org::fedora-atomic/${BUILD}/${v}/
+    rsync --delete --stats -a ${v}/ fedora-atomic@artifacts.ci.centos.org::fedora-atomic/${branch}/${v}/
 done

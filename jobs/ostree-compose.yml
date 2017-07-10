@@ -96,7 +96,7 @@
         - ci-pipeline-duffy-builder:
             task: ostree-compose
             variables: |
-                export BUILD="${fed_branch}"
+                export branch="${fed_branch}"
                 export JENKINS_JOB_NAME="${JOB_NAME}"
                 export JENKINS_BUILD_TAG="${BUILD_TAG}"
                 export OSTREE_BRANCH="${OSTREE_BRANCH:-}"
@@ -175,7 +175,7 @@
         - ci-pipeline-duffy-builder:
             task: ostree-image-compose
             variables: |
-                export BUILD="${fed_branch}"
+                export branch="${fed_branch}"
                 export JENKINS_JOB_NAME="${JOB_NAME}"
                 export JENKINS_BUILD_TAG="${BUILD_TAG}"
                 export OSTREE_BRANCH="${OSTREE_BRANCH:-}"
@@ -242,7 +242,7 @@
         - ci-pipeline-duffy-builder:
             task: ostree-boot-image
             variables: |
-                export BUILD="${fed_branch}"
+                export branch="${fed_branch}"
                 export image2boot="${image2boot:-}"
                 export commit=${commit:-}
                 export JENKINS_JOB_NAME="${JOB_NAME}"
@@ -334,7 +334,7 @@
         - ci-pipeline-duffy-builder:
             task: ostree-boot-image
             variables: |
-                export BUILD="${fed_branch}"
+                export branch="${fed_branch}"
                 export image2boot="${image2boot:-}"
                 export commit=${commit:-}
                 export JENKINS_JOB_NAME="${JOB_NAME}"
