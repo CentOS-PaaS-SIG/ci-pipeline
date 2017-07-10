@@ -71,6 +71,7 @@
             fi
 
             echo "topic=org.centos.prod.ci.pipeline.package.queued" >> ${{WORKSPACE}}/job.properties
+            echo "CI_MESSAGE=${{CI_MESSAGE}}" >> ${{WORKSPACE}}/job.properties
             touch ${{WORKSPACE}}/trigger.downstream
 
     publishers:
@@ -105,6 +106,7 @@
               - trigger-parameterized-builds:
                 - project: '{repo-name}-rpmbuild'
                   property-file: fedmsg_fields.txt
+                  current-parameters: true
                   fail-on-missing: true
 
 ## Describes the project

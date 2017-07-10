@@ -180,7 +180,7 @@ node('fedora-atomic') {
                         load(job_props_groovy)
 
                         // Stage resources - RPM build system
-                        setupStage()
+                        setupStage("${current_stage}")
 
                         // Rsync Data
                         writeFile file: "${env.ORIGIN_WORKSPACE}/task.env",
@@ -190,7 +190,7 @@ node('fedora-atomic') {
                                         "export fed_repo=\"${fed_repo}\"\n" +
                                         "export fed_branch=\"${fed_branch}\"\n" +
                                         "export fed_rev=\"${fed_rev}\"\n"
-                        rsyncResults("$current_stage")
+                        rsyncResults("${current_stage}")
 
                         //def desc_txt = "${env.ORIGIN_WORKSPACE}/logs/description.txt"
                         //def desc_txt_groovy = "${env.ORIGIN_WORKSPACE}/description.groovy"
@@ -277,7 +277,7 @@ node('fedora-atomic') {
                         load(job_props_groovy)
 
                         // Stage resources - ostree compose
-                        setupStage()
+                        setupStage("${current_stage}")
 
                         // Rsync Data
                         writeFile file: "${env.ORIGIN_WORKSPACE}/task.env",
@@ -285,7 +285,7 @@ node('fedora-atomic') {
                                         "export JENKINS_JOB_NAME=\"${JOB_NAME}-${current_stage}\"\n" +
                                         "export JENKINS_BUILD_TAG=\"${BUILD_TAG}-${current_stage}\"\n" +
                                         "export OSTREE_BRANCH=\"\${OSTREE_BRANCH:-}\"\n"
-                        rsyncResults("$current_stage")
+                        rsyncResults("${current_stage}")
 
                         def ostree_props = "${env.ORIGIN_WORKSPACE}/logs/ostree.props"
                         def ostree_props_groovy = "${env.ORIGIN_WORKSPACE}/ostree.props.groovy"
@@ -349,7 +349,7 @@ node('fedora-atomic') {
                                 load(job_props_groovy)
 
                                 // Stage resources - ostree compose
-                                setupStage()
+                                setupStage("${current_stage}")
 
                                 // Rsync Data
                                 writeFile file: "${env.ORIGIN_WORKSPACE}/task.env",
@@ -357,7 +357,7 @@ node('fedora-atomic') {
                                                 "export JENKINS_JOB_NAME=\"${JOB_NAME}-${current_stage}\"\n" +
                                                 "export JENKINS_BUILD_TAG=\"${BUILD_TAG}-${current_stage}\"\n" +
                                                 "export OSTREE_BRANCH=\"\${OSTREE_BRANCH:-}\"\n"
-                                rsyncResults("$current_stage")
+                                rsyncResults("${current_stage}")
 
                                 ostree_props = "${env.ORIGIN_WORKSPACE}/logs/ostree.props"
                                 ostree_props_groovy = "${env.ORIGIN_WORKSPACE}/ostree.props.groovy"
@@ -444,7 +444,7 @@ node('fedora-atomic') {
                                 load(job_props_groovy)
 
                                 // Stage resources - ostree compose
-                                setupStage()
+                                setupStage("${current_stage}")
 
                                 // Rsync Data
                                 writeFile file: "${env.ORIGIN_WORKSPACE}/task.env",
@@ -452,7 +452,7 @@ node('fedora-atomic') {
                                                 "export JENKINS_JOB_NAME=\"${JOB_NAME}-${current_stage}\"\n" +
                                                 "export JENKINS_BUILD_TAG=\"${BUILD_TAG}-${current_stage}\"\n" +
                                                 "export OSTREE_BRANCH=\"\${OSTREE_BRANCH:-}\"\n"
-                                rsyncResults("$current_stage")
+                                rsyncResults("${current_stage}")
 
                                 ostree_props = "${env.ORIGIN_WORKSPACE}/logs/ostree.props"
                                 ostree_props_groovy = "${env.ORIGIN_WORKSPACE}/ostree.props.groovy"
@@ -541,7 +541,7 @@ node('fedora-atomic') {
                         load(job_props_groovy)
 
                         // Stage resources - ostree compose
-                        setupStage()
+                        setupStage("${current_stage}")
 
                         // Rsync Data
                         writeFile file: "${env.ORIGIN_WORKSPACE}/task.env",
@@ -551,7 +551,7 @@ node('fedora-atomic') {
                                        "export JENKINS_JOB_NAME=\"${JOB_NAME}-${current_stage}\"\n" +
                                        "export JENKINS_BUILD_TAG=\"${BUILD_TAG}-${current_stage}\"\n" +
                                        "export OSTREE_BRANCH=\"\${OSTREE_BRANCH:-}\"\n"
-                        rsyncResults("$current_stage")
+                        rsyncResults("${current_stage}")
 
                         // Teardown resources
                         env.DUFFY_OP="--teardown"
@@ -630,7 +630,7 @@ node('fedora-atomic') {
                         load(new_props_file)
 
                         // Run Setup
-                        setupStage()
+                        setupStage("${current_stage}")
 
                         // Teardown
                         env.DUFFY_OP="--teardown"
@@ -693,7 +693,7 @@ node('fedora-atomic') {
 }
 
 def allocDuffy(stage) {
-    echo "Currently in stage: ${stage}"
+    echo "Currently in stage: ${stage} ${env.DUFFY_OP} resources"
     env.ORIGIN_WORKSPACE="${env.WORKSPACE}/${stage}"
     env.ORIGIN_BUILD_TAG="${env.BUILD_TAG}-${stage}"
     env.ORIGIN_CLASS="builder"
@@ -717,6 +717,7 @@ def allocDuffy(stage) {
         else
             exec ${WORKSPACE}/cciskel/cciskel-duffy ${DUFFY_OP}
         fi
+        exit
     '''
 }
 
@@ -725,7 +726,9 @@ def convertProps(file1, file2) {
     sh command
 }
 
-def setupStage() {
+def setupStage(stage) {
+    echo "Currently in stage: ${stage} in setupStage"
+
     sh '''
         #!/bin/bash
         set -xeuo pipefail
@@ -740,11 +743,12 @@ def setupStage() {
         else
             ansible -u root -i ${WORKSPACE}/inventory all -m ping
         fi
+        exit
     '''
 }
 
 def rsyncResults(stage) {
-    echo "Currently in stage: ${stage}"
+    echo "Currently in stage: ${stage} in rsyncResults"
 
     sh '''
         #!/bin/bash
@@ -768,8 +772,8 @@ def rsyncResults(stage) {
         if test "${build_success}" = "false"; then
             echo 'Build failed, see logs above'; exit 1
         fi
+        exit
     '''
-
 }
 
 def checkLastImage() {
@@ -784,5 +788,6 @@ def checkLastImage() {
         else
             echo "No need for a new image not time yet since time elapsed is ${elapsed}"
         fi
+        exit
     '''
 }
