@@ -281,7 +281,7 @@ node('fedora-atomic') {
 
                         // Rsync Data
                         writeFile file: "${env.ORIGIN_WORKSPACE}/task.env",
-                                  text: "export BUILD=\"${branch}\"\n" +
+                                  text: "export branch=\"${branch}\"\n" +
                                         "export JENKINS_JOB_NAME=\"${JOB_NAME}-${current_stage}\"\n" +
                                         "export JENKINS_BUILD_TAG=\"${BUILD_TAG}-${current_stage}\"\n" +
                                         "export OSTREE_BRANCH=\"\${OSTREE_BRANCH:-}\"\n"
@@ -353,7 +353,7 @@ node('fedora-atomic') {
 
                                 // Rsync Data
                                 writeFile file: "${env.ORIGIN_WORKSPACE}/task.env",
-                                        text: "export BUILD=\"${branch}\"\n" +
+                                        text: "export branch=\"${branch}\"\n" +
                                                 "export JENKINS_JOB_NAME=\"${JOB_NAME}-${current_stage}\"\n" +
                                                 "export JENKINS_BUILD_TAG=\"${BUILD_TAG}-${current_stage}\"\n" +
                                                 "export OSTREE_BRANCH=\"\${OSTREE_BRANCH:-}\"\n"
@@ -448,7 +448,7 @@ node('fedora-atomic') {
 
                                 // Rsync Data
                                 writeFile file: "${env.ORIGIN_WORKSPACE}/task.env",
-                                        text: "export BUILD=\"${branch}\"\n" +
+                                        text: "export branch=\"${branch}\"\n" +
                                                 "export JENKINS_JOB_NAME=\"${JOB_NAME}-${current_stage}\"\n" +
                                                 "export JENKINS_BUILD_TAG=\"${BUILD_TAG}-${current_stage}\"\n" +
                                                 "export OSTREE_BRANCH=\"\${OSTREE_BRANCH:-}\"\n"
@@ -545,7 +545,7 @@ node('fedora-atomic') {
 
                         // Rsync Data
                         writeFile file: "${env.ORIGIN_WORKSPACE}/task.env",
-                                text: "export BUILD=\"${branch}\"\n" +
+                                text: "export branch=\"${branch}\"\n" +
                                        "export image2boot=\"\${image2boot:-}\"\n" +
                                        "export commit=\"\${commit:-}\"\n" +
                                        "export JENKINS_JOB_NAME=\"${JOB_NAME}-${current_stage}\"\n" +
