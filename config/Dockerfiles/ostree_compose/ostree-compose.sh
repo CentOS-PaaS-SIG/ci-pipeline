@@ -23,8 +23,10 @@ ostree --repo=/home/output/ostree prune \
     --keep-younger-than='1 week ago' --refs-only
 
 # get list of repos
-# eventually we will be passed the list from the rpm build job
-repos=$(rsync fedora-atomic@artifacts.ci.centos.org::fedora-atomic/${branch}/repo/ | awk '/^d/ && match($5, /_repo$/) { print $5 }')
+repos=$(curl http://artifacts.ci.centos.org/fedora-atomic/${branch}/repo/manifest.txt | cut -d' ' -f1)
+
+# Old way if manifest.txt isn't generated
+#repos=$(rsync fedora-atomic@artifacts.ci.centos.org::fedora-atomic/${branch}/repo/ | awk '/^d/ && match($5, /_repo$/) { print $5 }')
 
 f_repos=""
 for repo in $repos; do
