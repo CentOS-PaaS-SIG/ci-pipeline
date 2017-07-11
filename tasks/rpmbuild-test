@@ -53,6 +53,7 @@ if [ "$(sudo docker images | grep rsync-container)" == "" ]; then
 fi
 
 sudo docker run --privileged --cap-add=SYS_ADMIN -v ${HOMEDIR}/${fed_repo}/output:/home/${fed_repo}/output -v ${HOMEDIR}/${fed_repo}/rpmbuild:/home/rpmbuild -t -i -e fed_repo="${fed_repo}" -e fed_branch="${fed_branch}" -e fed_rev="${fed_rev}" rpmbuild-container
+if [ "$?" != 0 ]; then echo -e "ERROR: RPMBUILD FAILED\nSTATUS: $?"; exit 1; fi
 # Move logs to proper location for duffy host cleanup rsync
 cp -rp ${HOMEDIR}/${fed_repo}/output/logs ${HOMEDIR}
 
