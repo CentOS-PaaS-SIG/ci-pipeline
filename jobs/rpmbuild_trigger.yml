@@ -71,7 +71,7 @@
             fi
 
             echo "topic=org.centos.prod.ci.pipeline.package.queued" >> ${{WORKSPACE}}/job.properties
-            echo "CI_MESSAGE=${{CI_MESSAGE}}" >> ${{WORKSPACE}}/job.properties
+            echo "CI_MESSAGE=${{CI_MESSAGE}}" >> ${{WORKSPACE}}/CI_MESSAGE.properties
             touch ${{WORKSPACE}}/trigger.downstream
 
     publishers:

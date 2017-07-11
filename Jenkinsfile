@@ -683,7 +683,7 @@ node('fedora-atomic') {
 
                 throw e
             } finally {
-                currentBuild.displayName = "Build# - ${env.BUILD_NUMBER}"
+                currentBuild.displayName = "Build# - ${env.BUILD_NUMBER} for Branch ${env.branch}"
                 currentBuild.description = "${currentBuild.result}"
                 //emailext subject: "${env.JOB_NAME} - Build # ${env.BUILD_NUMBER} - STATUS = ${currentBuild.result}", to: "ari@redhat.com", body: "This pipeline was a ${currentBuild.result}"
                 step([$class: 'ArtifactArchiver', allowEmptyArchive: true, artifacts: '**/logs/**,*.txt,*.groovy,**/job.*,**/inventory.*', excludes: '**/*.example', fingerprint: true])
