@@ -1,5 +1,6 @@
 - job-template:
     name: ci-pipeline-rpmbuild-trigger
+    concurrent: true
     defaults: ci-pipeline-defaults
     triggers:
       - jms-messaging:
