@@ -216,7 +216,7 @@ parameters:
 - description: Git source URI for Jenkins S2I
   name: SOURCE_REPOSITORY_URL
   required: true
-  value: https://github.com/scoheb/jenkins-s2i-example.git
+  value: https://github.com/CentOS-PaaS-SIG/ci-pipeline.git
 - description: Git branch/tag reference
   name: SOURCE_REPOSITORY_REF
   value: master
