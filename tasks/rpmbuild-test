@@ -28,7 +28,7 @@ function clean_up {
      # Delete the rsync lock we placed
      rsync -vr --delete $(mktemp -d)/ fedora-atomic@artifacts.ci.centos.org::fedora-atomic/${fed_branch}/repo/lockdir/
 }
-#trap clean_up EXIT SIGHUP SIGINT SIGTERM
+trap clean_up EXIT SIGHUP SIGINT SIGTERM
 
 base_dir="$(dirname $0)/.."
 HOMEDIR=$(pwd)
@@ -64,7 +64,7 @@ fi
 
 # Create empty branch and repo dirs to rsync over first in case they DNE
 mkdir -p ${HOMEDIR}/${fed_branch}/repo
-#acquire_lock
+acquire_lock
 
 # Get manifest file
 touch ${HOMEDIR}/${fed_branch}/repo/manifest.txt
