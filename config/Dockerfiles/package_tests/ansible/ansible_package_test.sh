@@ -13,23 +13,27 @@ fi
 # Clone standard-test-roles repo
 git clone https://pagure.io/standard-test-roles.git
 pushd standard-test-roles
-# Write test_atomic.yml header
-cat << EOF > test_atomic.yml
+if [ -f ${package}/test_local.yml ]; then
+     sed 's/hosts: localhost/hosts: all/' ${package}/test_local.yml > test_atomic.yml
+else
+     # Write test_atomic.yml header
+     cat << EOF > test_atomic.yml
 ---
 - hosts: all
   roles:
   - role: standard-test-beakerlib
     tests:
 EOF
-# Find the tests
-git clone https://upstreamfirst.fedorainfracloud.org/${package}
-if [ $(find ${package} -name "runtest.sh" | wc -l) -eq 0 ]; then
-     echo "No runtest.sh files found in package's repo. Exiting..."
-     exit 1
+     # Find the tests
+     git clone https://upstreamfirst.fedorainfracloud.org/${package}
+     if [ $(find ${package} -name "runtest.sh" | wc -l) -eq 0 ]; then
+          echo "No runtest.sh files found in package's repo. Exiting..."
+          exit 1
+     fi
+     for test in $(find ${package} -name "runtest.sh"); do
+          echo "    - $test" >> test_atomic.yml
+     done
 fi
-for test in $(find ${package} -name "runtest.sh"); do
-     echo "    - $test" >> test_atomic.yml
-done
 # Get ready to execute tests
 sed -i 's|^artifacts\:.*|artifacts\: /tmp/artifacts|' roles/standard-test-beakerlib/vars/main.yml
 # Execute the tests
