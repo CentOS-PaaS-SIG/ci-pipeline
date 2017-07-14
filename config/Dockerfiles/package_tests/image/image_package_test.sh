@@ -9,13 +9,14 @@ fi
 # Clone standard-test-roles repo
 git clone https://pagure.io/standard-test-roles.git
 pushd standard-test-roles
+git clone https://upstreamfirst.fedorainfracloud.org/${package}
 # Write test_cloud.yml file
 cat << EOF > test_cloud.yml
 ---
 - hosts: localhost
   vars:
     artifacts: ./
-    playbooks: ./test_local.yml
+    playbooks: ./${package}/test_local.yml
   vars_prompt:
   - name: subjects
     prompt: "A QCow2/raw test subject file"
@@ -24,23 +25,27 @@ cat << EOF > test_cloud.yml
   roles:
   - standard-test-cloud
 EOF
-# Write test_local.yml header
-cat << EOF > test_local.yml
+if ! [ -f ${package}/test_local.yml ]; then
+     # Write test_local.yml header
+     cat << EOF > ${package}/test_local.yml
 ---
 - hosts: localhost
   roles:
   - role: standard-test-beakerlib
     tests:
 EOF
-# Find the tests
-git clone https://upstreamfirst.fedorainfracloud.org/${package}
-if [ $(find ${package} -name "runtest.sh" | wc -l) -eq 0 ]; then
-     echo "No runtest.sh files found in package's repo. Exiting..."
-     exit 1
+     # Find the tests
+     if [ $(find ${package} -name "runtest.sh" | wc -l) -eq 0 ]; then
+          echo "No runtest.sh files found in package's repo. Exiting..."
+          exit 1
+     fi
+     for test in $(find ${package} -name "runtest.sh"); do
+          echo "    - $test" >> ${package}/test_local.yml
+     done
 fi
-for test in $(find ${package} -name "runtest.sh"); do
-     echo "    - $test" >> test_local.yml
-done
+# Sym link ansible roles so they resolve properly
+mv /etc/ansible/roles /etc/ansible/roles-back
+ln -s $PWD/roles /etc/ansible/roles
 # Execute the tests
 sudo ansible-playbook test_cloud.yml -e artifacts=/tmp/artifacts -e subjects=${image_location}
 exit $?
