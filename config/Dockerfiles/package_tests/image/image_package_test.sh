@@ -9,6 +9,7 @@ fi
 # Clone standard-test-roles repo
 git clone https://pagure.io/standard-test-roles.git
 pushd standard-test-roles
+git clone https://upstreamfirst.fedorainfracloud.org/${package}
 # Write test_cloud.yml file
 cat << EOF > test_cloud.yml
 ---
@@ -34,7 +35,6 @@ if ! [ -f ${package}/test_local.yml ]; then
     tests:
 EOF
      # Find the tests
-     git clone https://upstreamfirst.fedorainfracloud.org/${package}
      if [ $(find ${package} -name "runtest.sh" | wc -l) -eq 0 ]; then
           echo "No runtest.sh files found in package's repo. Exiting..."
           exit 1
@@ -43,6 +43,9 @@ EOF
           echo "    - $test" >> ${package}/test_local.yml
      done
 fi
+# Sym link ansible roles so they resolve properly
+mv /etc/ansible/roles /etc/ansible/roles-back
+ln -s $PWD/roles /etc/ansible/roles
 # Execute the tests
 sudo ansible-playbook test_cloud.yml -e artifacts=/tmp/artifacts -e subjects=${image_location}
 exit $?

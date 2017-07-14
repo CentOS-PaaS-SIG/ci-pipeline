@@ -13,6 +13,7 @@ fi
 # Clone standard-test-roles repo
 git clone https://pagure.io/standard-test-roles.git
 pushd standard-test-roles
+git clone https://upstreamfirst.fedorainfracloud.org/${package}
 if [ -f ${package}/test_local.yml ]; then
      sed 's/hosts: localhost/hosts: all/' ${package}/test_local.yml > test_atomic.yml
 else
@@ -25,7 +26,6 @@ else
     tests:
 EOF
      # Find the tests
-     git clone https://upstreamfirst.fedorainfracloud.org/${package}
      if [ $(find ${package} -name "runtest.sh" | wc -l) -eq 0 ]; then
           echo "No runtest.sh files found in package's repo. Exiting..."
           exit 1
