@@ -76,7 +76,7 @@ rpm-ostree compose tree --repo=/home/output/ostree $base_dir/config/ostree/fedor
 ostree --repo=/home/output/ostree summary -u
 
 if ostree --repo=/home/output/ostree rev-parse ${REF}^ >/dev/null 2>&1; then
-    rpm-ostree db --repo=/home/output/ostree diff ${REF}{^,} | tee logs/packages.txt
+    rpm-ostree db --repo=/home/output/ostree diff ${REF}{^,} | tee /home/output/logs/packages.txt
 fi
 
 # Record the commit so we can test it later
