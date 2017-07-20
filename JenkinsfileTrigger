@@ -1,0 +1,158 @@
+properties(
+        [
+                buildDiscarder(logRotator(artifactDaysToKeepStr: '', artifactNumToKeepStr: '50', daysToKeepStr: '', numToKeepStr: '100')),
+                disableConcurrentBuilds(),
+                parameters(
+                    [
+                        string(description: 'fedmsg msg', name: 'CI_MESSAGE'),
+                        string(defaultValue: '^(f26)$', description: 'fedora branch targets', name: 'TARGETS'),
+                        string(defaultValue: 'ci-pipeline', description: 'Main project repo', name: 'PROJECT_REPO'),
+                        string(defaultValue: 'org.centos.stage', description: 'main topic to publish on', name: 'MAIN_TOPIC'),
+                    ]
+                ),
+                pipelineTriggers(
+                        [[$class: 'CIBuildTrigger', checks: [], providerName: 'fedora-fedmsg', selector: 'topic = "org.fedoraproject.prod.git.receive"']]
+                )
+        ]
+)
+
+node('fedora-atomic') {
+    ansiColor('xterm') {
+        timestamps {
+            //def current_stage = "ci-pipeline-rpmbuild-trigger"
+            try {
+                deleteDir()
+                stage('ci-pipeline-rpmbuild-trigger') {
+                    env.basearch = "x86_64"
+
+                    // Set default main topic for messaging
+                    if ((env.MAIN_TOPIC == null) || ("${env.MAIN_TOPIC}" == "")) {
+                        env.MAIN_TOPIC = "org.centos.prod"
+                    }
+
+                    // SCM
+                    dir('ci-pipeline') {
+                        git 'https://github.com/CentOS-PaaS-SIG/ci-pipeline'
+                    }
+
+                    // Python script to parse the ${CI_MESSAGE}
+                    writeFile file: "${env.WORKSPACE}/parse_fedmsg.py",
+                            text: "#!/bin/env python\n" +
+                                    "import json\n" +
+                                    "import sys\n\n" +
+                                    "reload(sys)\n" +
+                                    "sys.setdefaultencoding('utf-8')\n" +
+                                    "message = json.load(sys.stdin)\n" +
+                                    "if 'commit' in message:\n" +
+                                    "    msg = message['commit']\n\n" +
+                                    "    for key in msg:\n" +
+                                    "        print \"fed_%s=%s\" % (key, msg[key])\n"
+
+                    // Parse the ${CI_MESSAGE}
+                    sh '''
+                        #!/bin/bash
+                        set -xuo pipefail
+
+                        chmod +x ${WORKSPACE}/parse_fedmsg.py
+
+                        # Write fedmsg fields to a file to inject them
+                        if [ -n "${CI_MESSAGE}" ]; then
+                            echo ${CI_MESSAGE} | ${WORKSPACE}/parse_fedmsg.py > fedmsg_fields.txt
+                            sed -i '/^\\\\s*$/d' ${WORKSPACE}/fedmsg_fields.txt
+                            grep fed ${WORKSPACE}/fedmsg_fields.txt > ${WORKSPACE}/fedmsg_fields.txt.tmp
+                            mv ${WORKSPACE}/fedmsg_fields.txt.tmp ${WORKSPACE}/fedmsg_fields.txt
+                        fi
+                    '''
+
+                    // Load fedmsg fields as environment variables
+                    def fedmsg_fields = "${env.WORKSPACE}/fedmsg_fields.txt"
+                    def fedmsg_fields_groovy = "${env.WORKSPACE}/fedmsg_fields.groovy"
+                    convertProps(fedmsg_fields, fedmsg_fields_groovy)
+                    load(fedmsg_fields_groovy)
+
+                    // Check if package is in the package list for fedora-atomic host
+                    sh '''
+                        set +e
+                        branch=${fed_branch}
+                        if [ "${branch}" = "master" ]; then
+                          branch="rawhide"
+                        fi
+                        
+                        
+                        # Save the bramch in job.properties
+                        echo "branch=${branch}" >> ${WORKSPACE}/job.properties
+                     
+                        # Verify this is a branch in our list of targets defined above in the parameters
+                        if [[ ! "${fed_branch}" =~ ${TARGETS} ]]; then
+                            echo "${fed_branch} is not in the list"
+                            echo "topic=${MAIN_TOPIC}.ci.pipeline.package.ignore" >> ${WORKSPACE}/job.properties
+                        else                                           
+                            # Verify this is a package we are interested in
+                            valid=0
+                            for package in $(cat ${PROJECT_REPO}/config/package_list); do
+                                if [ "${package}" = "${fed_repo}" ]; then
+                                    valid=1
+                                    break
+                                fi
+                            done
+
+                            if [ $valid -eq 0 ]; then
+                                echo "Not a package we are interested in"
+                                echo "topic=${MAIN_TOPIC}.ci.pipeline.package.ignore" >> ${WORKSPACE}/job.properties
+                            else
+                                echo "topic=${MAIN_TOPIC}.ci.pipeline.package.queued" >> ${WORKSPACE}/job.properties
+                                touch ${WORKSPACE}/trigger.downstream
+                            fi
+                        fi
+                        exit
+                    '''
+                    def job_props = "${env.WORKSPACE}/job.properties"
+                    def job_props_groovy = "${env.WORKSPACE}/job.properties.groovy"
+                    convertProps(job_props, job_props_groovy)
+                    load(job_props_groovy)
+
+                    // Send message org.centos.prod.ci.pipeline.package.queued or .ignore on fedmsg
+                    sendCIMessage messageContent: '',
+                            messageProperties: "topic=${topic}\n" +
+                                    "build_url=${BUILD_URL}\n" +
+                                    "build_id=${BUILD_ID}\n" +
+                                    "branch=${branch}\n" +
+                                    "ref=fedora/${branch}/x86_64/atomic-host\n" +
+                                    "rev=${fed_rev}\n" +
+                                    "repo=${fed_repo}\n" +
+                                    "namespace=${fed_namespace}\n" +
+                                    "username=fedora-atomic\n" +
+                                    "test_guidance=''\n" +
+                                    "status=success",
+
+                            messageType: 'Custom',
+                            overrides: [topic: "${topic}"],
+                            providerName: 'fedora-fedmsg'
+
+                    currentBuild.result = 'SUCCESS'
+                }
+            } catch (e) {
+                // if any exception occurs, mark the build as failed
+                currentBuild.result = 'FAILURE'
+                throw e
+            } finally {
+                currentBuild.displayName = "Build#: ${env.BUILD_NUMBER} - Branch: ${env.branch} - Package: ${env.fed_repo}"
+                currentBuild.description = "${currentBuild.result}"
+                //emailext subject: "${env.JOB_NAME} - Build # ${env.BUILD_NUMBER} - STATUS = ${currentBuild.result}", to: "ari@redhat.com", body: "This pipeline was a ${currentBuild.result}"
+                step([$class: 'ArtifactArchiver', allowEmptyArchive: true, artifacts: '*.txt,*.properties,*.props,*.groovy', excludes: '**/*.example', fingerprint: true])
+                if (fileExists("${env.WORKSPACE}/trigger.downstream")) {
+                    echo "Trigger downstream pipeline ci-pipeline-2-0"
+                    echo "CI_MESSAGE: ${env.CI_MESSAGE}"
+                    echo "TARGET_BRANCH: ${env.fed_branch}"
+                    echo "MAIN_TOPIC: ${env.MAIN_TOPIC}"
+                    build job: "ci-pipeline-${env.branch}", parameters: [string(name: 'CI_MESSAGE', value: "${env.CI_MESSAGE}"), string(name: 'TARGET_BRANCH', value: "${env.fed_branch}"), string(name: 'PROJECT_REPO', value: 'ci-pipeline'), string(name: 'MAIN_TOPIC', value: 'org.centos.stage')], wait: false
+                }
+            }
+        }
+    }
+}
+
+def convertProps(file1, file2) {
+    def command = $/awk -F'=' '{print "env."$1"=\""$2"\""}' ${file1} > ${file2}/$
+    sh command
+}
