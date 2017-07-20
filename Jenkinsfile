@@ -42,7 +42,7 @@ node('fedora-atomic') {
 
                     // Python script to parse the ${CI_MESSAGE}
                     writeFile file: "${env.WORKSPACE}/parse_fedmsg.py",
-                            text: "#!/bin/env python\n" +
+                              text: "#!/bin/env python\n" +
                                     "import json\n" +
                                     "import sys\n\n" +
                                     "reload(sys)\n" +
