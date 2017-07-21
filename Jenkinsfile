@@ -677,7 +677,7 @@ def convertProps(file1, file2) {
 def setupStage(stage) {
     echo "Currently in stage: ${stage} in setupStage"
 
-    withCredentials([file(credentialsId: 'fedora-atomic-key', variable: 'fedora_atomic')]) {
+    withCredentials([file(credentialsId: 'fedora-atomic-key', variable: 'FEDORA_ATOMIC_KEY')]) {
         sh '''
             #!/bin/bash
             set -xeuo pipefail
@@ -688,9 +688,9 @@ def setupStage(stage) {
             fi
     
             if test -n "${playbook:-}"; then
-                ansible-playbook --private-key=fedora-atomic -u root -i ${WORKSPACE}/inventory "${playbook}"
+                ansible-playbook --private-key=${FEDORA_ATOMIC_KEY} -u root -i ${WORKSPACE}/inventory "${playbook}"
             else
-                ansible --private-key=fedora-atomic -u root -i ${WORKSPACE}/inventory all -m ping
+                ansible --private-key=${FEDORA_ATOMIC_KEY} -u root -i ${WORKSPACE}/inventory all -m ping
             fi
             exit
         '''
