@@ -651,9 +651,6 @@ def allocDuffy(stage) {
             cp ${DUFFY_KEY} ~/duffy.key
             chmod 600 ~/duffy.key
 
-    
-            echo ${DUFFY_KEY} > ~/duffy.key
-            
             mkdir -p ${ORIGIN_WORKSPACE}
             # If we somehow got called without an op, do nothing.
             if test -z "${DUFFY_OP:-}"; then
