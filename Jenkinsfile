@@ -643,7 +643,7 @@ def allocDuffy(stage) {
     env.ORIGIN_CLASS="builder"
     env.DUFFY_JOB_TIMEOUT_SECS="3600"
 
-    withCredentials([string(credentialsId: 'ce769310-b97f-4ca0-b7b8-0837560ab7d7', variable: 'DUFFY_KEY')]) {
+    withCredentials([string(credentialsId: 'duffy-key', variable: 'DUFFY_KEY')]) {
         sh '''
             #!/bin/bash
             set -xeuo pipefail
@@ -677,7 +677,7 @@ def convertProps(file1, file2) {
 def setupStage(stage) {
     echo "Currently in stage: ${stage} in setupStage"
 
-    withCredentials([file(credentialsId: '7307a673-6c88-432c-874d-195b77eeaba8', variable: 'fedora_atomic')]) {
+    withCredentials([file(credentialsId: 'fedora-atomic-key', variable: 'fedora_atomic')]) {
         sh '''
             #!/bin/bash
             set -xeuo pipefail
@@ -700,7 +700,7 @@ def setupStage(stage) {
 def rsyncResults(stage) {
     echo "Currently in stage: ${stage} in rsyncResults"
 
-    withCredentials([string(credentialsId: 'ce769310-b97f-4ca0-b7b8-0837560ab7d7', variable: 'DUFFY_KEY')]) {
+    withCredentials([string(credentialsId: 'duffy-key', variable: 'DUFFY_KEY')]) {
         sh '''
             #!/bin/bash
             set -xeuo pipefail
