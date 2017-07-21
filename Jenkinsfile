@@ -677,22 +677,24 @@ def convertProps(file1, file2) {
 def setupStage(stage) {
     echo "Currently in stage: ${stage} in setupStage"
 
-    sh '''
-        #!/bin/bash
-        set -xeuo pipefail
-        
-        # Keep compatibility with earlier cciskel-duffy
-        if test -f ${ORIGIN_WORKSPACE}/inventory.${ORIGIN_BUILD_TAG}; then
-            ln -fs ${ORIGIN_WORKSPACE}/inventory.${ORIGIN_BUILD_TAG} ${WORKSPACE}/inventory
-        fi
-
-        if test -n "${playbook:-}"; then
-            ansible-playbook -u root -i ${WORKSPACE}/inventory "${playbook}"
-        else
-            ansible -u root -i ${WORKSPACE}/inventory all -m ping
-        fi
-        exit
-    '''
+    withCredentials([file(credentialsId: '7307a673-6c88-432c-874d-195b77eeaba8', variable: 'fedora_atomic')]) {
+        sh '''
+            #!/bin/bash
+            set -xeuo pipefail
+            
+            # Keep compatibility with earlier cciskel-duffy
+            if test -f ${ORIGIN_WORKSPACE}/inventory.${ORIGIN_BUILD_TAG}; then
+                ln -fs ${ORIGIN_WORKSPACE}/inventory.${ORIGIN_BUILD_TAG} ${WORKSPACE}/inventory
+            fi
+    
+            if test -n "${playbook:-}"; then
+                ansible-playbook --private-key=fedora-atomic -u root -i ${WORKSPACE}/inventory "${playbook}"
+            else
+                ansible --private-key=fedora-atomic -u root -i ${WORKSPACE}/inventory all -m ping
+            fi
+            exit
+        '''
+    }
 }
 
 def rsyncResults(stage) {
