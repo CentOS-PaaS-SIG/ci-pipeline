@@ -643,26 +643,30 @@ def allocDuffy(stage) {
     env.ORIGIN_CLASS="builder"
     env.DUFFY_JOB_TIMEOUT_SECS="3600"
 
-    sh '''
-        #!/bin/bash
-        set -xeuo pipefail
-
-        mkdir -p ${ORIGIN_WORKSPACE}
-        # If we somehow got called without an op, do nothing.
-        if test -z "${DUFFY_OP:-}"; then
-          exit 0
-        fi
-        if test -n "${ORIGIN_WORKSPACE:-}"; then
-          pushd ${ORIGIN_WORKSPACE}
-        fi
-        if test -n "${ORIGIN_CLASS:-}"; then
-            exec ${WORKSPACE}/cciskel/cciskel-duffy ${DUFFY_OP} --prefix=ci-pipeline --class=${ORIGIN_CLASS} --jobid=${ORIGIN_BUILD_TAG} \
-                --timeout=${DUFFY_JOB_TIMEOUT_SECS:-0} --count=${DUFFY_COUNT:-1}
-        else
-            exec ${WORKSPACE}/cciskel/cciskel-duffy ${DUFFY_OP}
-        fi
-        exit
-    '''
+    withCredentials([string(credentialsId: 'ce769310-b97f-4ca0-b7b8-0837560ab7d7', variable: 'DUFFY_KEY')]) {
+        sh '''
+            #!/bin/bash
+            set -xeuo pipefail
+    
+            echo ${DUFFY_KEY} > ~/duffy.key
+            
+            mkdir -p ${ORIGIN_WORKSPACE}
+            # If we somehow got called without an op, do nothing.
+            if test -z "${DUFFY_OP:-}"; then
+              exit 0
+            fi
+            if test -n "${ORIGIN_WORKSPACE:-}"; then
+              pushd ${ORIGIN_WORKSPACE}
+            fi
+            if test -n "${ORIGIN_CLASS:-}"; then
+                exec ${WORKSPACE}/cciskel/cciskel-duffy ${DUFFY_OP} --prefix=ci-pipeline --class=${ORIGIN_CLASS} --jobid=${ORIGIN_BUILD_TAG} \
+                    --timeout=${DUFFY_JOB_TIMEOUT_SECS:-0} --count=${DUFFY_COUNT:-1}
+            else
+                exec ${WORKSPACE}/cciskel/cciskel-duffy ${DUFFY_OP}
+            fi
+            exit
+        '''
+    }
 }
 
 def convertProps(file1, file2) {
@@ -694,30 +698,34 @@ def setupStage(stage) {
 def rsyncResults(stage) {
     echo "Currently in stage: ${stage} in rsyncResults"
 
-    sh '''
-        #!/bin/bash
-        set -xeuo pipefail
-
-        source ${ORIGIN_WORKSPACE}/task.env
-        (echo -n "export RSYNC_PASSWORD=" && cat ~/duffy.key | cut -c '-13') > rsync-password.sh
-        
-        rsync -Hrlptv --stats -e ssh ${ORIGIN_WORKSPACE}/task.env rsync-password.sh builder@${DUFFY_HOST}:${JENKINS_JOB_NAME}
-        for repo in ci-pipeline sig-atomic-buildscripts; do
-            rsync -Hrlptv --stats --delete -e ssh ${repo}/ builder@${DUFFY_HOST}:${JENKINS_JOB_NAME}/${repo}
-        done
-        
-        build_success=true
-        if ! ssh -tt builder@${DUFFY_HOST} "pushd ${JENKINS_JOB_NAME} && . rsync-password.sh && . task.env && ./${task}"; then
-            build_success=false
-        fi
-        
-        rsync -Hrlptv --stats -e ssh builder@${DUFFY_HOST}:${JENKINS_JOB_NAME}/logs/ ${ORIGIN_WORKSPACE}/logs || true
-        # Exit with code from the build
-        if test "${build_success}" = "false"; then
-            echo 'Build failed, see logs above'; exit 1
-        fi
-        exit
-    '''
+    withCredentials([string(credentialsId: 'ce769310-b97f-4ca0-b7b8-0837560ab7d7', variable: 'DUFFY_KEY')]) {
+        sh '''
+            #!/bin/bash
+            set -xeuo pipefail
+            
+            echo ${DUFFY_KEY} > ~/duffy.key
+    
+            source ${ORIGIN_WORKSPACE}/task.env
+            (echo -n "export RSYNC_PASSWORD=" && cat ~/duffy.key | cut -c '-13') > rsync-password.sh
+            
+            rsync -Hrlptv --stats -e ssh ${ORIGIN_WORKSPACE}/task.env rsync-password.sh builder@${DUFFY_HOST}:${JENKINS_JOB_NAME}
+            for repo in ci-pipeline sig-atomic-buildscripts; do
+                rsync -Hrlptv --stats --delete -e ssh ${repo}/ builder@${DUFFY_HOST}:${JENKINS_JOB_NAME}/${repo}
+            done
+            
+            build_success=true
+            if ! ssh -tt builder@${DUFFY_HOST} "pushd ${JENKINS_JOB_NAME} && . rsync-password.sh && . task.env && ./${task}"; then
+                build_success=false
+            fi
+            
+            rsync -Hrlptv --stats -e ssh builder@${DUFFY_HOST}:${JENKINS_JOB_NAME}/logs/ ${ORIGIN_WORKSPACE}/logs || true
+            # Exit with code from the build
+            if test "${build_success}" = "false"; then
+                echo 'Build failed, see logs above'; exit 1
+            fi
+            exit
+        '''
+    }
 }
 
 def checkLastImage() {
