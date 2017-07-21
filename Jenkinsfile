@@ -643,10 +643,14 @@ def allocDuffy(stage) {
     env.ORIGIN_CLASS="builder"
     env.DUFFY_JOB_TIMEOUT_SECS="3600"
 
-    withCredentials([string(credentialsId: 'duffy-key', variable: 'DUFFY_KEY')]) {
+    withCredentials([file(credentialsId: 'duffy-key', variable: 'DUFFY_KEY')]) {
         sh '''
             #!/bin/bash
             set -xeuo pipefail
+    
+            cp ${DUFFY_KEY} ~/duffy.key
+            chmod 600 ~/duffy.key
+
     
             echo ${DUFFY_KEY} > ~/duffy.key
             
@@ -677,10 +681,16 @@ def convertProps(file1, file2) {
 def setupStage(stage) {
     echo "Currently in stage: ${stage} in setupStage"
 
-    withCredentials([file(credentialsId: 'fedora-atomic-key', variable: 'FEDORA_ATOMIC_KEY')]) {
+    withCredentials([file(credentialsId: 'fedora-atomic-key', variable: 'FEDORA_ATOMIC_KEY'), file(credentialsId: 'fedora-atomic-pub-key', variable: 'FEDORA_ATOMIC_PUB_KEY')]) {
         sh '''
             #!/bin/bash
             set -xeuo pipefail
+
+            mkdir -p ~/.ssh
+            cp ${FEDORA_ATOMIC_KEY} ~/.ssh/id_rsa
+            cp ${FEDORA_ATOMIC_PUB_KEY} ~/.ssh/id_rsa.pub
+            chmod 600 ~/.ssh/id_rsa
+            chmod 644 ~/.ssh/id_rsa.pub
             
             # Keep compatibility with earlier cciskel-duffy
             if test -f ${ORIGIN_WORKSPACE}/inventory.${ORIGIN_BUILD_TAG}; then
@@ -700,12 +710,13 @@ def setupStage(stage) {
 def rsyncResults(stage) {
     echo "Currently in stage: ${stage} in rsyncResults"
 
-    withCredentials([string(credentialsId: 'duffy-key', variable: 'DUFFY_KEY')]) {
+    withCredentials([file(credentialsId: 'duffy-key', variable: 'DUFFY_KEY')]) {
         sh '''
             #!/bin/bash
             set -xeuo pipefail
-            
-            echo ${DUFFY_KEY} > ~/duffy.key
+    
+            cp ${DUFFY_KEY} ~/duffy.key
+            chmod 600 ~/duffy.key
     
             source ${ORIGIN_WORKSPACE}/task.env
             (echo -n "export RSYNC_PASSWORD=" && cat ~/duffy.key | cut -c '-13') > rsync-password.sh
