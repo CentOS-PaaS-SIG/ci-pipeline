@@ -643,7 +643,7 @@ def allocDuffy(stage) {
     env.ORIGIN_CLASS="builder"
     env.DUFFY_JOB_TIMEOUT_SECS="3600"
 
-    withCredentials([string(credentialsId: 'ce769310-b97f-4ca0-b7b8-0837560ab7d7', variable: 'DUFFY_KEY')]) {
+    withCredentials([string(credentialsId: 'duffy-key', variable: 'DUFFY_KEY')]) {
         sh '''
             #!/bin/bash
             set -xeuo pipefail
@@ -677,28 +677,30 @@ def convertProps(file1, file2) {
 def setupStage(stage) {
     echo "Currently in stage: ${stage} in setupStage"
 
-    sh '''
-        #!/bin/bash
-        set -xeuo pipefail
-        
-        # Keep compatibility with earlier cciskel-duffy
-        if test -f ${ORIGIN_WORKSPACE}/inventory.${ORIGIN_BUILD_TAG}; then
-            ln -fs ${ORIGIN_WORKSPACE}/inventory.${ORIGIN_BUILD_TAG} ${WORKSPACE}/inventory
-        fi
-
-        if test -n "${playbook:-}"; then
-            ansible-playbook -u root -i ${WORKSPACE}/inventory "${playbook}"
-        else
-            ansible -u root -i ${WORKSPACE}/inventory all -m ping
-        fi
-        exit
-    '''
+    withCredentials([file(credentialsId: 'fedora-atomic-key', variable: 'fedora_atomic')]) {
+        sh '''
+            #!/bin/bash
+            set -xeuo pipefail
+            
+            # Keep compatibility with earlier cciskel-duffy
+            if test -f ${ORIGIN_WORKSPACE}/inventory.${ORIGIN_BUILD_TAG}; then
+                ln -fs ${ORIGIN_WORKSPACE}/inventory.${ORIGIN_BUILD_TAG} ${WORKSPACE}/inventory
+            fi
+    
+            if test -n "${playbook:-}"; then
+                ansible-playbook --private-key=fedora-atomic -u root -i ${WORKSPACE}/inventory "${playbook}"
+            else
+                ansible --private-key=fedora-atomic -u root -i ${WORKSPACE}/inventory all -m ping
+            fi
+            exit
+        '''
+    }
 }
 
 def rsyncResults(stage) {
     echo "Currently in stage: ${stage} in rsyncResults"
 
-    withCredentials([string(credentialsId: 'ce769310-b97f-4ca0-b7b8-0837560ab7d7', variable: 'DUFFY_KEY')]) {
+    withCredentials([string(credentialsId: 'duffy-key', variable: 'DUFFY_KEY')]) {
         sh '''
             #!/bin/bash
             set -xeuo pipefail
