@@ -23,12 +23,14 @@ virtlogd &
 chmod 666 /dev/kvm
 
 function clean_up {
+  # Add some debug here since I want to make sure I see what's in $basedir
+  ls $base_dir
   kill $(jobs -p)
   for screenshot in /var/lib/oz/screenshots/*.ppm; do
-      [ -e "$screenshot" ] && cp $screenshot $base_dir/logs
+      [ -e "$screenshot" ] && cp $screenshot /home/output/logs
   done
 
-  [ -e "$base_dir/fedora-atomic.ks" ] && cp $base_dir/fedora-atomic.ks $base_dir/logs
+  [ -e "$base_dir/fedora-atomic.ks" ] && cp $base_dir/fedora-atomic.ks /home/output/logs
 }
 trap clean_up EXIT SIGHUP SIGINT SIGTERM
 
@@ -53,7 +55,7 @@ if [ -d "/home/output/images" ]; then
     prev_img=$(ls -tr /home/output/images/fedora-atomic-*.qcow2 | tail -n 1)
     prev_rel=$(echo $prev_img | sed -e 's/.*-\([^-]*\).qcow2/\1/')
     # Don't fail if the previous build has been pruned
-    rpm-ostree db --repo=/home/output/ostree diff $prev_rel $release || echo "Previous build has been pruned" | tee /home/output/logs/packages.txt
+    (rpm-ostree db --repo=/home/output/ostree diff $prev_rel $release || echo "Previous build has been pruned") | tee /home/output/logs/packages.txt
 else
     mkdir /home/output/images
 fi
