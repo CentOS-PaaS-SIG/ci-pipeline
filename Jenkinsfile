@@ -259,7 +259,7 @@ node('fedora-atomic') {
                     checkLastImage()
                     if (fileExists("${env.WORKSPACE}/NeedNewImage.txt")) {
                         stage('ci-pipeline-ostree-image-compose') {
-                            // Set groovy and env vars
+                            // Set groovy aln -fs ${HOMEDIR}/output/logs ${HOMEDIR}/logsnd env vars
                             current_stage = "ci-pipeline-ostree-image-compose"
                             env.task = "./ci-pipeline/tasks/ostree-image-compose"
                             env.playbook = "ci-pipeline/playbooks/rdgo-setup.yml"
