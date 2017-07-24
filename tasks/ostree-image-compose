@@ -12,17 +12,13 @@ rm -rf ${HOMEDIR}/output
 mkdir -p ${HOMEDIR}/output
 ln -fs ${HOMEDIR}/output ${HOMEDIR}/logs
 
-if [ "$(sudo docker images | grep rsync-container)" == "" ]; then
-    pushd $base_dir/config/Dockerfiles/rsync
-    sudo docker build -t rsync-container .
-    popd
-fi
+pushd $base_dir/config/Dockerfiles/rsync
+sudo docker build -t rsync-container .
+popd
 
-if [ "$(sudo docker images | grep ostree_image_compose-container)" == "" ]; then
-    pushd $base_dir/config/Dockerfiles/ostree_image_compose
-    sudo docker build -t ostree_image_compose-container .
-    popd
-fi
+pushd $base_dir/config/Dockerfiles/ostree_image_compose
+sudo docker build -t ostree_image_compose-container .
+popd
 
 sudo docker run --privileged --cap-add=SYS_ADMIN -v ${HOMEDIR}/output:/home/output -e rsync_paths="netinst ostree images" -e rsync_from="fedora-atomic@artifacts.ci.centos.org::fedora-atomic/${branch}/" -e rsync_to="/home/output/" -e RSYNC_PASSWORD="$RSYNC_PASSWORD" rsync-container
 
