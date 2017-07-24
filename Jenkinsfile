@@ -256,7 +256,7 @@ node('fedora-atomic') {
                             "DUFFY_HOST=${env.DUFFY_HOST}"
 
                     // Check if a new ostree image compose is needed
-                    checkLastImage()
+                    //checkLastImage()
                     if (fileExists("${env.WORKSPACE}/NeedNewImage.txt")) {
                         stage('ci-pipeline-ostree-image-compose') {
                             // Set groovy and env vars
@@ -738,7 +738,9 @@ def rsyncResults(stage) {
     }
 }
 
-def checkLastImage() {
+def checkLastImage(stage) {
+    echo "Currently in stage: ${stage} in checkLastImage"
+
     sh '''
         prev=$( date --date="$( curl -I --silent http://artifacts.ci.centos.org/artifacts/fedora-atomic/${branch}/images/latest-atomic.qcow2 | grep Last-Modified | sed s'/Last-Modified: //' )" +%s )
         cur=$( date +%s )
