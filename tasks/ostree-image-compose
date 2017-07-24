@@ -10,6 +10,7 @@ base_dir="$(dirname $0)/.."
 HOMEDIR=$(pwd)
 rm -rf ${HOMEDIR}/output
 mkdir -p ${HOMEDIR}/output
+ln -fs ${HOMEDIR}/output/logs ${HOMEDIR}/logs
 
 pushd $base_dir/config/Dockerfiles/rsync
 sudo docker build -t rsync-container .
