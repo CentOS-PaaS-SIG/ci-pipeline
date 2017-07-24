@@ -11,7 +11,7 @@ set -xeuo pipefail
 # problems with converted images - just force it
 # TODO: Point the working directories at the bind mounted location?
 
-base_dir="$(dirname $0)"
+base_dir="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 
 # Start libvirtd
 ls /var/run/libvirt
@@ -23,8 +23,6 @@ virtlogd &
 chmod 666 /dev/kvm
 
 function clean_up {
-  # Add some debug here since I want to make sure I see what's in $basedir
-  ls $base_dir
   kill $(jobs -p)
   for screenshot in /var/lib/oz/screenshots/*.ppm; do
       [ -e "$screenshot" ] && cp $screenshot /home/output/logs
