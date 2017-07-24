@@ -10,6 +10,7 @@ base_dir="$(dirname $0)/.."
 HOMEDIR=$(pwd)
 rm -rf ${HOMEDIR}/output
 mkdir -p ${HOMEDIR}/output
+ln -fs ${HOMEDIR}/output ${HOMEDIR}/logs
 
 if [ "$(sudo docker images | grep rsync-container)" == "" ]; then
     pushd $base_dir/config/Dockerfiles/rsync
