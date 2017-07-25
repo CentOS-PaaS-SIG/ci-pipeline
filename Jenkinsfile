@@ -405,7 +405,8 @@ node('fedora-atomic') {
                                     text: "export branch=\"${branch}\"\n" +
                                             "export JENKINS_JOB_NAME=\"${JOB_NAME}-${current_stage}\"\n" +
                                             "export JENKINS_BUILD_TAG=\"${BUILD_TAG}-${current_stage}\"\n" +
-                                            "export OSTREE_BRANCH=\"\${OSTREE_BRANCH:-}\"\n"
+                                            "export OSTREE_BRANCH=\"\${OSTREE_BRANCH:-}\"\n" +
+                                            "export ANSIBLE_HOST_KEY_CHECKING=\"False\"\n"
                             rsyncResults("${current_stage}")
 
                             ostree_props = "${env.ORIGIN_WORKSPACE}/logs/ostree.props"
@@ -501,7 +502,8 @@ node('fedora-atomic') {
                                    "export commit=\"\${commit:-}\"\n" +
                                    "export JENKINS_JOB_NAME=\"${JOB_NAME}-${current_stage}\"\n" +
                                    "export JENKINS_BUILD_TAG=\"${BUILD_TAG}-${current_stage}\"\n" +
-                                   "export OSTREE_BRANCH=\"\${OSTREE_BRANCH:-}\"\n"
+                                   "export OSTREE_BRANCH=\"\${OSTREE_BRANCH:-}\"\n" +
+                                   "export ANSIBLE_HOST_KEY_CHECKING=\"False\"\n"
                     rsyncResults("${current_stage}")
 
                     // Teardown resources
