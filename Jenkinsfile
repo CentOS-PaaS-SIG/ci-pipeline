@@ -95,7 +95,7 @@ node('fedora-atomic') {
                     load(job_props_groovy)
 
                     // Set groovy and env vars
-                    env.task = "ci-pipeline/tasks/rpmbuild-test"
+                    env.task = "./ci-pipeline/tasks/rpmbuild-test"
                     env.topic = "${MAIN_TOPIC}.ci.pipeline.package.running"
                     env.playbook = "ci-pipeline/playbooks/setup-rpmbuild-system.yml"
                     env.ref = "fedora/${branch}/${basearch}/atomic-host"
@@ -142,7 +142,7 @@ node('fedora-atomic') {
                     writeFile file: "${env.ORIGIN_WORKSPACE}/task.env",
                               text: "export JENKINS_JOB_NAME=\"${JOB_NAME}-${current_stage}\"\n" +
                                     "export JENKINS_BUILD_TAG=\"${BUILD_TAG}-${current_stage}\"\n" +
-                                    "export OSTREE_BRANCH=\"\${OSTREE_BRANCH:-}\"\n" +
+                                    "export OSTREE_BRANCH=\"${OSTREE_BRANCH:-}\"\n" +
                                     "export fed_repo=\"${fed_repo}\"\n" +
                                     "export fed_branch=\"${fed_branch}\"\n" +
                                     "export fed_rev=\"${fed_rev}\"\n"
@@ -239,7 +239,7 @@ node('fedora-atomic') {
                               text: "export branch=\"${branch}\"\n" +
                                     "export JENKINS_JOB_NAME=\"${JOB_NAME}-${current_stage}\"\n" +
                                     "export JENKINS_BUILD_TAG=\"${BUILD_TAG}-${current_stage}\"\n" +
-                                    "export OSTREE_BRANCH=\"\${OSTREE_BRANCH:-}\"\n"
+                                    "export OSTREE_BRANCH=\"${OSTREE_BRANCH:-}\"\n"
                     rsyncResults("${current_stage}")
 
                     def ostree_props = "${env.ORIGIN_WORKSPACE}/logs/ostree.props"
@@ -311,7 +311,7 @@ node('fedora-atomic') {
                                     text: "export branch=\"${branch}\"\n" +
                                             "export JENKINS_JOB_NAME=\"${JOB_NAME}-${current_stage}\"\n" +
                                             "export JENKINS_BUILD_TAG=\"${BUILD_TAG}-${current_stage}\"\n" +
-                                            "export OSTREE_BRANCH=\"\${OSTREE_BRANCH:-}\"\n"
+                                            "export OSTREE_BRANCH=\"${OSTREE_BRANCH:-}\"\n"
                             rsyncResults("${current_stage}")
 
                             // Teardown resources
@@ -400,7 +400,7 @@ node('fedora-atomic') {
                                     text: "export branch=\"${branch}\"\n" +
                                             "export JENKINS_JOB_NAME=\"${JOB_NAME}-${current_stage}\"\n" +
                                             "export JENKINS_BUILD_TAG=\"${BUILD_TAG}-${current_stage}\"\n" +
-                                            "export OSTREE_BRANCH=\"\${OSTREE_BRANCH:-}\"\n" +
+                                            "export OSTREE_BRANCH=\"${OSTREE_BRANCH:-}\"\n" +
                                             "export ANSIBLE_HOST_KEY_CHECKING=\"False\"\n"
                             rsyncResults("${current_stage}")
 
@@ -486,21 +486,12 @@ node('fedora-atomic') {
                     // Rsync Data
                     writeFile file: "${env.ORIGIN_WORKSPACE}/task.env",
                             text: "export branch=\"${branch}\"\n" +
-                                  "export image2boot=\"\${image2boot:-}\"\n" +
-                                  "export commit=\"\${commit:-}\"\n" +
-                                  "export JENKINS_JOB_NAME=\"${JOB_NAME}-${current_stage}\"\n" +
-                                  "export JENKINS_BUILD_TAG=\"${BUILD_TAG}-${current_stage}\"\n" +
-                                  "export OSTREE_BRANCH=\"\${OSTREE_BRANCH:-}\"\n" +
-                                  "export ANSIBLE_HOST_KEY_CHECKING=\"False\"\n"
-                    sh '''
-                        #!/bin/bash
-                        set -xeuo pipefail
-
-                        echo "Print Environment"
-                        env
-                        exit 0
-                    '''
-
+                                   "export image2boot=\"${image2boot:-}\"\n" +
+                                   "export commit=\"${commit:-}\"\n" +
+                                   "export JENKINS_JOB_NAME=\"${JOB_NAME}-${current_stage}\"\n" +
+                                   "export JENKINS_BUILD_TAG=\"${BUILD_TAG}-${current_stage}\"\n" +
+                                   "export OSTREE_BRANCH=\"${OSTREE_BRANCH:-}\"\n" +
+                                   "export ANSIBLE_HOST_KEY_CHECKING=\"False\"\n"
                     rsyncResults("${current_stage}")
 
 
@@ -724,7 +715,7 @@ def rsyncResults(stage) {
             done
             
             build_success=true
-            if ! ssh -tt builder@${DUFFY_HOST} "pushd ${JENKINS_JOB_NAME} && . rsync-password.sh && . task.env && ./${task}"; then
+            if ! ssh -tt builder@${DUFFY_HOST} "pushd ${JENKINS_JOB_NAME} && . rsync-password.sh && . task.env && ${task}"; then
                 build_success=false
             fi
             
