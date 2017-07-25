@@ -30,7 +30,7 @@ node('fedora-atomic') {
                         env.MAIN_TOPIC = "org.centos.prod"
                     }
                     if ((env.MSG_PROVIDER == null) || ("${env.MSG_PROVIDER}" == "")) {
-                        env.MSG_PROVIDER = "fedora-fsdmsg"
+                        env.MSG_PROVIDER = "fedora-fedmsg"
                     }
 
 
