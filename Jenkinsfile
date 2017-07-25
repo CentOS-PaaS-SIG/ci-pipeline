@@ -506,6 +506,7 @@ node('fedora-atomic') {
                                    "export ANSIBLE_HOST_KEY_CHECKING=\"False\"\n"
                     rsyncResults("${current_stage}")
 
+
                     // Teardown resources
                     env.DUFFY_OP="--teardown"
                     allocDuffy("${current_stage}")
@@ -632,7 +633,7 @@ node('fedora-atomic') {
                 currentBuild.displayName = "Build#: ${env.BUILD_NUMBER} - Branch: ${env.branch} - Package: ${env.fed_repo}"
                 currentBuild.description = "${currentBuild.currentResult}"
                 //emailext subject: "${env.JOB_NAME} - Build # ${env.BUILD_NUMBER} - STATUS = ${currentBuild.currentResult}", to: "ari@redhat.com", body: "This pipeline was a ${currentBuild.currentResult}"
-                step([$class: 'ArtifactArchiver', allowEmptyArchive: true, artifacts: '**/logs/**,*.txt,*.groovy,**/job.*,**/inventory.*', excludes: '**/*.example', fingerprint: true])
+                step([$class: 'ArtifactArchiver', allowEmptyArchive: true, artifacts: '**/logs/**,*.txt,*.groovy,**/job.*,**/*.groovy,**/inventory.*', excludes: '**/*.example', fingerprint: true])
             }
         }
     }
