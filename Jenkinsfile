@@ -256,7 +256,7 @@ node('fedora-atomic') {
                             "DUFFY_HOST=${env.DUFFY_HOST}"
 
                     // Check if a new ostree image compose is needed
-                    //checkLastImage()
+                    //checkLastImage("${current_stage}")
                     if (fileExists("${env.WORKSPACE}/NeedNewImage.txt")) {
                         stage('ci-pipeline-ostree-image-compose') {
                             // Set groovy and env vars
