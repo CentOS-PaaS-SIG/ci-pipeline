@@ -111,33 +111,30 @@ node('fedora-atomic') {
                     convertProps(job_props, job_props_groovy)
                     load(job_props_groovy)
 
+                    // Populate message Properties
+                    messageProperties = "topic=${topic}\n" +
+                                        "build_url=${BUILD_URL}\n" +
+                                        "build_id=${BUILD_ID}\n" +
+                                        "branch=${branch}\n" +
+                                        "ref=fedora/${branch}/x86_64/atomic-host\n" +
+                                        "rev=${fed_rev}\n" +
+                                        "repo=${fed_repo}\n" +
+                                        "namespace=${fed_namespace}\n" +
+                                        "username=fedora-atomic\n" +
+                                        "test_guidance=''\n" +
+                                        "status=${currentBuild.currentResult}"
+                    messageContent = ''
+
                     // Send message org.centos.prod.ci.pipeline.package.queued or .ignore on fedmsg
-                    sendCIMessage messageContent: '',
-                            messageProperties: "topic=${topic}\n" +
-                                    "build_url=${BUILD_URL}\n" +
-                                    "build_id=${BUILD_ID}\n" +
-                                    "branch=${branch}\n" +
-                                    "ref=fedora/${branch}/x86_64/atomic-host\n" +
-                                    "rev=${fed_rev}\n" +
-                                    "repo=${fed_repo}\n" +
-                                    "namespace=${fed_namespace}\n" +
-                                    "username=fedora-atomic\n" +
-                                    "test_guidance=''\n" +
-                                    "status=success",
-
-                            messageType: 'Custom',
-                            overrides: [topic: "${topic}"],
-                            providerName: 'fedora-fedmsg'
-
-                    currentBuild.result = 'SUCCESS'
+                    sendMessage(messageProperties, messageContent)
                 }
             } catch (e) {
                 // if any exception occurs, mark the build as failed
-                currentBuild.result = 'FAILURE'
+                sendMessage(messageProperties, messageContent)
                 throw e
             } finally {
                 currentBuild.displayName = "Build#: ${env.BUILD_NUMBER} - Branch: ${env.branch} - Package: ${env.fed_repo}"
-                currentBuild.description = "${currentBuild.result}"
+                currentBuild.description = "${currentBuild.currentResult}"
                 //emailext subject: "${env.JOB_NAME} - Build # ${env.BUILD_NUMBER} - STATUS = ${currentBuild.result}", to: "ari@redhat.com", body: "This pipeline was a ${currentBuild.result}"
                 step([$class: 'ArtifactArchiver', allowEmptyArchive: true, artifacts: '*.txt,*.properties,*.props,*.groovy', excludes: '**/*.example', fingerprint: true])
                 if (fileExists("${env.WORKSPACE}/trigger.downstream")) {
@@ -155,4 +152,13 @@ node('fedora-atomic') {
 def convertProps(file1, file2) {
     def command = $/awk -F'=' '{print "env."$1"=\""$2"\""}' ${file1} > ${file2}/$
     sh command
+}
+
+def sendMessage(msgProps, msgContent) {
+    sendCIMessage messageContent: msgContent,
+            messageProperties: msgProps,
+
+            messageType: 'Custom',
+            overrides: [topic: "${topic}"],
+            providerName: 'fedora-fedmsg'
 }

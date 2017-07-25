@@ -314,11 +314,6 @@ node('fedora-atomic') {
                                             "export OSTREE_BRANCH=\"${OSTREE_BRANCH:-}\"\n"
                             rsyncResults("${current_stage}")
 
-                            ostree_props = "${env.ORIGIN_WORKSPACE}/logs/ostree.props"
-                            ostree_props_groovy = "${env.ORIGIN_WORKSPACE}/ostree.props.groovy"
-                            convertProps(ostree_props, ostree_props_groovy)
-                            load(ostree_props_groovy)
-
                             // Teardown resources
                             env.DUFFY_OP="--teardown"
                             allocDuffy("${current_stage}")
@@ -409,11 +404,6 @@ node('fedora-atomic') {
                                             "export ANSIBLE_HOST_KEY_CHECKING=\"False\"\n"
                             rsyncResults("${current_stage}")
 
-                            ostree_props = "${env.ORIGIN_WORKSPACE}/logs/ostree.props"
-                            ostree_props_groovy = "${env.ORIGIN_WORKSPACE}/ostree.props.groovy"
-                            convertProps(ostree_props, ostree_props_groovy)
-                            load(ostree_props_groovy)
-
                             // Teardown resources
                             env.DUFFY_OP="--teardown"
                             allocDuffy("${current_stage}")
@@ -445,9 +435,7 @@ node('fedora-atomic') {
                                     messageType: 'Custom',
                                     overrides: [topic: "${topic}"],
                                     providerName: 'fedora-fedmsg'
-
                         }
-
                     }
 
 
@@ -757,4 +745,13 @@ def checkLastImage(stage) {
         fi
         exit
     '''
+}
+
+def sendMessage(msgProps, msgContent) {
+    sendCIMessage messageContent: msgContent,
+            messageProperties: msgProps,
+
+            messageType: 'Custom',
+            overrides: [topic: "${topic}"],
+            providerName: 'fedora-fedmsg'
 }
