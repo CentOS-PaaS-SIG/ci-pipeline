@@ -314,11 +314,6 @@ node('fedora-atomic') {
                                             "export OSTREE_BRANCH=\"\${OSTREE_BRANCH:-}\"\n"
                             rsyncResults("${current_stage}")
 
-                            ostree_props = "${env.ORIGIN_WORKSPACE}/logs/ostree.props"
-                            ostree_props_groovy = "${env.ORIGIN_WORKSPACE}/ostree.props.groovy"
-                            convertProps(ostree_props, ostree_props_groovy)
-                            load(ostree_props_groovy)
-
                             // Teardown resources
                             env.DUFFY_OP="--teardown"
                             allocDuffy("${current_stage}")
@@ -409,11 +404,6 @@ node('fedora-atomic') {
                                             "export ANSIBLE_HOST_KEY_CHECKING=\"False\"\n"
                             rsyncResults("${current_stage}")
 
-                            ostree_props = "${env.ORIGIN_WORKSPACE}/logs/ostree.props"
-                            ostree_props_groovy = "${env.ORIGIN_WORKSPACE}/ostree.props.groovy"
-                            convertProps(ostree_props, ostree_props_groovy)
-                            load(ostree_props_groovy)
-
                             // Teardown resources
                             env.DUFFY_OP="--teardown"
                             allocDuffy("${current_stage}")
@@ -445,9 +435,7 @@ node('fedora-atomic') {
                                     messageType: 'Custom',
                                     overrides: [topic: "${topic}"],
                                     providerName: 'fedora-fedmsg'
-
                         }
-
                     }
 
 
@@ -498,12 +486,21 @@ node('fedora-atomic') {
                     // Rsync Data
                     writeFile file: "${env.ORIGIN_WORKSPACE}/task.env",
                             text: "export branch=\"${branch}\"\n" +
-                                   "export image2boot=\"\${image2boot:-}\"\n" +
-                                   "export commit=\"\${commit:-}\"\n" +
-                                   "export JENKINS_JOB_NAME=\"${JOB_NAME}-${current_stage}\"\n" +
-                                   "export JENKINS_BUILD_TAG=\"${BUILD_TAG}-${current_stage}\"\n" +
-                                   "export OSTREE_BRANCH=\"\${OSTREE_BRANCH:-}\"\n" +
-                                   "export ANSIBLE_HOST_KEY_CHECKING=\"False\"\n"
+                                  "export image2boot=\"\${image2boot:-}\"\n" +
+                                  "export commit=\"\${commit:-}\"\n" +
+                                  "export JENKINS_JOB_NAME=\"${JOB_NAME}-${current_stage}\"\n" +
+                                  "export JENKINS_BUILD_TAG=\"${BUILD_TAG}-${current_stage}\"\n" +
+                                  "export OSTREE_BRANCH=\"\${OSTREE_BRANCH:-}\"\n" +
+                                  "export ANSIBLE_HOST_KEY_CHECKING=\"False\"\n"
+                    sh '''
+                        #!/bin/bash
+                        set -xeuo pipefail
+
+                        echo "Print Environment"
+                        env
+                        exit 0
+                    '''
+
                     rsyncResults("${current_stage}")
 
 
@@ -757,4 +754,13 @@ def checkLastImage(stage) {
         fi
         exit
     '''
+}
+
+def sendMessage(msgProps, msgContent) {
+    sendCIMessage messageContent: msgContent,
+            messageProperties: msgProps,
+
+            messageType: 'Custom',
+            overrides: [topic: "${topic}"],
+            providerName: 'fedora-fedmsg'
 }
