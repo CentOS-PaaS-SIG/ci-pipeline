@@ -79,8 +79,6 @@ pipeline-stage-tags-metadata:1.1.6
 pipeline-stage-view:2.8
 pipeline-utility-steps:1.3.0
 plain-credentials:1.4
-project-inheritance:2.0.0
-promoted-builds:2.28.1
 pubsub-light:1.8
 rebuild:1.25
 resource-disposer:0.6
