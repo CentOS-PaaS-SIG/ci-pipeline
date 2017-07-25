@@ -140,6 +140,10 @@ node('fedora-atomic') {
                     // Stage resources - RPM build system
                     setupStage("${current_stage}")
 
+                    if (env.OSTREE_BRANCH == null) {
+                       env.OSTREE_BRANCH = ""
+                    }
+
                     // Rsync Data
                     writeFile file: "${env.ORIGIN_WORKSPACE}/task.env",
                               text: "export JENKINS_JOB_NAME=\"${JOB_NAME}-${current_stage}\"\n" +
@@ -226,6 +230,10 @@ node('fedora-atomic') {
                     // Stage resources - ostree compose
                     setupStage("${current_stage}")
 
+                    if (env.OSTREE_BRANCH == null) {
+                        env.OSTREE_BRANCH = ""
+                    }
+
                     // Rsync Data
                     writeFile file: "${env.ORIGIN_WORKSPACE}/task.env",
                               text: "export branch=\"${branch}\"\n" +
@@ -294,6 +302,10 @@ node('fedora-atomic') {
 
                             // Stage resources - ostree compose
                             setupStage("${current_stage}")
+
+                            if (env.OSTREE_BRANCH == null) {
+                                env.OSTREE_BRANCH = ""
+                            }
 
                             // Rsync Data
                             writeFile file: "${env.ORIGIN_WORKSPACE}/task.env",
@@ -377,6 +389,10 @@ node('fedora-atomic') {
                             // Stage resources - ostree compose
                             setupStage("${current_stage}")
 
+                            if (env.OSTREE_BRANCH == null) {
+                                env.OSTREE_BRANCH = ""
+                            }
+
                             // Rsync Data
                             writeFile file: "${env.ORIGIN_WORKSPACE}/task.env",
                                       text: "export branch=\"${branch}\"\n" +
@@ -458,6 +474,18 @@ node('fedora-atomic') {
 
                     // Stage resources - ostree compose
                     setupStage("${current_stage}")
+
+                    if (env.OSTREE_BRANCH == null) {
+                        env.OSTREE_BRANCH = ""
+                    }
+
+                    if (env.commit == null) {
+                        env.commit = ""
+                    }
+
+                    if (env.image2boot == null) {
+                        env.image2boot = ""
+                    }
 
                     // Rsync Data
                     writeFile file: "${env.ORIGIN_WORKSPACE}/task.env",
