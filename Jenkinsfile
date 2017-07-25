@@ -476,7 +476,7 @@ node('fedora-atomic') {
                     // Set groovy and env vars
                     current_stage = "ci-pipeline-ostree-boot-sanity"
                     env.task = "./ci-pipeline/tasks/ostree-boot-image"
-                    env.playbook = "ci-pipeline/playbooks/rdgo-setup.yml"
+                    env.playbook = "ci-pipeline/playbooks/system-setup.yml"
 
                     // Provision resources
                     env.DUFFY_OP = "--allocate"
@@ -544,7 +544,7 @@ node('fedora-atomic') {
                     // Set groovy and env vars
                     current_stage="ci-pipeline-atomic-host-tests"
                     env.task = "./ci-pipeline/tasks/atomic-host-tests"
-                    env.playbook = "ci-pipeline/playbooks/rdgo-setup.yml"
+                    env.playbook = "ci-pipeline/playbooks/system-setup.yml"
 
                     // Send integration test running message on fedmsg
                     env.topic = "${MAIN_TOPIC}.ci.pipeline.compose.test.integration.running"
