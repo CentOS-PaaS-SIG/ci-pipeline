@@ -514,10 +514,10 @@ node('fedora-atomic') {
                          "RSYNC_PASSWORD=${env.RSYNC_PASSWORD}\r\n" +
                          "DUFFY_HOST=${env.DUFFY_HOST}"
 
-                    step([$class: 'XUnitBuilder',
-                          thresholds: [[$class: 'FailedThreshold', unstableThreshold: '1']],
-                          tools: [[$class: 'JUnitType', pattern: "${env.ORIGIN_WORKSPACE}/logs/*.xml"]]]
-                    )
+//                    step([$class: 'XUnitBuilder',
+//                          thresholds: [[$class: 'FailedThreshold', unstableThreshold: '1']],
+//                          tools: [[$class: 'JUnitType', pattern: "${env.ORIGIN_WORKSPACE}/logs/*.xml"]]]
+//                    )
 
                     // Send integration test queued message on fedmsg
                     env.topic = "${MAIN_TOPIC}.ci.pipeline.compose.test.integration.queued"
