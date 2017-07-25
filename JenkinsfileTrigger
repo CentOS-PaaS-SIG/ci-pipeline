@@ -129,7 +129,7 @@ node('fedora-atomic') {
                     sendMessage(messageProperties, messageContent)
                 }
             } catch (e) {
-                // if any exception occurs, mark the build as failed
+                // Send failure message for appropriate topic
                 sendMessage(messageProperties, messageContent)
                 throw e
             } finally {
