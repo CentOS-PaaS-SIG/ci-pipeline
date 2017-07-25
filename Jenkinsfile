@@ -476,7 +476,6 @@ node('fedora-atomic') {
                         env
                         exit 0
                     '''
-
                     rsyncResults("${current_stage}")
 
                     // Teardown resources
@@ -689,7 +688,7 @@ def rsyncResults(stage) {
             done
             
             build_success=true
-            if ! ssh -tt builder@${DUFFY_HOST} "pushd ${JENKINS_JOB_NAME} && . rsync-password.sh && . task.env && ./${task}"; then
+            if ! ssh -tt builder@${DUFFY_HOST} "pushd ${JENKINS_JOB_NAME} && . rsync-password.sh && . task.env && ${task}"; then
                 build_success=false
             fi
             
