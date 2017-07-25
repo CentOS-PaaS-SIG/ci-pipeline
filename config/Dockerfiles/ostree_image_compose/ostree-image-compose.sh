@@ -28,7 +28,7 @@ function clean_up {
       [ -e "$screenshot" ] && cp $screenshot /home/output/logs
   done
 
-  [ -e "$base_dir/fedora-atomic.ks" ] && cp $base_dir/fedora-atomic.ks /home/output/logs
+  exit 0
 }
 trap clean_up EXIT SIGHUP SIGINT SIGTERM
 
@@ -63,19 +63,19 @@ python -m SimpleHTTPServer &
 popd
 
 # Grab the kickstart file
-cp $base_dir/config/ostree/fedora-atomic-${branch}.ks fedora-atomic.ks
+cp $base_dir/config/ostree/fedora-atomic-${branch}.ks /home/output/logs/fedora-atomic.ks
 
 # Put new url into the kickstart file
-sed -i "s|^ostreesetup.*|ostreesetup --nogpg --osname=fedora-atomic --remote=fedora-atomic --url=http://192.168.122.1:8000/ --ref=$REF|" ./fedora-atomic.ks
+sed -i "s|^ostreesetup.*|ostreesetup --nogpg --osname=fedora-atomic --remote=fedora-atomic --url=http://192.168.122.1:8000/ --ref=$REF|" /home/output/logs/fedora-atomic.ks
 
 # point to upstream
-sed -i "s|\(%end.*$\)|ostree remote delete fedora-atomic\nostree remote add --set=gpg-verify=false fedora-atomic http://artifacts.ci.centos.org/artifacts/fedora-atomic/${branch}/ostree\n\1|" ./fedora-atomic.ks
+sed -i "s|\(%end.*$\)|ostree remote delete fedora-atomic\nostree remote add --set=gpg-verify=false fedora-atomic http://artifacts.ci.centos.org/artifacts/fedora-atomic/${branch}/ostree\n\1|" /home/output/logs/fedora-atomic.ks
 
 # Create a tdl file for imagefactory
 #       <install type='url'>
 #           <url>http://download.fedoraproject.org/pub/fedora/linux/releases/25/Everything/x86_64/os/</url>
 #       </install>
-cat <<EOF >./fedora-${branch}.tdl
+cat <<EOF >/home/output/logs/fedora-${branch}.tdl
 <template>
     <name>${branch}</name>
     <os>
@@ -93,7 +93,7 @@ EOF
 
 #export LIBGUESTFS_BACKEND=direct
 
-imagefactory --debug --imgdir $imgdir --timeout 3000 base_image ./fedora-${branch}.tdl --parameter offline_icicle true --file-parameter install_script ./fedora-atomic.ks
+imagefactory --debug --imgdir $imgdir --timeout 3000 base_image /home/output/logs/fedora-${branch}.tdl --parameter offline_icicle true --file-parameter install_script /home/output/logs/fedora-atomic.ks
 
 # convert to qcow
 imgname="fedora-atomic-$version-$release"
