@@ -16,7 +16,7 @@ properties(
         ]
 )
 
-node('fedora-atomic') {
+node('master') {
     ansiColor('xterm') {
         timestamps {
             //def current_stage = "ci-pipeline-rpmbuild-trigger"
@@ -77,16 +77,16 @@ node('fedora-atomic') {
                         if [ "${branch}" = "master" ]; then
                           branch="rawhide"
                         fi
-                        
-                        
+
+
                         # Save the bramch in job.properties
                         echo "branch=${branch}" >> ${WORKSPACE}/job.properties
-                     
+
                         # Verify this is a branch in our list of targets defined above in the parameters
                         if [[ ! "${fed_branch}" =~ ${TARGETS} ]]; then
                             echo "${fed_branch} is not in the list"
                             echo "topic=${MAIN_TOPIC}.ci.pipeline.package.ignore" >> ${WORKSPACE}/job.properties
-                        else                                           
+                        else
                             # Verify this is a package we are interested in
                             valid=0
                             for package in $(cat ${PROJECT_REPO}/config/package_list); do
