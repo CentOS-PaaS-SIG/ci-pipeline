@@ -237,7 +237,7 @@ email=jchaloup@redhat.com
         "username": "fedora-atomic", 
         "test_guidance": "''",
         "message-content": "",
-        "status": "<success/failure>"
+        "status": "<SUCCESS/FAILURE/ABORTED>"
   }
 }
 ````
@@ -265,7 +265,7 @@ email=jchaloup@redhat.com
         "username": "fedora-atomic", 
         "test_guidance": "<comma-separated-list-of-test-suites-to-run>",
         "message-content": "",
-        "status": "<success/failure>"
+        "status": "<SUCCESS/FAILURE/ABORTED>"
   }
 }
 ````
@@ -293,7 +293,7 @@ email=jchaloup@redhat.com
         "username": "fedora-atomic", 
         "test_guidance": "<comma-separated-list-of-test-suites-to-run>",
         "message-content": "",
-        "status": "<success/failure>"
+        "status": "<SUCCESS/FAILURE/ABORTED>"
   }
 }
 ````
@@ -321,7 +321,7 @@ email=jchaloup@redhat.com
         "username": "fedora-atomic", 
         "test_guidance": "<comma-separated-list-of-test-suites-to-run>",
         "message-content": "",
-        "status": "<success/failure>"
+        "status": "<SUCCESS/FAILURE/ABORTED>"
   }
 }
 ````
@@ -350,7 +350,7 @@ email=jchaloup@redhat.com
         "username": "fedora-atomic", 
         "test_guidance": "<comma-separated-list-of-test-suites-to-run>",
         "message-content": "",
-        "status": "<success/failure>"
+        "status": "<SUCCESS/FAILURE/ABORTED>"
   }
 }
 ````
@@ -379,7 +379,7 @@ email=jchaloup@redhat.com
         "username": "fedora-atomic", 
         "test_guidance": "<comma-separated-list-of-test-suites-to-run>",
         "message-content": "",
-        "status": "<success/failure>"
+        "status": "<SUCCESS/FAILURE/ABORTED>"
   }
 }
 ````
@@ -408,7 +408,7 @@ email=jchaloup@redhat.com
         "username": "fedora-atomic", 
         "test_guidance": "<comma-separated-list-of-test-suites-to-run>",
         "message-content": "",
-        "status": "<success/failure>"
+        "status": "<SUCCESS/FAILURE/ABORTED>"
   }
 }
 ````
@@ -437,35 +437,7 @@ email=jchaloup@redhat.com
         "username": "fedora-atomic", 
         "test_guidance": "<comma-separated-list-of-test-suites-to-run>",
         "message-content": "",
-        "status": "<success/failure>"
-  }
-}
-````
-
-#### org.centos.prod.ci.pipeline.compose.queued
-
-````
-{ 
-  "i": 1,
-  "timestamp": 1496382015, 
-  "msg_id": "2017-f2b46ca1-1b07-4539-8d86-f7d3cb1b5934", 
-  "crypto": "x509", 
-  "topic": "org.centos.prod.ci.pipeline.compose.queued",   
-  'msg': { 
-        "CI_TYPE": "custom", 
-        "CI_NAME": "ci-pipeline-ostree-compose",
-        "topic": "org.centos.prod.ci.pipeline.compose.queued",
-        "build_id": "79", 
-        "build_url": "https://ci.centos.org/job/ci-pipeline-ostree-compose/79/",
-        "branch": "f26",
-        "ref": "fedora/f26/x86_64/atomic-host",
-        "rev": "0546fa18041a8ca223f4f441dc1868fc81ddce0f", 
-        "repo": "perl", 
-        "namespace": "rpms", 
-        "username": "fedora-atomic", 
-        "test_guidance": "<comma-separated-list-of-test-suites-to-run>",
-        "message-content": "",
-        "status": "<success/failure>"
+        "status": "<SUCCESS/FAILURE/ABORTED>"
   }
 }
 ````
@@ -493,7 +465,7 @@ email=jchaloup@redhat.com
         "username": "fedora-atomic", 
         "test_guidance": "<comma-separated-list-of-test-suites-to-run>",
         "message-content": "",
-        "status": "<success/failure>"
+        "status": "<SUCCESS/FAILURE/ABORTED/ABORTED>"
   }
 }
 ````
@@ -522,7 +494,7 @@ email=jchaloup@redhat.com
         "username": "fedora-atomic", 
         "test_guidance": "<comma-separated-list-of-test-suites-to-run>",
         "message-content": "",
-        "status": "<success/failure>"
+        "status": "<SUCCESS/FAILURE/ABORTED/ABORTED>"
   }
 }
 ````
@@ -550,7 +522,7 @@ email=jchaloup@redhat.com
         "username": "fedora-atomic", 
         "test_guidance": "<comma-separated-list-of-test-suites-to-run>",
         "message-content": "",
-        "status": "<success/failure>"
+        "status": "<SUCCESS/FAILURE/ABORTED/ABORTED>"
   }
 }
 ````
@@ -578,7 +550,7 @@ email=jchaloup@redhat.com
         "username": "fedora-atomic", 
         "test_guidance": "<comma-separated-list-of-test-suites-to-run>",
         "message-content": "",
-        "status": "<success/failure>"
+        "status": "<SUCCESS/FAILURE/ABORTED/ABORTED>"
   }
 }
 ````
@@ -611,40 +583,7 @@ email=jchaloup@redhat.com
         "username": "fedora-atomic", 
         "test_guidance": "<comma-separated-list-of-test-suites-to-run>",
         "message-content": "",
-        "status": "<success/failure>"
-  }
-}
-````
-
-#### org.centos.prod.ci.pipeline.image.queued
-
-````
-{ 
-  "i": 1,
-  "timestamp": 1496382015, 
-  "msg_id": "2017-f2b46ca1-1b07-4539-8d86-f7d3cb1b5934", 
-  "crypto": "x509", 
-  "topic": "org.centos.prod.ci.pipeline.image.queued",   
-  'msg': { 
-        "CI_TYPE": "custom", 
-        "CI_NAME": "ci-pipeline-ostree-image-compose",
-        "topic": "org.centos.prod.ci.pipeline.image.queued",
-        "build_id": "82", 
-        "build_url": "https://ci.centos.org/job/ci-pipeline-ostree-image-compose/82/",
-        "image_url": "N/A",
-        "image_name": "N/A",
-        "type": "qcow2",
-        "compose_url": "http://artifacts.ci.centos.org/artifacts/fedora-atomic/f26/ostree",
-        "compose_rev": "c2dcff5e8d4637a6cb19dd0f3e867b48b3d3b6fa0528dd2d64de23169f9221df",
-        "branch": "f26",
-        "ref": "fedora/f26/x86_64/atomic-host",
-        "rev": "N/A", 
-        "repo": "N/A", 
-        "namespace": "rpms", 
-        "username": "fedora-atomic", 
-        "test_guidance": "<comma-separated-list-of-test-suites-to-run>",
-        "message-content": "",
-        "status": "<success/failure>"
+        "status": "<SUCCESS/FAILURE/ABORTED/ABORTED>"
   }
 }
 ````
@@ -677,7 +616,7 @@ email=jchaloup@redhat.com
         "username": "fedora-atomic", 
         "test_guidance": "<comma-separated-list-of-test-suites-to-run>",
         "message-content": "",
-        "status": "<success/failure>"
+        "status": "<SUCCESS/FAILURE/ABORTED/ABORTED>"
   }
 }
 ````
@@ -710,40 +649,7 @@ email=jchaloup@redhat.com
         "username": "fedora-atomic", 
         "test_guidance": "<comma-separated-list-of-test-suites-to-run>",
         "message-content": "",
-        "status": "<success/failure>"
-  }
-}
-````
-
-#### org.centos.prod.ci.pipeline.image.test.smoke.queued
-
-````
-{ 
-  "i": 1,
-  "timestamp": 1496382015, 
-  "msg_id": "2017-f2b46ca1-1b07-4539-8d86-f7d3cb1b5934", 
-  "crypto": "x509", 
-  "topic": "org.centos.prod.ci.pipeline.image.test.smoke.queued",   
-  'msg': { 
-        "CI_TYPE": "custom", 
-        "CI_NAME": "ci-pipeline-ostree-image-boot-sanity",
-        "topic": "org.centos.prod.ci.pipeline.image.test.smoke.queued",
-        "build_id": "82", 
-        "build_url": "https://ci.centos.org/job/cci-pipeline-ostree-image-boot-sanity/82/",
-        "image_url": "N/A",
-        "image_name": "N/A",
-        "type": "qcow2",
-        "compose_url": "http://artifacts.ci.centos.org/artifacts/fedora-atomic/f26/ostree",
-        "compose_rev": "c2dcff5e8d4637a6cb19dd0f3e867b48b3d3b6fa0528dd2d64de23169f9221df",
-        "branch": "f26",
-        "ref": "fedora/f26/x86_64/atomic-host",
-        "rev": "N/A", 
-        "repo": "N/A", 
-        "namespace": "rpms", 
-        "username": "fedora-atomic", 
-        "test_guidance": "<comma-separated-list-of-test-suites-to-run>",
-        "message-content": "",
-        "status": "<success/failure>"
+        "status": "<SUCCESS/FAILURE/ABORTED/ABORTED>"
   }
 }
 ````
@@ -756,11 +662,11 @@ email=jchaloup@redhat.com
   "timestamp": 1496382015, 
   "msg_id": "2017-f2b46ca1-1b07-4539-8d86-f7d3cb1b5934", 
   "crypto": "x509", 
-  "topic": "org.centos.prod.ci.pipeline.image.test.smoke.queued",   
+  "topic": "org.centos.prod.ci.pipeline.image.test.smoke.running",   
   'msg': { 
         "CI_TYPE": "custom", 
         "CI_NAME": "ci-pipeline-ostree-image-boot-sanity",
-        "topic": "org.centos.prod.ci.pipeline.image.test.smoke.queued",
+        "topic": "org.centos.prod.ci.pipeline.image.test.smoke.running",
         "build_id": "82", 
         "build_url": "https://ci.centos.org/job/cci-pipeline-ostree-image-boot-sanity/82/",
         "image_url": "N/A",
@@ -776,7 +682,7 @@ email=jchaloup@redhat.com
         "username": "fedora-atomic", 
         "test_guidance": "<comma-separated-list-of-test-suites-to-run>",
         "message-content": "",
-        "status": "<success/failure>"
+        "status": "<SUCCESS/FAILURE/ABORTED/ABORTED>"
   }
 }
 ````

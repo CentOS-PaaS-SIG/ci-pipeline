@@ -315,6 +315,11 @@ node('fedora-atomic') {
                                             "export OSTREE_BRANCH=\"${OSTREE_BRANCH}\"\n"
                             rsyncResults("${current_stage}")
 
+                            ostree_props = "${env.ORIGIN_WORKSPACE}/logs/ostree.props"
+                            ostree_props_groovy = "${env.ORIGIN_WORKSPACE}/ostree.props.groovy"
+                            convertProps(ostree_props, ostree_props_groovy)
+                            load(ostree_props_groovy)
+
                             // Teardown resources
                             env.DUFFY_OP="--teardown"
                             allocDuffy("${current_stage}")
