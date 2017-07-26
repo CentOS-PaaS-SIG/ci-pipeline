@@ -143,6 +143,11 @@ objects:
             value: 'true'
           - name: JNLP_SERVICE_NAME
             value: "${JNLP_SERVICE_NAME}"
+          - name: JAVA_GC_OPTS
+            value: >-
+                -XX:+UseParallelGC -XX:MaxPermSize=100m -XX:MinHeapFreeRatio=20
+                -XX:MaxHeapFreeRatio=40 -XX:GCTimeRatio=4
+                -XX:AdaptiveSizePolicyWeight=90 -XX:MaxMetaspaceSize=500m
           resources:
             limits:
               memory: "${MEMORY_LIMIT}"
