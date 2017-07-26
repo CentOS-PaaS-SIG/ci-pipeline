@@ -353,7 +353,7 @@ node('fedora-atomic') {
                             // Set groovy and env vars
                             current_stage = "ci-pipeline-ostree-image-boot-sanity"
                             env.task = "./ci-pipeline/tasks/ostree-image-compose"
-                            env.playbook = "ci-pipeline/playbooks/rdgo-setup.yml"
+                            env.playbook = "ci-pipeline/playbooks/system-setup.yml"
                             env.ANSIBLE_HOST_KEY_CHECKING = "False"
                             env.DUFFY_OP = "--allocate"
 
