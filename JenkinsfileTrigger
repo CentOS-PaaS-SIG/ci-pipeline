@@ -1,7 +1,6 @@
 properties(
         [
                 buildDiscarder(logRotator(artifactDaysToKeepStr: '', artifactNumToKeepStr: '50', daysToKeepStr: '', numToKeepStr: '100')),
-                disableConcurrentBuilds(),
                 parameters(
                     [
                         string(description: 'fedmsg msg', name: 'CI_MESSAGE'),
