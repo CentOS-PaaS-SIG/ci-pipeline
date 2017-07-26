@@ -256,7 +256,7 @@ node('fedora-atomic') {
                             "DUFFY_HOST=${env.DUFFY_HOST}"
 
                     // Check if a new ostree image compose is needed
-                    //checkLastImage("${current_stage}")
+                    checkLastImage("${current_stage}")
                     if (fileExists("${env.WORKSPACE}/NeedNewImage.txt")) {
                         stage('ci-pipeline-ostree-image-compose') {
                             // Set groovy and env vars
@@ -496,14 +496,7 @@ node('fedora-atomic') {
                                     "export JENKINS_BUILD_TAG=\"${BUILD_TAG}-${current_stage}\"\n" +
                                     "export OSTREE_BRANCH=\"${OSTREE_BRANCH}\"\n" +
                                     "export ANSIBLE_HOST_KEY_CHECKING=\"False\"\n"
-                    sh '''
-                        #!/bin/bash
-                        set -xeuo pipefail
 
-                        echo "Print Environment"
-                        env
-                        exit 0
-                    '''
                     rsyncResults("${current_stage}")
 
                     // Teardown resources
