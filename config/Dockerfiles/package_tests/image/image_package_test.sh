@@ -10,6 +10,10 @@ fi
 git clone https://pagure.io/standard-test-roles.git
 pushd standard-test-roles
 git clone https://upstreamfirst.fedorainfracloud.org/${package}
+# Sym link ansible roles so they resolve properly
+mv /etc/ansible/roles /etc/ansible/roles-back
+ln -s $PWD/roles /etc/ansible/roles
+if ! [ -f ${package}/tests.yml ]; then
 # Write test_cloud.yml file
 cat << EOF > test_cloud.yml
 ---
@@ -25,7 +29,6 @@ cat << EOF > test_cloud.yml
   roles:
   - standard-test-cloud
 EOF
-if ! [ -f ${package}/test_local.yml ]; then
      # Write test_local.yml header
      cat << EOF > ${package}/test_local.yml
 ---
@@ -42,10 +45,10 @@ EOF
      for test in $(find ${package} -name "runtest.sh"); do
           echo "    - $test" >> ${package}/test_local.yml
      done
+# Execute the tests legacy method
+sudo ansible-playbook test_cloud.yml -e artifacts=/tmp/test_output -e subjects=${image_location}
+exit $?
 fi
-# Sym link ansible roles so they resolve properly
-mv /etc/ansible/roles /etc/ansible/roles-back
-ln -s $PWD/roles /etc/ansible/roles
 # Execute the tests
-sudo ansible-playbook test_cloud.yml -e artifacts=/tmp/artifacts -e subjects=${image_location}
+sudo ansible-playbook --tags=atomic ${package}/tests.yml -e TEST_SUBJECTS=${image_location} -e artifacts=/tmp/test_output
 exit $?
