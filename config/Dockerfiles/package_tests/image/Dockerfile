@@ -21,4 +21,4 @@ COPY image_package_test.sh /home/image_package_test.sh
 ENTRYPOINT ["bash", "/home/image_package_test.sh"]
 
 # Call the container as follows:
-# docker run --privileged -v /dir/on/localhost/artifacts:/tmp/artifacts -t -i -e package=sed -e image_location=http://somewhere/image.qcow2 container_tag
+# docker run --privileged -v /dir/on/localhost/artifacts:/tmp/test_output -e package=sed -e image_location=http://somewhere/image.qcow2 container_tag
