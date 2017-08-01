@@ -213,59 +213,30 @@ email=jchaloup@redhat.com
 }
 ````
 
-#### org.centos.prod.ci.pipeline.package.complete
-
-````
-{ 
-  "i": 1,
-  "timestamp": 1496382015, 
-  "msg_id": "2017-f2b46ca1-1b07-4539-8d86-f7d3cb1b5934", 
-  "crypto": "x509", 
-  "topic": "org.centos.prod.ci.pipeline.package.complete",   
-  'msg': { 
-        "CI_TYPE": "custom", 
-        "CI_NAME": "ci-pipeline-duffy-allocate-new",
-        "topic": "org.centos.prod.ci.pipeline.package.complete",
-        "build_id": "79", 
-        "build_url": "https://ci.centos.org/job/ci-pipeline-duffy-allocate-new/79/",
-        "package_url": "http://artifacts.ci.centos.org/artifacts/fedora-atomic/rawhide/repo/perl_repo/perl-5.26.0-392.fc27.x86_64.rpm",
-        "branch": "rawhide",
-        "ref": "fedora/rawhide/x86_64/atomic-host",
-        "rev": "0546fa18041a8ca223f4f441dc1868fc81ddce0f", 
-        "repo": "perl", 
-        "namespace": "rpms", 
-        "username": "fedora-atomic", 
-        "test_guidance": "''",
-        "message-content": "",
-        "status": "<SUCCESS/FAILURE/ABORTED>"
-  }
-}
-````
-
 #### org.centos.prod.ci.pipeline.package.ignore
 
 ````
 { 
   "i": 1,
-  "timestamp": 1496382015, 
-  "msg_id": "2017-f2b46ca1-1b07-4539-8d86-f7d3cb1b5934", 
+  "msg_id": "2017-9987b043-b558-4b99-96e0-327548248e65",
+  "timestamp": 1501615199,
   "crypto": "x509", 
   "topic": "org.centos.prod.ci.pipeline.package.ignore",   
-  'msg': { 
-        "CI_TYPE": "custom", 
-        "CI_NAME": "ci-pipeline-rpmbuild",
-        "topic": "org.centos.prod.ci.pipeline.package.ignore",
-        "build_id": "79", 
-        "build_url": "https://ci.centos.org/job/ci-pipeline-rpmbuild/79/",
-        "branch": "rawhide",
-        "ref": "fedora/rawhide/x86_64/atomic-host",
-        "rev": "0546fa18041a8ca223f4f441dc1868fc81ddce0f", 
-        "repo": "perl", 
-        "namespace": "rpms", 
-        "username": "fedora-atomic", 
-        "test_guidance": "<comma-separated-list-of-test-suites-to-run>",
-        "message-content": "",
-        "status": "<SUCCESS/FAILURE/ABORTED>"
+  "msg": {
+      "CI_NAME": "ci-pipeline-trigger",
+      "CI_TYPE": "custom",
+      "branch": "f26",
+      "build_id": "16405",
+      "build_url": "https://jenkins-continuous-infra.apps.ci.centos.org/job/ci-pipeline-trigger/16405/",
+      "message-content": "",
+      "namespace": "rpms",
+      "ref": "fedora/f26/x86_64/atomic-host",
+      "repo": "electrum",
+      "rev": "8346cbfc821c824c5e5b1a42ac92f8b49ea843a4",
+      "status": "<SUCCESS/FAILURE/ABORTED>",
+      "test_guidance": "''",
+      "topic": "org.centos.stage.ci.pipeline.package.ignore",
+      "username": "fedora-atomic"
   }
 }
 ````
@@ -273,28 +244,28 @@ email=jchaloup@redhat.com
 #### org.centos.prod.ci.pipeline.package.queued
 
 ````
-{ 
-  "i": 1,
-  "timestamp": 1496382015, 
-  "msg_id": "2017-f2b46ca1-1b07-4539-8d86-f7d3cb1b5934", 
-  "crypto": "x509", 
-  "topic": "org.centos.prod.ci.pipeline.package.queued",   
-  'msg': { 
-        "CI_TYPE": "custom", 
-        "CI_NAME": "ci-pipeline-rpmbuild",
-        "topic": "org.centos.prod.ci.pipeline.package.queued",
-        "build_id": "79", 
-        "build_url": "https://ci.centos.org/job/ci-pipeline-rpmbuild/79/",
-        "branch": "rawhide",
-        "ref": "fedora/rawhide/x86_64/atomic-host",
-        "rev": "0546fa18041a8ca223f4f441dc1868fc81ddce0f", 
-        "repo": "perl", 
-        "namespace": "rpms", 
-        "username": "fedora-atomic", 
-        "test_guidance": "<comma-separated-list-of-test-suites-to-run>",
+{
+    "i": 1,
+    "msg_id": "2017-aa2a8e84-9631-40fc-8e4d-6fddd0bba1df",
+    "timestamp": 1501616700,
+    "crypto": "x509",
+    "topic": "org.centos.prod.ci.pipeline.package.running",
+    "msg": {
+        "CI_NAME": "ci-pipeline-trigger",
+        "CI_TYPE": "custom",
+        "branch": "f26",
+        "build_id": "16426",
+        "build_url": "https://jenkins-continuous-infra.apps.ci.centos.org/job/ci-pipeline-trigger/16426/",
         "message-content": "",
-        "status": "<SUCCESS/FAILURE/ABORTED>"
-  }
+        "namespace": "rpms",
+        "ref": "fedora/f26/x86_64/atomic-host",
+        "repo": "kernel",
+        "rev": "c0af8b92a4c5b13b1ba5b305270eb237b5a18ed1",
+        "status": "<SUCCESS/FAILURE/ABORTED>",
+        "test_guidance": "''",
+        "topic": "org.centos.stage.ci.pipeline.package.queued",
+        "username": "fedora-atomic"
+    }
 }
 ````
 
@@ -303,55 +274,55 @@ email=jchaloup@redhat.com
 ````
 { 
   "i": 1,
-  "timestamp": 1496382015, 
-  "msg_id": "2017-f2b46ca1-1b07-4539-8d86-f7d3cb1b5934", 
+  "msg_id": "2017-6ff7d926-8044-44f7-8efe-41fe114ef665",
+  "timestamp": 1501608514, 
   "crypto": "x509", 
   "topic": "org.centos.prod.ci.pipeline.package.running",   
-  'msg': { 
-        "CI_TYPE": "custom", 
-        "CI_NAME": "ci-pipeline-rpmbuild",
-        "topic": "org.centos.prod.ci.pipeline.package.running",
-        "build_id": "79", 
-        "build_url": "https://ci.centos.org/job/ci-pipeline-rpmbuild/79/",
-        "branch": "rawhide",
-        "ref": "fedora/rawhide/x86_64/atomic-host",
-        "rev": "0546fa18041a8ca223f4f441dc1868fc81ddce0f", 
-        "repo": "perl", 
-        "namespace": "rpms", 
-        "username": "fedora-atomic", 
-        "test_guidance": "<comma-separated-list-of-test-suites-to-run>",
+    "msg": {
+        "CI_NAME": "ci-pipeline-f26",
+        "CI_TYPE": "custom",
+        "branch": "f26",
+        "build_id": "88",
+        "build_url": "https://jenkins-continuous-infra.apps.ci.centos.org/job/ci-pipeline-f26/88/",
         "message-content": "",
-        "status": "<SUCCESS/FAILURE/ABORTED>"
-  }
+        "namespace": "modules",
+        "ref": "fedora/f26/x86_64/atomic-host",
+        "repo": "perl",
+        "rev": "0acffe135ebb30fd922cdf509f0da2a4482b4fb0",
+        "status": "<SUCCESS/FAILURE/ABORTED>",
+        "test_guidance": "''",
+        "topic": "org.centos.prod.ci.pipeline.package.running",
+        "username": "fedora-atomic"
+    }
 }
 ````
 
-#### org.centos.prod.ci.pipeline.package.test.functional.complete
+#### org.centos.prod.ci.pipeline.package.complete
 
 ````
 { 
   "i": 1,
-  "timestamp": 1496382015, 
-  "msg_id": "2017-f2b46ca1-1b07-4539-8d86-f7d3cb1b5934", 
-  "crypto": "x509", 
-  "topic": "org.centos.prod.ci.pipeline.test.functional.complete",   
-  'msg': { 
-        "CI_TYPE": "custom", 
-        "CI_NAME": "ci-pipeline-atomic-host-tests",
-        "topic": "org.centos.prod.ci.pipeline.test.functional.complete",
-        "build_id": "79", 
-        "build_url": "https://ci.centos.org/job/ci-pipeline-atomic-host-tests/79/",
-        "package_url": "http://artifacts.ci.centos.org/artifacts/fedora-atomic/rawhide/repo/perl_repo/perl-5.26.0-392.fc27.x86_64.rpm"
-        "branch": "rawhide",
-        "ref": "fedora/rawhide/x86_64/atomic-host",
-        "rev": "0546fa18041a8ca223f4f441dc1868fc81ddce0f", 
-        "repo": "perl", 
-        "namespace": "rpms", 
-        "username": "fedora-atomic", 
-        "test_guidance": "<comma-separated-list-of-test-suites-to-run>",
+   "msg_id": "2017-7af7f4e6-d3cf-465a-b039-da6e33efc688",
+   "timestamp": 1501610296,
+   "crypto": "x509", 
+   "topic": "org.centos.prod.ci.pipeline.package.complete",   
+   "msg": {
+        "CI_NAME": "ci-pipeline-f26",
+        "CI_TYPE": "custom",
+        "branch": "f26",
+        "build_id": "88",
+        "build_url": "https://jenkins-continuous-infra.apps.ci.centos.org/job/ci-pipeline-f26/88/",
         "message-content": "",
-        "status": "<SUCCESS/FAILURE/ABORTED>"
-  }
+        "namespace": "modules",
+        "package_url": "http://artifacts.ci.centos.org/fedora-atomic/f26/repo/perl_repo/perl-5.24.2-393.fc26.896.0acffe1.x86_64.rpm",
+        "ref": "fedora/f26/x86_64/atomic-host",
+        "repo": "perl",
+        "rev": "0acffe135ebb30fd922cdf509f0da2a4482b4fb0",
+        "status": "<SUCCESS/FAILURE/ABORTED>",
+        "test_guidance": "''",
+        "topic": "org.centos.prod.ci.pipeline.package.complete",
+        "username": "fedora-atomic"
+    }
 }
 ````
 
@@ -360,26 +331,27 @@ email=jchaloup@redhat.com
 ````
 { 
   "i": 1,
+  "msg_id": "2017-f2b46ca1-1b07-4539-8d86-f7d3cb1b5934",
   "timestamp": 1496382015, 
-  "msg_id": "2017-f2b46ca1-1b07-4539-8d86-f7d3cb1b5934", 
   "crypto": "x509", 
   "topic": "org.centos.prod.ci.pipeline.test.functional.queued",   
-  'msg': { 
-        "CI_TYPE": "custom", 
-        "CI_NAME": "ci-pipeline-atomic-host-tests",
-        "topic": "org.centos.prod.ci.pipeline.test.functional.queued",
-        "build_id": "79", 
-        "build_url": "https://ci.centos.org/job/ci-pipeline-atomic-host-tests/79/",
-        "package_url": "http://artifacts.ci.centos.org/artifacts/fedora-atomic/rawhide/repo/perl_repo/perl-5.26.0-392.fc27.x86_64.rpm"
-        "branch": "rawhide",
-        "ref": "fedora/rawhide/x86_64/atomic-host",
-        "rev": "0546fa18041a8ca223f4f441dc1868fc81ddce0f", 
-        "repo": "perl", 
-        "namespace": "rpms", 
-        "username": "fedora-atomic", 
-        "test_guidance": "<comma-separated-list-of-test-suites-to-run>",
-        "message-content": "",
-        "status": "<SUCCESS/FAILURE/ABORTED>"
+  "msg": { 
+      "CI_NAME": "ci-pipeline-f26",
+      "CI_TYPE": "custom",
+      "branch": "f26",
+      "build_id": "88",
+      "build_url": "https://jenkins-continuous-infra.apps.ci.centos.org/job/ci-pipeline-f26/88/",
+      "package_url": "http://artifacts.ci.centos.org/artifacts/fedora-atomic/rawhide/repo/perl_repo/perl-5.26.0-392.fc27.x86_64.rpm"
+      "branch": "rawhide",
+      "ref": "fedora/rawhide/x86_64/atomic-host",
+      "rev": "0546fa18041a8ca223f4f441dc1868fc81ddce0f", 
+      "repo": "perl", 
+      "namespace": "rpms", 
+      "username": "fedora-atomic", 
+      "test_guidance": "<comma-separated-list-of-test-suites-to-run>",
+      "message-content": "",
+      "topic": "org.centos.prod.ci.pipeline.test.functional.queued",
+      "status": "<SUCCESS/FAILURE/ABORTED>"
   }
 }
 ````
@@ -389,55 +361,57 @@ email=jchaloup@redhat.com
 ````
 { 
   "i": 1,
+  "msg_id": "2017-f2b46ca1-1b07-4539-8d86-f7d3cb1b5934",
   "timestamp": 1496382015, 
-  "msg_id": "2017-f2b46ca1-1b07-4539-8d86-f7d3cb1b5934", 
   "crypto": "x509", 
   "topic": "org.centos.prod.ci.pipeline.test.functional.running",   
-  'msg': { 
-        "CI_TYPE": "custom", 
-        "CI_NAME": "ci-pipeline-atomic-host-tests",
-        "topic": "org.centos.prod.ci.pipeline.test.functional.running",
-        "build_id": "79", 
-        "build_url": "https://ci.centos.org/job/ci-pipeline-atomic-host-tests/79/",
-        "package_url": "http://artifacts.ci.centos.org/artifacts/fedora-atomic/rawhide/repo/perl_repo/perl-5.26.0-392.fc27.x86_64.rpm"
-        "branch": "rawhide",
-        "ref": "fedora/rawhide/x86_64/atomic-host",
-        "rev": "0546fa18041a8ca223f4f441dc1868fc81ddce0f", 
-        "repo": "perl", 
-        "namespace": "rpms", 
-        "username": "fedora-atomic", 
-        "test_guidance": "<comma-separated-list-of-test-suites-to-run>",
-        "message-content": "",
-        "status": "<SUCCESS/FAILURE/ABORTED>"
+  "msg": { 
+      "CI_NAME": "ci-pipeline-f26",
+      "CI_TYPE": "custom",
+      "branch": "f26",
+      "build_id": "88",
+      "build_url": "https://jenkins-continuous-infra.apps.ci.centos.org/job/ci-pipeline-f26/88/",
+      "package_url": "http://artifacts.ci.centos.org/artifacts/fedora-atomic/rawhide/repo/perl_repo/perl-5.26.0-392.fc27.x86_64.rpm"
+      "branch": "rawhide",
+      "ref": "fedora/rawhide/x86_64/atomic-host",
+      "rev": "0546fa18041a8ca223f4f441dc1868fc81ddce0f", 
+      "repo": "perl", 
+      "namespace": "rpms", 
+      "username": "fedora-atomic", 
+      "test_guidance": "<comma-separated-list-of-test-suites-to-run>",
+      "message-content": "",
+      "topic": "org.centos.prod.ci.pipeline.test.functional.running",
+      "status": "<SUCCESS/FAILURE/ABORTED>"
   }
 }
 ````
 
-#### org.centos.prod.ci.pipeline.compose.complete
+#### org.centos.prod.ci.pipeline.package.test.functional.complete
 
 ````
 { 
   "i": 1,
+  "msg_id": "2017-f2b46ca1-1b07-4539-8d86-f7d3cb1b5934",
   "timestamp": 1496382015, 
-  "msg_id": "2017-f2b46ca1-1b07-4539-8d86-f7d3cb1b5934", 
   "crypto": "x509", 
-  "topic": "org.centos.prod.ci.pipeline.compose.complete",   
-  'msg': { 
-        "CI_TYPE": "custom", 
-        "CI_NAME": "ci-pipeline-ostree-compose",
-        "topic": "org.centos.prod.ci.pipeline.compose.complete",
-        "build_id": "79", 
-        "build_url": "https://ci.centos.org/job/cci-pipeline-ostree-compose/79/",
-        "compose_url": "http://artifacts.ci.centos.org/artifacts/fedora-atomic/f26/ostree",
-        "branch": "f26",
-        "ref": "fedora/f26/x86_64/atomic-host",
-        "rev": "0546fa18041a8ca223f4f441dc1868fc81ddce0f", 
-        "repo": "perl", 
-        "namespace": "rpms", 
-        "username": "fedora-atomic", 
-        "test_guidance": "<comma-separated-list-of-test-suites-to-run>",
-        "message-content": "",
-        "status": "<SUCCESS/FAILURE/ABORTED>"
+  "topic": "org.centos.prod.ci.pipeline.test.functional.complete",   
+  "msg": { 
+      "CI_NAME": "ci-pipeline-f26",
+      "CI_TYPE": "custom",
+      "branch": "f26",
+      "build_id": "88",
+      "build_url": "https://jenkins-continuous-infra.apps.ci.centos.org/job/ci-pipeline-f26/88/",
+      "package_url": "http://artifacts.ci.centos.org/artifacts/fedora-atomic/rawhide/repo/perl_repo/perl-5.26.0-392.fc27.x86_64.rpm"
+      "branch": "rawhide",
+      "ref": "fedora/rawhide/x86_64/atomic-host",
+      "rev": "0546fa18041a8ca223f4f441dc1868fc81ddce0f", 
+      "repo": "perl", 
+      "namespace": "rpms", 
+      "username": "fedora-atomic", 
+      "test_guidance": "<comma-separated-list-of-test-suites-to-run>",
+      "message-content": "",
+      "topic": "org.centos.prod.ci.pipeline.test.functional.complete",
+      "status": "<SUCCESS/FAILURE/ABORTED>"
   }
 }
 ````
@@ -448,24 +422,116 @@ email=jchaloup@redhat.com
 { 
   "i": 1,
   "timestamp": 1496382015, 
-  "msg_id": "2017-f2b46ca1-1b07-4539-8d86-f7d3cb1b5934", 
-  "crypto": "x509", 
+  "msg_id": "2017-9a3e044f-6886-4cfa-b06f-6a0fa73d04a0",
+  "timestamp": 1501610301,
   "topic": "org.centos.prod.ci.pipeline.compose.running",   
-  'msg': { 
-        "CI_TYPE": "custom", 
-        "CI_NAME": "ci-pipeline-ostree-compose",
-        "topic": "org.centos.prod.ci.pipeline.compose.running",
-        "build_id": "79", 
-        "build_url": "https://ci.centos.org/job/ci-pipeline-ostree-compose/79/",
-        "branch": "f26",
-        "ref": "fedora/f26/x86_64/atomic-host",
-        "rev": "0546fa18041a8ca223f4f441dc1868fc81ddce0f", 
-        "repo": "perl", 
-        "namespace": "rpms", 
-        "username": "fedora-atomic", 
-        "test_guidance": "<comma-separated-list-of-test-suites-to-run>",
-        "message-content": "",
-        "status": "<SUCCESS/FAILURE/ABORTED/ABORTED>"
+  "msg": {
+      "CI_NAME": "ci-pipeline-f26",
+      "CI_TYPE": "custom",
+      "branch": "f26",
+      "build_id": "88",
+      "build_url": "https://jenkins-continuous-infra.apps.ci.centos.org/job/ci-pipeline-f26/88/",
+      "compose_rev": "'N/A'",
+      "compose_url": "http://artifacts.ci.centos.org/artifacts/fedora-atomic/f26/ostree",
+      "message-content": "",
+      "namespace": "modules",
+      "ref": "fedora/f26/x86_64/atomic-host",
+      "repo": "perl",
+      "rev": "0acffe135ebb30fd922cdf509f0da2a4482b4fb0",
+      "status": "<SUCCESS/FAILURE/ABORTED>",
+      "test_guidance": "''",
+      "topic": "org.centos.prod.ci.pipeline.compose.running",
+      "username": "fedora-atomic"
+  }
+}
+````
+
+#### org.centos.prod.ci.pipeline.compose.complete
+
+````
+{ 
+  "i": 1,
+  "msg_id": "2017-8189dfd5-b873-4a03-9d27-6c6ce2aba65f",
+  "timestamp": 1501611084, 
+  "crypto": "x509", 
+  "topic": "org.centos.prod.ci.pipeline.compose.complete",   
+  "msg": {
+      "CI_NAME": "ci-pipeline-f26",
+      "CI_TYPE": "custom",
+      "branch": "f26",
+      "build_id": "88",
+      "build_url": "https://jenkins-continuous-infra.apps.ci.centos.org/job/ci-pipeline-f26/88/",
+      "compose_rev": "cfd1c7d2a9cb9875bd6e32b186521f30bf6cbfc7a7d6ab81344736215d995813",
+      "compose_url": "http://artifacts.ci.centos.org/artifacts/fedora-atomic/f26/ostree",
+      "message-content": "",
+      "namespace": "modules",
+      "ref": "fedora/f26/x86_64/atomic-host",
+      "repo": "perl",
+      "rev": "0acffe135ebb30fd922cdf509f0da2a4482b4fb0",
+      "status": "<SUCCESS/FAILURE/ABORTED>",
+      "test_guidance": "''",
+      "topic": "org.centos.prod.ci.pipeline.compose.complete",
+      "username": "fedora-atomic"
+  }
+}
+````
+
+#### org.centos.prod.ci.pipeline.compose.test.integration.queued
+
+````
+{ 
+  "i": 1,
+  "msg_id": "2017-060b10d1-af28-43fa-81c7-659384c601d8",
+  "timestamp": 1501611503, 
+  "crypto": "x509", 
+  "topic": "org.centos.prod.ci.pipeline.test.integration.queued",   
+  "msg": {
+      "CI_NAME": "ci-pipeline-f26",
+      "CI_TYPE": "custom",
+      "branch": "f26",
+      "build_id": "88",
+      "build_url": "https://jenkins-continuous-infra.apps.ci.centos.org/job/ci-pipeline-f26/88/",
+      "compose_rev": "cfd1c7d2a9cb9875bd6e32b186521f30bf6cbfc7a7d6ab81344736215d995813",
+      "compose_url": "http://artifacts.ci.centos.org/artifacts/fedora-atomic/f26/ostree",
+      "message-content": "",
+      "namespace": "modules",
+      "ref": "fedora/f26/x86_64/atomic-host",
+      "repo": "perl",
+      "rev": "0acffe135ebb30fd922cdf509f0da2a4482b4fb0",
+      "status": "<SUCCESS/FAILURE/ABORTED>",
+      "test_guidance": "''",
+      "topic": "org.centos.prod.ci.pipeline.compose.test.integration.queued",
+      "username": "fedora-atomic"
+  }
+}
+````
+
+#### org.centos.prod.ci.pipeline.compose.test.integration.running
+
+````
+{ 
+  "i": 1,
+  "msg_id": "2017-d7bc9bd3-fdd2-4a6b-ac8c-c8dac6e774e8",
+  "timestamp": 1501611508,
+  "crypto": "x509", 
+  "topic": "org.centos.prod.ci.pipeline.test.integration.running",   
+  "msg": {
+      "CI_NAME": "ci-pipeline-f26",
+      "CI_TYPE": "custom",
+      "branch": "f26",
+      "build_id": "88",
+      "build_url": "https://jenkins-continuous-infra.apps.ci.centos.org/job/ci-pipeline-f26/88/",
+      "compose_rev": "cfd1c7d2a9cb9875bd6e32b186521f30bf6cbfc7a7d6ab81344736215d995813",
+      "compose_url": "http://artifacts.ci.centos.org/artifacts/fedora-atomic/f26/ostree",
+      "message-content": "",
+      "namespace": "modules",
+      "ref": "fedora/f26/x86_64/atomic-host",
+      "repo": "perl",
+      "rev": "0acffe135ebb30fd922cdf509f0da2a4482b4fb0",
+      "status": "<SUCCESS/FAILURE/ABORTED>",
+      "test_guidance": "''",
+      "topic": "org.centos.prod.ci.pipeline.compose.test.integration.running",
+      "username": "fedora-atomic"
   }
 }
 ````
@@ -479,27 +545,29 @@ email=jchaloup@redhat.com
   "msg_id": "2017-f2b46ca1-1b07-4539-8d86-f7d3cb1b5934", 
   "crypto": "x509", 
   "topic": "org.centos.prod.ci.pipeline.test.integration.complete",   
-  'msg': { 
-        "CI_TYPE": "custom", 
-        "CI_NAME": "ci-pipeline-ostree-boot-sanity",
-        "topic": "org.centos.prod.ci.pipeline.test.integration.complete",
-        "build_id": "79", 
-        "build_url": "https://ci.centos.org/job/ci-pipeline-ostree-boot-sanity/79/",
-        "compose_url": "http://artifacts.ci.centos.org/artifacts/fedora-atomic/f26/ostree",
-        "branch": "f26",
-        "ref": "fedora/f26/x86_64/atomic-host",
-        "rev": "0546fa18041a8ca223f4f441dc1868fc81ddce0f", 
-        "repo": "perl", 
-        "namespace": "rpms", 
-        "username": "fedora-atomic", 
-        "test_guidance": "<comma-separated-list-of-test-suites-to-run>",
-        "message-content": "",
-        "status": "<SUCCESS/FAILURE/ABORTED/ABORTED>"
+  "msg": {
+      "CI_NAME": "ci-pipeline-f26",
+      "CI_TYPE": "custom",
+      "branch": "f26",
+      "build_id": "88",
+      "build_url": "https://jenkins-continuous-infra.apps.ci.centos.org/job/ci-pipeline-f26/88/",
+      "compose_rev": "cfd1c7d2a9cb9875bd6e32b186521f30bf6cbfc7a7d6ab81344736215d995813",
+      "compose_url": "http://artifacts.ci.centos.org/artifacts/fedora-atomic/f26/ostree",
+      "message-content": "",
+      "namespace": "modules",
+      "ref": "fedora/f26/x86_64/atomic-host",
+      "repo": "perl",
+      "rev": "0acffe135ebb30fd922cdf509f0da2a4482b4fb0",
+      "status": "<SUCCESS/FAILURE/ABORTED>",
+      "test_guidance": "''",
+      "topic": "org.centos.prod.ci.pipeline.compose.test.integration.complete",
+      "username": "fedora-atomic"
   }
 }
 ````
 
-#### org.centos.prod.ci.pipeline.compose.test.integration.queued
+
+#### org.centos.prod.ci.pipeline.image.running
 
 ````
 { 
@@ -507,50 +575,27 @@ email=jchaloup@redhat.com
   "timestamp": 1496382015, 
   "msg_id": "2017-f2b46ca1-1b07-4539-8d86-f7d3cb1b5934", 
   "crypto": "x509", 
-  "topic": "org.centos.prod.ci.pipeline.test.integration.queued",   
-  'msg': { 
-        "CI_TYPE": "custom", 
-        "CI_NAME": "ci-pipeline-ostree-boot-sanity",
-        "topic": "org.centos.prod.ci.pipeline.test.integration.queued",
-        "build_id": "79", 
-        "build_url": "https://ci.centos.org/job/ci-pipeline-ostree-boot-sanity/79/",
-        "branch": "f26",
-        "ref": "fedora/f26/x86_64/atomic-host",
-        "rev": "0546fa18041a8ca223f4f441dc1868fc81ddce0f", 
-        "repo": "perl", 
-        "namespace": "rpms", 
-        "username": "fedora-atomic", 
-        "test_guidance": "<comma-separated-list-of-test-suites-to-run>",
-        "message-content": "",
-        "status": "<SUCCESS/FAILURE/ABORTED/ABORTED>"
-  }
-}
-````
-
-#### org.centos.prod.ci.pipeline.compose.test.integration.running
-
-````
-{ 
-  "i": 1,
-  "timestamp": 1496382015, 
-  "msg_id": "2017-f2b46ca1-1b07-4539-8d86-f7d3cb1b5934", 
-  "crypto": "x509", 
-  "topic": "org.centos.prod.ci.pipeline.test.integration.running",   
-  'msg': { 
-        "CI_TYPE": "custom", 
-        "CI_NAME": "ci-pipeline-ostree-boot-sanity",
-        "topic": "org.centos.prod.ci.pipeline.test.integration.running",
-        "build_id": "79", 
-        "build_url": "https://ci.centos.org/job/ci-pipeline-ostree-boot-sanity/79/",
-        "branch": "f26",
-        "ref": "fedora/f26/x86_64/atomic-host",
-        "rev": "0546fa18041a8ca223f4f441dc1868fc81ddce0f", 
-        "repo": "perl", 
-        "namespace": "rpms", 
-        "username": "fedora-atomic", 
-        "test_guidance": "<comma-separated-list-of-test-suites-to-run>",
-        "message-content": "",
-        "status": "<SUCCESS/FAILURE/ABORTED/ABORTED>"
+  "topic": "org.centos.prod.ci.pipeline.image.running",   
+  "msg": { 
+      "CI_NAME": "ci-pipeline-f26",
+      "CI_TYPE": "custom",
+      "branch": "f26",
+      "build_id": "88",
+      "build_url": "https://jenkins-continuous-infra.apps.ci.centos.org/job/ci-pipeline-f26/88/",
+      "image_url": "N/A",
+      "image_name": "N/A",
+      "type": "qcow2",
+      "compose_rev": "c2dcff5e8d4637a6cb19dd0f3e867b48b3d3b6fa0528dd2d64de23169f9221df",
+      "compose_url": "http://artifacts.ci.centos.org/artifacts/fedora-atomic/f26/ostree",
+      "message-content": "",
+      "ref": "fedora/f26/x86_64/atomic-host",
+      "rev": "0546fa18041a8ca223f4f441dc1868fc81ddce0f", 
+      "repo": "perl", 
+      "namespace": "rpms", 
+      "username": "fedora-atomic", 
+      "test_guidance": "<comma-separated-list-of-test-suites-to-run>",
+      "topic": "org.centos.prod.ci.pipeline.image.complete",
+      "status": "<SUCCESS/FAILURE/ABORTED>"
   }
 }
 ````
@@ -564,92 +609,26 @@ email=jchaloup@redhat.com
   "msg_id": "2017-f2b46ca1-1b07-4539-8d86-f7d3cb1b5934", 
   "crypto": "x509", 
   "topic": "org.centos.prod.ci.pipeline.image.complete",   
-  'msg': { 
-        "CI_TYPE": "custom", 
-        "CI_NAME": "ci-pipeline-ostree-image-compose",
-        "topic": "org.centos.prod.ci.pipeline.image.complete",
-        "build_id": "82", 
-        "build_url": "https://ci.centos.org/job/ci-pipeline-ostree-image-compose/82/",
-        "image_url": "http://artifacts.ci.centos.org/artifacts/fedora-atomic/f26/images/fedora-atomic-26.85-c2dcff5e8d4637a.qcow2",
-        "image_name": "fedora-atomic-26.85-c2dcff5e8d4637a.qcow2",
-        "type": "qcow2",
-        "compose_url": "http://artifacts.ci.centos.org/artifacts/fedora-atomic/f26/ostree",
-        "compose_rev": "c2dcff5e8d4637a6cb19dd0f3e867b48b3d3b6fa0528dd2d64de23169f9221df",
-        "branch": "f26",
-        "ref": "fedora/f26/x86_64/atomic-host",
-        "rev": "N/A", 
-        "repo": "N/A", 
-        "namespace": "rpms", 
-        "username": "fedora-atomic", 
-        "test_guidance": "<comma-separated-list-of-test-suites-to-run>",
-        "message-content": "",
-        "status": "<SUCCESS/FAILURE/ABORTED/ABORTED>"
-  }
-}
-````
-
-#### org.centos.prod.ci.pipeline.image.running
-
-````
-{ 
-  "i": 1,
-  "timestamp": 1496382015, 
-  "msg_id": "2017-f2b46ca1-1b07-4539-8d86-f7d3cb1b5934", 
-  "crypto": "x509", 
-  "topic": "org.centos.prod.ci.pipeline.image.running",   
-  'msg': { 
-        "CI_TYPE": "custom", 
-        "CI_NAME": "ci-pipeline-ostree-image-compose",
-        "topic": "org.centos.prod.ci.pipeline.image.running",
-        "build_id": "82", 
-        "build_url": "https://ci.centos.org/job/ci-pipeline-ostree-image-compose/82/",
-        "image_url": "N/A",
-        "image_name": "N/A",
-        "type": "qcow2",
-        "compose_url": "http://artifacts.ci.centos.org/artifacts/fedora-atomic/f26/ostree",
-        "compose_rev": "c2dcff5e8d4637a6cb19dd0f3e867b48b3d3b6fa0528dd2d64de23169f9221df",
-        "branch": "f26",
-        "ref": "fedora/f26/x86_64/atomic-host",
-        "rev": "N/A", 
-        "repo": "N/A", 
-        "namespace": "rpms", 
-        "username": "fedora-atomic", 
-        "test_guidance": "<comma-separated-list-of-test-suites-to-run>",
-        "message-content": "",
-        "status": "<SUCCESS/FAILURE/ABORTED/ABORTED>"
-  }
-}
-````
-
-#### org.centos.prod.ci.pipeline.image.test.smoke.complete
-
-````
-{ 
-  "i": 1,
-  "timestamp": 1496382015, 
-  "msg_id": "2017-f2b46ca1-1b07-4539-8d86-f7d3cb1b5934", 
-  "crypto": "x509", 
-  "topic": "org.centos.prod.ci.pipeline.image.test.smoke.complete",   
-  'msg': { 
-        "CI_TYPE": "custom", 
-        "CI_NAME": "ci-pipeline-ostree-image-boot-sanity",
-        "topic": "org.centos.prod.ci.pipeline.image.test.smoke.complete",
-        "build_id": "82", 
-        "build_url": "https://ci.centos.org/job/cci-pipeline-ostree-image-boot-sanity/82/",
-        "image_url": "http://artifacts.ci.centos.org/artifacts/fedora-atomic/f26/images/fedora-atomic-26.85-c2dcff5e8d4637a.qcow2",
-        "image_name": "fedora-atomic-26.85-c2dcff5e8d4637a.qcow2",
-        "type": "qcow2",
-        "compose_url": "http://artifacts.ci.centos.org/artifacts/fedora-atomic/f26/ostree",
-        "compose_rev": "c2dcff5e8d4637a6cb19dd0f3e867b48b3d3b6fa0528dd2d64de23169f9221df",
-        "branch": "f26",
-        "ref": "fedora/f26/x86_64/atomic-host",
-        "rev": "N/A", 
-        "repo": "N/A", 
-        "namespace": "rpms", 
-        "username": "fedora-atomic", 
-        "test_guidance": "<comma-separated-list-of-test-suites-to-run>",
-        "message-content": "",
-        "status": "<SUCCESS/FAILURE/ABORTED/ABORTED>"
+  "msg": { 
+      "CI_NAME": "ci-pipeline-f26",
+      "CI_TYPE": "custom",
+      "branch": "f26",
+      "build_id": "88",
+      "build_url": "https://jenkins-continuous-infra.apps.ci.centos.org/job/ci-pipeline-f26/88/",
+      "image_url": "http://artifacts.ci.centos.org/artifacts/fedora-atomic/f26/images/fedora-atomic-26.85-c2dcff5e8d4637a.qcow2",
+      "image_name": "fedora-atomic-26.85-c2dcff5e8d4637a.qcow2",
+      "type": "qcow2",
+      "compose_rev": "c2dcff5e8d4637a6cb19dd0f3e867b48b3d3b6fa0528dd2d64de23169f9221df",
+      "compose_url": "http://artifacts.ci.centos.org/artifacts/fedora-atomic/f26/ostree",
+      "message-content": "",
+      "ref": "fedora/f26/x86_64/atomic-host",
+      "rev": "0546fa18041a8ca223f4f441dc1868fc81ddce0f", 
+      "repo": "perl", 
+      "namespace": "rpms", 
+      "username": "fedora-atomic", 
+      "test_guidance": "<comma-separated-list-of-test-suites-to-run>",
+      "topic": "org.centos.prod.ci.pipeline.image.complete",
+      "status": "<SUCCESS/FAILURE/ABORTED>"
   }
 }
 ````
@@ -663,26 +642,59 @@ email=jchaloup@redhat.com
   "msg_id": "2017-f2b46ca1-1b07-4539-8d86-f7d3cb1b5934", 
   "crypto": "x509", 
   "topic": "org.centos.prod.ci.pipeline.image.test.smoke.running",   
-  'msg': { 
-        "CI_TYPE": "custom", 
-        "CI_NAME": "ci-pipeline-ostree-image-boot-sanity",
-        "topic": "org.centos.prod.ci.pipeline.image.test.smoke.running",
-        "build_id": "82", 
-        "build_url": "https://ci.centos.org/job/cci-pipeline-ostree-image-boot-sanity/82/",
-        "image_url": "N/A",
-        "image_name": "N/A",
-        "type": "qcow2",
-        "compose_url": "http://artifacts.ci.centos.org/artifacts/fedora-atomic/f26/ostree",
-        "compose_rev": "c2dcff5e8d4637a6cb19dd0f3e867b48b3d3b6fa0528dd2d64de23169f9221df",
-        "branch": "f26",
-        "ref": "fedora/f26/x86_64/atomic-host",
-        "rev": "N/A", 
-        "repo": "N/A", 
-        "namespace": "rpms", 
-        "username": "fedora-atomic", 
-        "test_guidance": "<comma-separated-list-of-test-suites-to-run>",
-        "message-content": "",
-        "status": "<SUCCESS/FAILURE/ABORTED/ABORTED>"
+  "msg": { 
+      "CI_NAME": "ci-pipeline-f26",
+      "CI_TYPE": "custom",
+      "branch": "f26",
+      "build_id": "88",
+      "build_url": "https://jenkins-continuous-infra.apps.ci.centos.org/job/ci-pipeline-f26/88/",
+      "image_url": "http://artifacts.ci.centos.org/artifacts/fedora-atomic/f26/images/fedora-atomic-26.85-c2dcff5e8d4637a.qcow2",
+      "image_name": "fedora-atomic-26.85-c2dcff5e8d4637a.qcow2",
+      "type": "qcow2",
+      "compose_rev": "c2dcff5e8d4637a6cb19dd0f3e867b48b3d3b6fa0528dd2d64de23169f9221df",
+      "compose_url": "http://artifacts.ci.centos.org/artifacts/fedora-atomic/f26/ostree",
+      "message-content": "",
+      "ref": "fedora/f26/x86_64/atomic-host",
+      "rev": "0546fa18041a8ca223f4f441dc1868fc81ddce0f", 
+      "repo": "perl", 
+      "namespace": "rpms", 
+      "username": "fedora-atomic", 
+      "test_guidance": "<comma-separated-list-of-test-suites-to-run>",
+      "topic": "org.centos.prod.ci.pipeline.image.test.smoke.running",
+      "status": "<SUCCESS/FAILURE/ABORTED>"
+  }
+}
+````
+
+#### org.centos.prod.ci.pipeline.image.test.smoke.complete
+
+````
+{ 
+  "i": 1,
+  "timestamp": 1496382015, 
+  "msg_id": "2017-f2b46ca1-1b07-4539-8d86-f7d3cb1b5934", 
+  "crypto": "x509", 
+  "topic": "org.centos.prod.ci.pipeline.image.test.smoke.complete",   
+  "msg": { 
+      "CI_NAME": "ci-pipeline-f26",
+      "CI_TYPE": "custom",
+      "branch": "f26",
+      "build_id": "88",
+      "build_url": "https://jenkins-continuous-infra.apps.ci.centos.org/job/ci-pipeline-f26/88/",
+      "image_url": "http://artifacts.ci.centos.org/artifacts/fedora-atomic/f26/images/fedora-atomic-26.85-c2dcff5e8d4637a.qcow2",
+      "image_name": "fedora-atomic-26.85-c2dcff5e8d4637a.qcow2",
+      "type": "qcow2",
+      "compose_rev": "c2dcff5e8d4637a6cb19dd0f3e867b48b3d3b6fa0528dd2d64de23169f9221df",
+      "compose_url": "http://artifacts.ci.centos.org/artifacts/fedora-atomic/f26/ostree",
+      "message-content": "",
+      "ref": "fedora/f26/x86_64/atomic-host",
+      "rev": "0546fa18041a8ca223f4f441dc1868fc81ddce0f", 
+      "repo": "perl", 
+      "namespace": "rpms", 
+      "username": "fedora-atomic", 
+      "test_guidance": "<comma-separated-list-of-test-suites-to-run>",
+      "topic": "org.centos.prod.ci.pipeline.image.test.smoke.complete",
+      "status": "<SUCCESS/FAILURE/ABORTED>"
   }
 }
 ````
