@@ -9,6 +9,7 @@ properties(
                                 string(defaultValue: 'ci-pipeline', description: 'Main project repo', name: 'PROJECT_REPO'),
                                 string(defaultValue: 'org.centos.stage', description: 'Main topic to publish on', name: 'MAIN_TOPIC'),
                                 string(defaultValue: 'fedora-fedmsg', description: 'Main provider to send messages on', name: 'MSG_PROVIDER'),
+                                booleanParam(defaultValue: false, description: 'Force generation of the image', name: 'GENERATE_IMAGE'),
                         ]
                 ),
         ]
@@ -257,7 +258,7 @@ node('fedora-atomic') {
 
                     // Check if a new ostree image compose is needed
                     checkLastImage("${current_stage}")
-                    if (fileExists("${env.WORKSPACE}/NeedNewImage.txt")) {
+                    if (fileExists("${env.WORKSPACE}/NeedNewImage.txt") || ("${env.GENERATE_IMAGE}" == "true")) {
                         stage('ci-pipeline-ostree-image-compose') {
                             // Set groovy and env vars
                             current_stage = "ci-pipeline-ostree-image-compose"

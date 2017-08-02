@@ -135,7 +135,7 @@ node('master') {
                 currentBuild.displayName = "Build#: ${env.BUILD_NUMBER} - Branch: ${env.branch} - Package: ${env.fed_repo}"
                 currentBuild.description = "${currentBuild.currentResult}"
                 //emailext subject: "${env.JOB_NAME} - Build # ${env.BUILD_NUMBER} - STATUS = ${currentBuild.result}", to: "ari@redhat.com", body: "This pipeline was a ${currentBuild.result}"
-                step([$class: 'ArtifactArchiver', allowEmptyArchive: true, artifacts: '*.txt,*.properties,*.props,*.groovy', excludes: '**/*.example', fingerprint: true])
+                step([$class: 'ArtifactArchiver', allowEmptyArchive: true, artifacts: 'trigger.downstream,*.txt,*.properties,*.props,*.groovy', excludes: '**/*.example', fingerprint: true])
                 if (fileExists("${env.WORKSPACE}/trigger.downstream")) {
                     echo "Trigger downstream pipeline ci-pipeline-2-0"
                     echo "CI_MESSAGE: ${env.CI_MESSAGE}"
