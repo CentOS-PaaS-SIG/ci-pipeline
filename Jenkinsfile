@@ -186,7 +186,7 @@ node('fedora-atomic') {
                 }
                 stage('ci-pipeline-ostree-compose') {
                     // Set groovy and env vars
-                    current_stage="ci-pipeline-ostree-compose"
+                    current_stage = "ci-pipeline-ostree-compose"
                     env.task = "./ci-pipeline/tasks/ostree-compose"
                     env.playbook = "ci-pipeline/playbooks/rdgo-setup.yml"
                     env.ref = "fedora/${branch}/${basearch}/atomic-host"
@@ -196,22 +196,21 @@ node('fedora-atomic') {
                     env.ANSIBLE_HOST_KEY_CHECKING = "False"
                     env.DUFFY_OP = "--allocate"
 
-
                     // Send message org.centos.prod.ci.pipeline.compose.running on fedmsg
                     env.topic = "${MAIN_TOPIC}.ci.pipeline.compose.running"
                     messageProperties = "topic=${topic}\n" +
-                                        "build_url=${BUILD_URL}\n" +
-                                        "build_id=${BUILD_ID}\n" +
-                                        "compose_url=http://artifacts.ci.centos.org/artifacts/fedora-atomic/${branch}/ostree\n" +
-                                        "compose_rev='N/A'\n" +
-                                        "branch=${branch}\n" +
-                                        "ref=fedora/${branch}/${basearch}/atomic-host\n" +
-                                        "rev=${fed_rev}\n" +
-                                        "repo=${fed_repo}\n" +
-                                        "namespace=${fed_namespace}\n" +
-                                        "username=fedora-atomic\n" +
-                                        "test_guidance=''\n" +
-                                        "status=${currentBuild.currentResult}"
+                            "build_url=${BUILD_URL}\n" +
+                            "build_id=${BUILD_ID}\n" +
+                            "compose_url=http://artifacts.ci.centos.org/artifacts/fedora-atomic/${branch}/ostree\n" +
+                            "compose_rev='N/A'\n" +
+                            "branch=${branch}\n" +
+                            "ref=fedora/${branch}/${basearch}/atomic-host\n" +
+                            "rev=${fed_rev}\n" +
+                            "repo=${fed_repo}\n" +
+                            "namespace=${fed_namespace}\n" +
+                            "username=fedora-atomic\n" +
+                            "test_guidance=''\n" +
+                            "status=${currentBuild.currentResult}"
                     messageContent = ''
                     sendMessage(messageProperties, messageContent)
 
@@ -220,9 +219,9 @@ node('fedora-atomic') {
                     allocDuffy("${current_stage}")
 
                     echo "Duffy Allocate ran for stage ${current_stage} with option ${env.DUFFY_OP}\r\n" +
-                         "ORIGIN_WORKSPACE=${env.ORIGIN_WORKSPACE}\r\n" +
-                         "ORIGIN_BUILD_TAG=${env.ORIGIN_BUILD_TAG}\r\n" +
-                         "ORIGIN_CLASS=${env.ORIGIN_CLASS}"
+                            "ORIGIN_WORKSPACE=${env.ORIGIN_WORKSPACE}\r\n" +
+                            "ORIGIN_BUILD_TAG=${env.ORIGIN_BUILD_TAG}\r\n" +
+                            "ORIGIN_CLASS=${env.ORIGIN_CLASS}"
                     def job_props = "${env.ORIGIN_WORKSPACE}/job.props"
                     def job_props_groovy = "${env.ORIGIN_WORKSPACE}/job.groovy"
                     convertProps(job_props, job_props_groovy)
@@ -237,7 +236,7 @@ node('fedora-atomic') {
 
                     // Rsync Data
                     writeFile file: "${env.ORIGIN_WORKSPACE}/task.env",
-                              text: "export branch=\"${branch}\"\n" +
+                            text: "export branch=\"${branch}\"\n" +
                                     "export JENKINS_JOB_NAME=\"${JOB_NAME}-${current_stage}\"\n" +
                                     "export JENKINS_BUILD_TAG=\"${BUILD_TAG}-${current_stage}\"\n" +
                                     "export OSTREE_BRANCH=\"${OSTREE_BRANCH}\"\n"
@@ -249,213 +248,218 @@ node('fedora-atomic') {
                     load(ostree_props_groovy)
 
                     // Teardown resource
-                    env.DUFFY_OP="--teardown"
+                    env.DUFFY_OP = "--teardown"
                     allocDuffy("${current_stage}")
 
                     echo "Duffy Deallocate ran for stage ${current_stage} with option ${env.DUFFY_OP}\r\n" +
                             "RSYNC_PASSWORD=${env.RSYNC_PASSWORD}\r\n" +
                             "DUFFY_HOST=${env.DUFFY_HOST}"
 
-                    // Check if a new ostree image compose is needed
-                    checkLastImage("${current_stage}")
-                    if (fileExists("${env.WORKSPACE}/NeedNewImage.txt") || ("${env.GENERATE_IMAGE}" == "true")) {
-                        stage('ci-pipeline-ostree-image-compose') {
-                            // Set groovy and env vars
-                            current_stage = "ci-pipeline-ostree-image-compose"
-                            env.task = "./ci-pipeline/tasks/ostree-image-compose"
-                            env.playbook = "ci-pipeline/playbooks/rdgo-setup.yml"
-                            env.ANSIBLE_HOST_KEY_CHECKING = "False"
-                            env.DUFFY_OP = "--allocate"
-
-                            // Send message org.centos.prod.ci.pipeline.image.running on fedmsg
-                            env.topic = "${MAIN_TOPIC}.ci.pipeline.image.running"
-                            messageProperties = "topic=${topic}\n" +
-                                                "build_url=${BUILD_URL}\n" +
-                                                "build_id=${BUILD_ID}\n" +
-                                                "image_url=''\n" +
-                                                "image_name=''\n" +
-                                                "type=qcow2\n" +
-                                                "compose_url=http://artifacts.ci.centos.org/artifacts/fedora-atomic/${branch}/ostree\n" +
-                                                "compose_rev=${commit}\n" +
-                                                "branch=${branch}\n" +
-                                                "ref=fedora/${branch}/${basearch}/atomic-host\n" +
-                                                "rev=${fed_rev}\n" +
-                                                "repo=${fed_repo}\n" +
-                                                "namespace=${fed_namespace}\n" +
-                                                "username=fedora-atomic\n" +
-                                                "test_guidance=''\n" +
-                                                "status=${currentBuild.currentResult}"
-                            messageContent = ''
-                            sendMessage(messageProperties, messageContent)
-
-                            // Provision resources
-                            env.DUFFY_OP = "--allocate"
-                            allocDuffy("${current_stage}")
-
-                            echo "Duffy Allocate ran for stage ${current_stage} with option ${env.DUFFY_OP}\r\n" +
-                                 "ORIGIN_WORKSPACE=${env.ORIGIN_WORKSPACE}\r\n" +
-                                 "ORIGIN_BUILD_TAG=${env.ORIGIN_BUILD_TAG}\r\n" +
-                                 "ORIGIN_CLASS=${env.ORIGIN_CLASS}"
-                            job_props = "${env.ORIGIN_WORKSPACE}/job.props"
-                            job_props_groovy = "${env.ORIGIN_WORKSPACE}/job.groovy"
-                            convertProps(job_props, job_props_groovy)
-                            load(job_props_groovy)
-
-                            // Stage resources - ostree compose
-                            setupStage("${current_stage}")
-
-                            if (env.OSTREE_BRANCH == null) {
-                                env.OSTREE_BRANCH = ""
-                            }
-
-                            // Rsync Data
-                            writeFile file: "${env.ORIGIN_WORKSPACE}/task.env",
-                                      text: "export branch=\"${branch}\"\n" +
-                                            "export JENKINS_JOB_NAME=\"${JOB_NAME}-${current_stage}\"\n" +
-                                            "export JENKINS_BUILD_TAG=\"${BUILD_TAG}-${current_stage}\"\n" +
-                                            "export OSTREE_BRANCH=\"${OSTREE_BRANCH}\"\n"
-                            rsyncResults("${current_stage}")
-
-                            ostree_props = "${env.ORIGIN_WORKSPACE}/logs/ostree.props"
-                            ostree_props_groovy = "${env.ORIGIN_WORKSPACE}/ostree.props.groovy"
-                            convertProps(ostree_props, ostree_props_groovy)
-                            load(ostree_props_groovy)
-
-                            // Teardown resources
-                            env.DUFFY_OP="--teardown"
-                            allocDuffy("${current_stage}")
-
-                            echo "Duffy Deallocate ran for stage ${current_stage} with option ${env.DUFFY_OP}\r\n" +
-                                    "RSYNC_PASSWORD=${env.RSYNC_PASSWORD}\r\n" +
-                                    "DUFFY_HOST=${env.DUFFY_HOST}"
-
-                            // Send message org.centos.prod.ci.pipeline.image.complete on fedmsg
-                            env.topic = "${MAIN_TOPIC}.ci.pipeline.image.complete"
-                            messageProperties = "topic=${topic}\n" +
-                                                "build_url=${BUILD_URL}\n" +
-                                                "build_id=${BUILD_ID}\n" +
-                                                "image_url=${image2boot}\n" +
-                                                "image_name=${image_name}\n" +
-                                                "type=qcow2\n" +
-                                                "compose_url=http://artifacts.ci.centos.org/artifacts/fedora-atomic/${branch}/ostree\n" +
-                                                "compose_rev=${commit}\n" +
-                                                "branch=${branch}\n" +
-                                                "ref=fedora/${branch}/${basearch}/atomic-host\n" +
-                                                "rev=${fed_rev}\n" +
-                                                "repo=${fed_repo}\n" +
-                                                "namespace=${fed_namespace}\n" +
-                                                "username=fedora-atomic\n" +
-                                                "test_guidance=''\n" +
-                                                "status=${currentBuild.currentResult}"
-                            messageContent = ''
-                            sendMessage(messageProperties, messageContent)
-                        }
-                        stage('ci-pipeline-ostree-image-boot-sanity') {
-                            // Set groovy and env vars
-                            current_stage = "ci-pipeline-ostree-image-boot-sanity"
-                            env.task = "./ci-pipeline/tasks/ostree-image-compose"
-                            env.playbook = "ci-pipeline/playbooks/system-setup.yml"
-                            env.ANSIBLE_HOST_KEY_CHECKING = "False"
-                            env.DUFFY_OP = "--allocate"
-
-                            // Send message org.centos.prod.ci.pipeline.image.test.smoke.running on fedmsg
-                            env.topic = "${MAIN_TOPIC}.ci.pipeline.image.test.smoke.running"
-                            messageProperties = "topic=${topic}\n" +
-                                                "build_url=${BUILD_URL}\n" +
-                                                "build_id=${BUILD_ID}\n" +
-                                                "image_url=${image2boot}\n" +
-                                                "image_name=${image_name}\n" +
-                                                "type=qcow2\n" +
-                                                "compose_url=http://artifacts.ci.centos.org/artifacts/fedora-atomic/${branch}/ostree\n" +
-                                                "compose_rev=${commit}\n" +
-                                                "branch=${branch}\n" +
-                                                "ref=fedora/${branch}/${basearch}/atomic-host\n" +
-                                                "rev=${fed_rev}\n" +
-                                                "repo=${fed_repo}\n" +
-                                                "namespace=${fed_namespace}\n" +
-                                                "username=fedora-atomic\n" +
-                                                "test_guidance=''\n" +
-                                                "status=${currentBuild.currentResult}"
-                            messageContent = ''
-                            sendMessage(messageProperties, messageContent)
-
-                            // Provision resources
-                            env.DUFFY_OP = "--allocate"
-                            allocDuffy("${current_stage}")
-
-                            echo "Duffy Allocate ran for stage ${current_stage} with option ${env.DUFFY_OP}\r\n" +
-                                 "ORIGIN_WORKSPACE=${env.ORIGIN_WORKSPACE}\r\n" +
-                                 "ORIGIN_BUILD_TAG=${env.ORIGIN_BUILD_TAG}\r\n" +
-                                 "ORIGIN_CLASS=${env.ORIGIN_CLASS}"
-                            job_props = "${env.ORIGIN_WORKSPACE}/job.props"
-                            job_props_groovy = "${env.ORIGIN_WORKSPACE}/job.groovy"
-                            convertProps(job_props, job_props_groovy)
-                            load(job_props_groovy)
-
-                            // Stage resources - ostree compose
-                            setupStage("${current_stage}")
-
-                            if (env.OSTREE_BRANCH == null) {
-                                env.OSTREE_BRANCH = ""
-                            }
-
-                            // Rsync Data
-                            writeFile file: "${env.ORIGIN_WORKSPACE}/task.env",
-                                      text: "export branch=\"${branch}\"\n" +
-                                            "export JENKINS_JOB_NAME=\"${JOB_NAME}-${current_stage}\"\n" +
-                                            "export JENKINS_BUILD_TAG=\"${BUILD_TAG}-${current_stage}\"\n" +
-                                            "export OSTREE_BRANCH=\"${OSTREE_BRANCH}\"\n" +
-                                            "export ANSIBLE_HOST_KEY_CHECKING=\"False\"\n"
-                            rsyncResults("${current_stage}")
-
-                            // Teardown resources
-                            env.DUFFY_OP="--teardown"
-                            allocDuffy("${current_stage}")
-
-                            echo "Duffy Deallocate ran for stage ${current_stage} with option ${env.DUFFY_OP}\r\n" +
-                                 "RSYNC_PASSWORD=${env.RSYNC_PASSWORD}\r\n" +
-                                 "DUFFY_HOST=${env.DUFFY_HOST}"
-
-                            // Send message org.centos.prod.ci.pipeline.image.test.smoke.complete on fedmsg
-                            env.topic = "${MAIN_TOPIC}.ci.pipeline.image.test.smoke.complete"
-                            messageProperties = "topic=${topic}\n" +
-                                                "build_url=${BUILD_URL}\n" +
-                                                "build_id=${BUILD_ID}\n" +
-                                                "image_url=${image2boot}\n" +
-                                                "image_name=${image_name}\n" +
-                                                "type=qcow2\n" +
-                                                "compose_url=http://artifacts.ci.centos.org/artifacts/fedora-atomic/${branch}/ostree\n" +
-                                                "compose_rev=${commit}\n" +
-                                                "branch=${branch}\n" +
-                                                "ref=fedora/${branch}/${basearch}/atomic-host\n" +
-                                                "rev=${fed_rev}\n" +
-                                                "repo=${fed_repo}\n" +
-                                                "namespace=${fed_namespace}\n" +
-                                                "username=fedora-atomic\n" +
-                                                "test_guidance=''\n" +
-                                                "status=${currentBuild.currentResult}"
-                            sendMessage(messageProperties, messageContent)
-                        }
-                    }
-
-
                     // Send message org.centos.prod.ci.pipeline.compose.complete on fedmsg
                     env.topic = "${MAIN_TOPIC}.ci.pipeline.compose.complete"
                     messageProperties = "topic=${topic}\n" +
-                                        "build_url=${BUILD_URL}\n" +
-                                        "build_id=${BUILD_ID}\n" +
-                                        "compose_url=http://artifacts.ci.centos.org/artifacts/fedora-atomic/${branch}/ostree\n" +
-                                        "compose_rev=${commit}\n" +
-                                        "branch=${branch}\n" +
-                                        "ref=fedora/${branch}/${basearch}/atomic-host\n" +
-                                        "rev=${fed_rev}\n" +
-                                        "repo=${fed_repo}\n" +
-                                        "namespace=${fed_namespace}\n" +
-                                        "username=fedora-atomic\n" +
-                                        "test_guidance=''\n" +
-                                        "status=${currentBuild.currentResult}"
+                            "build_url=${BUILD_URL}\n" +
+                            "build_id=${BUILD_ID}\n" +
+                            "compose_url=http://artifacts.ci.centos.org/artifacts/fedora-atomic/${branch}/ostree\n" +
+                            "compose_rev=${commit}\n" +
+                            "branch=${branch}\n" +
+                            "ref=fedora/${branch}/${basearch}/atomic-host\n" +
+                            "rev=${fed_rev}\n" +
+                            "repo=${fed_repo}\n" +
+                            "namespace=${fed_namespace}\n" +
+                            "username=fedora-atomic\n" +
+                            "test_guidance=''\n" +
+                            "status=${currentBuild.currentResult}"
                     messageContent = ''
                     sendMessage(messageProperties, messageContent)
+
+                    checkLastImage("${current_stage}")
+                }
+                stage('ci-pipeline-ostree-image-compose') {
+                    // Set groovy and env vars
+                    current_stage = "ci-pipeline-ostree-image-compose"
+                    // Check if a new ostree image compose is needed
+                    if (fileExists("${env.WORKSPACE}/NeedNewImage.txt") || ("${env.GENERATE_IMAGE}" == "true")) {
+                        env.task = "./ci-pipeline/tasks/ostree-image-compose"
+                        env.playbook = "ci-pipeline/playbooks/rdgo-setup.yml"
+                        env.ANSIBLE_HOST_KEY_CHECKING = "False"
+                        env.DUFFY_OP = "--allocate"
+
+                        // Send message org.centos.prod.ci.pipeline.image.running on fedmsg
+                        env.topic = "${MAIN_TOPIC}.ci.pipeline.image.running"
+                        messageProperties = "topic=${topic}\n" +
+                                "build_url=${BUILD_URL}\n" +
+                                "build_id=${BUILD_ID}\n" +
+                                "image_url=''\n" +
+                                "image_name=''\n" +
+                                "type=qcow2\n" +
+                                "compose_url=http://artifacts.ci.centos.org/artifacts/fedora-atomic/${branch}/ostree\n" +
+                                "compose_rev=${commit}\n" +
+                                "branch=${branch}\n" +
+                                "ref=fedora/${branch}/${basearch}/atomic-host\n" +
+                                "rev=${fed_rev}\n" +
+                                "repo=${fed_repo}\n" +
+                                "namespace=${fed_namespace}\n" +
+                                "username=fedora-atomic\n" +
+                                "test_guidance=''\n" +
+                                "status=${currentBuild.currentResult}"
+                        messageContent = ''
+                        sendMessage(messageProperties, messageContent)
+
+                        // Provision resources
+                        env.DUFFY_OP = "--allocate"
+                        allocDuffy("${current_stage}")
+
+                        echo "Duffy Allocate ran for stage ${current_stage} with option ${env.DUFFY_OP}\r\n" +
+                                "ORIGIN_WORKSPACE=${env.ORIGIN_WORKSPACE}\r\n" +
+                                "ORIGIN_BUILD_TAG=${env.ORIGIN_BUILD_TAG}\r\n" +
+                                "ORIGIN_CLASS=${env.ORIGIN_CLASS}"
+                        job_props = "${env.ORIGIN_WORKSPACE}/job.props"
+                        job_props_groovy = "${env.ORIGIN_WORKSPACE}/job.groovy"
+                        convertProps(job_props, job_props_groovy)
+                        load(job_props_groovy)
+
+                        // Stage resources - ostree compose
+                        setupStage("${current_stage}")
+
+                        if (env.OSTREE_BRANCH == null) {
+                            env.OSTREE_BRANCH = ""
+                        }
+
+                        // Rsync Data
+                        writeFile file: "${env.ORIGIN_WORKSPACE}/task.env",
+                                text: "export branch=\"${branch}\"\n" +
+                                        "export JENKINS_JOB_NAME=\"${JOB_NAME}-${current_stage}\"\n" +
+                                        "export JENKINS_BUILD_TAG=\"${BUILD_TAG}-${current_stage}\"\n" +
+                                        "export OSTREE_BRANCH=\"${OSTREE_BRANCH}\"\n"
+                        rsyncResults("${current_stage}")
+
+                        ostree_props = "${env.ORIGIN_WORKSPACE}/logs/ostree.props"
+                        ostree_props_groovy = "${env.ORIGIN_WORKSPACE}/ostree.props.groovy"
+                        convertProps(ostree_props, ostree_props_groovy)
+                        load(ostree_props_groovy)
+
+                        // Teardown resources
+                        env.DUFFY_OP = "--teardown"
+                        allocDuffy("${current_stage}")
+
+                        echo "Duffy Deallocate ran for stage ${current_stage} with option ${env.DUFFY_OP}\r\n" +
+                                "RSYNC_PASSWORD=${env.RSYNC_PASSWORD}\r\n" +
+                                "DUFFY_HOST=${env.DUFFY_HOST}"
+
+                        // Send message org.centos.prod.ci.pipeline.image.complete on fedmsg
+                        env.topic = "${MAIN_TOPIC}.ci.pipeline.image.complete"
+                        messageProperties = "topic=${topic}\n" +
+                                "build_url=${BUILD_URL}\n" +
+                                "build_id=${BUILD_ID}\n" +
+                                "image_url=${image2boot}\n" +
+                                "image_name=${image_name}\n" +
+                                "type=qcow2\n" +
+                                "compose_url=http://artifacts.ci.centos.org/artifacts/fedora-atomic/${branch}/ostree\n" +
+                                "compose_rev=${commit}\n" +
+                                "branch=${branch}\n" +
+                                "ref=fedora/${branch}/${basearch}/atomic-host\n" +
+                                "rev=${fed_rev}\n" +
+                                "repo=${fed_repo}\n" +
+                                "namespace=${fed_namespace}\n" +
+                                "username=fedora-atomic\n" +
+                                "test_guidance=''\n" +
+                                "status=${currentBuild.currentResult}"
+                        messageContent = ''
+                        sendMessage(messageProperties, messageContent)
+                    } else {
+                        echo "Not Generating a New Image"
+                    }
+                }
+                stage('ci-pipeline-ostree-image-boot-sanity') {
+                    // Set groovy and env vars
+                    current_stage = "ci-pipeline-ostree-image-boot-sanity"
+                    if (fileExists("${env.WORKSPACE}/NeedNewImage.txt") || ("${env.GENERATE_IMAGE}" == "true")) {
+                        env.task = "./ci-pipeline/tasks/ostree-image-compose"
+                        env.playbook = "ci-pipeline/playbooks/system-setup.yml"
+                        env.ANSIBLE_HOST_KEY_CHECKING = "False"
+                        env.DUFFY_OP = "--allocate"
+
+                        // Send message org.centos.prod.ci.pipeline.image.test.smoke.running on fedmsg
+                        env.topic = "${MAIN_TOPIC}.ci.pipeline.image.test.smoke.running"
+                        messageProperties = "topic=${topic}\n" +
+                                            "build_url=${BUILD_URL}\n" +
+                                            "build_id=${BUILD_ID}\n" +
+                                            "image_url=${image2boot}\n" +
+                                            "image_name=${image_name}\n" +
+                                            "type=qcow2\n" +
+                                            "compose_url=http://artifacts.ci.centos.org/artifacts/fedora-atomic/${branch}/ostree\n" +
+                                            "compose_rev=${commit}\n" +
+                                            "branch=${branch}\n" +
+                                            "ref=fedora/${branch}/${basearch}/atomic-host\n" +
+                                            "rev=${fed_rev}\n" +
+                                            "repo=${fed_repo}\n" +
+                                            "namespace=${fed_namespace}\n" +
+                                            "username=fedora-atomic\n" +
+                                            "test_guidance=''\n" +
+                                            "status=${currentBuild.currentResult}"
+                        messageContent = ''
+                        sendMessage(messageProperties, messageContent)
+
+                        // Provision resources
+                        env.DUFFY_OP = "--allocate"
+                        allocDuffy("${current_stage}")
+
+                        echo "Duffy Allocate ran for stage ${current_stage} with option ${env.DUFFY_OP}\r\n" +
+                             "ORIGIN_WORKSPACE=${env.ORIGIN_WORKSPACE}\r\n" +
+                             "ORIGIN_BUILD_TAG=${env.ORIGIN_BUILD_TAG}\r\n" +
+                             "ORIGIN_CLASS=${env.ORIGIN_CLASS}"
+                        job_props = "${env.ORIGIN_WORKSPACE}/job.props"
+                        job_props_groovy = "${env.ORIGIN_WORKSPACE}/job.groovy"
+                        convertProps(job_props, job_props_groovy)
+                        load(job_props_groovy)
+
+                        // Stage resources - ostree compose
+                        setupStage("${current_stage}")
+
+                        if (env.OSTREE_BRANCH == null) {
+                            env.OSTREE_BRANCH = ""
+                        }
+
+                        // Rsync Data
+                        writeFile file: "${env.ORIGIN_WORKSPACE}/task.env",
+                                  text: "export branch=\"${branch}\"\n" +
+                                        "export JENKINS_JOB_NAME=\"${JOB_NAME}-${current_stage}\"\n" +
+                                        "export JENKINS_BUILD_TAG=\"${BUILD_TAG}-${current_stage}\"\n" +
+                                        "export OSTREE_BRANCH=\"${OSTREE_BRANCH}\"\n" +
+                                        "export ANSIBLE_HOST_KEY_CHECKING=\"False\"\n"
+                        rsyncResults("${current_stage}")
+
+                        // Teardown resources
+                        env.DUFFY_OP="--teardown"
+                        allocDuffy("${current_stage}")
+
+                        echo "Duffy Deallocate ran for stage ${current_stage} with option ${env.DUFFY_OP}\r\n" +
+                             "RSYNC_PASSWORD=${env.RSYNC_PASSWORD}\r\n" +
+                             "DUFFY_HOST=${env.DUFFY_HOST}"
+
+                        // Send message org.centos.prod.ci.pipeline.image.test.smoke.complete on fedmsg
+                        env.topic = "${MAIN_TOPIC}.ci.pipeline.image.test.smoke.complete"
+                        messageProperties = "topic=${topic}\n" +
+                                            "build_url=${BUILD_URL}\n" +
+                                            "build_id=${BUILD_ID}\n" +
+                                            "image_url=${image2boot}\n" +
+                                            "image_name=${image_name}\n" +
+                                            "type=qcow2\n" +
+                                            "compose_url=http://artifacts.ci.centos.org/artifacts/fedora-atomic/${branch}/ostree\n" +
+                                            "compose_rev=${commit}\n" +
+                                            "branch=${branch}\n" +
+                                            "ref=fedora/${branch}/${basearch}/atomic-host\n" +
+                                            "rev=${fed_rev}\n" +
+                                            "repo=${fed_repo}\n" +
+                                            "namespace=${fed_namespace}\n" +
+                                            "username=fedora-atomic\n" +
+                                            "test_guidance=''\n" +
+                                            "status=${currentBuild.currentResult}"
+                        sendMessage(messageProperties, messageContent)
+                    } else {
+                        echo "Not Running Image Boot Sanity on Image"
+                    }
                 }
                 stage('ci-pipeline-ostree-boot-sanity') {
                     // Set groovy and env vars
