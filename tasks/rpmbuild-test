@@ -1,87 +1,14 @@
 #!/bin/bash
 set +e
 
-function acquire_lock {
-     # Write uuid to a lock file and store a backup
-     uuidgen > file.lock
-     cp file.lock uuid.saved
-     while true; do
-          # Check if lock exists on remote server
-          while [[ $(rsync --ignore-existing --dry-run -avz file.lock fedora-atomic@artifacts.ci.centos.org::fedora-atomic/${fed_branch}/repo/lockdir) != *"file.lock"* ]]; do
-               sleep 60
-          done
-          cp uuid.saved file.lock
-          # Push lock file with uuid to remote server
-          rsync --ignore-existing -avz file.lock fedora-atomic@artifacts.ci.centos.org::fedora-atomic/${fed_branch}/repo/lockdir/
-          # Pull lock file back
-          rsync -avz fedora-atomic@artifacts.ci.centos.org::fedora-atomic/${fed_branch}/repo/lockdir/file.lock file.lock
-          # If uuid matches, we can proceed
-          if [[ $(diff file.lock uuid.saved) == "" ]]; then
-               break
-          fi
-          sleep 60
-     done
-}
-
-# Kill backgrounded jobs on exit
-function clean_up {
-     # Delete the rsync lock we placed
-     rsync -vr --delete $(mktemp -d)/ fedora-atomic@artifacts.ci.centos.org::fedora-atomic/${fed_branch}/repo/lockdir/
-}
-trap clean_up EXIT SIGHUP SIGINT SIGTERM
-
-base_dir="$(dirname $0)/.."
 HOMEDIR=$(pwd)
-rm -rf ${HOMEDIR}/${fed_repo}/output
-mkdir -p ${HOMEDIR}/${fed_repo}/output
-rm -rf ${HOMEDIR}/${fed_repo}/rpmbuild
-mkdir -p ${HOMEDIR}/${fed_repo}/rpmbuild
 which docker
 if [ "$?" != 0 ]; then echo "ERROR: DOCKER NOT INSTALLED\nSTATUS: $?"; exit 1; fi
 sudo systemctl start docker
 
-# Build the containers
-if [ "$(sudo docker images | grep rpmbuild-container)" == "" ]; then
-     pushd $base_dir/config/Dockerfiles/rpmbuild
-     sudo docker build -t rpmbuild-container .
-     popd
-fi
-if [ "$(sudo docker images | grep rsync-container)" == "" ]; then
-     pushd $base_dir/config/Dockerfiles/rsync
-     sudo docker build -t rsync-container .
-     popd
-fi
-
-sudo docker run --privileged --cap-add=SYS_ADMIN -v ${HOMEDIR}/${fed_repo}/output:/home/${fed_repo}/output -v ${HOMEDIR}/${fed_repo}/rpmbuild:/home/rpmbuild -t -i -e fed_repo="${fed_repo}" -e fed_branch="${fed_branch}" -e fed_rev="${fed_rev}" rpmbuild-container
+# Build the container
+pushd $base_dir/config/Dockerfiles/rpmbuild
+sudo docker build -t rpmbuild-container .
+popd
+sudo docker run --privileged -v ${HOMEDIR}:/home/logs -e fed_repo="${fed_repo}" -e fed_branch="${fed_branch}" -e fed_rev="${fed_rev}" -e RSYNC_PASSWORD=${RSYNC_PASSWORD} rpmbuild-container
 if [ "$?" != 0 ]; then echo -e "ERROR: RPMBUILD FAILED\nSTATUS: $?"; exit 1; fi
-# Move logs to proper location for duffy host cleanup rsync
-cp -rp ${HOMEDIR}/${fed_repo}/output/logs ${HOMEDIR}
-
-# Find out branch to rsync to
-if [ "${fed_branch}" = "master" ]; then
-    fed_branch=rawhide
-fi
-
-# Create empty branch and repo dirs to rsync over first in case they DNE
-mkdir -p ${HOMEDIR}/${fed_branch}/repo
-acquire_lock
-
-# Get manifest file
-touch ${HOMEDIR}/${fed_branch}/repo/manifest.txt
-sudo docker run --privileged --cap-add=SYS_ADMIN -v ${HOMEDIR}/${fed_branch}:/home/output -e rsync_paths="repo" -e rsync_from="fedora-atomic@artifacts.ci.centos.org::fedora-atomic/${fed_branch}/" -e rsync_to="/home/output/" -e RSYNC_PASSWORD="$RSYNC_PASSWORD" -e rsync_opts="--delete --existing" rsync-container
-
-# Update manifest file for latest change to package
-sudo sed -i "/${fed_repo}_repo/d" ${HOMEDIR}/${fed_branch}/repo/manifest.txt
-sudo sh -c "echo \"${fed_repo}_repo $(date --utc +%FT%T%Z)\" >> ${HOMEDIR}/${fed_branch}/repo/manifest.txt"
-sudo sort ${HOMEDIR}/${fed_branch}/repo/manifest.txt -o ${HOMEDIR}/${fed_branch}/repo/manifest.txt
-cat ${HOMEDIR}/${fed_branch}/repo/manifest.txt
-
-# Rsync empty dirs and manifest file back
-sudo docker run --privileged --cap-add=SYS_ADMIN -v ${HOMEDIR}:/home/output -e rsync_paths="${fed_branch} ${fed_branch}/repo" -e rsync_from="/home/output/" -e rsync_to="fedora-atomic@artifacts.ci.centos.org::fedora-atomic/" -e RSYNC_PASSWORD="$RSYNC_PASSWORD" -e rsync_opts="" rsync-container
-sudo docker run --privileged --cap-add=SYS_ADMIN -v ${HOMEDIR}:/home/output -e rsync_paths="${fed_branch}/repo/" -e rsync_from="/home/output/" -e rsync_to="fedora-atomic@artifacts.ci.centos.org::fedora-atomic/" -e RSYNC_PASSWORD="$RSYNC_PASSWORD" -e rsync_opts="--existing" rsync-container
-
-# Rsync over the rpms.  Needs different mount and rsync_to so has its own docker run
-sudo docker run --privileged --cap-add=SYS_ADMIN -v ${HOMEDIR}/${fed_repo}/output:/home/output -e rsync_paths="${fed_repo}_repo" -e rsync_from="/home/output/" -e rsync_to="fedora-atomic@artifacts.ci.centos.org::fedora-atomic/${fed_branch}/repo/" -e RSYNC_PASSWORD="$RSYNC_PASSWORD" -e rsync_opts="--delete" rsync-container
-
-sudo rm -rf ${HOMEDIR}/${fed_branch}
-exit 0
