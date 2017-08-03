@@ -202,7 +202,7 @@ node('fedora-atomic') {
                             "build_url=${BUILD_URL}\n" +
                             "build_id=${BUILD_ID}\n" +
                             "compose_url=http://artifacts.ci.centos.org/artifacts/fedora-atomic/${branch}/ostree\n" +
-                            "compose_rev='N/A'\n" +
+                            "compose_rev=''\n" +
                             "branch=${branch}\n" +
                             "ref=fedora/${branch}/${basearch}/atomic-host\n" +
                             "rev=${fed_rev}\n" +
