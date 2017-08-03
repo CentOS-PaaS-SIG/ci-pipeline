@@ -13,9 +13,7 @@ RUN for i in {1..5} ; do dnf -y install ansible \
         curl \
         file \
         findutils \
-        genisoimage \
         git \
-        qemu-system-x86 \
         restraint-rhts \
         sudo \
         wget \

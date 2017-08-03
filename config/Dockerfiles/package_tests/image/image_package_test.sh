@@ -13,7 +13,7 @@ if [[ $(grep "standard-test-beakerlib" ${package}/*.yml) == "" ]]; then
 fi
 if [[ $(file ${TEST_SUBJECTS}) == *"No such file or directory"* ]]; then
 	wget -q -O testimage.qcow2 ${TEST_SUBJECTS}
-	export TEST_SUBJECTS=${PWD}testimage.qcow2
+	export TEST_SUBJECTS=${PWD}/testimage.qcow2
 fi
 if [ -f ${package}/tests.yml ]; then
      # Execute the tests
