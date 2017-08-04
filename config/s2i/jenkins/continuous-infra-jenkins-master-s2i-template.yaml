@@ -143,6 +143,14 @@ objects:
             value: 'true'
           - name: JNLP_SERVICE_NAME
             value: "${JNLP_SERVICE_NAME}"
+          - name: JENKINS_OPTS
+            value: --logfile=/var/log/jenkins/jenkins.log
+          - name: JAVA_OPTS
+            value: >-
+                -Djenkins.model.Jenkins.logStartupPerformance=true
+                -Djava.security.egd=file:/dev/./urandom
+                -Djenkins.install.runSetupWizard=false
+                -Dhudson.DNSMultiCast.disabled=true
           - name: JAVA_GC_OPTS
             value: >-
                 -XX:+UseParallelGC -XX:MaxPermSize=100m -XX:MinHeapFreeRatio=20
