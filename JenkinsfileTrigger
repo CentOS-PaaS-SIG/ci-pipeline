@@ -18,10 +18,11 @@ properties(
 node('master') {
     ansiColor('xterm') {
         timestamps {
-            //def current_stage = "ci-pipeline-rpmbuild-trigger"
+            def current_stage = ""
             try {
                 deleteDir()
-                stage('ci-pipeline-rpmbuild-trigger') {
+                current_stage = "ci-pipeline-rpmbuild-trigger"
+                stage(current_stage) {
                     env.basearch = "x86_64"
 
                     // Set default main topic for messaging
@@ -128,6 +129,8 @@ node('master') {
                     sendMessage(messageProperties, messageContent)
                 }
             } catch (e) {
+                echo "Error: Exception from " + current_stage + ":"
+                echo e.getMessage()
                 // Send failure message for appropriate topic
                 sendMessage(messageProperties, messageContent)
                 throw e
