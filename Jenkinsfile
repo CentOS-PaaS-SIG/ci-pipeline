@@ -1,3 +1,6 @@
+/**
+ * commented out since it is possible that disableConcurrentBuilds()
+ * may not work properly when called from properties().
 properties(
         [
                 buildDiscarder(logRotator(artifactDaysToKeepStr: '', artifactNumToKeepStr: '25', daysToKeepStr: '', numToKeepStr: '50')),
@@ -14,16 +17,17 @@ properties(
                 ),
         ]
 )
-
+ *
+ **/
 
 node('fedora-atomic') {
     ansiColor('xterm') {
         timestamps {
-            def current_stage = "ci-pipeline-f26"
+            def current_stage = ""
             try {
                 deleteDir()
-                stage('ci-pipeline-rpmbuild') {
-                    current_stage = "ci-pipeline-rpmbuild"
+                current_stage = "ci-pipeline-rpmbuild"
+                stage(current_stage) {
                     env.basearch = "x86_64"
 
                     // Set default main topic for messaging
@@ -184,9 +188,10 @@ node('fedora-atomic') {
                     messageContent = ''
                     sendMessage(messageProperties, messageContent)
                 }
-                stage('ci-pipeline-ostree-compose') {
+                current_stage = "ci-pipeline-ostree-compose"
+                stage(current_stage) {
+
                     // Set groovy and env vars
-                    current_stage = "ci-pipeline-ostree-compose"
                     env.task = "./ci-pipeline/tasks/ostree-compose"
                     env.playbook = "ci-pipeline/playbooks/rdgo-setup.yml"
                     env.ref = "fedora/${branch}/${basearch}/atomic-host"
@@ -275,9 +280,9 @@ node('fedora-atomic') {
 
                     checkLastImage("${current_stage}")
                 }
-                stage('ci-pipeline-ostree-image-compose') {
+                current_stage = "ci-pipeline-ostree-image-compose"
+                stage(current_stage) {
                     // Set groovy and env vars
-                    current_stage = "ci-pipeline-ostree-image-compose"
                     // Check if a new ostree image compose is needed
                     if (fileExists("${env.WORKSPACE}/NeedNewImage.txt") || ("${env.GENERATE_IMAGE}" == "true")) {
                         env.task = "./ci-pipeline/tasks/ostree-image-compose"
@@ -371,9 +376,9 @@ node('fedora-atomic') {
                         echo "Not Generating a New Image"
                     }
                 }
-                stage('ci-pipeline-ostree-image-boot-sanity') {
+                current_stage = "ci-pipeline-ostree-image-boot-sanity"
+                stage(current_stage) {
                     // Set groovy and env vars
-                    current_stage = "ci-pipeline-ostree-image-boot-sanity"
                     if (fileExists("${env.WORKSPACE}/NeedNewImage.txt") || ("${env.GENERATE_IMAGE}" == "true")) {
                         env.task = "./ci-pipeline/tasks/ostree-image-compose"
                         env.playbook = "ci-pipeline/playbooks/system-setup.yml"
@@ -461,9 +466,9 @@ node('fedora-atomic') {
                         echo "Not Running Image Boot Sanity on Image"
                     }
                 }
-                stage('ci-pipeline-ostree-boot-sanity') {
+                current_stage = "ci-pipeline-ostree-boot-sanity"
+                stage(current_stage) {
                     // Set groovy and env vars
-                    current_stage = "ci-pipeline-ostree-boot-sanity"
                     env.task = "./ci-pipeline/tasks/ostree-boot-image"
                     env.playbook = "ci-pipeline/playbooks/system-setup.yml"
 
@@ -540,9 +545,9 @@ node('fedora-atomic') {
                     messageContent = ''
                     sendMessage(messageProperties, messageContent)
                 }
-                stage('ci-pipeline-atomic-host-tests') {
+                current_stage="ci-pipeline-atomic-host-tests"
+                stage(current_stage) {
                     // Set groovy and env vars
-                    current_stage="ci-pipeline-atomic-host-tests"
                     env.task = "./ci-pipeline/tasks/atomic-host-tests"
                     env.playbook = "ci-pipeline/playbooks/system-setup.yml"
 
@@ -612,6 +617,8 @@ node('fedora-atomic') {
                     sendMessage(messageProperties, messageContent)
                 }
             } catch (e) {
+                echo "Error: Exception from " + current_stage + ":"
+                echo e.getMessage()
                 // Teardown resources
                 env.DUFFY_OP = "--teardown"
                 echo "Duffy Deallocate ran for stage ${current_stage} with option ${env.DUFFY_OP}\r\n" +
