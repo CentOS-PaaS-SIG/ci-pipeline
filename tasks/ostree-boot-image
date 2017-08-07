@@ -39,7 +39,7 @@ function clean_up {
     sudo rm -rf $tmpdir
     ara generate junit - > $currentdir/logs/ansible_xunit.xml
     rm -rf $HOME/.ara
-    cp $currentdir/packagevolume/artifacts $currentdir/logs
+    cp -rp $currentdir/packagevolume/artifacts $currentdir/logs
     rm -rf $currentdir/packagevolume
 }
 trap clean_up EXIT SIGHUP SIGINT SIGTERM
