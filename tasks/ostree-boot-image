@@ -118,7 +118,7 @@ cp inventory $currentdir/packagevolume
 cp ~/.ssh/id_rsa $currentdir/packagevolume/ssh_key
 
 # Run test
-sudo docker run --privileged -v $currentdir/packagevolume:/tmp -t -e package=$(fed_repo) package-test
+sudo docker run --privileged -v $currentdir/packagevolume:/tmp -t -e package=${fed_repo} package-test
 RUNTEST_STATUS=$?
 if [ "$RUNTEST_STATUS" != 0 ]; then
     echo -e "ERROR: RUNTEST\nSTATUS: $RUNTEST_STATUS"
