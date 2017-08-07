@@ -505,6 +505,7 @@ node('fedora-atomic') {
                     // Rsync Data
                     writeFile file: "${env.ORIGIN_WORKSPACE}/task.env",
                               text: "export branch=\"${branch}\"\n" +
+                                    "export fed_repo=\"${fed_repo}\"\n" +
                                     "export image2boot=\"${image2boot}\"\n" +
                                     "export commit=\"${commit}\"\n" +
                                     "export JENKINS_JOB_NAME=\"${JOB_NAME}-${current_stage}\"\n" +
