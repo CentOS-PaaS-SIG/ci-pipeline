@@ -39,6 +39,8 @@ function clean_up {
     sudo rm -rf $tmpdir
     ara generate junit - > $currentdir/logs/ansible_xunit.xml
     rm -rf $HOME/.ara
+    cp $currentdir/packagevolume/artifacts $currentdir/logs
+    rm -rf $currentdir/packagevolume
 }
 trap clean_up EXIT SIGHUP SIGINT SIGTERM
 
@@ -105,3 +107,23 @@ if [ "$BOOT_STATUS" != 0 ]; then
     exit 1
 fi
 
+# Temporarily put package level test execution here
+pushd ci-pipeline/config/Dockerfiles/package_tests/ansible
+sudo docker build -t package-test .
+popd
+
+# Set up mounted volume
+mkdir $currentdir/packagevolume
+cp inventory $currentdir/packagevolume
+cp ~/.ssh/id_rsa $currentdir/packagevolume/ssh_key
+
+# Run test
+sudo docker run --privileged -v $currentdir/packagevolume:/tmp -t -e package=$(fed_repo) package-test
+RUNTEST_STATUS=$?
+if [ "$RUNTEST_STATUS" != 0 ]; then
+    echo -e "ERROR: RUNTEST\nSTATUS: $RUNTEST_STATUS"
+    #exit 1
+    # Still exit 0 so package level testing failure doesnt result in
+    # sending message saying failed to boot image
+    exit 0
+fi

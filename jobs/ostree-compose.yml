@@ -243,6 +243,7 @@
             task: ostree-boot-image
             variables: |
                 export branch="${fed_branch}"
+                export fed_repo="${fed_repo}"
                 export image2boot="${image2boot:-}"
                 export commit=${commit:-}
                 export JENKINS_JOB_NAME="${JOB_NAME}"
