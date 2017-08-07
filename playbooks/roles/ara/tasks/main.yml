@@ -5,3 +5,4 @@
 
 - pip:
     name: ara
+    version: 0.13.0
