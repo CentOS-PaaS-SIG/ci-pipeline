@@ -1,26 +1,36 @@
 - job:
-    name: ci-pipeline-kernel-f25-kt0
+    name: ci-pipeline-kernel-f26-ltp
     defaults: ci-pipeline-defaults
     parameters:
         - string:
             name: fed_branch
-            default: f25
+            default: f26
             description: |
               which branch the kernel comes from
         - string:
             name: kernel_nvr
             description: |
               the entire kernel rpm nvr
+    triggers:
+      - jms-messaging:
+          selector: topic = "org.centos.prod.ci.pipeline.package.complete"
+          provider-name: fedora-fedmsg
+          checks:
+            - field: repo
+              expected-value: kernel
+            - field: branch
+              expected-value: f26
     builders:
         - shell: |
             #!/bin/bash
+            kernel_nvr=$(curl http://artifacts.ci.centos.org/fedora-atomic/${fed_branch}/repo/kernel_repo/ | sed 's/\"/\n/g' | grep kernel-[0-9] | grep x86_64.rpm$)
             # Remove kernel- and .rpm from kernel_nvr
             kernel_vr=$(echo $kernel_nvr | cut -d '-' -f 2- | sed -r 's/(.*)\..*/\1/')
             echo "kernel_vr=$kernel_vr" >> ${WORKSPACE}/job.properties
         - inject:
             properties-file: ${WORKSPACE}/job.properties
         - ci-pipeline-duffy-builder:
-            task: kernel-kt0
+            task: kernel-ltp
             variables: |
                 export fed_branch="${fed_branch}"
                 export kernel_vr="${kernel_vr}"
@@ -34,7 +44,7 @@
         - email-ext:
             recipients: jbieren@redhat.com, asavkov@redhat.com
             reply-to: jbieren@redhat.com
-            subject: Build ${BUILD_URL} completed for public F25 Kernel Testing
+            subject: Build ${BUILD_URL} completed for public F26 Kernel Testing
             body: Currently set to email for all runs, regardless of pass or fail.
             always: true
             failure: false

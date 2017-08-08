@@ -15,13 +15,16 @@ tmpdir=$(mktemp -d)
 # Kill backgrounded jobs on exit
 function clean_up {
     ansible-playbook -i hosts ci-pipeline/playbooks/setup-libvirt-image.yml -l kernel_install_slave_baremetal -e 'state=absent'
-    kill $(jobs -p)
+    JOBS=$(jobs -p)
+    if [ -n "${JOBS}" ]; then
+      kill ${JOBS}
+    fi
     sudo rm -rf $tmpdir
 }
 trap clean_up EXIT SIGHUP SIGINT SIGTERM
 
 # Using base Fedora 25 qcow to start with
-IMG_URL="https://download.fedoraproject.org/pub/fedora/linux/releases/25/CloudImages/x86_64/images/Fedora-Cloud-Base-25-1.3.x86_64.qcow2"
+IMG_URL="http://mirror.sfo12.us.leaseweb.net/fedora/linux/releases/26/CloudImages/x86_64/images/Fedora-Cloud-Base-26-1.5.x86_64.qcow2"
 
 if ! [ -f ~/.ssh/id_rsa ]; then
     ssh-keygen -t rsa -f ~/.ssh/id_rsa -N ''
@@ -87,18 +90,8 @@ git clone https://pagure.io/ktests
 pushd ktests/misc/ltp
 ansible-playbook -i ../../../inventory test_local.yml -l kernel_install_slave -v > ${currentdir}/logs/ltp-playbook.out
 LTP_STATUS=$?
-# Wait 20 mins for host to come back before scp
-for i in {1..80}; do
-     ping -c 1 -W 5 $IP
-     if [ $? -eq 0 ]; then
-          break
-     fi
-     sleep 10
-done
 # Copy logs to proper location
 sshpass -p admin scp -rp admin@$IP:/mnt/testarea/ltp/logs ${currentdir}/logs/ltp
-# Grep dmesg as that won't happen in in the playbook currently
-./dmesg_grep.sh ${currentdir}/logs/ltp/ltp-dmesg* ./artifacts/ctlogs
 if [ "$LTP_STATUS" != 0 ]; then
     echo "ERROR: LTP Testing\nSTATUS: $LTP_STATUS"
     exit 1
