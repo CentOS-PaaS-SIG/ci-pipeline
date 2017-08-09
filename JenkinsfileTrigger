@@ -15,6 +15,9 @@ properties(
         ]
 )
 
+def fedmsg_properties = []
+def job_properties = []
+
 node('master') {
     ansiColor('xterm') {
         timestamps {
@@ -65,68 +68,67 @@ node('master') {
                     '''
 
                     // Load fedmsg fields as environment variables
-                    def fedmsg_fields = "${env.WORKSPACE}/fedmsg_fields.txt"
-                    def fedmsg_fields_groovy = "${env.WORKSPACE}/fedmsg_fields.groovy"
-                    convertProps(fedmsg_fields, fedmsg_fields_groovy)
-                    load(fedmsg_fields_groovy)
-
-                    // Check if package is in the package list for fedora-atomic host
-                    sh '''
-                        set +e
-                        branch=${fed_branch}
-                        if [ "${branch}" = "master" ]; then
-                          branch="rawhide"
-                        fi
+                    def fedmsg_map = readProperties file: "{env.WORKSPACE}/fedmsg_fields.txt"
+                    fedmsg_properties = fedmsg_map.collect { key, value -> return key+'='+value }
+                    withEnv(fedmsg_properties) {
+                        // Check if package is in the package list for fedora-atomic host
+                        sh '''
+                            set +e
+                            branch=${fed_branch}
+                            if [ "${branch}" = "master" ]; then
+                              branch="rawhide"
+                            fi
 
 
-                        # Save the bramch in job.properties
-                        echo "branch=${branch}" >> ${WORKSPACE}/job.properties
+                            # Save the bramch in job.properties
+                            echo "branch=${branch}" >> ${WORKSPACE}/job.properties
 
-                        # Verify this is a branch in our list of targets defined above in the parameters
-                        if [[ ! "${fed_branch}" =~ ${TARGETS} ]]; then
-                            echo "${fed_branch} is not in the list"
-                            echo "topic=${MAIN_TOPIC}.ci.pipeline.package.ignore" >> ${WORKSPACE}/job.properties
-                        else
-                            # Verify this is a package we are interested in
-                            valid=0
-                            for package in $(cat ${PROJECT_REPO}/config/package_list); do
-                                if [ "${package}" = "${fed_repo}" ]; then
-                                    valid=1
-                                    break
-                                fi
-                            done
-
-                            if [ $valid -eq 0 ]; then
-                                echo "Not a package we are interested in"
+                            # Verify this is a branch in our list of targets defined above in the parameters
+                            if [[ ! "${fed_branch}" =~ ${TARGETS} ]]; then
+                                echo "${fed_branch} is not in the list"
                                 echo "topic=${MAIN_TOPIC}.ci.pipeline.package.ignore" >> ${WORKSPACE}/job.properties
                             else
-                                echo "topic=${MAIN_TOPIC}.ci.pipeline.package.queued" >> ${WORKSPACE}/job.properties
-                                touch ${WORKSPACE}/trigger.downstream
+                                # Verify this is a package we are interested in
+                                valid=0
+                                for package in $(cat ${PROJECT_REPO}/config/package_list); do
+                                    if [ "${package}" = "${fed_repo}" ]; then
+                                        valid=1
+                                        break
+                                    fi
+                                done
+
+                                if [ $valid -eq 0 ]; then
+                                    echo "Not a package we are interested in"
+                                    echo "topic=${MAIN_TOPIC}.ci.pipeline.package.ignore" >> ${WORKSPACE}/job.properties
+                                else
+                                    echo "topic=${MAIN_TOPIC}.ci.pipeline.package.queued" >> ${WORKSPACE}/job.properties
+                                    touch ${WORKSPACE}/trigger.downstream
+                                fi
                             fi
-                        fi
-                        exit
-                    '''
-                    def job_props = "${env.WORKSPACE}/job.properties"
-                    def job_props_groovy = "${env.WORKSPACE}/job.properties.groovy"
-                    convertProps(job_props, job_props_groovy)
-                    load(job_props_groovy)
+                            exit
+                        '''
+                    }
 
-                    // Populate message Properties
-                    messageProperties = "topic=${topic}\n" +
-                                        "build_url=${BUILD_URL}\n" +
-                                        "build_id=${BUILD_ID}\n" +
-                                        "branch=${branch}\n" +
-                                        "ref=fedora/${branch}/x86_64/atomic-host\n" +
-                                        "rev=${fed_rev}\n" +
-                                        "repo=${fed_repo}\n" +
-                                        "namespace=${fed_namespace}\n" +
-                                        "username=fedora-atomic\n" +
-                                        "test_guidance=''\n" +
-                                        "status=${currentBuild.currentResult}"
-                    messageContent = ''
+                    def jobproperties_map = readProperties file: "{env.WORKSPACE}/job.properties"
+                    job_properties = jobproperties_map.collect { key, value -> return key+'='+value }
+                    withEnv(job_properties) {
+                        // Populate message Properties
+                        messageProperties = "topic=${topic}\n" +
+                                "build_url=${BUILD_URL}\n" +
+                                "build_id=${BUILD_ID}\n" +
+                                "branch=${branch}\n" +
+                                "ref=fedora/${branch}/x86_64/atomic-host\n" +
+                                "rev=${fed_rev}\n" +
+                                "repo=${fed_repo}\n" +
+                                "namespace=${fed_namespace}\n" +
+                                "username=fedora-atomic\n" +
+                                "test_guidance=''\n" +
+                                "status=${currentBuild.currentResult}"
+                        messageContent = ''
 
-                    // Send message org.centos.prod.ci.pipeline.package.queued or .ignore on fedmsg
-                    sendMessage(messageProperties, messageContent)
+                        // Send message org.centos.prod.ci.pipeline.package.queued or .ignore on fedmsg
+                        sendMessage(messageProperties, messageContent)
+                    }
                 }
             } catch (e) {
                 echo "Error: Exception from " + current_stage + ":"
@@ -135,16 +137,20 @@ node('master') {
                 sendMessage(messageProperties, messageContent)
                 throw e
             } finally {
-                currentBuild.displayName = "Build#: ${env.BUILD_NUMBER} - Branch: ${env.branch} - Package: ${env.fed_repo}"
-                currentBuild.description = "${currentBuild.currentResult}"
-                //emailext subject: "${env.JOB_NAME} - Build # ${env.BUILD_NUMBER} - STATUS = ${currentBuild.result}", to: "ari@redhat.com", body: "This pipeline was a ${currentBuild.result}"
-                step([$class: 'ArtifactArchiver', allowEmptyArchive: true, artifacts: 'trigger.downstream,*.txt,*.properties,*.props,*.groovy', excludes: '**/*.example', fingerprint: true])
-                if (fileExists("${env.WORKSPACE}/trigger.downstream")) {
-                    echo "Trigger downstream pipeline ci-pipeline-2-0"
-                    echo "CI_MESSAGE: ${env.CI_MESSAGE}"
-                    echo "TARGET_BRANCH: ${env.fed_branch}"
-                    echo "MAIN_TOPIC: ${env.MAIN_TOPIC}"
-                    build job: "ci-pipeline-${env.branch}", parameters: [string(name: 'CI_MESSAGE', value: "${env.CI_MESSAGE}"), string(name: 'TARGET_BRANCH', value: "${env.fed_branch}"), string(name: 'PROJECT_REPO', value: 'ci-pipeline'), string(name: 'MAIN_TOPIC', value: 'org.centos.prod'), string(name: 'MSG_PROVIDER', value: 'fedora-fedmsg')], wait: false
+                withEnv(fedmsg_properties) {
+                    withEnv(job_properties) {
+                        currentBuild.displayName = "Build#: ${env.BUILD_NUMBER} - Branch: ${env.branch} - Package: ${env.fed_repo}"
+                        currentBuild.description = "${currentBuild.currentResult}"
+
+                        step([$class: 'ArtifactArchiver', allowEmptyArchive: true, artifacts: 'trigger.downstream,*.txt,*.properties,*.props,*.groovy', excludes: '**/*.example', fingerprint: true])
+                        if (fileExists("${env.WORKSPACE}/trigger.downstream")) {
+                            echo "Trigger downstream pipeline ci-pipeline-2-0"
+                            echo "CI_MESSAGE: ${env.CI_MESSAGE}"
+                            echo "TARGET_BRANCH: ${env.fed_branch}"
+                            echo "MAIN_TOPIC: ${env.MAIN_TOPIC}"
+                            build job: "ci-pipeline-${env.branch}", parameters: [string(name: 'CI_MESSAGE', value: "${env.CI_MESSAGE}"), string(name: 'TARGET_BRANCH', value: "${env.fed_branch}"), string(name: 'PROJECT_REPO', value: 'ci-pipeline'), string(name: 'MAIN_TOPIC', value: 'org.centos.prod'), string(name: 'MSG_PROVIDER', value: 'fedora-fedmsg')], wait: false
+                        }
+                    }
                 }
             }
         }
