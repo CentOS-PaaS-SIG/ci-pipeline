@@ -17,6 +17,8 @@ properties(
 
 def fedmsg_properties = []
 def job_properties = []
+def messageProperties = ""
+def messageContent = ""
 
 node('master') {
     ansiColor('xterm') {
