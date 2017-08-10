@@ -108,27 +108,27 @@ node('master') {
                             fi
                             exit
                         '''
-                    }
 
-                    def jobproperties_map = readProperties file: "${env.WORKSPACE}/job.properties"
-                    job_properties = jobproperties_map.collect { key, value -> return key+'='+value }
-                    withEnv(job_properties) {
-                        // Populate message Properties
-                        messageProperties = "topic=${env.topic}\n" +
-                                "build_url=${BUILD_URL}\n" +
-                                "build_id=${BUILD_ID}\n" +
-                                "branch=${branch}\n" +
-                                "ref=fedora/${branch}/x86_64/atomic-host\n" +
-                                "rev=${env.fed_rev}\n" +
-                                "repo=${env.fed_repo}\n" +
-                                "namespace=${env.fed_namespace}\n" +
-                                "username=fedora-atomic\n" +
-                                "test_guidance=''\n" +
-                                "status=${currentBuild.currentResult}"
-                        messageContent = ''
+                        def jobproperties_map = readProperties file: "${env.WORKSPACE}/job.properties"
+                        job_properties = jobproperties_map.collect { key, value -> return key+'='+value }
+                        withEnv(job_properties) {
+                            // Populate message Properties
+                            messageProperties = "topic=${env.topic}\n" +
+                                    "build_url=${BUILD_URL}\n" +
+                                    "build_id=${BUILD_ID}\n" +
+                                    "branch=${branch}\n" +
+                                    "ref=fedora/${branch}/x86_64/atomic-host\n" +
+                                    "rev=${env.fed_rev}\n" +
+                                    "repo=${env.fed_repo}\n" +
+                                    "namespace=${env.fed_namespace}\n" +
+                                    "username=fedora-atomic\n" +
+                                    "test_guidance=''\n" +
+                                    "status=${currentBuild.currentResult}"
+                            messageContent = ''
 
-                        // Send message org.centos.prod.ci.pipeline.package.queued or .ignore on fedmsg
-                        sendMessage(messageProperties, messageContent)
+                            // Send message org.centos.prod.ci.pipeline.package.queued or .ignore on fedmsg
+                            sendMessage(messageProperties, messageContent)
+                        }
                     }
                 }
             } catch (e) {
