@@ -1,6 +1,3 @@
-/**
- * commented out since it is possible that disableConcurrentBuilds()
- * may not work properly when called from properties().
 properties(
         [
                 buildDiscarder(logRotator(artifactDaysToKeepStr: '', artifactNumToKeepStr: '25', daysToKeepStr: '', numToKeepStr: '50')),
@@ -17,8 +14,6 @@ properties(
                 ),
         ]
 )
- *
- **/
 
 node('fedora-atomic') {
     ansiColor('xterm') {
