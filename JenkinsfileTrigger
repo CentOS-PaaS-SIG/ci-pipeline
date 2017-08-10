@@ -19,7 +19,6 @@ def fedmsg_properties = []
 def job_properties = []
 def messageProperties = ""
 def messageContent = ""
-def topic = ""
 
 node('master') {
     ansiColor('xterm') {
@@ -115,14 +114,14 @@ node('master') {
                     job_properties = jobproperties_map.collect { key, value -> return key+'='+value }
                     withEnv(job_properties) {
                         // Populate message Properties
-                        messageProperties = "topic=${topic}\n" +
+                        messageProperties = "topic=${env.topic}\n" +
                                 "build_url=${BUILD_URL}\n" +
                                 "build_id=${BUILD_ID}\n" +
                                 "branch=${branch}\n" +
                                 "ref=fedora/${branch}/x86_64/atomic-host\n" +
-                                "rev=${fed_rev}\n" +
-                                "repo=${fed_repo}\n" +
-                                "namespace=${fed_namespace}\n" +
+                                "rev=${env.fed_rev}\n" +
+                                "repo=${env.fed_repo}\n" +
+                                "namespace=${env.fed_namespace}\n" +
                                 "username=fedora-atomic\n" +
                                 "test_guidance=''\n" +
                                 "status=${currentBuild.currentResult}"
@@ -167,6 +166,6 @@ def sendMessage(msgProps, msgContent) {
             messageProperties: msgProps,
 
             messageType: 'Custom',
-            overrides: [topic: "${topic}"],
+            overrides: [topic: "${env.topic}"],
             providerName: 'fedora-fedmsg'
 }
