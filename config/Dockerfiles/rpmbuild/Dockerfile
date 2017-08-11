@@ -41,4 +41,5 @@ COPY rpmbuild-test.sh /home/rpmbuild-test.sh
 # Run the build script
 ENTRYPOINT ["bash", "/home/rpmbuild-test.sh"]
 # Run the container as follows
+# Note: For stage builds, don't do production=no, simply don't pass a production var in
 # docker run --privileged -v /some/spot/for/logs:/home/logs -e fed_repo=${packagename} -e fed_branch=${fed_branch} -e fed_rev=${fed_rev} -e enable_rsync=yes -e RSYNC_PASSWORD=${rsync_password} -e production=yes container_tag

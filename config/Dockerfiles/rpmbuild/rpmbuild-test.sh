@@ -82,7 +82,10 @@ RSYNC_BRANCH=${fed_branch}
 if [ "${fed_branch}" = "master" ]; then
     RSYNC_BRANCH=rawhide
 fi
-mkdir ${RSYNC_BRANCH}
+if [ -z "${production}" ]; then
+    RSYNC_BRANCH=${RSYNC_BRANCH}/staging
+fi
+mkdir -p ${RSYNC_BRANCH}
 mkdir repo
 # Kill backgrounded jobs on exit
 function clean_up {
