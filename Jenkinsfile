@@ -70,7 +70,8 @@ podTemplate(name: 'fedora-atomic-inline', label: 'fedora-atomic-inline', cloud: 
                                         "if 'commit' in message:\n" +
                                         "    msg = message['commit']\n\n" +
                                         "    for key in msg:\n" +
-                                        "        print \"fed_%s=%s\" % (key, msg[key])\n"
+                                        "        safe_key = key.replace('-', '_')\n" +
+                                        "        print \"fed_%s=%s\" % (safe_key, msg[key])\n"
 
                         // Parse the ${CI_MESSAGE}
                         sh '''
