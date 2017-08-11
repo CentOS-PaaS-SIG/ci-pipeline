@@ -10,7 +10,8 @@ HOMEDIR=$(pwd)
 # Make sure logs are empty so we don't report previous build
 # if we fail
 if [ -e "${HOMEDIR}/output/logs" ]; then
-    sudo rm -rf ${HOMEDIR}/output/logs
+    sudo rm -rf ${HOMEDIR}/output/logs >/dev/null 2>&1
+    echo "rm -rf ${HOMEDIR}/output/logs rc:$?"
 fi
 mkdir -p ${HOMEDIR}/output
 
