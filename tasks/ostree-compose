@@ -6,7 +6,12 @@ fi
 
 base_dir="$(dirname $0)/.."
 HOMEDIR=$(pwd)
-rm -rf ${HOMEDIR}/output
+
+# Make sure logs are empty so we don't report previous build
+# if we fail
+if [ -e "${HOMEDIR}/output/logs" ]; then
+    sudo rm -rf ${HOMEDIR}/output/logs
+fi
 mkdir -p ${HOMEDIR}/output
 
 pushd $base_dir/config/Dockerfiles/rsync
