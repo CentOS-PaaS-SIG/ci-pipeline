@@ -1,0 +1,8 @@
+node() {
+  stage('build-image') {
+    openshiftBuild bldCfg: 'rpmbuild', namespace: 'continuous-infra', showBuildLogs: 'true', verbose: 'false'
+  }
+  stage('tag') {
+    openshiftTag destStream: 'rpmbuild', destTag: 'stable', destinationNamespace: 'continuous-infra', namespace: 'continuous-infra', srcStream: 'rpmbuild', srcTag: 'latest', verbose: 'false'
+  }
+}

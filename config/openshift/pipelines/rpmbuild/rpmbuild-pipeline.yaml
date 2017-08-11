@@ -1,0 +1,16 @@
+apiVersion: v1
+kind: BuildConfig
+metadata:
+  labels:
+    name: rpmbuild-pipeline
+  name: rpmbuild-pipeline
+spec:
+  source:
+    type: Git
+    git:
+      uri: https://github.com/CentOS-PaaS-SIG/ci-pipeline.git
+      ref: master
+  strategy:
+    type: JenkinsPipeline
+    jenkinsPipelineStrategy:
+      jenkinsfilePath: config/openshift/pipelines/rpmbuild/Jenkinsfile
