@@ -1,6 +1,11 @@
 #!/bin/bash
 set +e
 
+# Check to make sure we have all required vars
+if [ -z "${fed_repo}" ]; then echo "No fed_repo env var" ; exit 1 ; fi
+if [ -z "${fed_branch}" ]; then echo "No fed_branch env var" ; exit 1 ; fi
+if [ -z "${fed_rev}" ]; then echo "No fed_rev env var" ; exit 1 ; fi
+
 RPMDIR=/home/${fed_repo}_repo
 # Create one dir to store logs in that will be mounted
 LOGDIR=/home/logs
@@ -68,6 +73,10 @@ libabigail/tools/fedabipkgdiff --from ${ABIGAIL_BRANCH} ${RPM_TO_CHECK} &> ${LOG
 RPM_NAME=$(basename $RPM_TO_CHECK)
 echo "package_url=http://artifacts.ci.centos.org/fedora-atomic/${fed_branch}/repo/${fed_repo}_repo/$RPM_NAME" >> ${LOGDIR}/package_props.txt
 
+if [ -z "${enable_rsync}" ]; then echo "Rsync not enabled. Exiting" ; exit 0 ; fi
+
+# If we do rsync, make sure we have the password
+if [ -z "${RSYNC_PASSWORD}" ]; then echo "Told to rsync but no RSYNC_PASSWORD env var" ; exit 1 ; fi
 # Perform rsync to artifacts.ci.centos.org
 RSYNC_BRANCH=${fed_branch}
 if [ "${fed_branch}" = "master" ]; then
@@ -102,15 +111,20 @@ while true; do
 done
 # Rsync the empty directories over first, then the repo directory
 rsync -arv ${RSYNC_BRANCH}/ fedora-atomic@artifacts.ci.centos.org::fedora-atomic
-rsync -arv repo/ fedora-atomic@artifacts.ci.centos.org::fedora-atomic/${RSYNC_BRANCH}
-rsync --delete --stats -a ${RPMDIR} fedora-atomic@artifacts.ci.centos.org::fedora-atomic/${RSYNC_BRANCH}/repo
-if [ "$?" != 0 ]; then echo "ERROR: RSYNC REPO\nSTATUS: $?"; exit 1; fi
+if [ -z "${production}" ]; then
+     rsync --delete --stats -a ${RPMDIR} fedora-atomic@artifacts.ci.centos.org::fedora-atomic/${RSYNC_BRANCH}
+     if [ "$?" != 0 ]; then echo "ERROR: RSYNC REPO\nSTATUS: $?"; exit 1; fi
+else
+     rsync -arv repo/ fedora-atomic@artifacts.ci.centos.org::fedora-atomic/${RSYNC_BRANCH}
+     rsync --delete --stats -a ${RPMDIR} fedora-atomic@artifacts.ci.centos.org::fedora-atomic/${RSYNC_BRANCH}/repo
+     if [ "$?" != 0 ]; then echo "ERROR: RSYNC REPO\nSTATUS: $?"; exit 1; fi
+     # Update repo manifest file on artifacts.ci.centos.org
+     rsync --delete --stats -a fedora-atomic@artifacts.ci.centos.org::fedora-atomic/${RSYNC_BRANCH}/repo/manifest.txt .
+     # Remove repo name from file if it exists so it isn't there twice
+     sed -i "/${fed_repo}_repo/d" manifest.txt
+fi
 rm -rf ${RSYNC_BRANCH}
 rm -rf repo
-# Update repo manifest file on artifacts.ci.centos.org
-rsync --delete --stats -a fedora-atomic@artifacts.ci.centos.org::fedora-atomic/${RSYNC_BRANCH}/repo/manifest.txt .
-# Remove repo name from file if it exists so it isn't there twice
-sed -i "/${fed_repo}_repo/d" manifest.txt
 echo "${fed_repo}_repo $(date --utc +%FT%T%Z)" >> manifest.txt
 sort manifest.txt -o manifest.txt
 rsync --delete -stats -a manifest.txt fedora-atomic@artifacts.ci.centos.org::fedora-atomic/${RSYNC_BRANCH}/repo

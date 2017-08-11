@@ -10,5 +10,5 @@ sudo systemctl start docker
 pushd $base_dir/config/Dockerfiles/rpmbuild
 sudo docker build -t rpmbuild-container .
 popd
-sudo docker run --privileged -v ${HOMEDIR}:/home/logs -e fed_repo="${fed_repo}" -e fed_branch="${fed_branch}" -e fed_rev="${fed_rev}" -e RSYNC_PASSWORD=${RSYNC_PASSWORD} rpmbuild-container
+sudo docker run --privileged -v ${HOMEDIR}:/home/logs -e fed_repo="${fed_repo}" -e fed_branch="${fed_branch}" -e fed_rev="${fed_rev}" -e enable_rsync=yes -e RSYNC_PASSWORD=${RSYNC_PASSWORD} -e production=yes rpmbuild-container
 if [ "$?" != 0 ]; then echo -e "ERROR: RPMBUILD FAILED\nSTATUS: $?"; exit 1; fi
