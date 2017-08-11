@@ -102,8 +102,8 @@ podTemplate(name: 'fedora-atomic-inline', label: 'fedora-atomic-inline', cloud: 
                         if [ "${branch}" = "master" ]; then
                           branch="rawhide"
                         fi
-
-
+                        
+                        
                         # Save the bramch in job.properties
                         echo "branch=${branch}" >> ${WORKSPACE}/job.properties
                         echo "topic=${MAIN_TOPIC}.ci.pipeline.package.queued" >> ${WORKSPACE}/job.properties
@@ -661,7 +661,7 @@ def allocDuffy(stage) {
         sh '''
             #!/bin/bash
             set -xeuo pipefail
-
+    
             cp ${DUFFY_KEY} ~/duffy.key
             chmod 600 ~/duffy.key
 
@@ -702,12 +702,12 @@ def setupStage(stage) {
             cp ${FEDORA_ATOMIC_PUB_KEY} ~/.ssh/id_rsa.pub
             chmod 600 ~/.ssh/id_rsa
             chmod 644 ~/.ssh/id_rsa.pub
-
+            
             # Keep compatibility with earlier cciskel-duffy
             if test -f ${ORIGIN_WORKSPACE}/inventory.${ORIGIN_BUILD_TAG}; then
                 ln -fs ${ORIGIN_WORKSPACE}/inventory.${ORIGIN_BUILD_TAG} ${WORKSPACE}/inventory
             fi
-
+    
             if test -n "${playbook:-}"; then
                 ansible-playbook --private-key=${FEDORA_ATOMIC_KEY} -u root -i ${WORKSPACE}/inventory "${playbook}"
             else
@@ -725,23 +725,23 @@ def rsyncResults(stage) {
         sh '''
             #!/bin/bash
             set -xeuo pipefail
-
+    
             cp ${DUFFY_KEY} ~/duffy.key
             chmod 600 ~/duffy.key
-
+    
             source ${ORIGIN_WORKSPACE}/task.env
             (echo -n "export RSYNC_PASSWORD=" && cat ~/duffy.key | cut -c '-13') > rsync-password.sh
-
+            
             rsync -Hrlptv --stats -e ssh ${ORIGIN_WORKSPACE}/task.env rsync-password.sh builder@${DUFFY_HOST}:${JENKINS_JOB_NAME}
             for repo in ci-pipeline sig-atomic-buildscripts; do
                 rsync -Hrlptv --stats --delete -e ssh ${repo}/ builder@${DUFFY_HOST}:${JENKINS_JOB_NAME}/${repo}
             done
-
+            
             build_success=true
             if ! ssh -tt builder@${DUFFY_HOST} "pushd ${JENKINS_JOB_NAME} && . rsync-password.sh && . task.env && ${task}"; then
                 build_success=false
             fi
-
+            
             rsync -Hrlptv --stats -e ssh builder@${DUFFY_HOST}:${JENKINS_JOB_NAME}/logs/ ${ORIGIN_WORKSPACE}/logs || true
             # Exit with code from the build
             if test "${build_success}" = "false"; then
@@ -758,7 +758,7 @@ def checkLastImage(stage) {
     sh '''
         prev=$( date --date="$( curl -I --silent http://artifacts.ci.centos.org/artifacts/fedora-atomic/${branch}/images/latest-atomic.qcow2 | grep Last-Modified | sed s'/Last-Modified: //' )" +%s )
         cur=$( date +%s )
-
+        
         elapsed=$((cur - prev))
         if [ $elapsed -gt 86400 ]; then
             echo "Time for a new image since time elapsed is ${elapsed}"
