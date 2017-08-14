@@ -147,7 +147,7 @@ node('master') {
                             echo "CI_MESSAGE: ${env.CI_MESSAGE}"
                             echo "TARGET_BRANCH: ${env.fed_branch}"
                             echo "MAIN_TOPIC: ${env.MAIN_TOPIC}"
-                            build job: "ci-pipeline-${env.branch}", parameters: [string(name: 'CI_MESSAGE', value: "${env.CI_MESSAGE}"), string(name: 'TARGET_BRANCH', value: "${env.fed_branch}"), string(name: 'PROJECT_REPO', value: 'ci-pipeline'), string(name: 'MAIN_TOPIC', value: 'org.centos.prod'), string(name: 'MSG_PROVIDER', value: 'fedora-fedmsg')], wait: false
+                            build job: "continuous-infra-ci-pipeline-${env.branch}", parameters: [string(name: 'CI_MESSAGE', value: "${env.CI_MESSAGE}"), string(name: 'TARGET_BRANCH', value: "${env.fed_branch}"), string(name: 'PROJECT_REPO', value: 'ci-pipeline'), string(name: 'MAIN_TOPIC', value: 'org.centos.prod'), string(name: 'MSG_PROVIDER', value: 'fedora-fedmsg')], wait: false
                         }
                     }
                 }
