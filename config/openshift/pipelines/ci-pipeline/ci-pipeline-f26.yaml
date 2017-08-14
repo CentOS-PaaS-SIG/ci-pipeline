@@ -1,0 +1,16 @@
+apiVersion: v1
+kind: BuildConfig
+metadata:
+  labels:
+    name: ci-pipeline-f26
+  name: ci-pipeline-f26
+spec:
+  source:
+    type: Git
+    git:
+      uri: https://github.com/CentOS-PaaS-SIG/ci-pipeline.git
+      ref: master
+  strategy:
+    type: JenkinsPipeline
+    jenkinsPipelineStrategy:
+      jenkinsfilePath: Jenkinsfile
