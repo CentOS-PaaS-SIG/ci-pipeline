@@ -23,7 +23,7 @@ REF="fedora/${branch}/x86_64/atomic-host"
 
 mkdir -p logs
 
-for v in ostree images; do
+for v in images; do
     rsync --delete --stats -a fedora-atomic@artifacts.ci.centos.org::fedora-atomic/${branch}/${v}/ ${v}/
 done
 
@@ -44,16 +44,20 @@ function clean_up {
 }
 trap clean_up EXIT SIGHUP SIGINT SIGTERM
 
-version=$(ostree --repo=ostree show --print-metadata-key=version $REF| sed -e "s/'//g")
 if [ -d "images" ]; then
-    # Find the last image we pushed
-    prev_img=$(ls -tr images/*.qcow2 | tail -n 1)
-    IMG_URL="http://artifacts.ci.centos.org/artifacts/fedora-atomic/${branch}/$prev_img"
+    if [ -d "images/latest-atomic.qcow2" ]; then
+        # Use symlink if it exists
+        IMG_URL="http://artifacts.ci.centos.org/artifacts/fedora-atomic/${branch}/images/latest-atomic.qcow2"
+    else
+        # Find the last image we pushed
+        prev_img=$(ls -tr images/*.qcow2 | tail -n 1)
+        IMG_URL="http://artifacts.ci.centos.org/artifacts/fedora-atomic/${branch}/$prev_img"
+    fi
 fi
 
 # If image2boot is defined use that image, but if not fall back to the
 # previous image built
-image2boot=${image2boot:-$IMG_URL}
+bootimage=${image2boot:-$IMG_URL}
 
 if ! [ -f ~/.ssh/id_rsa ]; then
     ssh-keygen -t rsa -f ~/.ssh/id_rsa -N ''
@@ -73,7 +77,7 @@ libvirt_systems:
    disk: 10G
 EOF
 cat << EOF >> host_vars/ostree_compose_slave_baremetal.yml
-   img_url: $image2boot
+   img_url: $bootimage
    admin_ssh_rsa: $pubkey
 EOF
 cat << EOF > hosts
@@ -105,6 +109,17 @@ BOOT_STATUS=$?
 if [ "$BOOT_STATUS" != 0 ]; then
     echo "ERROR: Provisioning\nSTATUS: $BOOT_STATUS"
     exit 1
+fi
+
+# If image2boot is defined then symlink it as latest
+if [ -n "$image2boot" ]; then
+    pushd images
+    ln -sf $(basename $image2boot) latest-atomic.qcow2
+    popd
+    # rsync the images directory back if we update the symlink
+    for v in images; do
+        rsync --delete --stats -a ${v}/ fedora-atomic@artifacts.ci.centos.org::fedora-atomic/${branch}/${v}/
+    done
 fi
 
 # Temporarily put package level test execution here
