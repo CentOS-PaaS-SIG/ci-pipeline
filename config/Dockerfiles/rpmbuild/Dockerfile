@@ -46,3 +46,4 @@ ENTRYPOINT ["bash", "/home/rpmbuild-test.sh"]
 # test5
 # test6
 # test7
+# test8
