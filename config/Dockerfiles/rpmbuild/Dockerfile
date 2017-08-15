@@ -39,3 +39,4 @@ COPY rpmbuild-test.sh /home/rpmbuild-test.sh
 
 # Run the build script
 ENTRYPOINT ["bash", "/home/rpmbuild-test.sh"]
+# test
