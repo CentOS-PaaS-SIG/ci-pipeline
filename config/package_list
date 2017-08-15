@@ -346,6 +346,7 @@ quota
 readline
 rpcbind
 rpm
+rpm-ostree
 rsync
 runc
 samba
