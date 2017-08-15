@@ -106,7 +106,7 @@ if [ -e "latest-atomic.qcow2" ]; then
 fi
 
 # delete images over 3 days old but don't delete what our latest link points to
-find . -type f -mtime +3 ! -name "$latest" -exec rm {} \;
+find . -type f -mtime +3 ! -name "$latest" -exec rm -v {} \;
 
 # Also delete if we have more than 3 images (from manual runs)
 # but don't delete what our latest link points to
@@ -114,7 +114,7 @@ images=$(ls -t)
 if [ -n "$latest" ]; then
     images=$(echo $images| grep -v "$latest")
 fi
-echo $images| sed -e '1,3d' | xargs --no-run-if-empty -d '\n' rm
+echo $images| sed -e '1,3d' | xargs --no-run-if-empty -d '\n' rm -v
 popd
 
 # Record the commit so we can test it later
