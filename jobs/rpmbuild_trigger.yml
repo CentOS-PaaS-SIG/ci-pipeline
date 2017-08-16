@@ -114,6 +114,6 @@
 - project:
     name: ci-pipeline-rpmbuild-trigger-jobs
     repo-name: ci-pipeline
-    targets: '^(f25|f26|master)$'
+    targets: '^(f25|f26|f27|master)$'
     jobs:
       - ci-pipeline-rpmbuild-trigger
