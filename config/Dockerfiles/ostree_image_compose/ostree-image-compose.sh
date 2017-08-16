@@ -99,6 +99,15 @@ imagefactory --debug --imgdir $imgdir --timeout 3000 base_image /home/output/log
 imgname="fedora-atomic-$version-$release"
 qemu-img convert -c -p -O qcow2 $imgdir/*body /home/output/images/$imgname.qcow2
 
+# Record the commit so we can test it later
+commit=$(ostree --repo=/home/output/ostree rev-parse ${REF})
+cat << EOF > /home/output/logs/ostree.props
+builtcommit=$commit
+image2boot=http://artifacts.ci.centos.org/artifacts/fedora-atomic/${branch}/images/$imgname.qcow2
+image_name=$imgname.qcow2
+EOF
+
+# Cleanup older qcow2 images
 pushd /home/output/images || exit 1
 latest=""
 if [ -e "latest-atomic.qcow2" ]; then
@@ -107,20 +116,4 @@ fi
 
 # delete images over 3 days old but don't delete what our latest link points to
 find . -type f -mtime +3 ! -name "$latest" -exec rm -v {} \;
-
-# Also delete if we have more than 3 images (from manual runs)
-# but don't delete what our latest link points to
-images=$(ls -t)
-if [ -n "$latest" ]; then
-    images=$(echo $images| grep -v "$latest")
-fi
-echo $images| sed -e '1,3d' | xargs --no-run-if-empty -d '\n' rm -v
 popd
-
-# Record the commit so we can test it later
-commit=$(ostree --repo=/home/output/ostree rev-parse ${REF})
-cat << EOF > /home/output/logs/ostree.props
-builtcommit=$commit
-image2boot=http://artifacts.ci.centos.org/artifacts/fedora-atomic/${branch}/images/$imgname.qcow2
-image_name=$imgname.qcow2
-EOF
