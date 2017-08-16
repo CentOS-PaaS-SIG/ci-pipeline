@@ -9,6 +9,10 @@ if [ -z "${fed_rev}" ]; then echo "No fed_rev env var" ; exit 1 ; fi
 RPMDIR=/home/${fed_repo}_repo
 # Create one dir to store logs in that will be mounted
 LOGDIR=/home/logs
+RSYNC_BRANCH=${fed_branch}
+if [ "${fed_branch}" = "master" ]; then
+    RSYNC_BRANCH=rawhide
+fi
 rm -rf ${LOGDIR}/*
 mkdir -p ${LOGDIR}
 # Clone the fedoraproject git repo
@@ -46,7 +50,14 @@ else
      echo "description='${fed_repo} - make test failed'" >> ${LOGDIR}/package_props.txt
      exit $MAKE_TEST_STATUS
 fi
-# Build the package into ./results_${fed_repo}/$VERSION/$RELEASE/
+# Prepare concurrent koji build
+cp -rp ../${fed_repo} /root/rpmbuild/SOURCES/
+rpmbuild -bs /root/rpmbuild/SOURCES/${fed_repo}.spec
+# Set up koji creds
+#TODO
+# Should be a fedora-packager-setup command and a kinit. Will also probably require some packages like fedora-packager/python-krbV
+# Build the package into ./results_${fed_repo}/$VERSION/$RELEASE/ and concurrently do a koji build
+#{ time fedpkg --release ${fed_branch} mockbuild ; } 2> ${LOGDIR}/mockbuildtime.txt & { time koji build --scratch $RSYNC_BRANCH /root/rpmbuild/SRPMS/${fed_repo}*.src.rpm ; } 2> ${LOGDIR}/kojibuildtime.txt && fg
 fedpkg --release ${fed_branch} mockbuild
 MOCKBUILD_STATUS=$?
 echo "status=$MOCKBUILD_STATUS" >> ${LOGDIR}/package_props.txt
@@ -67,7 +78,7 @@ pushd ${RPMDIR} && createrepo .
 popd
 # Run fedabipkgdiff against the newly created rpm
 rm -rf libabigail
-git clone git://sourceware.org/git/libabigail.git
+git clone -q git://sourceware.org/git/libabigail.git
 RPM_TO_CHECK=$(find ${fed_repo}/results_${fed_repo}/${VERSION}/*/ -name "${fed_repo}-${VERSION}*" | grep -v src)
 libabigail/tools/fedabipkgdiff --from ${ABIGAIL_BRANCH} ${RPM_TO_CHECK} &> ${LOGDIR}/fedabipkgdiff_out.txt
 RPM_NAME=$(basename $RPM_TO_CHECK)
@@ -78,10 +89,6 @@ if [ -z "${enable_rsync}" ]; then echo "Rsync not enabled. Exiting" ; exit 0 ; f
 # If we do rsync, make sure we have the password
 if [ -z "${RSYNC_PASSWORD}" ]; then echo "Told to rsync but no RSYNC_PASSWORD env var" ; exit 1 ; fi
 # Perform rsync to artifacts.ci.centos.org
-RSYNC_BRANCH=${fed_branch}
-if [ "${fed_branch}" = "master" ]; then
-    RSYNC_BRANCH=rawhide
-fi
 if [ -z "${production}" ]; then
     RSYNC_BRANCH=${RSYNC_BRANCH}/staging
 fi
