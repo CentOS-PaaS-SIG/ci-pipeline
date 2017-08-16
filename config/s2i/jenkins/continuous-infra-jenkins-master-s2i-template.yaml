@@ -3,7 +3,7 @@ kind: Template
 apiVersion: v1
 metadata:
   name: jenkins-persistent
-  creationTimestamp: 
+  creationTimestamp:
   annotations:
     openshift.io/display-name: Jenkins (Persistent)
     description: |-
@@ -32,7 +32,7 @@ objects:
   apiVersion: v1
   metadata:
     name: "${JENKINS_SERVICE_NAME}"
-    creationTimestamp: 
+    creationTimestamp:
   spec:
     to:
       kind: Service
@@ -88,7 +88,7 @@ objects:
   apiVersion: v1
   metadata:
     name: "${JENKINS_SERVICE_NAME}"
-    creationTimestamp: 
+    creationTimestamp:
   spec:
     strategy:
       type: Recreate
@@ -109,7 +109,7 @@ objects:
       name: "${JENKINS_SERVICE_NAME}"
     template:
       metadata:
-        creationTimestamp: 
+        creationTimestamp:
         labels:
           name: "${JENKINS_SERVICE_NAME}"
       spec:
@@ -151,6 +151,7 @@ objects:
                 -Djava.security.egd=file:/dev/./urandom
                 -Djenkins.install.runSetupWizard=false
                 -Dhudson.DNSMultiCast.disabled=true
+                -Dhudson.model.ParametersAction.keepUndefinedParameters=true
           - name: JAVA_GC_OPTS
             value: >-
                 -XX:+UseParallelGC -XX:MaxPermSize=100m -XX:MinHeapFreeRatio=20
@@ -184,7 +185,7 @@ objects:
   apiVersion: v1
   metadata:
     name: "${JENKINS_SERVICE_NAME}_edit"
-  groupNames: 
+  groupNames:
   subjects:
   - kind: ServiceAccount
     name: "${JENKINS_SERVICE_NAME}"
@@ -213,7 +214,7 @@ objects:
       service.alpha.openshift.io/dependencies: '[{"name": "${JNLP_SERVICE_NAME}",
         "namespace": "", "kind": "Service"}]'
       service.openshift.io/infrastructure: 'true'
-    creationTimestamp: 
+    creationTimestamp:
   spec:
     ports:
     - name: web
