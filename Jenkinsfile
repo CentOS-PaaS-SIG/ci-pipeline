@@ -9,6 +9,9 @@ properties(
                                 string(defaultValue: 'ci-pipeline', description: 'Main project repo', name: 'PROJECT_REPO'),
                                 string(defaultValue: 'org.centos.stage', description: 'Main topic to publish on', name: 'MAIN_TOPIC'),
                                 string(defaultValue: 'fedora-fedmsg', description: 'Main provider to send messages on', name: 'MSG_PROVIDER'),
+                                string(defaultValue: 'stable', description: 'Tag for rpmbuild image', name: 'RPMBUILD_TAG'),
+                                string(defaultValue: '172.30.254.79:5000', description: 'Docker repo url for Openshift instance', name: 'DOCKER_REPO_URL'),
+                                string(defaultValue: 'continuous-infra', description: 'Project namespace for Openshift operations', name: 'OPENSHIFT_NAMESPACE'),
                                 booleanParam(defaultValue: false, description: 'Force generation of the image', name: 'GENERATE_IMAGE'),
                         ]
                 ),
@@ -16,14 +19,22 @@ properties(
 )
 
 podTemplate(name: 'fedora-atomic-inline', label: 'fedora-atomic-inline', cloud: 'openshift', serviceAccount: 'jenkins',
-        idleMinutes: 1,  namespace: 'continuous-infra',
+        idleMinutes: 1,  namespace: OPENSHIFT_NAMESPACE,
         containers: [
                 // This adds the custom slave container to the pod. Must be first with name 'jnlp'
                 containerTemplate(name: 'jnlp',
-                        image: '172.30.254.79:5000/continuous-infra/jenkins-continuous-infra-slave',
+                        image: DOCKER_REPO_URL + '/' + OPENSHIFT_NAMESPACE + '/jenkins-continuous-infra-slave',
                         ttyEnabled: false,
                         args: '${computer.jnlpmac} ${computer.name}',
                         command: '',
+                        workingDir: '/tmp'),
+                // This adds the rpmbuild test container to the pod.
+                containerTemplate(name: 'rpmbuild',
+                        alwaysPullImage: true,
+                        image: DOCKER_REPO_URL + '/' + OPENSHIFT_NAMESPACE + '/rpmbuild:' + RPMBUILD_TAG,
+                        ttyEnabled: true,
+                        command: 'cat',
+                        privileged: true,
                         workingDir: '/tmp'),
         ])
 
@@ -87,7 +98,7 @@ podTemplate(name: 'fedora-atomic-inline', label: 'fedora-atomic-inline', cloud: 
                             grep fed ${WORKSPACE}/fedmsg_fields.txt > ${WORKSPACE}/fedmsg_fields.txt.tmp
                             mv ${WORKSPACE}/fedmsg_fields.txt.tmp ${WORKSPACE}/fedmsg_fields.txt
                         fi
-                    '''
+                        '''
 
                         // Load fedmsg fields as environment variables
                         def fedmsg_fields = "${env.WORKSPACE}/fedmsg_fields.txt"
@@ -108,7 +119,8 @@ podTemplate(name: 'fedora-atomic-inline', label: 'fedora-atomic-inline', cloud: 
                         echo "branch=${branch}" >> ${WORKSPACE}/job.properties
                         echo "topic=${MAIN_TOPIC}.ci.pipeline.package.queued" >> ${WORKSPACE}/job.properties
                         exit
-                    '''
+                        '''
+
                         def job_props = "${env.WORKSPACE}/job.properties"
                         def job_props_groovy = "${env.WORKSPACE}/job.properties.groovy"
                         convertProps(job_props, job_props_groovy)
@@ -139,47 +151,24 @@ podTemplate(name: 'fedora-atomic-inline', label: 'fedora-atomic-inline', cloud: 
                         messageContent = ''
                         sendMessage(messageProperties, messageContent)
 
-                        // Provision of resources
-                        allocDuffy("${current_stage}")
-
-                        echo "Duffy Allocate ran for stage ${current_stage} with option ${env.DUFFY_OP}\r\n" +
-                                "ORIGIN_WORKSPACE=${env.ORIGIN_WORKSPACE}\r\n" +
-                                "ORIGIN_BUILD_TAG=${env.ORIGIN_BUILD_TAG}\r\n" +
-                                "ORIGIN_CLASS=${env.ORIGIN_CLASS}"
-
                         job_props = "${env.ORIGIN_WORKSPACE}/job.props"
                         job_props_groovy = "${env.ORIGIN_WORKSPACE}/job.groovy"
                         convertProps(job_props, job_props_groovy)
                         load(job_props_groovy)
 
-                        // Stage resources - RPM build system
-                        setupStage("${current_stage}")
-
-                        if (env.OSTREE_BRANCH == null) {
-                            env.OSTREE_BRANCH = ""
+                        // Call rpmbuild-test.sh
+                        // in rpmbuild container
+                        container('rpmbuild') {
+                            sh "fed_repo=${env.fed_repo} " +
+                               "fed_branch=${env.fed_branch} " +
+                               "fed_rev=${env.fed_rev} " +
+                               "/home/rpmbuild-test.sh"
                         }
-
-                        // Rsync Data
-                        writeFile file: "${env.ORIGIN_WORKSPACE}/task.env",
-                                text: "export JENKINS_JOB_NAME=\"${JOB_NAME}-${current_stage}\"\n" +
-                                        "export JENKINS_BUILD_TAG=\"${BUILD_TAG}-${current_stage}\"\n" +
-                                        "export OSTREE_BRANCH=\"${OSTREE_BRANCH}\"\n" +
-                                        "export fed_repo=\"${fed_repo}\"\n" +
-                                        "export fed_branch=\"${fed_branch}\"\n" +
-                                        "export fed_rev=\"${fed_rev}\"\n"
-                        rsyncResults("${current_stage}")
 
                         def package_props = "${env.ORIGIN_WORKSPACE}/logs/package_props.txt"
                         def package_props_groovy = "${env.ORIGIN_WORKSPACE}/package_props.groovy"
                         convertProps(package_props, package_props_groovy)
                         load(package_props_groovy)
-
-                        // Teardown resources
-                        env.DUFFY_OP="--teardown"
-                        allocDuffy("${current_stage}")
-                        echo "Duffy Deallocate ran for stage ${current_stage} with option ${env.DUFFY_OP}\r\n" +
-                                "RSYNC_PASSWORD=${env.RSYNC_PASSWORD}\r\n" +
-                                "DUFFY_HOST=${env.DUFFY_HOST}"
 
                         // Send message org.centos.prod.ci.pipeline.package.complete on fedmsg
                         env.topic = "${MAIN_TOPIC}.ci.pipeline.package.complete"
@@ -198,6 +187,11 @@ podTemplate(name: 'fedora-atomic-inline', label: 'fedora-atomic-inline', cloud: 
                         messageContent = ''
                         sendMessage(messageProperties, messageContent)
                     }
+
+                    if (env.OSTREE_BRANCH == null) {
+                        env.OSTREE_BRANCH = ""
+                    }
+
                     current_stage = "ci-pipeline-ostree-compose"
                     stage(current_stage) {
 
