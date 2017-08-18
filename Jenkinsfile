@@ -84,6 +84,7 @@ podTemplate(name: 'fedora-atomic-inline', label: 'fedora-atomic-inline', cloud: 
                         if [ -n "${CI_MESSAGE}" ]; then
                             echo ${CI_MESSAGE} | ${WORKSPACE}/parse_fedmsg.py > fedmsg_fields.txt
                             sed -i '/^\\\\s*$/d' ${WORKSPACE}/fedmsg_fields.txt
+                            sed -i '/`/g' ${WORKSPACE}/fedmsg_fields.txt
                             sed -i '/^fed/!d' ${WORKSPACE}/fedmsg_fields.txt
                             grep fed ${WORKSPACE}/fedmsg_fields.txt > ${WORKSPACE}/fedmsg_fields.txt.tmp
                             mv ${WORKSPACE}/fedmsg_fields.txt.tmp ${WORKSPACE}/fedmsg_fields.txt
