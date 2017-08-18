@@ -8,6 +8,8 @@ properties(
                                 string(defaultValue: 'f26', description: 'Fedora target branch', name: 'TARGET_BRANCH'),
                                 string(defaultValue: 'ci-pipeline', description: 'Main project repo', name: 'PROJECT_REPO'),
                                 string(defaultValue: 'org.centos.stage', description: 'Main topic to publish on', name: 'MAIN_TOPIC'),
+                                string(defaultValue: 'production=yes', description: 'Production Mode. Leave empty to disable.', name: 'PRODUCTION_MODE'),
+                                string(defaultValue: 'enable_rsync=yes', description: 'Rsync Mode. Leave empty to disable rsync.', name: 'RSYNC_MODE'),
                                 string(defaultValue: 'fedora-fedmsg', description: 'Main provider to send messages on', name: 'MSG_PROVIDER'),
                                 string(defaultValue: 'stable', description: 'Tag for rpmbuild image', name: 'RPMBUILD_TAG'),
                                 string(defaultValue: '172.30.254.79:5000', description: 'Docker repo url for Openshift instance', name: 'DOCKER_REPO_URL'),
@@ -57,7 +59,8 @@ podTemplate(name: 'fedora-atomic-inline', label: 'fedora-atomic-inline', cloud: 
                         if ((env.MSG_PROVIDER == null) || ("${env.MSG_PROVIDER}" == "")) {
                             env.MSG_PROVIDER = "fedora-fedmsg"
                         }
-
+                        // Initialize RSYNC_PASSWORD from credentialsId
+                        env.RSYNC_PASSWORD = getPasswordFromDuffyKey('duffy-key')
 
                         // SCM
                         dir('ci-pipeline') {
@@ -160,6 +163,9 @@ podTemplate(name: 'fedora-atomic-inline', label: 'fedora-atomic-inline', cloud: 
                         // in rpmbuild container
                         container('rpmbuild') {
                             sh "fed_repo=${env.fed_repo} " +
+                                PRODUCTION_MODE + " " +
+                                RSYNC_MODE + " " +
+                               "RSYNC_PASSWORD=${env.RSYNC_PASSWORD} " +
                                "fed_branch=${env.fed_branch} " +
                                "fed_rev=${env.fed_rev} " +
                                "/home/rpmbuild-test.sh"
@@ -771,4 +777,11 @@ def sendMessage(msgProps, msgContent) {
             messageType: 'Custom',
             overrides: [topic: "${topic}"],
             providerName: "${MSG_PROVIDER}"
+}
+
+def getPasswordFromDuffyKey(credentialsId) {
+    withCredentials([file(credentialsId: credentialsId, variable: 'DUFFY_KEY')]) {
+        return sh(script: 'cat ' + DUFFY_KEY +
+                ' | cut -c \'-13\'', returnStdout: true).trim()
+    }
 }
