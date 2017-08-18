@@ -1,7 +1,8 @@
 FROM fedora:24
 LABEL maintainer "https://github.com/CentOS-PaaS-SIG/ci-pipeline"
 LABEL description="This container is meant to \
-use fedpkg mock to create rpms."
+use fedpkg mock to create rpms.  It also rsyncs \
+them to artifacts.ci.centos.org."
 
 # Install all package requirements
 RUN for i in {1..5} ; do dnf -y update && dnf clean all && break || sleep 10 ; done
@@ -39,3 +40,6 @@ COPY rpmbuild-test.sh /home/rpmbuild-test.sh
 
 # Run the build script
 ENTRYPOINT ["bash", "/home/rpmbuild-test.sh"]
+# Run the container as follows
+# Note: For stage builds, don't do production=no, simply don't pass a production var in
+# docker run --privileged -v /some/spot/for/logs:/home/logs -e fed_repo=${packagename} -e fed_branch=${fed_branch} -e fed_rev=${fed_rev} -e enable_rsync=yes -e RSYNC_PASSWORD=${rsync_password} -e production=yes container_tag
