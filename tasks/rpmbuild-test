@@ -2,7 +2,6 @@
 set +e
 
 HOMEDIR=$(pwd)
-base_dir="$(dirname $0)/.."
 which docker
 if [ "$?" != 0 ]; then echo "ERROR: DOCKER NOT INSTALLED\nSTATUS: $?"; exit 1; fi
 sudo systemctl start docker
