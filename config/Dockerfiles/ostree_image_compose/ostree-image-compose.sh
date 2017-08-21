@@ -69,7 +69,7 @@ cp $base_dir/config/ostree/fedora-atomic-${branch}.ks /home/output/logs/fedora-a
 sed -i "s|^ostreesetup.*|ostreesetup --nogpg --osname=fedora-atomic --remote=fedora-atomic --url=http://192.168.122.1:8000/ --ref=$REF|" /home/output/logs/fedora-atomic.ks
 
 # point to upstream
-sed -i "s|\(%end.*$\)|ostree remote delete fedora-atomic\nostree remote add --set=gpg-verify=false fedora-atomic http://artifacts.ci.centos.org/artifacts/fedora-atomic/${branch}/ostree\n\1|" /home/output/logs/fedora-atomic.ks
+sed -i "s|\(%end.*$\)|ostree remote delete fedora-atomic\nostree remote add --set=gpg-verify=false fedora-atomic ${HTTP_BASE}/${branch}/ostree\n\1|" /home/output/logs/fedora-atomic.ks
 
 # Create a tdl file for imagefactory
 #       <install type='url'>
@@ -103,7 +103,7 @@ qemu-img convert -c -p -O qcow2 $imgdir/*body /home/output/images/$imgname.qcow2
 commit=$(ostree --repo=/home/output/ostree rev-parse ${REF})
 cat << EOF > /home/output/logs/ostree.props
 builtcommit=$commit
-image2boot=http://artifacts.ci.centos.org/artifacts/fedora-atomic/${branch}/images/$imgname.qcow2
+image2boot=${HTTP_BASE}/${branch}/images/$imgname.qcow2
 image_name=$imgname.qcow2
 EOF
 
