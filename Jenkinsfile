@@ -224,7 +224,6 @@ podTemplate(name: 'fedora-atomic-inline', label: 'fedora-atomic-inline', cloud: 
 
                         // Send message org.centos.prod.ci.pipeline.compose.running on fedmsg
                         env.topic = "${MAIN_TOPIC}.ci.pipeline.compose.running"
-                        env.HTTP_BASE = "${HTTP_BASE}"
                         messageProperties = "topic=${topic}\n" +
                                 "build_url=${BUILD_URL}\n" +
                                 "build_id=${BUILD_ID}\n" +
