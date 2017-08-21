@@ -6,7 +6,7 @@ properties(
                         [
                                 string(description: 'CI Message that triggered the pipeline', name: 'CI_MESSAGE'),
                                 string(defaultValue: 'f26', description: 'Fedora target branch', name: 'TARGET_BRANCH'),
-                                string(defaultValue: 'http://artifects.ci.centos.org/artifacts/fedora-atomic', description: 'URL for rsync content', name: 'HTTP_BASE'),
+                                string(defaultValue: 'http://artifacts.ci.centos.org/artifacts/fedora-atomic', description: 'URL for rsync content', name: 'HTTP_BASE'),
                                 string(defaultValue: 'fedora-atomic', description: 'RSync User', name: 'RSYNC_USER'),
                                 string(defaultValue: 'artifacts.ci.centos.org', description: 'RSync Server', name: 'RSYNC_SERVER'),
                                 string(defaultValue: 'fedora-atomic', description: 'RSync Dir', name: 'RSYNC_DIR'),
