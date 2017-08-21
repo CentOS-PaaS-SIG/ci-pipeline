@@ -24,10 +24,7 @@ ostree --repo=/home/output/ostree prune \
     --keep-younger-than='1 week ago' --refs-only
 
 # get list of repos
-repos=$(curl http://artifacts.ci.centos.org/fedora-atomic/${branch}/repo/manifest.txt | cut -d' ' -f1)
-
-# Old way if manifest.txt isn't generated
-#repos=$(rsync fedora-atomic@artifacts.ci.centos.org::fedora-atomic/${branch}/repo/ | awk '/^d/ && match($5, /_repo$/) { print $5 }')
+repos=$(curl ${HTTP_BASE}/${branch}/repo/manifest.txt | cut -d' ' -f1)
 
 f_repos=""
 for repo in $repos; do
@@ -39,7 +36,7 @@ for repo in $repos; do
     cat << EOF > $base_dir/config/ostree/${repo}.repo
 [${repo}]
 name=Testing ${repo}
-baseurl=http://artifacts.ci.centos.org/fedora-atomic/${branch}/repo/${repo}
+baseurl=${HTTP_BASE}/${branch}/repo/${repo}
 enabled=1
 gpgcheck=0
 skip_if_unavailable=False
