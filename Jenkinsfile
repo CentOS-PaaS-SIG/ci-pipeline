@@ -226,7 +226,7 @@ podTemplate(name: 'fedora-atomic-inline', label: 'fedora-atomic-inline', cloud: 
                         messageProperties = "topic=${topic}\n" +
                                 "build_url=${BUILD_URL}\n" +
                                 "build_id=${BUILD_ID}\n" +
-                                "compose_url=http://artifacts.ci.centos.org/artifacts/fedora-atomic/${branch}/ostree\n" +
+                                "compose_url=${HTTP_BASE}/${branch}/ostree\n" +
                                 "compose_rev=''\n" +
                                 "branch=${branch}\n" +
                                 "ref=fedora/${branch}/${basearch}/atomic-host\n" +
@@ -289,7 +289,7 @@ podTemplate(name: 'fedora-atomic-inline', label: 'fedora-atomic-inline', cloud: 
                         messageProperties = "topic=${topic}\n" +
                                 "build_url=${BUILD_URL}\n" +
                                 "build_id=${BUILD_ID}\n" +
-                                "compose_url=http://artifacts.ci.centos.org/artifacts/fedora-atomic/${branch}/ostree\n" +
+                                "compose_url=${HTTP_BASE}/${branch}/ostree\n" +
                                 "compose_rev=${commit}\n" +
                                 "branch=${branch}\n" +
                                 "ref=fedora/${branch}/${basearch}/atomic-host\n" +
@@ -322,7 +322,7 @@ podTemplate(name: 'fedora-atomic-inline', label: 'fedora-atomic-inline', cloud: 
                                     "image_url=''\n" +
                                     "image_name=''\n" +
                                     "type=qcow2\n" +
-                                    "compose_url=http://artifacts.ci.centos.org/artifacts/fedora-atomic/${branch}/ostree\n" +
+                                    "compose_url=${HTTP_BASE}/${branch}/ostree\n" +
                                     "compose_rev=${commit}\n" +
                                     "branch=${branch}\n" +
                                     "ref=fedora/${branch}/${basearch}/atomic-host\n" +
@@ -388,7 +388,7 @@ podTemplate(name: 'fedora-atomic-inline', label: 'fedora-atomic-inline', cloud: 
                                     "image_url=${image2boot}\n" +
                                     "image_name=${image_name}\n" +
                                     "type=qcow2\n" +
-                                    "compose_url=http://artifacts.ci.centos.org/artifacts/fedora-atomic/${branch}/ostree\n" +
+                                    "compose_url=${HTTP_BASE}/${branch}/ostree\n" +
                                     "compose_rev=${commit}\n" +
                                     "branch=${branch}\n" +
                                     "ref=fedora/${branch}/${basearch}/atomic-host\n" +
@@ -421,7 +421,7 @@ podTemplate(name: 'fedora-atomic-inline', label: 'fedora-atomic-inline', cloud: 
                                     "image_url=${image2boot}\n" +
                                     "image_name=${image_name}\n" +
                                     "type=qcow2\n" +
-                                    "compose_url=http://artifacts.ci.centos.org/artifacts/fedora-atomic/${branch}/ostree\n" +
+                                    "compose_url=${HTTP_BASE}/${branch}/ostree\n" +
                                     "compose_rev=${commit}\n" +
                                     "branch=${branch}\n" +
                                     "ref=fedora/${branch}/${basearch}/atomic-host\n" +
@@ -483,7 +483,7 @@ podTemplate(name: 'fedora-atomic-inline', label: 'fedora-atomic-inline', cloud: 
                                     "image_url=${image2boot}\n" +
                                     "image_name=${image_name}\n" +
                                     "type=qcow2\n" +
-                                    "compose_url=http://artifacts.ci.centos.org/artifacts/fedora-atomic/${branch}/ostree\n" +
+                                    "compose_url=${HTTP_BASE}/${branch}/ostree\n" +
                                     "compose_rev=${commit}\n" +
                                     "branch=${branch}\n" +
                                     "ref=fedora/${branch}/${basearch}/atomic-host\n" +
@@ -569,7 +569,7 @@ podTemplate(name: 'fedora-atomic-inline', label: 'fedora-atomic-inline', cloud: 
                         messageProperties = "topic=${topic}\n" +
                                 "build_url=${BUILD_URL}\n" +
                                 "build_id=${BUILD_ID}\n" +
-                                "compose_url=http://artifacts.ci.centos.org/artifacts/fedora-atomic/${branch}/ostree\n" +
+                                "compose_url=${HTTP_BASE}/${branch}/ostree\n" +
                                 "compose_rev=${commit}\n" +
                                 "branch=${branch}\n" +
                                 "ref=fedora/${branch}/${basearch}/atomic-host\n" +
@@ -593,7 +593,7 @@ podTemplate(name: 'fedora-atomic-inline', label: 'fedora-atomic-inline', cloud: 
                         messageProperties = "topic=${topic}\n" +
                                 "build_url=${BUILD_URL}\n" +
                                 "build_id=${BUILD_ID}\n" +
-                                "compose_url=http://artifacts.ci.centos.org/artifacts/fedora-atomic/${branch}/ostree\n" +
+                                "compose_url=${HTTP_BASE}/${branch}/ostree\n" +
                                 "compose_rev=${commit}\n" +
                                 "branch=${branch}\n" +
                                 "ref=fedora/${branch}/${basearch}/atomic-host\n" +
@@ -640,7 +640,7 @@ podTemplate(name: 'fedora-atomic-inline', label: 'fedora-atomic-inline', cloud: 
                         messageProperties = "topic=${topic}\n" +
                                 "build_url=${BUILD_URL}\n" +
                                 "build_id=${BUILD_ID}\n" +
-                                "compose_url=http://artifacts.ci.centos.org/artifacts/fedora-atomic/${branch}/ostree\n" +
+                                "compose_url=${HTTP_BASE}/${branch}/ostree\n" +
                                 "compose_rev=${commit}\n" +
                                 "branch=${branch}\n" +
                                 "ref=fedora/${branch}/${basearch}/atomic-host\n" +
@@ -782,7 +782,7 @@ def checkLastImage(stage) {
     echo "Currently in stage: ${stage} in checkLastImage"
 
     sh '''
-        prev=$( date --date="$( curl -I --silent http://artifacts.ci.centos.org/artifacts/fedora-atomic/${branch}/images/latest-atomic.qcow2 | grep Last-Modified | sed s'/Last-Modified: //' )" +%s )
+        prev=$( date --date="$( curl -I --silent ${HTTP_BASE}/${branch}/images/latest-atomic.qcow2 | grep Last-Modified | sed s'/Last-Modified: //' )" +%s )
         cur=$( date +%s )
         
         elapsed=$((cur - prev))
