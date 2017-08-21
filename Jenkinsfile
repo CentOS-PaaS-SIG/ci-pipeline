@@ -6,6 +6,10 @@ properties(
                         [
                                 string(description: 'CI Message that triggered the pipeline', name: 'CI_MESSAGE'),
                                 string(defaultValue: 'f26', description: 'Fedora target branch', name: 'TARGET_BRANCH'),
+                                string(defaultValue: 'http://artifects.ci.centos.org/artifacts/fedora-atomic', description: 'URL for rsync content', name: 'HTTP_BASE'),
+                                string(defaultValue: 'fedora-atomic', description: 'RSync User', name: 'RSYNC_USER'),
+                                string(defaultValue: 'artifacts.ci.centos.org', description: 'RSync Server', name: 'RSYNC_SERVER'),
+                                string(defaultValue: 'fedora-atomic', description: 'RSync Dir', name: 'RSYNC_DIR'),
                                 string(defaultValue: 'ci-pipeline', description: 'Main project repo', name: 'PROJECT_REPO'),
                                 string(defaultValue: 'org.centos.stage', description: 'Main topic to publish on', name: 'MAIN_TOPIC'),
                                 string(defaultValue: 'fedora-fedmsg', description: 'Main provider to send messages on', name: 'MSG_PROVIDER'),
@@ -164,6 +168,10 @@ podTemplate(name: 'fedora-atomic-inline', label: 'fedora-atomic-inline', cloud: 
                         // Rsync Data
                         writeFile file: "${env.ORIGIN_WORKSPACE}/task.env",
                                 text: "export JENKINS_JOB_NAME=\"${JOB_NAME}-${current_stage}\"\n" +
+                                        "export HTTP_BASE=\"${HTTP_BASE}\"\n" +
+                                        "export RSYNC_USER=\"${RSYNC_USER}\"\n" +
+                                        "export RSYNC_SERVER=\"${RSYNC_SERVER}\"\n" +
+                                        "export RSYNC_DIR=\"${RSYNC_DIR}\"\n" +
                                         "export JENKINS_BUILD_TAG=\"${BUILD_TAG}-${current_stage}\"\n" +
                                         "export OSTREE_BRANCH=\"${OSTREE_BRANCH}\"\n" +
                                         "export fed_repo=\"${fed_repo}\"\n" +
@@ -254,6 +262,10 @@ podTemplate(name: 'fedora-atomic-inline', label: 'fedora-atomic-inline', cloud: 
                         // Rsync Data
                         writeFile file: "${env.ORIGIN_WORKSPACE}/task.env",
                                 text: "export branch=\"${branch}\"\n" +
+                                        "export HTTP_BASE=\"${HTTP_BASE}\"\n" +
+                                        "export RSYNC_USER=\"${RSYNC_USER}\"\n" +
+                                        "export RSYNC_SERVER=\"${RSYNC_SERVER}\"\n" +
+                                        "export RSYNC_DIR=\"${RSYNC_DIR}\"\n" +
                                         "export JENKINS_JOB_NAME=\"${JOB_NAME}-${current_stage}\"\n" +
                                         "export JENKINS_BUILD_TAG=\"${BUILD_TAG}-${current_stage}\"\n" +
                                         "export OSTREE_BRANCH=\"${OSTREE_BRANCH}\"\n"
@@ -346,6 +358,10 @@ podTemplate(name: 'fedora-atomic-inline', label: 'fedora-atomic-inline', cloud: 
                             // Rsync Data
                             writeFile file: "${env.ORIGIN_WORKSPACE}/task.env",
                                     text: "export branch=\"${branch}\"\n" +
+                                            "export HTTP_BASE=\"${HTTP_BASE}\"\n" +
+                                            "export RSYNC_USER=\"${RSYNC_USER}\"\n" +
+                                            "export RSYNC_SERVER=\"${RSYNC_SERVER}\"\n" +
+                                            "export RSYNC_DIR=\"${RSYNC_DIR}\"\n" +
                                             "export JENKINS_JOB_NAME=\"${JOB_NAME}-${current_stage}\"\n" +
                                             "export JENKINS_BUILD_TAG=\"${BUILD_TAG}-${current_stage}\"\n" +
                                             "export OSTREE_BRANCH=\"${OSTREE_BRANCH}\"\n"
@@ -441,6 +457,10 @@ podTemplate(name: 'fedora-atomic-inline', label: 'fedora-atomic-inline', cloud: 
                             // Rsync Data
                             writeFile file: "${env.ORIGIN_WORKSPACE}/task.env",
                                     text: "export branch=\"${branch}\"\n" +
+                                            "export HTTP_BASE=\"${HTTP_BASE}\"\n" +
+                                            "export RSYNC_USER=\"${RSYNC_USER}\"\n" +
+                                            "export RSYNC_SERVER=\"${RSYNC_SERVER}\"\n" +
+                                            "export RSYNC_DIR=\"${RSYNC_DIR}\"\n" +
                                             "export JENKINS_JOB_NAME=\"${JOB_NAME}-${current_stage}\"\n" +
                                             "export JENKINS_BUILD_TAG=\"${BUILD_TAG}-${current_stage}\"\n" +
                                             "export OSTREE_BRANCH=\"${OSTREE_BRANCH}\"\n" +
@@ -517,6 +537,10 @@ podTemplate(name: 'fedora-atomic-inline', label: 'fedora-atomic-inline', cloud: 
                         // Rsync Data
                         writeFile file: "${env.ORIGIN_WORKSPACE}/task.env",
                                 text: "export branch=\"${branch}\"\n" +
+                                        "export HTTP_BASE=\"${HTTP_BASE}\"\n" +
+                                        "export RSYNC_USER=\"${RSYNC_USER}\"\n" +
+                                        "export RSYNC_SERVER=\"${RSYNC_SERVER}\"\n" +
+                                        "export RSYNC_DIR=\"${RSYNC_DIR}\"\n" +
                                         "export fed_repo=\"${fed_repo}\"\n" +
                                         "export image2boot=\"${image2boot}\"\n" +
                                         "export commit=\"${commit}\"\n" +
