@@ -19,7 +19,7 @@ git checkout ${fed_rev}
 # Create new branch because fedpkg wont build with detached head
 git checkout -b test_branch
 # Get current NVR
-truenvr= rpm -q --define "dist .$fed_branch" --queryformat '%{name}-%{version}-%{release}.%{arch}\n' --specfile ${fed_repo}.spec | head -n 1
+truenvr=$(rpm -q --define "dist .$fed_branch" --queryformat '%{name}-%{version}-%{release}.%{arch}\n' --specfile ${fed_repo}.spec | head -n 1)
 # Find number of git commits in log to append to RELEASE
 commits=$(git log --pretty=format:'' | wc -l)
 # Append to release in spec file
@@ -73,5 +73,6 @@ libabigail/tools/fedabipkgdiff --from ${ABIGAIL_BRANCH} ${RPM_TO_CHECK} &> ${OUT
 RPM_NAME=$(basename $RPM_TO_CHECK)
 echo "package_url=${HTTP_BASE}/${fed_branch}/repo/${fed_repo}_repo/$RPM_NAME" >> ${OUTPUTDIR}/logs/package_props.txt
 echo "original_spec_nvr=${truenvr}" >> ${OUTPUTDIR}/logs/package_props.txt
+echo "nvr=${RPM_NAME}" >> ${OUTPUTDIR}/logs/package_props.txt
 
 exit 0
