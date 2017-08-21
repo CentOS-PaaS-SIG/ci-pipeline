@@ -199,6 +199,7 @@ podTemplate(name: 'fedora-atomic-inline', label: 'fedora-atomic-inline', cloud: 
                                 "build_id=${BUILD_ID}\n" +
                                 "branch=${branch}\n" +
                                 "package_url=${package_url}\n" +
+                                "original_spec_nvr=${original_spec_nvr}\n" +
                                 "ref=fedora/${branch}/${basearch}/atomic-host\n" +
                                 "rev=${fed_rev}\n" +
                                 "repo=${fed_repo}\n" +
