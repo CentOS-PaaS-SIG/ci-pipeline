@@ -43,6 +43,7 @@ podTemplate(name: 'fedora-atomic-inline', label: 'fedora-atomic-inline', cloud: 
                     stage(current_stage) {
                         env.basearch = "x86_64"
 
+                        env.HTTP_BASE = params.HTTP_BASE
                         // Set default main topic for messaging
                         if ((env.MAIN_TOPIC == null) || ("${env.MAIN_TOPIC}" == "")) {
                             env.MAIN_TOPIC = "org.centos.prod"
@@ -223,6 +224,7 @@ podTemplate(name: 'fedora-atomic-inline', label: 'fedora-atomic-inline', cloud: 
 
                         // Send message org.centos.prod.ci.pipeline.compose.running on fedmsg
                         env.topic = "${MAIN_TOPIC}.ci.pipeline.compose.running"
+                        env.HTTP_BASE = "${HTTP_BASE}"
                         messageProperties = "topic=${topic}\n" +
                                 "build_url=${BUILD_URL}\n" +
                                 "build_id=${BUILD_ID}\n" +
