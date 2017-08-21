@@ -231,6 +231,7 @@ podTemplate(name: 'fedora-atomic-inline', label: 'fedora-atomic-inline', cloud: 
                                 "compose_url=${HTTP_BASE}/${branch}/ostree\n" +
                                 "compose_rev=''\n" +
                                 "branch=${branch}\n" +
+                                "original_spec_nvr=${original_spec_nvr}\n" +
                                 "ref=fedora/${branch}/${basearch}/atomic-host\n" +
                                 "rev=${fed_rev}\n" +
                                 "repo=${fed_repo}\n" +
@@ -294,6 +295,7 @@ podTemplate(name: 'fedora-atomic-inline', label: 'fedora-atomic-inline', cloud: 
                                 "compose_url=${HTTP_BASE}/${branch}/ostree\n" +
                                 "compose_rev=${commit}\n" +
                                 "branch=${branch}\n" +
+                                "original_spec_nvr=${original_spec_nvr}\n" +
                                 "ref=fedora/${branch}/${basearch}/atomic-host\n" +
                                 "rev=${fed_rev}\n" +
                                 "repo=${fed_repo}\n" +
@@ -327,6 +329,7 @@ podTemplate(name: 'fedora-atomic-inline', label: 'fedora-atomic-inline', cloud: 
                                     "compose_url=${HTTP_BASE}/${branch}/ostree\n" +
                                     "compose_rev=${commit}\n" +
                                     "branch=${branch}\n" +
+                                    "original_spec_nvr=${original_spec_nvr}\n" +
                                     "ref=fedora/${branch}/${basearch}/atomic-host\n" +
                                     "rev=${fed_rev}\n" +
                                     "repo=${fed_repo}\n" +
@@ -393,6 +396,7 @@ podTemplate(name: 'fedora-atomic-inline', label: 'fedora-atomic-inline', cloud: 
                                     "compose_url=${HTTP_BASE}/${branch}/ostree\n" +
                                     "compose_rev=${commit}\n" +
                                     "branch=${branch}\n" +
+                                    "original_spec_nvr=${original_spec_nvr}\n" +
                                     "ref=fedora/${branch}/${basearch}/atomic-host\n" +
                                     "rev=${fed_rev}\n" +
                                     "repo=${fed_repo}\n" +
@@ -426,6 +430,7 @@ podTemplate(name: 'fedora-atomic-inline', label: 'fedora-atomic-inline', cloud: 
                                     "compose_url=${HTTP_BASE}/${branch}/ostree\n" +
                                     "compose_rev=${commit}\n" +
                                     "branch=${branch}\n" +
+                                    "original_spec_nvr=${original_spec_nvr}\n" +
                                     "ref=fedora/${branch}/${basearch}/atomic-host\n" +
                                     "rev=${fed_rev}\n" +
                                     "repo=${fed_repo}\n" +
@@ -488,6 +493,7 @@ podTemplate(name: 'fedora-atomic-inline', label: 'fedora-atomic-inline', cloud: 
                                     "compose_url=${HTTP_BASE}/${branch}/ostree\n" +
                                     "compose_rev=${commit}\n" +
                                     "branch=${branch}\n" +
+                                    "original_spec_nvr=${original_spec_nvr}\n" +
                                     "ref=fedora/${branch}/${basearch}/atomic-host\n" +
                                     "rev=${fed_rev}\n" +
                                     "repo=${fed_repo}\n" +
@@ -574,6 +580,7 @@ podTemplate(name: 'fedora-atomic-inline', label: 'fedora-atomic-inline', cloud: 
                                 "compose_url=${HTTP_BASE}/${branch}/ostree\n" +
                                 "compose_rev=${commit}\n" +
                                 "branch=${branch}\n" +
+                                "original_spec_nvr=${original_spec_nvr}\n" +
                                 "ref=fedora/${branch}/${basearch}/atomic-host\n" +
                                 "rev=${fed_rev}\n" +
                                 "repo=${fed_repo}\n" +
@@ -598,6 +605,7 @@ podTemplate(name: 'fedora-atomic-inline', label: 'fedora-atomic-inline', cloud: 
                                 "compose_url=${HTTP_BASE}/${branch}/ostree\n" +
                                 "compose_rev=${commit}\n" +
                                 "branch=${branch}\n" +
+                                "original_spec_nvr=${original_spec_nvr}\n" +
                                 "ref=fedora/${branch}/${basearch}/atomic-host\n" +
                                 "rev=${fed_rev}\n" +
                                 "repo=${fed_repo}\n" +
@@ -645,6 +653,7 @@ podTemplate(name: 'fedora-atomic-inline', label: 'fedora-atomic-inline', cloud: 
                                 "compose_url=${HTTP_BASE}/${branch}/ostree\n" +
                                 "compose_rev=${commit}\n" +
                                 "branch=${branch}\n" +
+                                "original_spec_nvr=${original_spec_nvr}\n" +
                                 "ref=fedora/${branch}/${basearch}/atomic-host\n" +
                                 "rev=${fed_rev}\n" +
                                 "repo=${fed_repo}\n" +
