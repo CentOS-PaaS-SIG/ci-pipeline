@@ -73,6 +73,7 @@ libabigail/tools/fedabipkgdiff --from ${ABIGAIL_BRANCH} ${RPM_TO_CHECK} &> ${OUT
 RPM_NAME=$(basename $RPM_TO_CHECK)
 echo "package_url=${HTTP_BASE}/${fed_branch}/repo/${fed_repo}_repo/$RPM_NAME" >> ${OUTPUTDIR}/logs/package_props.txt
 echo "original_spec_nvr=${truenvr}" >> ${OUTPUTDIR}/logs/package_props.txt
+RPM_NAME=$(echo $RPM_NAME | rev | cut -d '.' -f 2- | rev)
 echo "nvr=${RPM_NAME}" >> ${OUTPUTDIR}/logs/package_props.txt
 
 exit 0
