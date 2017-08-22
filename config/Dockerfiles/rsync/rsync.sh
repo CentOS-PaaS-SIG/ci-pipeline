@@ -3,7 +3,7 @@
 set -x
 
 #rsync_paths="ostree"
-#rsync_from="fedora-atomic@artifacts.ci.centos.org::fedora-atomic/f26/"
+#rsync_from="${RSYNC_USER}@${RSYNC_SERVER}::${RSYNC_DIR}/f26/"
 #rsync_to="/home/output/"
 
 if [[ ! -v rsync_opts ]]; then

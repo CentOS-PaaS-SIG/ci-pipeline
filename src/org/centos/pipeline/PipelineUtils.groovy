@@ -2,7 +2,7 @@
 package org.centos.pipeline
 
 /**
- * Library to setup the to configure the host to be configured the way we want
+ * Library to setup and configure the host the way ci-pipeline requires
  *
  * variables
  *  stage - current stage running
@@ -38,7 +38,7 @@ def setupStage(stage, sshKey) {
 }
 
 /**
- * Library to setup the to configure the host to be configured the way we want
+ * Library to rsync data back to artifacts.ci.centos.org
  *
  * variables
  *  stage - current stage running
@@ -79,17 +79,16 @@ def rsyncResults(stage, duffyKey) {
 }
 
 /**
- * Library to setup the to configure the host to be configured the way we want
+ * Library to check last image
  *
  * variables
  *  stage - current stage running
- *  duffyKey - duffy file credential name stored in Jenkins credentials
  */
 def checkLastImage(stage) {
     echo "Currently in stage: ${stage} in checkLastImage"
 
     sh '''
-        prev=$( date --date="$( curl -I --silent http://artifacts.ci.centos.org/artifacts/fedora-atomic/${branch}/images/latest-atomic.qcow2 | grep Last-Modified | sed s'/Last-Modified: //' )" +%s )
+        prev=$( date --date="$( curl -I --silent ${HTTP_BASE}/${RSYNC_DIR}/${branch}/images/latest-atomic.qcow2 | grep Last-Modified | sed s'/Last-Modified: //' )" +%s )
         cur=$( date +%s )
         
         elapsed=$((cur - prev))
@@ -101,4 +100,57 @@ def checkLastImage(stage) {
         fi
         exit
     '''
+}
+
+/**
+ * Library to set message fields to be published
+ *
+ * variables
+ *  messageType - ${MAIN_TOPIC}.ci.pipeline.<defined-in-README>
+ */
+
+def setMessageFields(messageType){
+    topic = "${MAIN_TOPIC}.ci.pipeline.${messageType}"
+    messageProperties = "topic=${topic}\n" +
+                        "build_url=${BUILD_URL}\n" +
+                        "build_id=${BUILD_ID}\n" +
+                        "branch=${branch}\n" +
+                        "compose_rev=${commit}\n" +
+                        "namespace=${fed_namespace}\n" +
+                        "ref=fedora/${branch}/${basearch}/atomic-host\n" +
+                        "repo=${fed_repo}\n" +
+                        "rev=${fed_rev}\n" +
+                        "test_guidance=''\n" +
+                        "username=${RSYNC_USER}\n" +
+                        "status=${currentBuild.currentRelease}\n"
+    messageContent=''
+
+    if (messageType == 'compose.running') {
+        messageProperties = messageProperties +
+                "compose_url=${HTTP_BASE}/artifacts/${RSYNC_DIR}/${branch}/ostree\n"
+                "compose_rev=''\n"
+    } else if ((messageType == 'compose.complete') || (messageType == 'test.integration.queued') ||
+            (messageType == 'test.integration.running') || (messageType == 'test.integration.complete')) {
+        messageProperties = messageProperties +
+            "compose_url=${HTTP_BASE}/artifacts/${RSYNC_DIR}/${branch}/ostree\n"
+            "compose_rev=${commit}\n"
+    } else if (messageType == 'image.running') {
+            messageProperties = messageProperties +
+                "compose_url=${HTTP_BASE}/artifacts/${RSYNC_DIR}/${branch}/ostree\n"
+                "compose_rev=${commit}\n" +
+                "image_url=''\n" +
+                "image_name=''\n" +
+                "type=qcow2\n"
+    } else if ((messageType == 'image.complete') || (messageType == 'test.smoke.running') ||
+            (messageType == 'test.smoke.compelete')) {
+        messageProperties = messageProperties +
+                "compose_url=${HTTP_BASE}/artifacts/${RSYNC_DIR}/${branch}/ostree\n"
+                "compose_rev=${commit}\n" +
+                "image_url=${image2boot}\n" +
+                "image_name=${image_name}\n" +
+                "type=qcow2\n"
+    } else {
+        return [ topic, messageProperties, messageContent ]
+    }
+    return [ topic, messageProperties, messageContent ]
 }

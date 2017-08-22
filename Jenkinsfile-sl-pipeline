@@ -1,24 +1,44 @@
-@Library(['github.com/CentOS-PaaS-SIG/ci-pipeline@master', 'github.com/CentOS/cico-pipeline-library@master'])
-import org.centos.pipeline.*
-import org.centos.*
-
 
 properties(
         [
-                buildDiscarder(logRotator(artifactDaysToKeepStr: '', artifactNumToKeepStr: '25', daysToKeepStr: '', numToKeepStr: '50')),
+                buildDiscarder(logRotator(artifactDaysToKeepStr: '30', artifactNumToKeepStr: '', daysToKeepStr: '90', numToKeepStr: '')),
                 disableConcurrentBuilds(),
                 parameters(
                         [
                                 string(description: 'CI Message that triggered the pipeline', name: 'CI_MESSAGE'),
                                 string(defaultValue: 'f26', description: 'Fedora target branch', name: 'TARGET_BRANCH'),
+                                string(defaultValue: 'bpeck/jenkins-continuous-infra.apps.ci.centos.org@FEDORAPROJECT.ORG', description: 'Principal for authenticating with fedora build system', name: 'FEDORA_PRINCIPAL'),
+                                string(defaultValue: 'http://artifacts.ci.centos.org/artifacts/fedora-atomic', description: 'URL for rsync content', name: 'HTTP_BASE'),
+                                string(defaultValue: 'fedora-atomic', description: 'RSync User', name: 'RSYNC_USER'),
+                                string(defaultValue: 'artifacts.ci.centos.org', description: 'RSync Server', name: 'RSYNC_SERVER'),
+                                string(defaultValue: 'fedora-atomic', description: 'RSync Dir', name: 'RSYNC_DIR'),
                                 string(defaultValue: 'ci-pipeline', description: 'Main project repo', name: 'PROJECT_REPO'),
                                 string(defaultValue: 'org.centos.stage', description: 'Main topic to publish on', name: 'MAIN_TOPIC'),
                                 string(defaultValue: 'fedora-fedmsg', description: 'Main provider to send messages on', name: 'MSG_PROVIDER'),
+                                string(defaultValue: 'https://github.com/CentOS-PaaS-SIG/ci-pipeline.git', description: 'URL of the ci-pipeline', name: 'REMOTE'),
+                                string(defaultValue: 'master', description: 'Version of code and libs for the ci-pipeline repo', name: 'ghprbActualCommit'),
                                 booleanParam(defaultValue: false, description: 'Force generation of the image', name: 'GENERATE_IMAGE'),
                         ]
                 ),
         ]
 )
+
+// Import the CentOS/cico-pipeline-library
+library identifier: "cico-pipeline-library@master",
+        retriever: modernSCM([$class: 'GitSCMSource',
+                              remote: "https://github.com/CentOS/cico-pipeline-library"])
+import org.centos.*
+
+
+// Default REMOTE and ghprbActualCommit if not defined
+env.REMOTE = env.BRANCH_NAME ?: 'https://github.com/CentOS-PaaS-SIG/ci-pipeline.git'
+env.ghprbActualCommit = env.ghprbActualCommit ?: 'master'
+
+// Load the proper url and branch of the ci-pipeline
+library identifier: "ci-pipeline@${env.ghprbActualCommit}",
+        retriever: modernSCM([$class: 'GitSCMSource',
+                              remote: "${env.REMOTE}"])
+import org.centos.pipeline.*
 
 podTemplate(name: 'fedora-atomic-inline', label: 'fedora-atomic-inline', cloud: 'openshift', serviceAccount: 'jenkins',
         idleMinutes: 1,  namespace: 'continuous-infra',

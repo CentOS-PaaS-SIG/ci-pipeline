@@ -156,8 +156,12 @@ Below are the different message types that we listen and publish.  There will be
 * image_name - Image name
   - ex. fedora-atomic-26.200-c15b07cc0f560dd.qcow2
 * message-content - If additional content is needed in the bod of the message (default = "")
-* namespace - Packageing type passed from dist-git message 
+* namespace - Packaging type passed from dist-git message 
   - ex. rpms
+* original_spec_nvr - The NVR of the RPM if the spec file hadn't been modified
+  - ex. gnutls-3.5.15-1.fc26.x86_64.rpm
+* nvr - The NVR of the RPM after modification, so including sha and # commits
+  - ex. gnutls-3.5.15-1.246.a3e666c.fc26.x86_64.rpm
 * CI_NAME - Jenkins pipeline job name
   - ex. ci-pipeline-f26
 * repo - Package name
@@ -357,6 +361,8 @@ email=jchaloup@redhat.com
     "namespace": "rpms",
     "CI_NAME": "ci-pipeline-f26",
     "repo": "vim",
+    "original_spec_nvr": "vim-7.4.160-1.fc26.x86_64.rpm",
+    "nvr": "vim-7.4.160-1.200.591b0d2.fc26.x86_64.rpm",
     "topic": "org.centos.prod.ci.pipeline.package.complete",
     "status": "SUCCESS",
     "test_guidance": "''",
@@ -386,6 +392,8 @@ email=jchaloup@redhat.com
     "namespace": "rpms",
     "CI_NAME": "ci-pipeline-f26",
     "repo": "vim",
+    "original_spec_nvr": "vim-7.4.160-1.fc26.x86_64.rpm",
+    "nvr": "vim-7.4.160-1.200.591b0d2.fc26.x86_64.rpm",
     "topic": "org.centos.prod.ci.pipeline.package.test.functional.queued",
     "status": "SUCCESS",
     "test_guidance": "''",
@@ -415,6 +423,8 @@ email=jchaloup@redhat.com
     "namespace": "rpms",
     "CI_NAME": "ci-pipeline-f26",
     "repo": "vim",
+    "original_spec_nvr": "vim-7.4.160-1.fc26.x86_64.rpm",
+    "nvr": "vim-7.4.160-1.200.591b0d2.fc26.x86_64.rpm",
     "topic": "org.centos.prod.ci.pipeline.package.test.functional.running",
     "status": "SUCCESS",
     "test_guidance": "''",
@@ -444,6 +454,8 @@ email=jchaloup@redhat.com
     "namespace": "rpms",
     "CI_NAME": "ci-pipeline-f26",
     "repo": "vim",
+    "original_spec_nvr": "vim-7.4.160-1.fc26.x86_64.rpm",
+    "nvr": "vim-7.4.160-1.200.591b0d2.fc26.x86_64.rpm",
     "topic": "org.centos.prod.ci.pipeline.package.test.functional.complete",
     "status": "SUCCESS",
     "test_guidance": "''",
@@ -474,6 +486,8 @@ email=jchaloup@redhat.com
     "namespace": "rpms",
     "CI_NAME": "ci-pipeline-f26",
     "repo": "vim",
+    "original_spec_nvr": "vim-7.4.160-1.fc26.x86_64.rpm",
+    "nvr": "vim-7.4.160-1.200.591b0d2.fc26.x86_64.rpm",
     "compose_rev": "''",
     "topic": "org.centos.prod.ci.pipeline.compose.running",
     "status": "SUCCESS",
@@ -504,6 +518,8 @@ email=jchaloup@redhat.com
     "namespace": "rpms",
     "CI_NAME": "ci-pipeline-f26",
     "repo": "vim",
+    "original_spec_nvr": "vim-7.4.160-1.fc26.x86_64.rpm",
+    "nvr": "vim-7.4.160-1.200.591b0d2.fc26.x86_64.rpm",
     "compose_rev": "c15b07cc0f560dd4325b64b8ed8f5750ab102f2ff2e0ace39cda4158f900e4da",
     "topic": "org.centos.prod.ci.pipeline.compose.complete",
     "status": "SUCCESS",
@@ -535,6 +551,8 @@ email=jchaloup@redhat.com
     "CI_NAME": "ci-pipeline-f26",
     "image_name": "''",
     "repo": "vim",
+    "original_spec_nvr": "vim-7.4.160-1.fc26.x86_64.rpm",
+    "nvr": "vim-7.4.160-1.200.591b0d2.fc26.x86_64.rpm",
     "compose_rev": "c15b07cc0f560dd4325b64b8ed8f5750ab102f2ff2e0ace39cda4158f900e4da",
     "topic": "org.centos.prod.ci.pipeline.image.running",
     "status": "SUCCESS",
@@ -568,6 +586,8 @@ email=jchaloup@redhat.com
     "CI_NAME": "ci-pipeline-f26",
     "image_name": "fedora-atomic-26.200-c15b07cc0f560dd.qcow2",
     "repo": "vim",
+    "original_spec_nvr": "vim-7.4.160-1.fc26.x86_64.rpm",
+    "nvr": "vim-7.4.160-1.200.591b0d2.fc26.x86_64.rpm",
     "compose_rev": "c15b07cc0f560dd4325b64b8ed8f5750ab102f2ff2e0ace39cda4158f900e4da",
     "topic": "org.centos.prod.ci.pipeline.image.complete",
     "status": "SUCCESS",
@@ -601,6 +621,8 @@ email=jchaloup@redhat.com
     "CI_NAME": "ci-pipeline-f26",
     "image_name": "fedora-atomic-26.200-c15b07cc0f560dd.qcow2",
     "repo": "vim",
+    "original_spec_nvr": "vim-7.4.160-1.fc26.x86_64.rpm",
+    "nvr": "vim-7.4.160-1.200.591b0d2.fc26.x86_64.rpm",
     "compose_rev": "c15b07cc0f560dd4325b64b8ed8f5750ab102f2ff2e0ace39cda4158f900e4da",
     "topic": "org.centos.prod.ci.pipeline.image.test.smoke.running",
     "status": "SUCCESS",
@@ -634,6 +656,8 @@ email=jchaloup@redhat.com
     "CI_NAME": "ci-pipeline-f26",
     "image_name": "fedora-atomic-26.200-c15b07cc0f560dd.qcow2",
     "repo": "vim",
+    "original_spec_nvr": "vim-7.4.160-1.fc26.x86_64.rpm",
+    "nvr": "vim-7.4.160-1.200.591b0d2.fc26.x86_64.rpm",
     "compose_rev": "c15b07cc0f560dd4325b64b8ed8f5750ab102f2ff2e0ace39cda4158f900e4da",
     "topic": "org.centos.prod.ci.pipeline.image.test.smoke.complete",
     "status": "SUCCESS",
@@ -666,6 +690,8 @@ email=jchaloup@redhat.com
     "namespace": "rpms",
     "CI_NAME": "ci-pipeline-f26",
     "repo": "vim",
+    "original_spec_nvr": "vim-7.4.160-1.fc26.x86_64.rpm",
+    "nvr": "vim-7.4.160-1.200.591b0d2.fc26.x86_64.rpm",
     "compose_rev": "c15b07cc0f560dd4325b64b8ed8f5750ab102f2ff2e0ace39cda4158f900e4da",
     "topic": "org.centos.prod.ci.pipeline.compose.test.integration.queued",
     "status": "SUCCESS",
@@ -696,6 +722,8 @@ email=jchaloup@redhat.com
     "namespace": "rpms",
     "CI_NAME": "ci-pipeline-f26",
     "repo": "vim",
+    "original_spec_nvr": "vim-7.4.160-1.fc26.x86_64.rpm",
+    "nvr": "vim-7.4.160-1.200.591b0d2.fc26.x86_64.rpm",
     "compose_rev": "c15b07cc0f560dd4325b64b8ed8f5750ab102f2ff2e0ace39cda4158f900e4da",
     "topic": "org.centos.prod.ci.pipeline.compose.test.integration.running",
     "status": "SUCCESS",
@@ -726,6 +754,8 @@ email=jchaloup@redhat.com
     "namespace": "rpms",
     "CI_NAME": "ci-pipeline-f26",
     "repo": "vim",
+    "original_spec_nvr": "vim-7.4.160-1.fc26.x86_64.rpm",
+    "nvr": "vim-7.4.160-1.200.591b0d2.fc26.x86_64.rpm",
     "compose_rev": "c15b07cc0f560dd4325b64b8ed8f5750ab102f2ff2e0ace39cda4158f900e4da",
     "topic": "org.centos.prod.ci.pipeline.compose.test.integration.complete",
     "status": "SUCCESS",
@@ -739,4 +769,3 @@ email=jchaloup@redhat.com
 ### Reporting Results
 
 Results will be made available in the CentOS CI Datahub.  The Datahub will monitor CI-Pipeline jobs.  The results stored in the CentOS CI Datahub will be pushed to the Red Hat internal Datahub.  Please refer to documentation about the datahub for detail information.
-

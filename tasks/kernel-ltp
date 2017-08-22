@@ -76,7 +76,7 @@ if [ "${fed_branch}" = "master" ]; then
     BRANCH="rawhide"
 fi
 
-ansible-playbook -i inventory ci-pipeline/utils/kernel_install.yml --extra-vars "kernel=${kernel_vr}" --extra-vars "url=http://artifacts.ci.centos.org/artifacts/fedora-atomic/${BRANCH}/repo/kernel_repo/" -l kernel_install_slave -v > ${currentdir}/logs/kernel-install.out
+ansible-playbook -i inventory ci-pipeline/utils/kernel_install.yml --extra-vars "kernel=${kernel_vr}" --extra-vars "url=${HTTP_BASE}/${BRANCH}/repo/kernel_repo/" -l kernel_install_slave -v > ${currentdir}/logs/kernel-install.out
 
 KERNEL_INSTALL_STATUS=$?
 if [ "$KERNEL_INSTALL_STATUS" != 0 ]; then

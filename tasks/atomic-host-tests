@@ -24,7 +24,7 @@ mkdir -p logs
 HOMEDIR=$(pwd)
 
 for v in ostree images; do
-    rsync --delete --stats -a fedora-atomic@artifacts.ci.centos.org::fedora-atomic/${branch}/${v}/ ${v}/
+    rsync --delete --stats -a ${RSYNC_USER}@${RSYNC_SERVER}::${RSYNC_DIR}/${branch}/${v}/ ${v}/
 done
 
 # Create directory for temporary files
@@ -44,7 +44,7 @@ version=$(ostree --repo=ostree show --print-metadata-key=version $REF| sed -e "s
 if [ -d "images" ]; then
     # Find the last image we pushed
     prev_img=$(ls -tr images/*.qcow2 | tail -n 1)
-    IMG_URL="http://artifacts.ci.centos.org/artifacts/fedora-atomic/${branch}/$prev_img"
+    IMG_URL="${HTTP_BASE}/${branch}/$prev_img"
 fi
 
 # If image2boot is defined use that image, but if not fall back to the

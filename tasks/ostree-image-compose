@@ -24,11 +24,11 @@ pushd $base_dir/config/Dockerfiles/ostree_image_compose
 sudo docker build -t ostree_image_compose-container .
 popd
 
-sudo docker run --privileged --cap-add=SYS_ADMIN -v ${HOMEDIR}/output:/home/output -e rsync_paths="netinst ostree images" -e rsync_from="fedora-atomic@artifacts.ci.centos.org::fedora-atomic/${branch}/" -e rsync_to="/home/output/" -e RSYNC_PASSWORD="$RSYNC_PASSWORD" rsync-container
+sudo docker run --privileged --cap-add=SYS_ADMIN -v ${HOMEDIR}/output:/home/output -e rsync_paths="netinst ostree images" -e rsync_from="${RSYNC_USER}@${RSYNC_SERVER}::${RSYNC_DIR}/${branch}/" -e rsync_to="/home/output/" -e RSYNC_PASSWORD="$RSYNC_PASSWORD" rsync-container
 
-sudo docker run --privileged -e 'container=docker' -v /sys/fs/cgroup:/sys/fs/cgroup:rw -v ${HOMEDIR}/output:/home/output -e branch="${branch}" -e RSYNC_PASSWORD="$RSYNC_PASSWORD" ostree_image_compose-container
+sudo docker run --privileged -e 'container=docker' -v /sys/fs/cgroup:/sys/fs/cgroup:rw -v ${HOMEDIR}/output:/home/output -e branch="${branch}" -e HTTP_BASE="${HTTP_BASE}" ostree_image_compose-container
 
 # Logs need to be in a specific place to be picked up.
 sudo mv ${HOMEDIR}/output/logs ${HOMEDIR}
 
-sudo docker run --privileged --cap-add=SYS_ADMIN -v ${HOMEDIR}/output:/home/output -e rsync_paths="images" -e rsync_to="fedora-atomic@artifacts.ci.centos.org::fedora-atomic/${branch}/" -e rsync_from="/home/output/" -e RSYNC_PASSWORD="$RSYNC_PASSWORD" rsync-container
+sudo docker run --privileged --cap-add=SYS_ADMIN -v ${HOMEDIR}/output:/home/output -e rsync_paths="images" -e rsync_to="${RSYNC_USER}@${RSYNC_SERVER}::${RSYNC_DIR}/${branch}/" -e rsync_from="/home/output/" -e RSYNC_PASSWORD="$RSYNC_PASSWORD" rsync-container

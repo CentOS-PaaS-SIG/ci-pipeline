@@ -8,9 +8,9 @@ def call(body) {
     body.delegate = config
     body()
 
-    def getUtils = new Utils()
-    def getPipelineUtils = new PipelineUtils()
-    def getMessage = new Messaging()
+    def utils = new Utils()
+    def pipelineUtils = new PipelineUtils()
+    def messageUtils = new Messaging()
     def current_stage = 'atomic-host-tests'
 
     try {
@@ -23,22 +23,9 @@ def call(body) {
             env.playbook = "ci-pipeline/playbooks/system-setup.yml"
 
             // Send integration test running message on fedmsg
-            env.topic = "${MAIN_TOPIC}.ci.pipeline.compose.test.integration.running"
-            messageProperties = "topic=${topic}\n" +
-                    "build_url=${BUILD_URL}\n" +
-                    "build_id=${BUILD_ID}\n" +
-                    "compose_url=http://artifacts.ci.centos.org/artifacts/fedora-atomic/${branch}/ostree\n" +
-                    "compose_rev=${commit}\n" +
-                    "branch=${branch}\n" +
-                    "ref=fedora/${branch}/${basearch}/atomic-host\n" +
-                    "rev=${fed_rev}\n" +
-                    "repo=${fed_repo}\n" +
-                    "namespace=${fed_namespace}\n" +
-                    "username=fedora-atomic\n" +
-                    "test_guidance=''\n" +
-                    "status=${currentBuild.currentResult}"
-            messageContent = ''
-            getMessage.sendMessage([topic:"${env.topic}",
+            (topic, messageProperties, messageContent) = pipelineUtils.setMessageFields('test.integration.running')
+            env.topic = topic
+            messageUtils.sendMessage([topic:"${env.topic}",
                                     provider:"${env.MSG_PROVIDER}",
                                     msgType:'custom',
                                     msgProps:messageProperties,
@@ -46,19 +33,19 @@ def call(body) {
 
             // Provision resources
             env.DUFFY_OP = "--allocate"
-            getUtils.duffyCciskel([stage:current_stage, duffyKey:'duffy-key', duffyOps:env.DUFFY_OP])
+            utils.duffyCciskel([stage:current_stage, duffyKey:'duffy-key', duffyOps:env.DUFFY_OP])
 
             echo "Duffy Allocate ran for stage ${current_stage} with option ${env.DUFFY_OP}\r\n" +
-                    "ORIGIN_WORKSPACE=${env.ORIGIN_WORKSPACE}\r\n" +
-                    "ORIGIN_BUILD_TAG=${env.ORIGIN_BUILD_TAG}\r\n" +
-                    "ORIGIN_CLASS=${env.ORIGIN_CLASS}"
+                 "ORIGIN_WORKSPACE=${env.ORIGIN_WORKSPACE}\r\n" +
+                 "ORIGIN_BUILD_TAG=${env.ORIGIN_BUILD_TAG}\r\n" +
+                 "ORIGIN_CLASS=${env.ORIGIN_CLASS}"
 
             def job_props  = "${env.ORIGIN_WORKSPACE}/job.props"
-            def job_props_groovy = getUtils.convertProps(job_props)
+            def job_props_groovy = utils.convertProps(job_props)
             load(job_props_groovy)
 
             // Run Setup - atomic host tests
-            getPipelineUtils.setupStage(current_stage, 'fedora-atomic-key')
+            pipelineUtils.setupStage(current_stage, 'fedora-atomic-key')
 
             step([$class: 'XUnitBuilder',
                  thresholds: [[$class: 'FailedThreshold', unstableThreshold: '1']],
@@ -66,21 +53,9 @@ def call(body) {
             )
 
             // Set Message Fields
-            env.topic = "${MAIN_TOPIC}.ci.pipeline.compose.test.integration.complete"
-            messageProperties = "topic=${topic}\n" +
-                    "build_url=${BUILD_URL}\n" +
-                    "build_id=${BUILD_ID}\n" +
-                    "compose_url=http://artifacts.ci.centos.org/artifacts/fedora-atomic/${branch}/ostree\n" +
-                    "compose_rev=${commit}\n" +
-                    "branch=${branch}\n" +
-                    "ref=fedora/${branch}/${basearch}/atomic-host\n" +
-                    "rev=${fed_rev}\n" +
-                    "repo=${fed_repo}\n" +
-                    "namespace=${fed_namespace}\n" +
-                    "username=fedora-atomic\n" +
-                    "test_guidance=''\n" +
-                    "status=${currentBuild.currentResult}"
-            messageContent = ''
+            (topic, messageProperties, messageContent) = pipelineUtils.setMessageFields('test.integration.complete')
+            env.topic = topic
+
         }
     } catch (err) {
         echo "Error: Exception from " + current_stage + ":"
@@ -92,11 +67,10 @@ def call(body) {
         echo "Duffy Deallocate ran for stage ${current_stage} with option ${env.DUFFY_OP}\r\n" +
                 "RSYNC_PASSWORD=${env.RSYNC_PASSWORD}\r\n" +
                 "DUFFY_HOST=${env.DUFFY_HOST}"
-        getUtils.duffyCciskel([stage:current_stage, duffyKey:'duffy-key', duffyOps:env.DUFFY_OP])
+        utils.duffyCciskel([stage:current_stage, duffyKey:'duffy-key', duffyOps:env.DUFFY_OP])
 
         // Send message org.centos.prod.ci.pipeline.compose.test.integration.complete on fedmsg
-        env.topic = "${MAIN_TOPIC}.ci.pipeline.compose.test.integration.complete"
-        getMessage.sendMessage([topic:"${env.topic}",
+        messageUtils.sendMessage([topic:"${env.topic}",
                                 provider:"${env.MSG_PROVIDER}",
                                 msgType:'custom',
                                 msgProps:messageProperties,

@@ -8,9 +8,9 @@ def call(body) {
     body.delegate = config
     body()
 
-    def getUtils = new Utils()
-    def getPipelineUtils = new PipelineUtils()
-    def getMessage = new Messaging()
+    def utils = new Utils()
+    def pipelineUtils = new PipelineUtils()
+    def messageUtils = new Messaging()
     def current_stage = 'rpmbuild'
 
     try {
@@ -49,7 +49,7 @@ def call(body) {
 
             // Load fedmsg fields as environment variables
             def fedmsg_fields = "${env.WORKSPACE}/fedmsg_fields.txt"
-            def fedmsg_fields_groovy = getUtils.convertProps(fedmsg_fields)
+            def fedmsg_fields_groovy = utils.convertProps(fedmsg_fields)
             load(fedmsg_fields_groovy)
 
             // Add Branch and Message Topic to properties and inject
@@ -67,7 +67,7 @@ def call(body) {
                     exit
                 '''
             def job_props = "${env.WORKSPACE}/job.properties"
-            def job_props_groovy = getUtils.convertProps(job_props)
+            def job_props_groovy = utils.convertProps(job_props)
             load(job_props_groovy)
 
             // Change display
@@ -83,20 +83,9 @@ def call(body) {
             env.ANSIBLE_HOST_KEY_CHECKING = "False"
 
             // Send message org.centos.prod.ci.pipeline.package.running on fedmsg
-            env.topic = "${env.MAIN_TOPIC}.ci.pipeline.package.running"
-            messageProperties = "topic=${topic}\n" +
-                    "build_url=${BUILD_URL}\n" +
-                    "build_id=${BUILD_ID}\n" +
-                    "branch=${branch}\n" +
-                    "ref=fedora/${branch}/${basearch}/atomic-host\n" +
-                    "rev=${fed_rev}\n" +
-                    "repo=${fed_repo}\n" +
-                    "namespace=${fed_namespace}\n" +
-                    "username=fedora-atomic\n" +
-                    "test_guidance=''\n" +
-                    "status=${currentBuild.currentResult}"
-            messageContent = ''
-            getMessage.sendMessage([topic:"${env.topic}",
+            (topic, messageProperties, messageContent) = pipelineUtils.setMessageFields('package.running')
+            env.topic = topic
+            messageUtils.sendMessage([topic:"${env.topic}",
                                     provider:"${env.MSG_PROVIDER}",
                                     msgType:'custom',
                                     msgProps:messageProperties,
@@ -104,53 +93,42 @@ def call(body) {
 
             // Provision of resources
             env.DUFFY_OP = "--allocate"
-            getUtils.duffyCciskel([stage:current_stage, duffyKey:'duffy-key', duffyOps:env.DUFFY_OP])
+            utils.duffyCciskel([stage:current_stage, duffyKey:'duffy-key', duffyOps:env.DUFFY_OP])
 
             echo "Duffy Allocate ran for stage ${current_stage} with option ${env.DUFFY_OP}\r\n" +
-                    "ORIGIN_WORKSPACE=${env.ORIGIN_WORKSPACE}\r\n" +
-                    "ORIGIN_BUILD_TAG=${env.ORIGIN_BUILD_TAG}\r\n" +
-                    "ORIGIN_CLASS=${env.ORIGIN_CLASS}"
+                 "ORIGIN_WORKSPACE=${env.ORIGIN_WORKSPACE}\r\n" +
+                 "ORIGIN_BUILD_TAG=${env.ORIGIN_BUILD_TAG}\r\n" +
+                 "ORIGIN_CLASS=${env.ORIGIN_CLASS}"
 
             job_props = "${env.ORIGIN_WORKSPACE}/job.props"
-            job_props_groovy = getUtils.convertProps(job_props)
+            job_props_groovy = utils.convertProps(job_props)
             load(job_props_groovy)
 
             // Stage resources - RPM build
-            getPipelineUtils.setupStage(current_stage, 'fedora-atomic-key')
-
-            if (env.OSTREE_BRANCH == null) {
-                env.OSTREE_BRANCH = ""
-            }
+            pipelineUtils.setupStage(current_stage, 'fedora-atomic-key')
 
             // Rsync Data - RPM build
             writeFile file: "${env.ORIGIN_WORKSPACE}/task.env",
                     text: "export JENKINS_JOB_NAME=\"${JOB_NAME}-${current_stage}\"\n" +
-                            "export JENKINS_BUILD_TAG=\"${BUILD_TAG}-${current_stage}\"\n" +
-                            "export OSTREE_BRANCH=\"${OSTREE_BRANCH}\"\n" +
-                            "export fed_repo=\"${fed_repo}\"\n" +
-                            "export fed_branch=\"${fed_branch}\"\n" +
-                            "export fed_rev=\"${fed_rev}\"\n"
-            getPipelineUtils.rsyncResults(current_stage, 'duffy-key')
+                          "export HTTP_BASE=\"${HTTP_BASE}\"\n" +
+                          "export RSYNC_USER=\"${RSYNC_USER}\"\n" +
+                          "export RSYNC_SERVER=\"${RSYNC_SERVER}\"\n" +
+                          "export RSYNC_DIR=\"${RSYNC_DIR}\"\n" +
+                          "export FEDORA_PRINCIPAL=\"${FEDORA_PRINCIPAL}\"\n" +
+                          "export JENKINS_BUILD_TAG=\"${BUILD_TAG}-${current_stage}\"\n" +
+                          "export OSTREE_BRANCH=\"${OSTREE_BRANCH}\"\n" +
+                          "export fed_repo=\"${fed_repo}\"\n" +
+                          "export fed_branch=\"${fed_branch}\"\n" +
+                          "export fed_rev=\"${fed_rev}\"\n"
+            pipelineUtils.rsyncResults(current_stage, 'duffy-key')
 
             def package_props = "${env.ORIGIN_WORKSPACE}/logs/package_props.txt"
-            def package_props_groovy = getUtils.convertProps(package_props)
+            def package_props_groovy = utils.convertProps(package_props)
             load(package_props_groovy)
 
             // Set Message Fields
-            env.topic = "${env.MAIN_TOPIC}.ci.pipeline.package.complete"
-            messageProperties = "topic=${topic}\n" +
-                    "build_url=${BUILD_URL}\n" +
-                    "build_id=${BUILD_ID}\n" +
-                    "branch=${branch}\n" +
-                    "package_url=${package_url}\n" +
-                    "ref=fedora/${branch}/${basearch}/atomic-host\n" +
-                    "rev=${fed_rev}\n" +
-                    "repo=${fed_repo}\n" +
-                    "namespace=${fed_namespace}\n" +
-                    "username=fedora-atomic\n" +
-                    "test_guidance=''\n" +
-                    "status=${currentBuild.currentResult}"
-            messageContent = ''
+            (topic, messageProperties, messageContent) = pipelineUtils.setMessageFields('package.complete')
+            env.topic = topic
         }
     } catch (err) {
         echo "Error: Exception from " + current_stage + ":"
@@ -162,11 +140,10 @@ def call(body) {
         echo "Duffy Deallocate ran for stage ${current_stage} with option ${env.DUFFY_OP}\r\n" +
                 "RSYNC_PASSWORD=${env.RSYNC_PASSWORD}\r\n" +
                 "DUFFY_HOST=${env.DUFFY_HOST}"
-        getUtils.duffyCciskel([stage:current_stage, duffyKey:'duffy-key', duffyOps:env.DUFFY_OP])
+        utils.duffyCciskel([stage:current_stage, duffyKey:'duffy-key', duffyOps:env.DUFFY_OP])
 
         // Send message org.centos.prod.ci.pipeline.package.complete on fedmsg
-        env.topic = "${env.MAIN_TOPIC}.ci.pipeline.package.complete"
-        getMessage.sendMessage([topic:"${env.topic}",
+        messageUtils.sendMessage([topic:"${env.topic}",
                                 provider:"${env.MSG_PROVIDER}",
                                 msgType:'custom',
                                 msgProps:messageProperties,
