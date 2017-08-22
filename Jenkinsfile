@@ -42,17 +42,17 @@ podTemplate(name: 'fedora-atomic-inline', label: 'fedora-atomic-inline', cloud: 
                     deleteDir()
                     current_stage = "ci-pipeline-rpmbuild"
                     stage(current_stage) {
-                        env.basearch = "x86_64"
-
-                        env.HTTP_BASE = params.HTTP_BASE
-                        // Set default main topic for messaging
-                        if ((env.MAIN_TOPIC == null) || ("${env.MAIN_TOPIC}" == "")) {
-                            env.MAIN_TOPIC = "org.centos.prod"
-                        }
-                        if ((env.MSG_PROVIDER == null) || ("${env.MSG_PROVIDER}" == "")) {
-                            env.MSG_PROVIDER = "fedora-fedmsg"
-                        }
-
+                        env.MAIN_TOPIC = env.MAIN_TOPIC ?: 'org.centos.prod'
+                        env.MSG_PROVIDER = env.MSG_PROVIDER ?: 'fedora-fedmsg'
+                        env.HTTP_BASE = env.HTTP_BASE ?: 'http://artifacts.ci.centos.org/artifacts/fedora-atomic'
+                        env.RSYNC_USER = env.RSYNC_USER ?: 'fedora-atomic'
+                        env.RSYNC_SERVER = env.RSYNC_SERVER ?: 'artifacts.ci.centos.org'
+                        env.RSYNC_DIR = env.RSYNC_DIR ?: 'fedora-atomic'
+                        env.basearch = env.basearch ?: 'x86_64'
+                        env.OSTREE_BRANCH = env.OSTREE_BRANCH ?: ''
+                        env.commit = env.commit ?: ''
+                        env.image2boot = env.image2boot ?: ''
+                        env.image_name = env.image_name ?: ''
 
                         // SCM
                         dir('ci-pipeline') {
