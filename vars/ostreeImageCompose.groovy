@@ -71,6 +71,14 @@ def call(body) {
                 // Set Message Fields
                 (topic, messageProperties, messageContent) = pipelineUtils.setMessageFields('image.complete')
                 env.topic = topic
+                // Send message org.centos.prod.ci.pipeline.image.complete on fedmsg status = SUCCESS
+                messageUtils.sendMessage([topic:"${env.topic}",
+                                          provider:"${env.MSG_PROVIDER}",
+                                          msgType:'custom',
+                                          msgProps:messageProperties,
+                                          msgContent:messageContent])
+                env.MSG_PROPS = messageProperties
+                env.MSG_CONTENTS = messageContent
             } else {
                 echo "Not Generating a New Image"
             }
@@ -78,6 +86,17 @@ def call(body) {
     } catch (err) {
         echo "Error: Exception from " + current_stage + ":"
         echo err.getMessage()
+        // Set Message Fields
+        (topic, messageProperties, messageContent) = pipelineUtils.setMessageFields('image.complete')
+        env.topic = topic
+        // Send message org.centos.prod.ci.pipeline.image.complete on fedmsg status = FAILURE or ABORT
+        messageUtils.sendMessage([topic:"${env.topic}",
+                                  provider:"${env.MSG_PROVIDER}",
+                                  msgType:'custom',
+                                  msgProps:messageProperties,
+                                  msgContent:messageContent])
+        env.MSG_PROPS = messageProperties
+        env.MSG_CONTENTS = messageContent
         throw err
     } finally {
         // Teardown resources
@@ -86,14 +105,5 @@ def call(body) {
              "RSYNC_PASSWORD=${env.RSYNC_PASSWORD}\r\n" +
              "DUFFY_HOST=${env.DUFFY_HOST}"
         utils.duffyCciskel([stage:current_stage, duffyKey:'duffy-key', duffyOps:env.DUFFY_OP])
-
-        // Send message org.centos.prod.ci.pipeline.image.complete on fedmsg
-        messageUtils.sendMessage([topic:"${env.topic}",
-                                provider:"${env.MSG_PROVIDER}",
-                                msgType:'custom',
-                                msgProps:messageProperties,
-                                msgContent:messageContent])
-        env.MSG_PROPS = messageProperties
-        env.MSG_CONTENTS = messageContent
     }
 }
