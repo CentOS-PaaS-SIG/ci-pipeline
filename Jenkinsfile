@@ -13,8 +13,8 @@ properties(
                                 string(defaultValue: 'ci-pipeline', description: 'Main project repo', name: 'PROJECT_REPO'),
                                 string(defaultValue: 'org.centos.stage', description: 'Main topic to publish on', name: 'MAIN_TOPIC'),
                                 string(defaultValue: 'fedora-fedmsg', description: 'Main provider to send messages on', name: 'MSG_PROVIDER'),
-                                booleanParam(defaultValue: false, description: 'Force generation of the image', name: 'GENERATE_IMAGE'),
                                 string(defaultValue: 'bpeck/jenkins-continuous-infra.apps.ci.centos.org@FEDORAPROJECT.ORG', description: 'Principal for authenticating with fedora build system', name: 'FEDORA_PRINCIPAL'),
+                                booleanParam(defaultValue: false, description: 'Force generation of the image', name: 'GENERATE_IMAGE'),
                         ]
                 ),
         ]
@@ -53,6 +53,7 @@ podTemplate(name: 'fedora-atomic-inline', label: 'fedora-atomic-inline', cloud: 
                         env.commit = env.commit ?: ''
                         env.image2boot = env.image2boot ?: ''
                         env.image_name = env.image_name ?: ''
+                        env.FEDORA_PRINCIPAL = env.FEDORA_PRINCIPAL ?: 'bpeck/jenkins-continuous-infra.apps.ci.centos.org@FEDORAPROJECT.ORG'
 
                         // SCM
                         dir('ci-pipeline') {
