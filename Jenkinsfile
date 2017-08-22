@@ -14,6 +14,7 @@ properties(
                                 string(defaultValue: 'org.centos.stage', description: 'Main topic to publish on', name: 'MAIN_TOPIC'),
                                 string(defaultValue: 'fedora-fedmsg', description: 'Main provider to send messages on', name: 'MSG_PROVIDER'),
                                 booleanParam(defaultValue: false, description: 'Force generation of the image', name: 'GENERATE_IMAGE'),
+                                string(defaultValue: 'bpeck/jenkins-continuous-infra.apps.ci.centos.org@FEDORAPROJECT.ORG', description: 'Principal for authenticating with fedora build system', name: 'FEDORA_PRINCIPAL'),
                         ]
                 ),
         ]
@@ -173,6 +174,7 @@ podTemplate(name: 'fedora-atomic-inline', label: 'fedora-atomic-inline', cloud: 
                                         "export RSYNC_USER=\"${RSYNC_USER}\"\n" +
                                         "export RSYNC_SERVER=\"${RSYNC_SERVER}\"\n" +
                                         "export RSYNC_DIR=\"${RSYNC_DIR}\"\n" +
+                                        "export FEDORA_PRINCIPAL=\"${FEDORA_PRINCIPAL}\"\n" +
                                         "export JENKINS_BUILD_TAG=\"${BUILD_TAG}-${current_stage}\"\n" +
                                         "export OSTREE_BRANCH=\"${OSTREE_BRANCH}\"\n" +
                                         "export fed_repo=\"${fed_repo}\"\n" +
@@ -271,6 +273,7 @@ podTemplate(name: 'fedora-atomic-inline', label: 'fedora-atomic-inline', cloud: 
                                         "export RSYNC_USER=\"${RSYNC_USER}\"\n" +
                                         "export RSYNC_SERVER=\"${RSYNC_SERVER}\"\n" +
                                         "export RSYNC_DIR=\"${RSYNC_DIR}\"\n" +
+                                        "export FEDORA_PRINCIPAL=\"${FEDORA_PRINCIPAL}\"\n" +
                                         "export JENKINS_JOB_NAME=\"${JOB_NAME}-${current_stage}\"\n" +
                                         "export JENKINS_BUILD_TAG=\"${BUILD_TAG}-${current_stage}\"\n" +
                                         "export OSTREE_BRANCH=\"${OSTREE_BRANCH}\"\n"
@@ -371,6 +374,7 @@ podTemplate(name: 'fedora-atomic-inline', label: 'fedora-atomic-inline', cloud: 
                                             "export RSYNC_USER=\"${RSYNC_USER}\"\n" +
                                             "export RSYNC_SERVER=\"${RSYNC_SERVER}\"\n" +
                                             "export RSYNC_DIR=\"${RSYNC_DIR}\"\n" +
+                                            "export FEDORA_PRINCIPAL=\"${FEDORA_PRINCIPAL}\"\n" +
                                             "export JENKINS_JOB_NAME=\"${JOB_NAME}-${current_stage}\"\n" +
                                             "export JENKINS_BUILD_TAG=\"${BUILD_TAG}-${current_stage}\"\n" +
                                             "export OSTREE_BRANCH=\"${OSTREE_BRANCH}\"\n"
@@ -474,6 +478,7 @@ podTemplate(name: 'fedora-atomic-inline', label: 'fedora-atomic-inline', cloud: 
                                             "export RSYNC_USER=\"${RSYNC_USER}\"\n" +
                                             "export RSYNC_SERVER=\"${RSYNC_SERVER}\"\n" +
                                             "export RSYNC_DIR=\"${RSYNC_DIR}\"\n" +
+                                            "export FEDORA_PRINCIPAL=\"${FEDORA_PRINCIPAL}\"\n" +
                                             "export JENKINS_JOB_NAME=\"${JOB_NAME}-${current_stage}\"\n" +
                                             "export JENKINS_BUILD_TAG=\"${BUILD_TAG}-${current_stage}\"\n" +
                                             "export OSTREE_BRANCH=\"${OSTREE_BRANCH}\"\n" +
@@ -556,6 +561,7 @@ podTemplate(name: 'fedora-atomic-inline', label: 'fedora-atomic-inline', cloud: 
                                         "export RSYNC_USER=\"${RSYNC_USER}\"\n" +
                                         "export RSYNC_SERVER=\"${RSYNC_SERVER}\"\n" +
                                         "export RSYNC_DIR=\"${RSYNC_DIR}\"\n" +
+                                        "export FEDORA_PRINCIPAL=\"${FEDORA_PRINCIPAL}\"\n" +
                                         "export fed_repo=\"${fed_repo}\"\n" +
                                         "export image2boot=\"${image2boot}\"\n" +
                                         "export commit=\"${commit}\"\n" +
@@ -749,7 +755,7 @@ def setupStage(stage) {
             cp ${FEDORA_ATOMIC_PUB_KEY} ~/.ssh/id_rsa.pub
             chmod 600 ~/.ssh/id_rsa
             chmod 644 ~/.ssh/id_rsa.pub
-            
+
             # Keep compatibility with earlier cciskel-duffy
             if test -f ${ORIGIN_WORKSPACE}/inventory.${ORIGIN_BUILD_TAG}; then
                 ln -fs ${ORIGIN_WORKSPACE}/inventory.${ORIGIN_BUILD_TAG} ${WORKSPACE}/inventory
@@ -768,7 +774,7 @@ def setupStage(stage) {
 def rsyncResults(stage) {
     echo "Currently in stage: ${stage} in rsyncResults"
 
-    withCredentials([file(credentialsId: 'duffy-key', variable: 'DUFFY_KEY')]) {
+    withCredentials([file(credentialsId: 'duffy-key', variable: 'DUFFY_KEY'), file(credentialsId: 'fedora-keytab', variable: 'FEDORA_KEYTAB')]) {
         sh '''
             #!/bin/bash
             set -xeuo pipefail
@@ -776,14 +782,19 @@ def rsyncResults(stage) {
             cp ${DUFFY_KEY} ~/duffy.key
             chmod 600 ~/duffy.key
     
+            cp ${FEDORA_KEYTAB} fedora.keytab
+            chmod 0600 fedora.keytab
+
             source ${ORIGIN_WORKSPACE}/task.env
             (echo -n "export RSYNC_PASSWORD=" && cat ~/duffy.key | cut -c '-13') > rsync-password.sh
             
-            rsync -Hrlptv --stats -e ssh ${ORIGIN_WORKSPACE}/task.env rsync-password.sh builder@${DUFFY_HOST}:${JENKINS_JOB_NAME}
+            rsync -Hrlptv --stats -e ssh ${ORIGIN_WORKSPACE}/task.env rsync-password.sh fedora.keytab builder@${DUFFY_HOST}:${JENKINS_JOB_NAME}
             for repo in ci-pipeline sig-atomic-buildscripts; do
                 rsync -Hrlptv --stats --delete -e ssh ${repo}/ builder@${DUFFY_HOST}:${JENKINS_JOB_NAME}/${repo}
             done
             
+            # Use the following in ${task} to authenticate.
+            #kinit -k -t ${FEDORA_KEYTAB} ${FEDORA_PRINCIPAL}
             build_success=true
             if ! ssh -tt builder@${DUFFY_HOST} "pushd ${JENKINS_JOB_NAME} && . rsync-password.sh && . task.env && ${task}"; then
                 build_success=false
