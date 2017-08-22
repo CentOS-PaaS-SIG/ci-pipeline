@@ -60,7 +60,7 @@ fi
 # Make repo with the newly created rpm
 rm -rf ${OUTPUTDIR}/${fed_repo}_repo
 mkdir ${OUTPUTDIR}/${fed_repo}_repo
-cp ${fed_repo}/results_${fed_repo}/${VERSION}/*/*.rpm ${OUTPUTDIR}/${fed_repo}_repo/
+cp /${fed_repo}/results_${fed_repo}/${VERSION}/*/*.rpm ${OUTPUTDIR}/${fed_repo}_repo/
 # Run rpmlint
 rpmlint ${OUTPUTDIR}/${fed_repo}_repo/ > ${OUTPUTDIR}/logs/rpmlint_out.txt
 pushd ${OUTPUTDIR}/${fed_repo}_repo && createrepo .
@@ -68,7 +68,7 @@ popd
 # Run fedabipkgdiff against the newly created rpm
 rm -rf libabigail
 git clone git://sourceware.org/git/libabigail.git
-RPM_TO_CHECK=$(find ${fed_repo}/results_${fed_repo}/${VERSION}/*/ -name "${fed_repo}-${VERSION}*" | grep -v src)
+RPM_TO_CHECK=$(find /${fed_repo}/results_${fed_repo}/${VERSION}/*/ -name "${fed_repo}-${VERSION}*" | grep -v src)
 libabigail/tools/fedabipkgdiff --from ${ABIGAIL_BRANCH} ${RPM_TO_CHECK} &> ${OUTPUTDIR}/logs/fedabipkgdiff_out.txt
 RPM_NAME=$(basename $RPM_TO_CHECK)
 echo "package_url=${HTTP_BASE}/${fed_branch}/repo/${fed_repo}_repo/$RPM_NAME" >> ${OUTPUTDIR}/logs/package_props.txt
