@@ -47,7 +47,7 @@ def setupStage(stage, sshKey) {
 def rsyncResults(stage, duffyKey) {
     echo "Currently in stage: ${stage} in rsyncResults"
 
-    withCredentials([file(credentialsId: duffyKey, variable: 'DUFFY_KEY')]) {
+    withCredentials([file(credentialsId: 'duffy-key', variable: 'DUFFY_KEY'), file(credentialsId: 'fedora-keytab', variable: 'FEDORA_KEYTAB')]) {
         sh '''
             #!/bin/bash
             set -xeuo pipefail
@@ -55,14 +55,19 @@ def rsyncResults(stage, duffyKey) {
             cp ${DUFFY_KEY} ~/duffy.key
             chmod 600 ~/duffy.key
     
+            cp ${FEDORA_KEYTAB} fedora.keytab
+            chmod 0600 fedora.keytab
+
             source ${ORIGIN_WORKSPACE}/task.env
             (echo -n "export RSYNC_PASSWORD=" && cat ~/duffy.key | cut -c '-13') > rsync-password.sh
             
-            rsync -Hrlptv --stats -e ssh ${ORIGIN_WORKSPACE}/task.env rsync-password.sh builder@${DUFFY_HOST}:${JENKINS_JOB_NAME}
+            rsync -Hrlptv --stats -e ssh ${ORIGIN_WORKSPACE}/task.env rsync-password.sh fedora.keytab builder@${DUFFY_HOST}:${JENKINS_JOB_NAME}
             for repo in ci-pipeline sig-atomic-buildscripts; do
                 rsync -Hrlptv --stats --delete -e ssh ${repo}/ builder@${DUFFY_HOST}:${JENKINS_JOB_NAME}/${repo}
             done
             
+            # Use the following in ${task} to authenticate.
+            #kinit -k -t ${FEDORA_KEYTAB} ${FEDORA_PRINCIPAL}
             build_success=true
             if ! ssh -tt builder@${DUFFY_HOST} "pushd ${JENKINS_JOB_NAME} && . rsync-password.sh && . task.env && ${task}"; then
                 build_success=false
