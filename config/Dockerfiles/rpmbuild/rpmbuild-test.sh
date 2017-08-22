@@ -19,7 +19,7 @@ git checkout ${fed_rev}
 # Create new branch because fedpkg wont build with detached head
 git checkout -b test_branch
 # Get current NVR
-truenvr=$(rpm -q --define "dist .$fed_branch" --queryformat '%{name}-%{version}-%{release}.%{arch}\n' --specfile ${fed_repo}.spec | head -n 1)
+truenvr=$(rpm -q --define "dist .$fed_branch" --queryformat '%{name}-%{version}-%{release}\n' --specfile ${fed_repo}.spec | head -n 1)
 # Find number of git commits in log to append to RELEASE
 commits=$(git log --pretty=format:'' | wc -l)
 # Append to release in spec file
