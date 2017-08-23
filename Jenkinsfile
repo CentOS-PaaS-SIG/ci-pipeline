@@ -82,21 +82,21 @@ podTemplate(name: 'fedora-atomic-inline', label: 'fedora-atomic-inline', cloud: 
 
                         // Parse the ${CI_MESSAGE}
                         sh '''
-                        #!/bin/bash
-                        set -xuo pipefail
+                #!/bin/bash
+                set -xuo pipefail
 
-                        chmod +x ${WORKSPACE}/parse_fedmsg.py
+                chmod +x ${WORKSPACE}/parse_fedmsg.py
 
-                        # Write fedmsg fields to a file to inject them
-                        if [ -n "${CI_MESSAGE}" ]; then
-                            echo ${CI_MESSAGE} | ${WORKSPACE}/parse_fedmsg.py > fedmsg_fields.txt
-                            sed -i '/^\\\\s*$/d' ${WORKSPACE}/fedmsg_fields.txt
-                            sed -i '/`/g' ${WORKSPACE}/fedmsg_fields.txt
-                            sed -i '/^fed/!d' ${WORKSPACE}/fedmsg_fields.txt
-                            grep fed ${WORKSPACE}/fedmsg_fields.txt > ${WORKSPACE}/fedmsg_fields.txt.tmp
-                            mv ${WORKSPACE}/fedmsg_fields.txt.tmp ${WORKSPACE}/fedmsg_fields.txt
-                        fi
-                    '''
+                # Write fedmsg fields to a file to inject them
+                if [ -n "${CI_MESSAGE}" ]; then
+                    echo ${CI_MESSAGE} | ${WORKSPACE}/parse_fedmsg.py > fedmsg_fields.txt
+                    sed -i '/^\\\\s*$/d' ${WORKSPACE}/fedmsg_fields.txt
+                    sed -i '/`/g' ${WORKSPACE}/fedmsg_fields.txt
+                    sed -i '/^fed/!d' ${WORKSPACE}/fedmsg_fields.txt
+                    grep fed ${WORKSPACE}/fedmsg_fields.txt > ${WORKSPACE}/fedmsg_fields.txt.tmp
+                    mv ${WORKSPACE}/fedmsg_fields.txt.tmp ${WORKSPACE}/fedmsg_fields.txt
+                fi
+            '''
 
                         // Load fedmsg fields as environment variables
                         def fedmsg_fields = "${env.WORKSPACE}/fedmsg_fields.txt"
@@ -106,18 +106,18 @@ podTemplate(name: 'fedora-atomic-inline', label: 'fedora-atomic-inline', cloud: 
 
                         // Add Branch and Message Topic to properties and inject
                         sh '''
-                        set +e
-                        branch=${fed_branch}
-                        if [ "${branch}" = "master" ]; then
-                          branch="rawhide"
-                        fi
-                        
-                        
-                        # Save the bramch in job.properties
-                        echo "branch=${branch}" >> ${WORKSPACE}/job.properties
-                        echo "topic=${MAIN_TOPIC}.ci.pipeline.package.queued" >> ${WORKSPACE}/job.properties
-                        exit
-                    '''
+                set +e
+                branch=${fed_branch}
+                if [ "${branch}" = "master" ]; then
+                  branch="rawhide"
+                fi
+                
+                
+                # Save the bramch in job.properties
+                echo "branch=${branch}" >> ${WORKSPACE}/job.properties
+                echo "topic=${MAIN_TOPIC}.ci.pipeline.package.queued" >> ${WORKSPACE}/job.properties
+                exit
+            '''
                         def job_props = "${env.WORKSPACE}/job.properties"
                         def job_props_groovy = "${env.WORKSPACE}/job.properties.groovy"
                         convertProps(job_props, job_props_groovy)
