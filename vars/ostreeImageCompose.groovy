@@ -85,10 +85,11 @@ def call(body) {
                  "RSYNC_PASSWORD=${env.RSYNC_PASSWORD}\r\n" +
                  "DUFFY_HOST=${env.DUFFY_HOST}"
             utils.duffyCciskel([stage: current_stage, duffyKey: 'duffy-key', duffyOps: env.DUFFY_OP])
+
             // Set Message Fields
             (topic, messageProperties, messageContent) = pipelineUtils.setMessageFields('image.complete')
             env.topic = topic
-            // Send message org.centos.prod.ci.pipeline.image.complete on fedmsg status = SUCCESS
+            // Send message org.centos.prod.ci.pipeline.image.complete on fedmsg
             messageUtils.sendMessage([topic     : "${env.topic}",
                                       provider  : "${env.MSG_PROVIDER}",
                                       msgType   : 'custom',

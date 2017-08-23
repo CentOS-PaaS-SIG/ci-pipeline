@@ -88,7 +88,7 @@ def call(body) {
         // Set Message Fields
         (topic, messageProperties, messageContent) = pipelineUtils.setMessageFields('compose.complete')
         env.topic = topic
-        // Send message org.centos.prod.ci.pipeline.compose.complete on fedmsg status = SUCCESS
+        // Send message org.centos.prod.ci.pipeline.compose.complete on fedmsg
         messageUtils.sendMessage([topic:"${env.topic}",
                                   provider:"${env.MSG_PROVIDER}",
                                   msgType:'custom',

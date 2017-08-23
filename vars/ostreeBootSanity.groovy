@@ -26,7 +26,7 @@ def call(body) {
             // Set Message Fields
             (topic, messageProperties, messageContent) = pipelineUtils.setMessageFields('test.integration.queued')
             env.topic = topic
-            // Send message org.centos.prod.ci.pipeline.compose.test.integration.queued on fedmsg status = SUCCESS
+            // Send message org.centos.prod.ci.pipeline.compose.test.integration.queued on fedmsg
             messageUtils.sendMessage([topic:"${env.topic}",
                                       provider:"${env.MSG_PROVIDER}",
                                       msgType:'custom',
@@ -72,6 +72,18 @@ def call(body) {
     } catch (err) {
         echo "Error: Exception from " + current_stage + ":"
         echo err.getMessage()
+
+        // Set Message Fields
+        (topic, messageProperties, messageContent) = pipelineUtils.setMessageFields('test.integration.running')
+        env.topic = topic
+        // Send message org.centos.prod.ci.pipeline.compose.test.integration.queued on fedmsg
+        messageUtils.sendMessage([topic:"${env.topic}",
+                                  provider:"${env.MSG_PROVIDER}",
+                                  msgType:'custom',
+                                  msgProps:messageProperties,
+                                  msgContent:messageContent])
+        env.MSG_PROPS = messageProperties
+        env.MSG_CONTENTS = messageContent
         throw err
     } finally {
         // Teardown resources
