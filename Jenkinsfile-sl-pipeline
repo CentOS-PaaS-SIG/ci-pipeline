@@ -1,0 +1,89 @@
+
+properties(
+        [
+                buildDiscarder(logRotator(artifactDaysToKeepStr: '30', artifactNumToKeepStr: '', daysToKeepStr: '90', numToKeepStr: '')),
+                disableConcurrentBuilds(),
+                parameters(
+                        [
+                                string(description: 'CI Message that triggered the pipeline', name: 'CI_MESSAGE'),
+                                string(defaultValue: 'f26', description: 'Fedora target branch', name: 'TARGET_BRANCH'),
+                                string(defaultValue: 'bpeck/jenkins-continuous-infra.apps.ci.centos.org@FEDORAPROJECT.ORG', description: 'Principal for authenticating with fedora build system', name: 'FEDORA_PRINCIPAL'),
+                                string(defaultValue: 'http://artifacts.ci.centos.org/artifacts/fedora-atomic', description: 'URL for rsync content', name: 'HTTP_BASE'),
+                                string(defaultValue: 'fedora-atomic', description: 'RSync User', name: 'RSYNC_USER'),
+                                string(defaultValue: 'artifacts.ci.centos.org', description: 'RSync Server', name: 'RSYNC_SERVER'),
+                                string(defaultValue: 'fedora-atomic', description: 'RSync Dir', name: 'RSYNC_DIR'),
+                                string(defaultValue: 'ci-pipeline', description: 'Main project repo', name: 'PROJECT_REPO'),
+                                string(defaultValue: 'org.centos.stage', description: 'Main topic to publish on', name: 'MAIN_TOPIC'),
+                                string(defaultValue: 'fedora-fedmsg', description: 'Main provider to send messages on', name: 'MSG_PROVIDER'),
+                                string(defaultValue: 'https://github.com/CentOS-PaaS-SIG/ci-pipeline.git', description: 'URL of the ci-pipeline', name: 'REMOTE'),
+                                string(defaultValue: 'master', description: 'Version of code and libs for the ci-pipeline repo', name: 'ghprbActualCommit'),
+                                booleanParam(defaultValue: false, description: 'Force generation of the image', name: 'GENERATE_IMAGE'),
+                        ]
+                ),
+        ]
+)
+
+// Import the CentOS/cico-pipeline-library
+library identifier: "cico-pipeline-library@master",
+        retriever: modernSCM([$class: 'GitSCMSource',
+                              remote: "https://github.com/CentOS/cico-pipeline-library"])
+import org.centos.*
+
+
+// Default REMOTE and ghprbActualCommit if not defined
+env.REMOTE = env.BRANCH_NAME ?: 'https://github.com/CentOS-PaaS-SIG/ci-pipeline.git'
+env.ghprbActualCommit = env.ghprbActualCommit ?: 'master'
+
+// Load the proper url and branch of the ci-pipeline
+library identifier: "ci-pipeline@${env.ghprbActualCommit}",
+        retriever: modernSCM([$class: 'GitSCMSource',
+                              remote: "${env.REMOTE}"])
+import org.centos.pipeline.*
+
+podTemplate(name: 'fedora-atomic-inline', label: 'fedora-atomic-inline', cloud: 'openshift', serviceAccount: 'jenkins',
+        idleMinutes: 1,  namespace: 'continuous-infra',
+        containers: [
+                // This adds the custom slave container to the pod. Must be first with name 'jnlp'
+                containerTemplate(name: 'jnlp',
+                        image: '172.30.254.79:5000/continuous-infra/jenkins-continuous-infra-slave',
+                        ttyEnabled: false,
+                        args: '${computer.jnlpmac} ${computer.name}',
+                        command: '',
+                        workingDir: '/tmp'),
+        ])
+
+        {
+
+            node('fedora-atomic-inline') {
+                ansiColor('xterm') {
+                    timestamps {
+                        def getMessage = new Messaging()
+
+                        try {
+                            deleteDir()
+                            cicdPipeline {}
+                        } catch (err) {
+                            echo err.getMessage()
+                            throw err
+                        } finally {
+                            currentBuild.displayName = "Build#: ${env.BUILD_NUMBER} - Branch: ${env.branch} - Package: ${env.fed_repo}"
+                            currentBuild.description = "Pipeline Build Status: ${currentBuild.currentResult}"
+
+                            //emailext subject: "${env.JOB_NAME} - Build # ${env.BUILD_NUMBER} - STATUS = ${currentBuild.currentResult}", to: "ari@redhat.com", body: "This pipeline was a ${currentBuild.currentResult}"
+
+                            step([$class: 'ArtifactArchiver', allowEmptyArchive: true,
+                                  artifacts: '**/logs/**,*.txt,*.groovy,**/job.*,**/*.groovy,**/inventory.*', excludes: '**/*.example',
+                                  fingerprint: true])
+
+                            // Send message org.centos.prod.ci.pipeline.complete on fedmsg
+                            env.topic = "${env.MAIN_TOPIC}.ci.pipeline.complete"
+                            getMessage.sendMessage([topic:"${env.topic}",
+                                                    provider:"${env.MSG_PROVIDER}",
+                                                    msgType:'custom',
+                                                    msgProps:"${env.MSG_PROPS}",
+                                                    msgContent:"${env.MSG_CONTENTS}"])
+                        }
+                    }
+                }
+            }
+        }
