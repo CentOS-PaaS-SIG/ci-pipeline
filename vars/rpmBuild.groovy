@@ -125,18 +125,6 @@ def call(body) {
             def package_props = "${env.ORIGIN_WORKSPACE}/logs/package_props.txt"
             def package_props_groovy = utils.convertProps(package_props)
             load(package_props_groovy)
-
-            // Set Message Fields
-            (topic, messageProperties, messageContent) = pipelineUtils.setMessageFields('package.complete')
-            env.topic = topic
-            // Send message org.centos.prod.ci.pipeline.package.complete on fedmsg status = SUCCESS
-            messageUtils.sendMessage([topic:"${env.topic}",
-                                      provider:"${env.MSG_PROVIDER}",
-                                      msgType:'custom',
-                                      msgProps:messageProperties,
-                                      msgContent:messageContent])
-            env.MSG_PROPS = messageProperties
-            env.MSG_CONTENTS = messageConten
         }
     } catch (err) {
         echo "Error: Exception from " + current_stage + ":"
@@ -157,8 +145,20 @@ def call(body) {
         // Teardown resources
         env.DUFFY_OP = "--teardown"
         echo "Duffy Deallocate ran for stage ${current_stage} with option ${env.DUFFY_OP}\r\n" +
-                "RSYNC_PASSWORD=${env.RSYNC_PASSWORD}\r\n" +
-                "DUFFY_HOST=${env.DUFFY_HOST}"
+             "RSYNC_PASSWORD=${env.RSYNC_PASSWORD}\r\n" +
+             "DUFFY_HOST=${env.DUFFY_HOST}"
         utils.duffyCciskel([stage:current_stage, duffyKey:'duffy-key', duffyOps:env.DUFFY_OP])
+
+        // Set Message Fields
+        (topic, messageProperties, messageContent) = pipelineUtils.setMessageFields('package.complete')
+        env.topic = topic
+        // Send message org.centos.prod.ci.pipeline.package.complete on fedmsg status = SUCCESS
+        messageUtils.sendMessage([topic:"${env.topic}",
+                                  provider:"${env.MSG_PROVIDER}",
+                                  msgType:'custom',
+                                  msgProps:messageProperties,
+                                  msgContent:messageContent])
+        env.MSG_PROPS = messageProperties
+        env.MSG_CONTENTS = messageContent
     }
 }

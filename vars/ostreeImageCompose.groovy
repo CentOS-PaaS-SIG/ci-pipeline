@@ -68,17 +68,7 @@ def call(body) {
                 def ostree_props_groovy = utils.convertProps(ostree_props)
                 load(ostree_props_groovy)
 
-                // Set Message Fields
-                (topic, messageProperties, messageContent) = pipelineUtils.setMessageFields('image.complete')
-                env.topic = topic
-                // Send message org.centos.prod.ci.pipeline.image.complete on fedmsg status = SUCCESS
-                messageUtils.sendMessage([topic:"${env.topic}",
-                                          provider:"${env.MSG_PROVIDER}",
-                                          msgType:'custom',
-                                          msgProps:messageProperties,
-                                          msgContent:messageContent])
-                env.MSG_PROPS = messageProperties
-                env.MSG_CONTENTS = messageContent
+
             } else {
                 echo "Not Generating a New Image"
             }
@@ -99,11 +89,24 @@ def call(body) {
         env.MSG_CONTENTS = messageContent
         throw err
     } finally {
-        // Teardown resources
-        env.DUFFY_OP = "--teardown"
-        echo "Duffy Deallocate ran for stage ${current_stage} with option ${env.DUFFY_OP}\r\n" +
-             "RSYNC_PASSWORD=${env.RSYNC_PASSWORD}\r\n" +
-             "DUFFY_HOST=${env.DUFFY_HOST}"
-        utils.duffyCciskel([stage:current_stage, duffyKey:'duffy-key', duffyOps:env.DUFFY_OP])
+        if (fileExists("${env.WORKSPACE}/NeedNewImage.txt") || ("${env.GENERATE_IMAGE}" == "true")) {
+            // Teardown resources
+            env.DUFFY_OP = "--teardown"
+            echo "Duffy Deallocate ran for stage ${current_stage} with option ${env.DUFFY_OP}\r\n" +
+                 "RSYNC_PASSWORD=${env.RSYNC_PASSWORD}\r\n" +
+                 "DUFFY_HOST=${env.DUFFY_HOST}"
+            utils.duffyCciskel([stage: current_stage, duffyKey: 'duffy-key', duffyOps: env.DUFFY_OP])
+            // Set Message Fields
+            (topic, messageProperties, messageContent) = pipelineUtils.setMessageFields('image.complete')
+            env.topic = topic
+            // Send message org.centos.prod.ci.pipeline.image.complete on fedmsg status = SUCCESS
+            messageUtils.sendMessage([topic     : "${env.topic}",
+                                      provider  : "${env.MSG_PROVIDER}",
+                                      msgType   : 'custom',
+                                      msgProps  : messageProperties,
+                                      msgContent: messageContent])
+            env.MSG_PROPS = messageProperties
+            env.MSG_CONTENTS = messageContent
+        }
     }
 }

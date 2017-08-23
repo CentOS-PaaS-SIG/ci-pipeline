@@ -70,18 +70,6 @@ def call(body) {
             def ostree_props_groovy = utils.convertProps(ostree_props)
             load(ostree_props_groovy)
 
-            // Set Message Fields
-            (topic, messageProperties, messageContent) = pipelineUtils.setMessageFields('compose.complete')
-            env.topic = topic
-            // Send message org.centos.prod.ci.pipeline.compose.complete on fedmsg status = SUCCESS
-            messageUtils.sendMessage([topic:"${env.topic}",
-                                      provider:"${env.MSG_PROVIDER}",
-                                      msgType:'custom',
-                                      msgProps:messageProperties,
-                                      msgContent:messageContent])
-            env.MSG_PROPS = messageProperties
-            env.MSG_CONTENTS = messageContent
-
             // Check if image is too old
             pipelineUtils.checkLastImage(current_stage)
         }
@@ -107,5 +95,17 @@ def call(body) {
              "RSYNC_PASSWORD=${env.RSYNC_PASSWORD}\r\n" +
              "DUFFY_HOST=${env.DUFFY_HOST}"
         utils.duffyCciskel([stage:current_stage, duffyKey:'duffy-key', duffyOps:env.DUFFY_OP])
+
+        // Set Message Fields
+        (topic, messageProperties, messageContent) = pipelineUtils.setMessageFields('compose.complete')
+        env.topic = topic
+        // Send message org.centos.prod.ci.pipeline.compose.complete on fedmsg status = SUCCESS
+        messageUtils.sendMessage([topic:"${env.topic}",
+                                  provider:"${env.MSG_PROVIDER}",
+                                  msgType:'custom',
+                                  msgProps:messageProperties,
+                                  msgContent:messageContent])
+        env.MSG_PROPS = messageProperties
+        env.MSG_CONTENTS = messageContent
     }
 }

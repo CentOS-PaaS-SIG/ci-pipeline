@@ -23,6 +23,18 @@ def call(body) {
             env.task = "./ci-pipeline/tasks/ostree-boot-image"
             env.playbook = "ci-pipeline/playbooks/system-setup.yml"
 
+            // Set Message Fields
+            (topic, messageProperties, messageContent) = pipelineUtils.setMessageFields('test.integration.queued')
+            env.topic = topic
+            // Send message org.centos.prod.ci.pipeline.compose.test.integration.queued on fedmsg status = SUCCESS
+            messageUtils.sendMessage([topic:"${env.topic}",
+                                      provider:"${env.MSG_PROVIDER}",
+                                      msgType:'custom',
+                                      msgProps:messageProperties,
+                                      msgContent:messageContent])
+            env.MSG_PROPS = messageProperties
+            env.MSG_CONTENTS = messageContent
+
             // Provision resources
             env.DUFFY_OP = "--allocate"
             utils.duffyCciskel([stage:current_stage, duffyKey:'duffy-key', duffyOps:env.DUFFY_OP])
@@ -56,18 +68,6 @@ def call(body) {
                           "export ANSIBLE_HOST_KEY_CHECKING=\"False\"\n"
 
             pipelineUtils.rsyncResults(current_stage, 'duffy-key')
-
-            // Set Message Fields
-            (topic, messageProperties, messageContent) = pipelineUtils.setMessageFields('test.integration.queued')
-            env.topic = topic
-            // Send message org.centos.prod.ci.pipeline.compose.test.integration.queued on fedmsg status = SUCCESS
-            messageUtils.sendMessage([topic:"${env.topic}",
-                                      provider:"${env.MSG_PROVIDER}",
-                                      msgType:'custom',
-                                      msgProps:messageProperties,
-                                      msgContent:messageContent])
-            env.MSG_PROPS = messageProperties
-            env.MSG_CONTENTS = messageContent
         }
     } catch (err) {
         echo "Error: Exception from " + current_stage + ":"
