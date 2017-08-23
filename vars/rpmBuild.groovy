@@ -129,17 +129,6 @@ def call(body) {
     } catch (err) {
         echo "Error: Exception from " + current_stage + ":"
         echo err.getMessage()
-        // Set Message Fields
-        (topic, messageProperties, messageContent) = pipelineUtils.setMessageFields('package.complete')
-        env.topic = topic
-        // Send message org.centos.prod.ci.pipeline.package.complete on fedmsg status = FAILURE or ABORT
-        messageUtils.sendMessage([topic:"${env.topic}",
-                                  provider:"${env.MSG_PROVIDER}",
-                                  msgType:'custom',
-                                  msgProps:messageProperties,
-                                  msgContent:messageContent])
-        env.MSG_PROPS = messageProperties
-        env.MSG_CONTENTS = messageConten
         throw err
     } finally {
         // Teardown resources
@@ -152,7 +141,7 @@ def call(body) {
         // Set Message Fields
         (topic, messageProperties, messageContent) = pipelineUtils.setMessageFields('package.complete')
         env.topic = topic
-        // Send message org.centos.prod.ci.pipeline.package.complete on fedmsg status = SUCCESS
+        // Send message org.centos.prod.ci.pipeline.package.complete on fedmsg status
         messageUtils.sendMessage([topic:"${env.topic}",
                                   provider:"${env.MSG_PROVIDER}",
                                   msgType:'custom',

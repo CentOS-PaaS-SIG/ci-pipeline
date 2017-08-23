@@ -76,17 +76,6 @@ def call(body) {
     } catch (err) {
         echo "Error: Exception from " + current_stage + ":"
         echo err.getMessage()
-        // Set Message Fields
-        (topic, messageProperties, messageContent) = pipelineUtils.setMessageFields('image.complete')
-        env.topic = topic
-        // Send message org.centos.prod.ci.pipeline.image.complete on fedmsg status = FAILURE or ABORT
-        messageUtils.sendMessage([topic:"${env.topic}",
-                                  provider:"${env.MSG_PROVIDER}",
-                                  msgType:'custom',
-                                  msgProps:messageProperties,
-                                  msgContent:messageContent])
-        env.MSG_PROPS = messageProperties
-        env.MSG_CONTENTS = messageContent
         throw err
     } finally {
         if (fileExists("${env.WORKSPACE}/NeedNewImage.txt") || ("${env.GENERATE_IMAGE}" == "true")) {
