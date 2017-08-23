@@ -82,7 +82,6 @@ def call(body) {
             // Teardown resources
             env.DUFFY_OP = "--teardown"
             echo "Duffy Deallocate ran for stage ${current_stage} with option ${env.DUFFY_OP}\r\n" +
-                 "RSYNC_PASSWORD=${env.RSYNC_PASSWORD}\r\n" +
                  "DUFFY_HOST=${env.DUFFY_HOST}"
             utils.duffyCciskel([stage: current_stage, duffyKey: 'duffy-key', duffyOps: env.DUFFY_OP])
 

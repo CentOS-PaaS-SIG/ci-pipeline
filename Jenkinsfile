@@ -192,8 +192,7 @@ podTemplate(name: 'fedora-atomic-inline', label: 'fedora-atomic-inline', cloud: 
                         env.DUFFY_OP="--teardown"
                         allocDuffy("${current_stage}")
                         echo "Duffy Deallocate ran for stage ${current_stage} with option ${env.DUFFY_OP}\r\n" +
-                                "RSYNC_PASSWORD=${env.RSYNC_PASSWORD}\r\n" +
-                                "DUFFY_HOST=${env.DUFFY_HOST}"
+                             "DUFFY_HOST=${env.DUFFY_HOST}"
 
                         // Send message org.centos.prod.ci.pipeline.package.complete on fedmsg
                         env.topic = "${MAIN_TOPIC}.ci.pipeline.package.complete"
@@ -290,8 +289,7 @@ podTemplate(name: 'fedora-atomic-inline', label: 'fedora-atomic-inline', cloud: 
                         allocDuffy("${current_stage}")
 
                         echo "Duffy Deallocate ran for stage ${current_stage} with option ${env.DUFFY_OP}\r\n" +
-                                "RSYNC_PASSWORD=${env.RSYNC_PASSWORD}\r\n" +
-                                "DUFFY_HOST=${env.DUFFY_HOST}"
+                             "DUFFY_HOST=${env.DUFFY_HOST}"
 
                         // Send message org.centos.prod.ci.pipeline.compose.complete on fedmsg
                         env.topic = "${MAIN_TOPIC}.ci.pipeline.compose.complete"
@@ -391,8 +389,7 @@ podTemplate(name: 'fedora-atomic-inline', label: 'fedora-atomic-inline', cloud: 
                             allocDuffy("${current_stage}")
 
                             echo "Duffy Deallocate ran for stage ${current_stage} with option ${env.DUFFY_OP}\r\n" +
-                                    "RSYNC_PASSWORD=${env.RSYNC_PASSWORD}\r\n" +
-                                    "DUFFY_HOST=${env.DUFFY_HOST}"
+                                 "DUFFY_HOST=${env.DUFFY_HOST}"
 
                             // Send message org.centos.prod.ci.pipeline.image.complete on fedmsg
                             env.topic = "${MAIN_TOPIC}.ci.pipeline.image.complete"
@@ -491,8 +488,7 @@ podTemplate(name: 'fedora-atomic-inline', label: 'fedora-atomic-inline', cloud: 
                             allocDuffy("${current_stage}")
 
                             echo "Duffy Deallocate ran for stage ${current_stage} with option ${env.DUFFY_OP}\r\n" +
-                                    "RSYNC_PASSWORD=${env.RSYNC_PASSWORD}\r\n" +
-                                    "DUFFY_HOST=${env.DUFFY_HOST}"
+                                 "DUFFY_HOST=${env.DUFFY_HOST}"
 
                             // Send message org.centos.prod.ci.pipeline.image.test.smoke.complete on fedmsg
                             env.topic = "${MAIN_TOPIC}.ci.pipeline.image.test.smoke.complete"
@@ -578,8 +574,7 @@ podTemplate(name: 'fedora-atomic-inline', label: 'fedora-atomic-inline', cloud: 
                         allocDuffy("${current_stage}")
 
                         echo "Duffy Deallocate ran for stage ${current_stage} with option ${env.DUFFY_OP}\r\n" +
-                                "RSYNC_PASSWORD=${env.RSYNC_PASSWORD}\r\n" +
-                                "DUFFY_HOST=${env.DUFFY_HOST}"
+                             "DUFFY_HOST=${env.DUFFY_HOST}"
 
 //                    step([$class: 'XUnitBuilder',
 //                          thresholds: [[$class: 'FailedThreshold', unstableThreshold: '1']],
@@ -653,8 +648,7 @@ podTemplate(name: 'fedora-atomic-inline', label: 'fedora-atomic-inline', cloud: 
                         env.DUFFY_OP="--teardown"
                         allocDuffy("${current_stage}")
                         echo "Duffy Deallocate ran for stage ${current_stage} with option ${env.DUFFY_OP}\r\n" +
-                                "RSYNC_PASSWORD=${env.RSYNC_PASSWORD}\r\n" +
-                                "DUFFY_HOST=${env.DUFFY_HOST}"
+                             "DUFFY_HOST=${env.DUFFY_HOST}"
 
 //                     step([$class: 'XUnitBuilder',
 //                          thresholds: [[$class: 'FailedThreshold', unstableThreshold: '1']],
@@ -687,8 +681,7 @@ podTemplate(name: 'fedora-atomic-inline', label: 'fedora-atomic-inline', cloud: 
                     // Teardown resources
                     env.DUFFY_OP = "--teardown"
                     echo "Duffy Deallocate ran for stage ${current_stage} with option ${env.DUFFY_OP}\r\n" +
-                            "RSYNC_PASSWORD=${env.RSYNC_PASSWORD}\r\n" +
-                            "DUFFY_HOST=${env.DUFFY_HOST}"
+                          "DUFFY_HOST=${env.DUFFY_HOST}"
                     allocDuffy("${current_stage}")
                     // Send failure message for appropriate topic
                     sendMessage(messageProperties, messageContent)
