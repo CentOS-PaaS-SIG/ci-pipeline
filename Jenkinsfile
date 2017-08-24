@@ -87,7 +87,7 @@ podTemplate(name: 'fedora-atomic-inline', label: 'fedora-atomic-inline', cloud: 
                                         "                ci_message[k] = ci_message[k].replace('\"', \"'\").encode('utf-8')\n" +
                                         "            if k == 'message':\n" +
                                         "                ci_message[k] = ci_message[k].split('\\n')[0]\n" +
-                                        "            f.write('env.fed_{0}=\"{1}\"\\n'.format(k.replace('-', '_', ci_message[k]))"
+                                        "            f.write('env.fed_{0}=\"{1}\"\\n'.format(k.replace('-', '_'), ci_message[k]))"
 
                         // Chmod the python script to make it executable
                         sh 'chmod +x ${WORKSPACE}/parse_fedmsg.py'
