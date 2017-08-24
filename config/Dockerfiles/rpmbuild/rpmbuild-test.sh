@@ -87,9 +87,9 @@ RPM_TO_CHECK=$(find /${fed_repo}/results_${fed_repo}/${VERSION}/*/ -name "${fed_
 libabigail/tools/fedabipkgdiff --from ${ABIGAIL_BRANCH} ${RPM_TO_CHECK} &> ${LOGDIR}/fedabipkgdiff_out.txt
 RPM_NAME=$(basename $RPM_TO_CHECK)
 echo "package_url=${HTTP_BASE}/${fed_branch}/repo/${fed_repo}_repo/$RPM_NAME" >> ${LOGDIR}/package_props.txt
-echo "original_spec_nvr=${truenvr}" >> ${OUTPUTDIR}/logs/package_props.txt
+echo "original_spec_nvr=${truenvr}" >> ${LOGDIR}/package_props.txt
 RPM_NAME=$(echo $RPM_NAME | rev | cut -d '.' -f 2- | rev)
-echo "nvr=${RPM_NAME}" >> ${OUTPUTDIR}/logs/package_props.txt
+echo "nvr=${RPM_NAME}" >> ${LOGDIR}/package_props.txt
 RSYNC_LOCATION="${RSYNC_HOST}::${RSYNC_DIR}/${RSYNC_BRANCH}"
 
 # If we do rsync, make sure we have the password
