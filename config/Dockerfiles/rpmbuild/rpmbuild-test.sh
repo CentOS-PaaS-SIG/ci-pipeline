@@ -5,6 +5,7 @@ set +e
 if [ -z "${fed_repo}" ]; then echo "No fed_repo env var" ; exit 1 ; fi
 if [ -z "${fed_branch}" ]; then echo "No fed_branch env var" ; exit 1 ; fi
 if [ -z "${fed_rev}" ]; then echo "No fed_rev env var" ; exit 1 ; fi
+if [ -z "${FEDORA_PRINCIPAL}" ]; then echo "No FEDORA_PRINCIPAL env var"; exit 1; fi
 
 RPMDIR=/home/${fed_repo}_repo
 # Create one dir to store logs in that will be mounted
@@ -59,6 +60,7 @@ rpmbuild -bs /root/rpmbuild/SOURCES/${fed_repo}.spec
 #TODO
 # Should be a fedora-packager-setup command and a kinit. Will also probably require some packages like fedora-packager/python-krbV
 # Build the package into ./results_${fed_repo}/$VERSION/$RELEASE/ and concurrently do a koji build
+kinit  -k -t /home/fedora.keytab $FEDORA_PRINCIPAL
 #{ time fedpkg --release ${fed_branch} mockbuild ; } 2> ${LOGDIR}/mockbuildtime.txt & { time koji build --scratch $RSYNC_BRANCH /root/rpmbuild/SRPMS/${fed_repo}*.src.rpm ; } 2> ${LOGDIR}/kojibuildtime.txt && fg
 fedpkg --release ${fed_branch} mockbuild
 MOCKBUILD_STATUS=$?
