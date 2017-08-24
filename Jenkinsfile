@@ -71,41 +71,32 @@ podTemplate(name: 'fedora-atomic-inline', label: 'fedora-atomic-inline', cloud: 
 
                         // Python script to parse the ${CI_MESSAGE}
                         writeFile file: "${env.WORKSPACE}/parse_fedmsg.py",
-                                text: "#!/bin/env python\n" +
+                                text: "#! /usr/bin/env python\n" +
+                                        "\n" +
                                         "import json\n" +
-                                        "import sys\n\n" +
-                                        "reload(sys)\n" +
-                                        "sys.setdefaultencoding('utf-8')\n" +
-                                        "message = json.load(sys.stdin)\n" +
-                                        "if 'commit' in message:\n" +
-                                        "    msg = message['commit']\n\n" +
-                                        "    for key in msg:\n" +
-                                        "        safe_key = key.replace('-', '_')\n" +
-                                        "        print \"fed_%s=%s\" % (safe_key, msg[key])\n"
+                                        "import os\n" +
+                                        "\n" +
+                                        "ci_message = json.loads(os.environ['CI_MESSAGE'], encoding='utf-8')\n" +
+                                        "\n" +
+                                        "if 'commit' in ci_message:\n" +
+                                        "    ci_message = ci_message.get('commit')\n" +
+                                        "\n" +
+                                        "    with open(\"{0}/fedmsg_fields.groovy\".format(os.environ['WORKSPACE']), 'wb') as f:\n" +
+                                        "        for k in ci_message:\n" +
+                                        "            if isinstance(ci_message[k], basestring):\n" +
+                                        "                ci_message[k] = ci_message[k].replace('\"', \"'\").encode('utf-8')\n" +
+                                        "            if k == 'message':\n" +
+                                        "                ci_message[k] = ci_message[k].split('\\n')[0]\n" +
+                                        "            f.write('env.fed_{0}=\"{1}\"\\n'.format(k.replace('-', '_', ci_message[k]))"
 
-                        // Parse the ${CI_MESSAGE}
-                        sh '''
-                            #!/bin/bash
-                            set -xuo pipefail
-            
-                            chmod +x ${WORKSPACE}/parse_fedmsg.py
-            
-                            # Write fedmsg fields to a file to inject them
-                            if [ -n "${CI_MESSAGE}" ]; then
-                                echo ${CI_MESSAGE} | ${WORKSPACE}/parse_fedmsg.py > fedmsg_fields.txt
-                                sed -i '/^\\\\s*$/d' ${WORKSPACE}/fedmsg_fields.txt
-                                sed -i '/`/g' ${WORKSPACE}/fedmsg_fields.txt
-                                sed -i '/^fed/!d' ${WORKSPACE}/fedmsg_fields.txt
-                                sed -i 's/"//g' ${WORKSPACE}/fedmsg_fields.txt
-                                grep fed ${WORKSPACE}/fedmsg_fields.txt > ${WORKSPACE}/fedmsg_fields.txt.tmp
-                                mv ${WORKSPACE}/fedmsg_fields.txt.tmp ${WORKSPACE}/fedmsg_fields.txt
-                            fi
-                        '''
+                        // Chmod the python script to make it executable
+                        sh 'chmod +x ${WORKSPACE}/parse_fedmsg.py'
+
+                        // Execute the python script
+                        sh '${WORKSPACE}/parse_fedmsg.py'
 
                         // Load fedmsg fields as environment variables
-                        def fedmsg_fields = "${env.WORKSPACE}/fedmsg_fields.txt"
                         def fedmsg_fields_groovy = "${env.WORKSPACE}/fedmsg_fields.groovy"
-                        convertProps(fedmsg_fields, fedmsg_fields_groovy)
                         load(fedmsg_fields_groovy)
 
                         // Add Branch and Message Topic to properties and inject
