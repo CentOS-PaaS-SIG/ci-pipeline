@@ -682,22 +682,22 @@ podTemplate(name: 'fedora-atomic-inline', label: 'fedora-atomic-inline', cloud: 
                     step([$class: 'ArtifactArchiver', allowEmptyArchive: true, artifacts: '**/logs/**,*.txt,*.groovy,**/job.*,**/*.groovy,**/inventory.*', excludes: '**/job.props,**/job.props.groovy,**/*.example', fingerprint: true])
 
                     // Send message org.centos.prod.ci.pipeline.complete on fedmsg
-//                    env.topic = "${env.MAIN_TOPIC}.ci.pipeline.complete"
-//                    messageProperties = "topic=${topic}\n" +
-//                            "build_url=${BUILD_URL}\n" +
-//                            "build_id=${BUILD_ID}\n" +
-//                            "branch=${branch}\n" +
-//                            "original_spec_nvr=${original_spec_nvr}\n" +
-//                            "nvr=${nvr}\n" +
-//                            "ref=fedora/${branch}/${basearch}/atomic-host\n" +
-//                            "rev=${fed_rev}\n" +
-//                            "repo=${fed_repo}\n" +
-//                            "namespace=${fed_namespace}\n" +
-//                            "username=fedora-atomic\n" +
-//                            "test_guidance=''\n" +
-//                            "status=${currentBuild.currentResult}"
-//                    messageContent = ''
-//                    sendMessage(messageProperties, messageContent)
+                    env.topic = "${env.MAIN_TOPIC}.ci.pipeline.complete"
+                    messageProperties = "topic=${topic}\n" +
+                            "build_url=${BUILD_URL}\n" +
+                            "build_id=${BUILD_ID}\n" +
+                            "branch=${branch}\n" +
+                            "original_spec_nvr=${original_spec_nvr}\n" +
+                            "nvr=${nvr}\n" +
+                            "ref=fedora/${branch}/${basearch}/atomic-host\n" +
+                            "rev=${fed_rev}\n" +
+                            "repo=${fed_repo}\n" +
+                            "namespace=${fed_namespace}\n" +
+                            "username=fedora-atomic\n" +
+                            "test_guidance=''\n" +
+                            "status=${currentBuild.currentResult}"
+                    messageContent = ''
+                    sendMessage(messageProperties, messageContent)
                 }
             }
         }
