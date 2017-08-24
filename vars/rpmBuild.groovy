@@ -28,13 +28,19 @@ def call(body) {
                             "if 'commit' in ci_message:\n" +
                             "    ci_message = ci_message.get('commit')\n" +
                             "\n" +
-                            "    with open(\"{0}/fedmsg_fields.groovy\".format(os.environ['WORKSPACE']), 'w') as f:\n" +
+                            "    with open(\"{0}/fedmsg_fields.groovy\".format(os.environ['WORKSPACE']), 'wb') as f:\n" +
                             "        for k in ci_message:\n" +
-                            "            if type(ci_message[k]) is str:\n" +
-                            "                ci_message[k] = ci_message[k].replace('\"', \"'\")\n" +
+                            "            if isinstance(ci_message[k], basestring):\n" +
+                            "                ci_message[k] = ci_message[k].replace('\"', \"'\").encode('utf-8')\n" +
                             "            if k == 'message':\n" +
                             "                ci_message[k] = ci_message[k].split('\\n')[0]\n" +
                             "            f.write('env.fed_{0}=\"{1}\"\\n'.format(k.replace('-', '_', ci_message[k]))"
+
+            // Chmod the python script to make it executable
+            sh 'chmod +x ${WORKSPACE}/parse_fedmsg.py'
+
+            // Execute the python script
+            sh '${WORKSPACE}/parse_fedmsg.py'
 
             // Load fedmsg fields as environment variables
             def fedmsg_fields_groovy = "${env.WORKSPACE}/fedmsg_fields.groovy"
