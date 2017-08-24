@@ -96,9 +96,7 @@ podTemplate(name: 'fedora-atomic-inline', label: 'fedora-atomic-inline', cloud: 
                         sh '${WORKSPACE}/parse_fedmsg.py'
 
                         // Load fedmsg fields as environment variables
-                        def fedmsg_fields = "${env.WORKSPACE}/fedmsg_fields.txt"
                         def fedmsg_fields_groovy = "${env.WORKSPACE}/fedmsg_fields.groovy"
-                        convertProps(fedmsg_fields, fedmsg_fields_groovy)
                         load(fedmsg_fields_groovy)
 
                         // Add Branch and Message Topic to properties and inject
