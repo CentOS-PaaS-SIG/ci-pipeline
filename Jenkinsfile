@@ -672,6 +672,9 @@ podTemplate(name: 'fedora-atomic-inline', label: 'fedora-atomic-inline', cloud: 
                         sendMessage(messageProperties, messageContent)
                     }
                 } catch (e) {
+                    // Set build result
+                    currentBuild.result = 'FAILURE'
+                    //
                     echo "Error: Exception from " + current_stage + ":"
                     echo e.getMessage()
                     // Teardown resources
@@ -679,8 +682,6 @@ podTemplate(name: 'fedora-atomic-inline', label: 'fedora-atomic-inline', cloud: 
                     echo "Duffy Deallocate ran for stage ${current_stage} with option ${env.DUFFY_OP}\r\n" +
                           "DUFFY_HOST=${env.DUFFY_HOST}"
                     allocDuffy("${current_stage}")
-                    // Send failure message for appropriate topic
-                    sendMessage(messageProperties, messageContent)
                     throw e
                 } finally {
                     currentBuild.displayName = "Build#: ${env.BUILD_NUMBER} - Branch: ${env.branch} - Package: ${env.fed_repo}"

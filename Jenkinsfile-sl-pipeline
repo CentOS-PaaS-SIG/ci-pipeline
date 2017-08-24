@@ -63,6 +63,9 @@ podTemplate(name: 'fedora-atomic-inline', label: 'fedora-atomic-inline', cloud: 
                             deleteDir()
                             cicdPipeline {}
                         } catch (err) {
+                            // Set build result
+                            currentBuild.result = 'FAILURE'
+                            //
                             echo err.getMessage()
                             throw err
                         } finally {

@@ -132,6 +132,8 @@ node('master') {
                     }
                 }
             } catch (e) {
+                // Set build result
+                currentBuild.result = 'FAILURE'
                 // Send failure message for appropriate topic
                 sendMessage(messageProperties, messageContent)
                 throw e
