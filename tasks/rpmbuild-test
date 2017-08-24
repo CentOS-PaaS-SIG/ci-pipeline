@@ -11,6 +11,6 @@ sudo systemctl start docker
 pushd $base_dir/config/Dockerfiles/rpmbuild
 sudo docker build -t rpmbuild-container .
 popd
-sudo docker run --privileged -v ${HOMEDIR}:/home -e fed_repo="${fed_repo}" -e fed_branch="${fed_branch}" -e fed_rev="${fed_rev}" -e RSYNC_PASSWORD=${RSYNC_PASSWORD} -e HTTP_BASE="${HTTP_BASE}" -e RSYNC_HOST="${RSYNC_USER}@${RSYNC_SERVER}" -e RSYNC_DIR="${RSYNC_DIR}" rpmbuild-container
+sudo docker run --privileged -v ${HOMEDIR}:/home -e fed_repo="${fed_repo}" -e fed_branch="${fed_branch}" -e fed_rev="${fed_rev}" -e RSYNC_PASSWORD=${RSYNC_PASSWORD} -e HTTP_BASE="${HTTP_BASE}" -e RSYNC_HOST="${RSYNC_USER}@${RSYNC_SERVER}" -e RSYNC_DIR="${RSYNC_DIR}" -e FEDORA_PRINCIPAL="${FEDORA_PRINCIPAL}" rpmbuild-container
 if [ "$?" != 0 ]; then echo -e "ERROR: RPMBUILD FAILED\nSTATUS: $?"; exit 1; fi
 exit 0
