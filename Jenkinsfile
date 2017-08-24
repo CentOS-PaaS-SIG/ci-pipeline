@@ -54,6 +54,9 @@ podTemplate(name: 'fedora-atomic-inline', label: 'fedora-atomic-inline', cloud: 
                         env.image2boot = env.image2boot ?: ''
                         env.image_name = env.image_name ?: ''
                         env.FEDORA_PRINCIPAL = env.FEDORA_PRINCIPAL ?: 'bpeck/jenkins-continuous-infra.apps.ci.centos.org@FEDORAPROJECT.ORG'
+                        env.package_url = env.package_url ?: ''
+                        env.nvr = env.nvr ?: ''
+                        env.original_spec_nvr = env.original_spec_nvr ?: ''
 
                         // SCM
                         dir('ci-pipeline') {
@@ -93,6 +96,7 @@ podTemplate(name: 'fedora-atomic-inline', label: 'fedora-atomic-inline', cloud: 
                     sed -i '/^\\\\s*$/d' ${WORKSPACE}/fedmsg_fields.txt
                     sed -i '/`/g' ${WORKSPACE}/fedmsg_fields.txt
                     sed -i '/^fed/!d' ${WORKSPACE}/fedmsg_fields.txt
+                    sed -i 's/"//g' ${WORKSPACE}/fedmsg_fields.txt
                     grep fed ${WORKSPACE}/fedmsg_fields.txt > ${WORKSPACE}/fedmsg_fields.txt.tmp
                     mv ${WORKSPACE}/fedmsg_fields.txt.tmp ${WORKSPACE}/fedmsg_fields.txt
                 fi
@@ -690,23 +694,25 @@ podTemplate(name: 'fedora-atomic-inline', label: 'fedora-atomic-inline', cloud: 
                     currentBuild.displayName = "Build#: ${env.BUILD_NUMBER} - Branch: ${env.branch} - Package: ${env.fed_repo}"
                     currentBuild.description = "${currentBuild.currentResult}"
                     //emailext subject: "${env.JOB_NAME} - Build # ${env.BUILD_NUMBER} - STATUS = ${currentBuild.currentResult}", to: "ari@redhat.com", body: "This pipeline was a ${currentBuild.currentResult}"
-                    step([$class: 'ArtifactArchiver', allowEmptyArchive: true, artifacts: '**/logs/**,*.txt,*.groovy,**/job.*,**/*.groovy,**/inventory.*', excludes: '**/*.example', fingerprint: true])
+                    step([$class: 'ArtifactArchiver', allowEmptyArchive: true, artifacts: '**/logs/**,*.txt,*.groovy,**/job.*,**/*.groovy,**/inventory.*', excludes: '**/job.props,**/job.props.groovy,**/*.example', fingerprint: true])
 
                     // Send message org.centos.prod.ci.pipeline.complete on fedmsg
-                    env.topic = "${env.MAIN_TOPIC}.ci.pipeline.complete"
-                    messageProperties = "topic=${topic}\n" +
-                            "build_url=${BUILD_URL}\n" +
-                            "build_id=${BUILD_ID}\n" +
-                            "branch=${branch}\n" +
-                            "ref=fedora/${branch}/${basearch}/atomic-host\n" +
-                            "rev=${fed_rev}\n" +
-                            "repo=${fed_repo}\n" +
-                            "namespace=${fed_namespace}\n" +
-                            "username=fedora-atomic\n" +
-                            "test_guidance=''\n" +
-                            "status=${currentBuild.currentResult}"
-                    messageContent = ''
-                    sendMessage(messageProperties, messageContent)
+//                    env.topic = "${env.MAIN_TOPIC}.ci.pipeline.complete"
+//                    messageProperties = "topic=${topic}\n" +
+//                            "build_url=${BUILD_URL}\n" +
+//                            "build_id=${BUILD_ID}\n" +
+//                            "branch=${branch}\n" +
+//                            "original_spec_nvr=${original_spec_nvr}\n" +
+//                            "nvr=${nvr}\n" +
+//                            "ref=fedora/${branch}/${basearch}/atomic-host\n" +
+//                            "rev=${fed_rev}\n" +
+//                            "repo=${fed_repo}\n" +
+//                            "namespace=${fed_namespace}\n" +
+//                            "username=fedora-atomic\n" +
+//                            "test_guidance=''\n" +
+//                            "status=${currentBuild.currentResult}"
+//                    messageContent = ''
+//                    sendMessage(messageProperties, messageContent)
                 }
             }
         }
