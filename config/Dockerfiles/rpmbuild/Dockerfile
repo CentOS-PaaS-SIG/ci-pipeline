@@ -36,9 +36,9 @@ RUN echo "config_opts['plugin_conf']['lvm_root_opts']['poolmetadatasize'] = '30G
 RUN echo "config_opts['basedir'] = '/home/rpmbuild/'" >> /etc/mock/site-defaults.cfg
 
 # Copy the build script to the container
-COPY rpmbuild-test.sh /home/rpmbuild-test.sh
+COPY rpmbuild-test.sh /tmp/rpmbuild-test.sh
 
 # Run the build script
-ENTRYPOINT ["bash", "/home/rpmbuild-test.sh"]
+ENTRYPOINT ["bash", "/tmp/rpmbuild-test.sh"]
 # Run the container as follows
 # docker run --privileged -v /log/parent/dir:/home -e fed_repo=${packagename} -e fed_branch=${fed_branch} -e fed_rev=${fed_rev} -e RSYNC_PASSWORD=${rsync_password} HTTP_BASE="${HTTP_BASE}" -e RSYNC_HOST="${RSYNC_USER}@${RSYNC_SERVER}" -e RSYNC_DIR="${RSYNC_DIR}" container_tag
