@@ -5,6 +5,7 @@ set +e
 if [ -z "${fed_repo}" ]; then echo "No fed_repo env var" ; exit 1 ; fi
 if [ -z "${fed_branch}" ]; then echo "No fed_branch env var" ; exit 1 ; fi
 if [ -z "${fed_rev}" ]; then echo "No fed_rev env var" ; exit 1 ; fi
+if [ -z "${FEDORA_PRINCIPAL}" ]; then echo "No FEDORA_PRINCIPAL env var"; exit 1; fi
 
 RPMDIR=/home/${fed_repo}_repo
 # Create one dir to store logs in that will be mounted
