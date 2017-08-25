@@ -63,6 +63,9 @@ podTemplate(name: 'fedora-atomic-inline', label: 'fedora-atomic-inline', cloud: 
                             deleteDir()
                             cicdPipeline {}
                         } catch (err) {
+                            // Set build result
+                            currentBuild.result = 'FAILURE'
+                            //
                             echo err.getMessage()
                             throw err
                         } finally {
@@ -72,7 +75,8 @@ podTemplate(name: 'fedora-atomic-inline', label: 'fedora-atomic-inline', cloud: 
                             //emailext subject: "${env.JOB_NAME} - Build # ${env.BUILD_NUMBER} - STATUS = ${currentBuild.currentResult}", to: "ari@redhat.com", body: "This pipeline was a ${currentBuild.currentResult}"
 
                             step([$class: 'ArtifactArchiver', allowEmptyArchive: true,
-                                  artifacts: '**/logs/**,*.txt,*.groovy,**/job.*,**/*.groovy,**/inventory.*', excludes: '**/*.example',
+                                  artifacts: '**/logs/**,*.txt,*.groovy,**/job.*,**/*.groovy,**/inventory.*',
+                                  excludes: '**/job.props,**/job.props.groovy,**/*.example',
                                   fingerprint: true])
 
                             // Send message org.centos.prod.ci.pipeline.complete on fedmsg

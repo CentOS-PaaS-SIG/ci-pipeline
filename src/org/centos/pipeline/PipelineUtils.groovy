@@ -124,6 +124,8 @@ def setMessageFields(messageType){
                         "namespace=${fed_namespace}\n" +
                         "ref=fedora/${branch}/${basearch}/atomic-host\n" +
                         "repo=${fed_repo}\n" +
+                        "original_spec_nvr=${original_spec_nvr}\n" +
+                        "nvr=${nvr}\n" +
                         "rev=${fed_rev}\n" +
                         "test_guidance=''\n" +
                         "username=${RSYNC_USER}\n" +

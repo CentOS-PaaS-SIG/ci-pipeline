@@ -1,6 +1,6 @@
 properties(
         [
-                buildDiscarder(logRotator(artifactDaysToKeepStr: '', artifactNumToKeepStr: '25', daysToKeepStr: '', numToKeepStr: '50')),
+                buildDiscarder(logRotator(artifactDaysToKeepStr: '30', artifactNumToKeepStr: '', daysToKeepStr: '90', numToKeepStr: '')),
                 disableConcurrentBuilds(),
                 parameters(
                         [
@@ -54,6 +54,9 @@ podTemplate(name: 'fedora-atomic-inline', label: 'fedora-atomic-inline', cloud: 
                         env.image2boot = env.image2boot ?: ''
                         env.image_name = env.image_name ?: ''
                         env.FEDORA_PRINCIPAL = env.FEDORA_PRINCIPAL ?: 'bpeck/jenkins-continuous-infra.apps.ci.centos.org@FEDORAPROJECT.ORG'
+                        env.package_url = env.package_url ?: ''
+                        env.nvr = env.nvr ?: ''
+                        env.original_spec_nvr = env.original_spec_nvr ?: ''
 
                         // SCM
                         dir('ci-pipeline') {
@@ -68,56 +71,49 @@ podTemplate(name: 'fedora-atomic-inline', label: 'fedora-atomic-inline', cloud: 
 
                         // Python script to parse the ${CI_MESSAGE}
                         writeFile file: "${env.WORKSPACE}/parse_fedmsg.py",
-                                text: "#!/bin/env python\n" +
+                                text: "#! /usr/bin/env python\n" +
+                                        "\n" +
                                         "import json\n" +
-                                        "import sys\n\n" +
-                                        "reload(sys)\n" +
-                                        "sys.setdefaultencoding('utf-8')\n" +
-                                        "message = json.load(sys.stdin)\n" +
-                                        "if 'commit' in message:\n" +
-                                        "    msg = message['commit']\n\n" +
-                                        "    for key in msg:\n" +
-                                        "        safe_key = key.replace('-', '_')\n" +
-                                        "        print \"fed_%s=%s\" % (safe_key, msg[key])\n"
+                                        "import os\n" +
+                                        "\n" +
+                                        "ci_message = json.loads(os.environ['CI_MESSAGE'], encoding='utf-8')\n" +
+                                        "\n" +
+                                        "if 'commit' in ci_message:\n" +
+                                        "    ci_message = ci_message.get('commit')\n" +
+                                        "\n" +
+                                        "    with open(\"{0}/fedmsg_fields.groovy\".format(os.environ['WORKSPACE']), 'wb') as f:\n" +
+                                        "        for k in ci_message:\n" +
+                                        "            if isinstance(ci_message[k], basestring):\n" +
+                                        "                ci_message[k] = ci_message[k].replace('\"', \"'\").encode('utf-8')\n" +
+                                        "            if k == 'message':\n" +
+                                        "                ci_message[k] = ci_message[k].split('\\n')[0]\n" +
+                                        "            f.write('env.fed_{0}=\"{1}\"\\n'.format(k.replace('-', '_'), ci_message[k]))"
 
-                        // Parse the ${CI_MESSAGE}
-                        sh '''
-                #!/bin/bash
-                set -xuo pipefail
+                        // Chmod the python script to make it executable
+                        sh 'chmod +x ${WORKSPACE}/parse_fedmsg.py'
 
-                chmod +x ${WORKSPACE}/parse_fedmsg.py
-
-                # Write fedmsg fields to a file to inject them
-                if [ -n "${CI_MESSAGE}" ]; then
-                    echo ${CI_MESSAGE} | ${WORKSPACE}/parse_fedmsg.py > fedmsg_fields.txt
-                    sed -i '/^\\\\s*$/d' ${WORKSPACE}/fedmsg_fields.txt
-                    sed -i '/`/g' ${WORKSPACE}/fedmsg_fields.txt
-                    sed -i '/^fed/!d' ${WORKSPACE}/fedmsg_fields.txt
-                    grep fed ${WORKSPACE}/fedmsg_fields.txt > ${WORKSPACE}/fedmsg_fields.txt.tmp
-                    mv ${WORKSPACE}/fedmsg_fields.txt.tmp ${WORKSPACE}/fedmsg_fields.txt
-                fi
-            '''
+                        // Execute the python script
+                        sh '${WORKSPACE}/parse_fedmsg.py'
 
                         // Load fedmsg fields as environment variables
-                        def fedmsg_fields = "${env.WORKSPACE}/fedmsg_fields.txt"
                         def fedmsg_fields_groovy = "${env.WORKSPACE}/fedmsg_fields.groovy"
-                        convertProps(fedmsg_fields, fedmsg_fields_groovy)
                         load(fedmsg_fields_groovy)
 
                         // Add Branch and Message Topic to properties and inject
                         sh '''
-                set +e
-                branch=${fed_branch}
-                if [ "${branch}" = "master" ]; then
-                  branch="rawhide"
-                fi
-                
-                
-                # Save the bramch in job.properties
-                echo "branch=${branch}" >> ${WORKSPACE}/job.properties
-                echo "topic=${MAIN_TOPIC}.ci.pipeline.package.queued" >> ${WORKSPACE}/job.properties
-                exit
-            '''
+                            set +e
+                            branch=${fed_branch}
+                            if [ "${branch}" = "master" ]; then
+                              branch="rawhide"
+                            fi
+                            
+                            
+                            # Save the bramch in job.properties
+                            echo "branch=${branch}" >> ${WORKSPACE}/job.properties
+                            echo "topic=${MAIN_TOPIC}.ci.pipeline.package.queued" >> ${WORKSPACE}/job.properties
+                            exit
+                        '''
+
                         def job_props = "${env.WORKSPACE}/job.properties"
                         def job_props_groovy = "${env.WORKSPACE}/job.properties.groovy"
                         convertProps(job_props, job_props_groovy)
@@ -192,8 +188,7 @@ podTemplate(name: 'fedora-atomic-inline', label: 'fedora-atomic-inline', cloud: 
                         env.DUFFY_OP="--teardown"
                         allocDuffy("${current_stage}")
                         echo "Duffy Deallocate ran for stage ${current_stage} with option ${env.DUFFY_OP}\r\n" +
-                                "RSYNC_PASSWORD=${env.RSYNC_PASSWORD}\r\n" +
-                                "DUFFY_HOST=${env.DUFFY_HOST}"
+                             "DUFFY_HOST=${env.DUFFY_HOST}"
 
                         // Send message org.centos.prod.ci.pipeline.package.complete on fedmsg
                         env.topic = "${MAIN_TOPIC}.ci.pipeline.package.complete"
@@ -290,8 +285,7 @@ podTemplate(name: 'fedora-atomic-inline', label: 'fedora-atomic-inline', cloud: 
                         allocDuffy("${current_stage}")
 
                         echo "Duffy Deallocate ran for stage ${current_stage} with option ${env.DUFFY_OP}\r\n" +
-                                "RSYNC_PASSWORD=${env.RSYNC_PASSWORD}\r\n" +
-                                "DUFFY_HOST=${env.DUFFY_HOST}"
+                             "DUFFY_HOST=${env.DUFFY_HOST}"
 
                         // Send message org.centos.prod.ci.pipeline.compose.complete on fedmsg
                         env.topic = "${MAIN_TOPIC}.ci.pipeline.compose.complete"
@@ -391,8 +385,7 @@ podTemplate(name: 'fedora-atomic-inline', label: 'fedora-atomic-inline', cloud: 
                             allocDuffy("${current_stage}")
 
                             echo "Duffy Deallocate ran for stage ${current_stage} with option ${env.DUFFY_OP}\r\n" +
-                                    "RSYNC_PASSWORD=${env.RSYNC_PASSWORD}\r\n" +
-                                    "DUFFY_HOST=${env.DUFFY_HOST}"
+                                 "DUFFY_HOST=${env.DUFFY_HOST}"
 
                             // Send message org.centos.prod.ci.pipeline.image.complete on fedmsg
                             env.topic = "${MAIN_TOPIC}.ci.pipeline.image.complete"
@@ -491,8 +484,7 @@ podTemplate(name: 'fedora-atomic-inline', label: 'fedora-atomic-inline', cloud: 
                             allocDuffy("${current_stage}")
 
                             echo "Duffy Deallocate ran for stage ${current_stage} with option ${env.DUFFY_OP}\r\n" +
-                                    "RSYNC_PASSWORD=${env.RSYNC_PASSWORD}\r\n" +
-                                    "DUFFY_HOST=${env.DUFFY_HOST}"
+                                 "DUFFY_HOST=${env.DUFFY_HOST}"
 
                             // Send message org.centos.prod.ci.pipeline.image.test.smoke.complete on fedmsg
                             env.topic = "${MAIN_TOPIC}.ci.pipeline.image.test.smoke.complete"
@@ -578,8 +570,7 @@ podTemplate(name: 'fedora-atomic-inline', label: 'fedora-atomic-inline', cloud: 
                         allocDuffy("${current_stage}")
 
                         echo "Duffy Deallocate ran for stage ${current_stage} with option ${env.DUFFY_OP}\r\n" +
-                                "RSYNC_PASSWORD=${env.RSYNC_PASSWORD}\r\n" +
-                                "DUFFY_HOST=${env.DUFFY_HOST}"
+                             "DUFFY_HOST=${env.DUFFY_HOST}"
 
 //                    step([$class: 'XUnitBuilder',
 //                          thresholds: [[$class: 'FailedThreshold', unstableThreshold: '1']],
@@ -653,8 +644,7 @@ podTemplate(name: 'fedora-atomic-inline', label: 'fedora-atomic-inline', cloud: 
                         env.DUFFY_OP="--teardown"
                         allocDuffy("${current_stage}")
                         echo "Duffy Deallocate ran for stage ${current_stage} with option ${env.DUFFY_OP}\r\n" +
-                                "RSYNC_PASSWORD=${env.RSYNC_PASSWORD}\r\n" +
-                                "DUFFY_HOST=${env.DUFFY_HOST}"
+                             "DUFFY_HOST=${env.DUFFY_HOST}"
 
 //                     step([$class: 'XUnitBuilder',
 //                          thresholds: [[$class: 'FailedThreshold', unstableThreshold: '1']],
@@ -682,22 +672,40 @@ podTemplate(name: 'fedora-atomic-inline', label: 'fedora-atomic-inline', cloud: 
                         sendMessage(messageProperties, messageContent)
                     }
                 } catch (e) {
+                    // Set build result
+                    currentBuild.result = 'FAILURE'
+                    //
                     echo "Error: Exception from " + current_stage + ":"
                     echo e.getMessage()
                     // Teardown resources
                     env.DUFFY_OP = "--teardown"
                     echo "Duffy Deallocate ran for stage ${current_stage} with option ${env.DUFFY_OP}\r\n" +
-                            "RSYNC_PASSWORD=${env.RSYNC_PASSWORD}\r\n" +
-                            "DUFFY_HOST=${env.DUFFY_HOST}"
+                          "DUFFY_HOST=${env.DUFFY_HOST}"
                     allocDuffy("${current_stage}")
-                    // Send failure message for appropriate topic
-                    sendMessage(messageProperties, messageContent)
                     throw e
                 } finally {
                     currentBuild.displayName = "Build#: ${env.BUILD_NUMBER} - Branch: ${env.branch} - Package: ${env.fed_repo}"
                     currentBuild.description = "${currentBuild.currentResult}"
                     //emailext subject: "${env.JOB_NAME} - Build # ${env.BUILD_NUMBER} - STATUS = ${currentBuild.currentResult}", to: "ari@redhat.com", body: "This pipeline was a ${currentBuild.currentResult}"
-                    step([$class: 'ArtifactArchiver', allowEmptyArchive: true, artifacts: '**/logs/**,*.txt,*.groovy,**/job.*,**/*.groovy,**/inventory.*', excludes: '**/*.example', fingerprint: true])
+                    step([$class: 'ArtifactArchiver', allowEmptyArchive: true, artifacts: '**/logs/**,*.txt,*.groovy,**/job.*,**/*.groovy,**/inventory.*', excludes: '**/job.props,**/job.props.groovy,**/*.example', fingerprint: true])
+
+                    // Send message org.centos.prod.ci.pipeline.complete on fedmsg
+                    env.topic = "${env.MAIN_TOPIC}.ci.pipeline.complete"
+                    messageProperties = "topic=${topic}\n" +
+                            "build_url=${BUILD_URL}\n" +
+                            "build_id=${BUILD_ID}\n" +
+                            "branch=${branch}\n" +
+                            "original_spec_nvr=${original_spec_nvr}\n" +
+                            "nvr=${nvr}\n" +
+                            "ref=fedora/${branch}/${basearch}/atomic-host\n" +
+                            "rev=${fed_rev}\n" +
+                            "repo=${fed_repo}\n" +
+                            "namespace=${fed_namespace}\n" +
+                            "username=fedora-atomic\n" +
+                            "test_guidance=''\n" +
+                            "status=${currentBuild.currentResult}"
+                    messageContent = ''
+                    sendMessage(messageProperties, messageContent)
                 }
             }
         }

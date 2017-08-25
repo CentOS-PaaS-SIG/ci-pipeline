@@ -22,6 +22,9 @@ def call(body) {
         env.commit = env.commit ?: ''
         env.image2boot = env.image2boot ?: ''
         env.image_name = env.image_name ?: ''
+        env.package_url = env.package_url ?: ''
+        env.nvr = env.nvr ?: ''
+        env.original_spec_nvr = env.original_spec_nvr ?: ''
 
         // SCM
         dir('ci-pipeline') {
