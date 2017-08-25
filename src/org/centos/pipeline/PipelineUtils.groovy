@@ -172,16 +172,11 @@ def setMessageFields(messageType){
  * @return
  */
 def writeFedmsgFieldsFile(filename) {
-    // Create our fedmsg_fields file
-    def fedmsgFile = new File("${env.WORKSPACE}/${filename}")
-
-    // If the file exists, delete it.
-    if ( fedmsgFile.exists() ){
-        fedmsgFile.delete()
-    }
 
     // Parse the CI_MESSAGE into a Map
     def ci_data = new JsonSlurper().parseText(env.CI_MESSAGE)
+
+    def props = new String()
 
     // See if there's a commit key in the map
     if (ci_data['commit']) {
@@ -189,11 +184,10 @@ def writeFedmsgFieldsFile(filename) {
             k = "env.fed_${k.toString().replaceAll('-', '_')}"
             v = "${v.toString().split('\n')[0].replaceAll('"', '\'')}"
 
-            fedmsgFile.append("${k}=\"${v}\"\n")
+            props = props + "${k}=\"${v}\"\n"
         }
-    // If there is no commit key in the map, we write an empty file
-    } else {
-        fedmsgFile.write('')
-        println("No 'commit' key in CI_MESSAGE, writing empty fedmsg_fields.groovy")
     }
+
+    // Write the props to the filename specified in our workspace
+    writeFile encoding: 'utf-8', file: "${filename}", text: "${props}"
 }
