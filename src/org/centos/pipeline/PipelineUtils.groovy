@@ -1,6 +1,8 @@
 #!/usr/bin/groovy
 package org.centos.pipeline
 
+import groovy.json.JsonSlurper
+
 /**
  * Library to setup and configure the host the way ci-pipeline requires
  *
@@ -160,4 +162,38 @@ def setMessageFields(messageType){
         return [ topic, messageProperties, messageContent ]
     }
     return [ topic, messageProperties, messageContent ]
+}
+
+/**
+ * Library to parse CI_MESSAGE and write it out to a file which can be injected as env variables.
+ *
+ * variables
+ *  filename - filename to write to in the workspace directory. Defaults to fedmsg_fields.groovy
+ * @return
+ */
+def writeFedmsgFieldsFile(filename) {
+    // Create our fedmsg_fields file
+    def fedmsgFile = new File("${env.WORKSPACE}/${filename}")
+
+    // If the file exists, delete it.
+    if ( fedmsgFile.exists() ){
+        fedmsgFile.delete()
+    }
+
+    // Parse the CI_MESSAGE into a Map
+    def ci_data = new JsonSlurper().parseText(env.CI_MESSAGE)
+
+    // See if there's a commit key in the map
+    if (ci_data['commit']) {
+        ci_data.commit.each { k, v ->
+            k = "env.fed_${k.toString().replaceAll('-', '_')}"
+            v = "${v.toString().split('\n')[0].replaceAll('"', '\'')}"
+
+            fedmsgFile.append("${k}=\"${v}\"\n")
+        }
+    // If there is no commit key in the map, we write an empty file
+    } else {
+        fedmsgFile.write('')
+        println("No 'commit' key in CI_MESSAGE, writing empty fedmsg_fields.groovy")
+    }
 }
