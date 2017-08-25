@@ -168,7 +168,7 @@ def setMessageFields(messageType){
  * Library to parse CI_MESSAGE and write it out to a file which can be injected as env variables.
  *
  * variables
- *  filename - filename to write to in the workspace directory. Defaults to fedmsg_fields.groovy
+ *  filename - filename to write to in the workspace directory.
  * @return
  */
 def writeFedmsgFieldsFile(filename) {
