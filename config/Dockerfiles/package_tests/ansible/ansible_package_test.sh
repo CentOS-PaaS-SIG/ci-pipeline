@@ -9,7 +9,7 @@
 curl -s --head https://upstreamfirst.fedorainfracloud.org/${package} | head -n 1 | grep "HTTP/1.[01] [23].." > /dev/null
 if [ $? -ne 0 ]; then
      echo "No upstream repo for this package! Exiting..."
-     exit 1
+     exit 0
 fi
 git clone https://upstreamfirst.fedorainfracloud.org/${package}
 if [[ $(grep "standard-test-beakerlib" ${package}/*.yml) == "" ]]; then
