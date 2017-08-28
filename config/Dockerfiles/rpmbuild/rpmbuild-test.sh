@@ -68,6 +68,7 @@ while wait -n; do
     if [ $? -ne 0 ]; then
         MOCKBUILD_STATUS=FAILURE
         MOCKBUILD_RC=$?
+        break
     fi
 done
 echo "status=$MOCKBUILD_STATUS" >> ${LOGDIR}/package_props.txt
