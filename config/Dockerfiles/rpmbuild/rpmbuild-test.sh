@@ -57,14 +57,13 @@ fi
 cp -rp ../${fed_repo} /root/rpmbuild/SOURCES/
 rpmbuild -bs /root/rpmbuild/SOURCES/${fed_repo}.spec
 # Set up koji creds
-#TODO
-# Should be a fedora-packager-setup command and a kinit. Will also probably require some packages like fedora-packager/python-krbV
+kinit -k -t /home/fedora.keytab $FEDORA_PRINCIPAL
 # Build the package into ./results_${fed_repo}/$VERSION/$RELEASE/ and concurrently do a koji build
-kinit  -k -t /home/fedora.keytab $FEDORA_PRINCIPAL
-#{ time fedpkg --release ${fed_branch} mockbuild ; } 2> ${LOGDIR}/mockbuildtime.txt & { time koji build --scratch $RSYNC_BRANCH /root/rpmbuild/SRPMS/${fed_repo}*.src.rpm ; } 2> ${LOGDIR}/kojibuildtime.txt && fg
-fedpkg --release ${fed_branch} mockbuild
+{ time fedpkg --release ${fed_branch} mockbuild ; } 2> ${LOGDIR}/mockbuild.txt & { time koji build --scratch $RSYNC_BRANCH /root/rpmbuild/SRPMS/${fed_repo}*.src.rpm ; } 2> ${LOGDIR}/kojibuildtime.txt
 MOCKBUILD_STATUS=$?
 echo "status=$MOCKBUILD_STATUS" >> ${LOGDIR}/package_props.txt
+# Make mockbuildtime be just the time result
+tail -n 3 ${LOGDIR}/mockbuild.txt > ${LOGDIR}/mockbuildtime.txt
 if [ "$MOCKBUILD_STATUS" != 0 ]; then echo -e "ERROR: FEDPKG MOCKBUILD\nSTATUS: $MOCKBUILD_STATUS"; exit 1; fi
 popd
 
