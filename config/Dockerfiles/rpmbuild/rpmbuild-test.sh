@@ -63,15 +63,17 @@ kinit -k -t /home/fedora.keytab $FEDORA_PRINCIPAL
 { time koji build --scratch $RSYNC_BRANCH /root/rpmbuild/SRPMS/${fed_repo}*.src.rpm ; } 2> ${LOGDIR}/kojibuildtime.txt &
 # Set status if either job fails to build the rpm
 MOCKBUILD_STATUS=SUCCESS
+MOCKBUILD_RC=0
 while wait -n; do
     if [ $? -ne 0 ]; then
         MOCKBUILD_STATUS=FAILURE
+        MOCKBUILD_RC=$?
     fi
 done
 echo "status=$MOCKBUILD_STATUS" >> ${LOGDIR}/package_props.txt
 # Make mockbuildtime be just the time result
 tail -n 3 ${LOGDIR}/mockbuild.txt > ${LOGDIR}/mockbuildtime.txt
-if [ "$MOCKBUILD_STATUS" != 0 ]; then echo -e "ERROR: FEDPKG MOCKBUILD\nSTATUS: $MOCKBUILD_STATUS"; exit 1; fi
+if [ "$MOCKBUILD_RC" != 0 ]; then echo -e "ERROR: FEDPKG MOCKBUILD\nSTATUS: $MOCKBUILD_RC"; exit 1; fi
 popd
 
 ABIGAIL_BRANCH=$(echo ${fed_branch} | sed 's/./&c/1')
