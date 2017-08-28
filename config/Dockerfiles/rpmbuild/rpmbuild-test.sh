@@ -59,8 +59,15 @@ rpmbuild -bs /root/rpmbuild/SOURCES/${fed_repo}.spec
 # Set up koji creds
 kinit -k -t /home/fedora.keytab $FEDORA_PRINCIPAL
 # Build the package into ./results_${fed_repo}/$VERSION/$RELEASE/ and concurrently do a koji build
-{ time fedpkg --release ${fed_branch} mockbuild ; } 2> ${LOGDIR}/mockbuild.txt & { time koji build --scratch $RSYNC_BRANCH /root/rpmbuild/SRPMS/${fed_repo}*.src.rpm ; } 2> ${LOGDIR}/kojibuildtime.txt
-MOCKBUILD_STATUS=$?
+{ time fedpkg --release ${fed_branch} mockbuild ; } 2> ${LOGDIR}/mockbuild.txt &
+{ time koji build --scratch $RSYNC_BRANCH /root/rpmbuild/SRPMS/${fed_repo}*.src.rpm ; } 2> ${LOGDIR}/kojibuildtime.txt &
+# Set status if either job fails to build the rpm
+MOCKBUILD_STATUS=SUCCESS
+while wait -n; do
+    if [ $? -ne 0 ]; then
+        MOCKBUILD_STATUS=FAILURE
+    fi
+done
 echo "status=$MOCKBUILD_STATUS" >> ${LOGDIR}/package_props.txt
 # Make mockbuildtime be just the time result
 tail -n 3 ${LOGDIR}/mockbuild.txt > ${LOGDIR}/mockbuildtime.txt
