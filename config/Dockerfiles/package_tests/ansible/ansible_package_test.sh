@@ -17,6 +17,10 @@ if [[ $(grep "standard-test-beakerlib" ${package}/*.yml) == "" ]]; then
         exit 0
 fi
 if [ -f ${package}/tests.yml ]; then
+     if [[ $(ansible-playbook --list-tags ${package}/tests.yml) != *"atomic"* ]]; then
+         echo "No atomic tagged tests for this package!"
+         exit 0
+     fi
      sed 's/hosts: localhost/hosts: all/g' ${package}/tests.yml > ${package}/test_atomic.yml
      ansible-playbook -i /tmp/inventory --private-key=/tmp/ssh_key --tags=atomic --start-at-task='Define remote_artifacts if it is not already defined' ${package}/test_atomic.yml
      exit $?

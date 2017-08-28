@@ -16,6 +16,10 @@ if [[ $(file ${TEST_SUBJECTS}) == *"No such file or directory"* ]]; then
 	export TEST_SUBJECTS=${PWD}/testimage.qcow2
 fi
 if [ -f ${package}/tests.yml ]; then
+     if [[ $(ansible-playbook --list-tags ${package}/tests.yml) != *"atomic"* ]]; then
+         echo "No atomic tagged tests for this package!"
+         exit 0
+     fi
      # Execute the tests
      ansible-playbook --tags atomic ${package}/tests.yml
      exit $?
