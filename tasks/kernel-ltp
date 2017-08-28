@@ -3,6 +3,9 @@
 set -x
 # Find the base dir
 base_dir="$(dirname $0)/.."
+if [ -z "${HTTP_BASE}" ]; then
+    HTTP_BASE=http://artifacts.ci.centos.org/fedora-atomic
+fi
 
 rm -rf logs
 mkdir -p logs
