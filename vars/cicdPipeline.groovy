@@ -25,7 +25,7 @@ def call(body) {
         env.package_url = env.package_url ?: ''
         env.nvr = env.nvr ?: ''
         env.original_spec_nvr = env.original_spec_nvr ?: ''
-        env.
+        env.ANSIBLE_HOST_KEY_CHECKING = env.ANSIBLE_HOST_KEY_CHECKING ?: "False"
 
         // SCM
         dir('ci-pipeline') {

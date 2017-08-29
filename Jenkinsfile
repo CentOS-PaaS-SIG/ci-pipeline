@@ -58,7 +58,6 @@ podTemplate(name: 'fedora-atomic-inline', label: 'fedora-atomic-inline', cloud: 
                         env.nvr = env.nvr ?: ''
                         env.original_spec_nvr = env.original_spec_nvr ?: ''
                         env.ANSIBLE_HOST_KEY_CHECKING = env.ANSIBLE_HOST_KEY_CHECKING ?: "False"
-                        env.basearch = env.basearch ?: "x86_64"
 
                         // SCM
                         dir('ci-pipeline') {
