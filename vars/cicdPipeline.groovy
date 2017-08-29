@@ -10,7 +10,7 @@ def call(body) {
 
     try {
         // Set defaults
-        env.MAIN_TOPIC = env.MAIN_TOPIC ?: 'org.centos.prod'
+        env.MAIN_TOPIC = env.MAIN_TOPIC ?: 'org.centos.stage'
         env.MSG_PROVIDER = env.MSG_PROVIDER ?: 'fedora-fedmsg'
         env.FEDORA_PRINCIPAL = env.FEDORA_PRINCIPAL ?: 'bpeck/jenkins-continuous-infra.apps.ci.centos.org@FEDORAPROJECT.ORG'
         env.HTTP_BASE = env.HTTP_BASE ?: 'http://artifacts.ci.centos.org/artifacts/fedora-atomic'
@@ -25,6 +25,7 @@ def call(body) {
         env.package_url = env.package_url ?: ''
         env.nvr = env.nvr ?: ''
         env.original_spec_nvr = env.original_spec_nvr ?: ''
+        env.
 
         // SCM
         dir('ci-pipeline') {

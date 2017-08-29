@@ -57,6 +57,8 @@ podTemplate(name: 'fedora-atomic-inline', label: 'fedora-atomic-inline', cloud: 
                         env.package_url = env.package_url ?: ''
                         env.nvr = env.nvr ?: ''
                         env.original_spec_nvr = env.original_spec_nvr ?: ''
+                        env.ANSIBLE_HOST_KEY_CHECKING = env.ANSIBLE_HOST_KEY_CHECKING ?: "False"
+                        env.basearch = env.basearch ?: "x86_64"
 
                         // SCM
                         dir('ci-pipeline') {
@@ -125,8 +127,6 @@ podTemplate(name: 'fedora-atomic-inline', label: 'fedora-atomic-inline', cloud: 
                         env.ref = "fedora/${branch}/${basearch}/atomic-host"
                         env.repo = "${fed_repo}"
                         env.rev = "${fed_rev}"
-                        env.ANSIBLE_HOST_KEY_CHECKING = "False"
-                        env.DUFFY_OP = "--allocate"
 
                         // Send message org.centos.prod.ci.pipeline.package.running on fedmsg
                         env.topic = "${MAIN_TOPIC}.ci.pipeline.package.running"
@@ -145,6 +145,7 @@ podTemplate(name: 'fedora-atomic-inline', label: 'fedora-atomic-inline', cloud: 
                         sendMessage(messageProperties, messageContent)
 
                         // Provision of resources
+                        env.DUFFY_OP = "--allocate"
                         allocDuffy("${current_stage}")
 
                         echo "Duffy Allocate ran for stage ${current_stage} with option ${env.DUFFY_OP}\r\n" +
@@ -159,10 +160,6 @@ podTemplate(name: 'fedora-atomic-inline', label: 'fedora-atomic-inline', cloud: 
 
                         // Stage resources - RPM build system
                         setupStage("${current_stage}")
-
-                        if (env.OSTREE_BRANCH == null) {
-                            env.OSTREE_BRANCH = ""
-                        }
 
                         // Rsync Data
                         writeFile file: "${env.ORIGIN_WORKSPACE}/task.env",
@@ -218,9 +215,6 @@ podTemplate(name: 'fedora-atomic-inline', label: 'fedora-atomic-inline', cloud: 
                         env.ref = "fedora/${branch}/${basearch}/atomic-host"
                         env.repo = "${fed_repo}"
                         env.rev = "${fed_rev}"
-                        env.basearch = "x86_64"
-                        env.ANSIBLE_HOST_KEY_CHECKING = "False"
-                        env.DUFFY_OP = "--allocate"
 
                         // Send message org.centos.prod.ci.pipeline.compose.running on fedmsg
                         env.topic = "${MAIN_TOPIC}.ci.pipeline.compose.running"
@@ -257,10 +251,6 @@ podTemplate(name: 'fedora-atomic-inline', label: 'fedora-atomic-inline', cloud: 
 
                         // Stage resources - ostree compose
                         setupStage("${current_stage}")
-
-                        if (env.OSTREE_BRANCH == null) {
-                            env.OSTREE_BRANCH = ""
-                        }
 
                         // Rsync Data
                         writeFile file: "${env.ORIGIN_WORKSPACE}/task.env",
@@ -316,8 +306,6 @@ podTemplate(name: 'fedora-atomic-inline', label: 'fedora-atomic-inline', cloud: 
                         if (fileExists("${env.WORKSPACE}/NeedNewImage.txt") || ("${env.GENERATE_IMAGE}" == "true")) {
                             env.task = "./ci-pipeline/tasks/ostree-image-compose"
                             env.playbook = "ci-pipeline/playbooks/rdgo-setup.yml"
-                            env.ANSIBLE_HOST_KEY_CHECKING = "False"
-                            env.DUFFY_OP = "--allocate"
 
                             // Send message org.centos.prod.ci.pipeline.image.running on fedmsg
                             env.topic = "${MAIN_TOPIC}.ci.pipeline.image.running"
@@ -357,10 +345,6 @@ podTemplate(name: 'fedora-atomic-inline', label: 'fedora-atomic-inline', cloud: 
 
                             // Stage resources - ostree compose
                             setupStage("${current_stage}")
-
-                            if (env.OSTREE_BRANCH == null) {
-                                env.OSTREE_BRANCH = ""
-                            }
 
                             // Rsync Data
                             writeFile file: "${env.ORIGIN_WORKSPACE}/task.env",
@@ -419,8 +403,6 @@ podTemplate(name: 'fedora-atomic-inline', label: 'fedora-atomic-inline', cloud: 
                         if (fileExists("${env.WORKSPACE}/NeedNewImage.txt") || ("${env.GENERATE_IMAGE}" == "true")) {
                             env.task = "./ci-pipeline/tasks/ostree-image-compose"
                             env.playbook = "ci-pipeline/playbooks/system-setup.yml"
-                            env.ANSIBLE_HOST_KEY_CHECKING = "False"
-                            env.DUFFY_OP = "--allocate"
 
                             // Send message org.centos.prod.ci.pipeline.image.test.smoke.running on fedmsg
                             env.topic = "${MAIN_TOPIC}.ci.pipeline.image.test.smoke.running"
@@ -460,10 +442,6 @@ podTemplate(name: 'fedora-atomic-inline', label: 'fedora-atomic-inline', cloud: 
 
                             // Stage resources - ostree compose
                             setupStage("${current_stage}")
-
-                            if (env.OSTREE_BRANCH == null) {
-                                env.OSTREE_BRANCH = ""
-                            }
 
                             // Rsync Data
                             writeFile file: "${env.ORIGIN_WORKSPACE}/task.env",
@@ -535,18 +513,6 @@ podTemplate(name: 'fedora-atomic-inline', label: 'fedora-atomic-inline', cloud: 
                         // Stage resources - ostree compose
                         setupStage("${current_stage}")
 
-                        if (env.OSTREE_BRANCH == null) {
-                            env.OSTREE_BRANCH = ""
-                        }
-
-                        if (env.commit == null) {
-                            env.commit = ""
-                        }
-
-                        if (env.image2boot == null) {
-                            env.image2boot = ""
-                        }
-
                         // Rsync Data
                         writeFile file: "${env.ORIGIN_WORKSPACE}/task.env",
                                 text: "export branch=\"${branch}\"\n" +
@@ -602,7 +568,6 @@ podTemplate(name: 'fedora-atomic-inline', label: 'fedora-atomic-inline', cloud: 
                         // Set groovy and env vars
                         env.task = "./ci-pipeline/tasks/atomic-host-tests"
                         env.playbook = "ci-pipeline/playbooks/system-setup.yml"
-                        env.ANSIBLE_HOST_KEY_CHECKING = "False"
 
                         // Send integration test running message on fedmsg
                         env.topic = "${MAIN_TOPIC}.ci.pipeline.compose.test.integration.running"
