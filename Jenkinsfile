@@ -602,6 +602,7 @@ podTemplate(name: 'fedora-atomic-inline', label: 'fedora-atomic-inline', cloud: 
                         // Set groovy and env vars
                         env.task = "./ci-pipeline/tasks/atomic-host-tests"
                         env.playbook = "ci-pipeline/playbooks/system-setup.yml"
+                        env.ANSIBLE_HOST_KEY_CHECKING = "False"
 
                         // Send integration test running message on fedmsg
                         env.topic = "${MAIN_TOPIC}.ci.pipeline.compose.test.integration.running"
