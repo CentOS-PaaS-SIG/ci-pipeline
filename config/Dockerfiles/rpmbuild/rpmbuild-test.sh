@@ -37,7 +37,7 @@ sed -i "/^Release:/s/%{?dist}/.${commits}.${fed_rev:0:7}%{?dist}/" ${fed_repo}.s
 fedpkg --release ${fed_branch} prep
 VERSION=$(rpmspec --queryformat "%{VERSION}\n" -q ${fed_repo}.spec | head -n 1)
 # Some packages are packagename-version-release, some packagename-sha, some packagename[0-9]
-DIR_TO_GO=$(find . -maxdepth 1 -type d | cut -c 3- | grep ${fed_repo})
+DIR_TO_GO=$(dirname $(find . -name Makefile | tail -n 1))
 pushd $DIR_TO_GO
 # Run configure if it exists, if not, no big deal
 ./configure

@@ -18,6 +18,7 @@ RUN for i in {1..5} ; do dnf -y install ansible \
         go \
         libsolv \
         mock \
+        perl \
         python-krbV \
         pyxdg \
         PyYAML \
