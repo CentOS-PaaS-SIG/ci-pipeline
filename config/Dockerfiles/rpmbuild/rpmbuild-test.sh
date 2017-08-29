@@ -38,20 +38,22 @@ fedpkg --release ${fed_branch} prep
 VERSION=$(rpmspec --queryformat "%{VERSION}\n" -q ${fed_repo}.spec | head -n 1)
 # Some packages are packagename-version-release, some packagename-sha, some packagename[0-9]
 DIR_TO_GO=$(dirname $(find . -name Makefile | tail -n 1))
-pushd $DIR_TO_GO
-# Run configure if it exists, if not, no big deal
-./configure
-# Run tests if they are there
-make test >> ${LOGDIR}/make_test_output.txt
-MAKE_TEST_STATUS=$?
-popd
-if [ "$MAKE_TEST_STATUS" == 2 ]; then
-     echo "description='${fed_repo} - No tests'" >> ${LOGDIR}/package_props.txt
-elif [ "$MAKE_TEST_STATUS" == 0 ]; then
-     echo "description='${fed_repo} - make test passed'" >> ${LOGDIR}/package_props.txt
-else
-     echo "description='${fed_repo} - make test failed'" >> ${LOGDIR}/package_props.txt
-     exit $MAKE_TEST_STATUS
+if [ -n "$DIR_TO_GO" ] ; then
+    pushd $DIR_TO_GO
+    # Run configure if it exists, if not, no big deal
+    ./configure
+    # Run tests if they are there
+    make test >> ${LOGDIR}/make_test_output.txt
+    MAKE_TEST_STATUS=$?
+    popd
+    if [ "$MAKE_TEST_STATUS" == 2 ]; then
+         echo "description='${fed_repo} - No tests'" >> ${LOGDIR}/package_props.txt
+    elif [ "$MAKE_TEST_STATUS" == 0 ]; then
+         echo "description='${fed_repo} - make test passed'" >> ${LOGDIR}/package_props.txt
+    else
+         echo "description='${fed_repo} - make test failed'" >> ${LOGDIR}/package_props.txt
+         exit $MAKE_TEST_STATUS
+    fi
 fi
 # Prepare concurrent koji build
 cp -rp ../${fed_repo} /root/rpmbuild/SOURCES/
