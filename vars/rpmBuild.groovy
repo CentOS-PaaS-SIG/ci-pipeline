@@ -1,4 +1,3 @@
-import org.centos.Messaging
 import org.centos.Utils
 import org.centos.pipeline.PipelineUtils
 
@@ -18,23 +17,11 @@ def call(body) {
         stage(current_stage) {
 
             // Parse the CI_MESSAGE and write it to ${env.WORKSPACE}/fedmsg_fields.groovy
-            pipelineUtils.writeFedmsgFieldsFile("fedmsg_fields.groovy")
-
-            // Load fedmsg fields as environment variables
-            def fedmsg_fields_groovy = "${env.WORKSPACE}/fedmsg_fields.groovy"
-            load(fedmsg_fields_groovy)
+            pipelineUtils.injectFedmsgVars()
 
             // Add Branch and Message Topic to properties and inject
             sh '''
-                    set +e
-                    branch=${fed_branch}
-                    if [ "${branch}" = "master" ]; then
-                      branch="rawhide"
-                    fi
-                    
-                    
-                    # Save the bramch in job.properties
-                    echo "branch=${branch}" >> ${WORKSPACE}/job.properties
+                    set +e                                        
                     echo "topic=${MAIN_TOPIC}.ci.pipeline.package.queued" >> ${WORKSPACE}/job.properties
                     exit
                 '''
