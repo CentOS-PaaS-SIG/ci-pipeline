@@ -605,6 +605,15 @@ podTemplate(name: 'fedora-atomic-inline', label: 'fedora-atomic-inline', cloud: 
                         // Run Setup
                         setupStage("${current_stage}")
 
+                        // Rsync Data
+                        writeFile file: "${env.ORIGIN_WORKSPACE}/task.env",
+                                text: "export JENKINS_JOB_NAME=\"${JOB_NAME}-${current_stage}\"\n" +
+                                        "export HTTP_BASE=\"${HTTP_BASE}\"\n" +
+                                        "export JENKINS_BUILD_TAG=\"${BUILD_TAG}-${current_stage}\"\n" +
+                                        "export image2boot=\"${image2boot}\"\n" +
+                                        "export ANSIBLE_HOST_KEY_CHECKING=\"False\"\n"
+                        rsyncResults("${current_stage}")
+
                         // Teardown
                         env.DUFFY_OP="--teardown"
                         allocDuffy("${current_stage}")
