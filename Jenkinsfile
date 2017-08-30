@@ -368,7 +368,7 @@ podTemplate(name: 'fedora-atomic-inline', label: 'fedora-atomic-inline', cloud: 
                             allocDuffy("${current_stage}")
 
                             echo "Duffy Deallocate ran for stage ${current_stage} with option ${env.DUFFY_OP}\r\n" +
-                                  "DUFFY_HOST=${env.DUFFY_HOST}"
+                                 "DUFFY_HOST=${env.DUFFY_HOST}"
 
                             // Send message org.centos.prod.ci.pipeline.image.complete on fedmsg
                             env.topic = "${MAIN_TOPIC}.ci.pipeline.image.complete"
@@ -654,7 +654,7 @@ podTemplate(name: 'fedora-atomic-inline', label: 'fedora-atomic-inline', cloud: 
                     // Teardown resources
                     env.DUFFY_OP = "--teardown"
                     echo "Duffy Deallocate ran for stage ${current_stage} with option ${env.DUFFY_OP}\r\n" +
-                         "DUFFY_HOST=${env.DUFFY_HOST}"
+                          "DUFFY_HOST=${env.DUFFY_HOST}"
                     allocDuffy("${current_stage}")
                     throw e
                 } finally {
