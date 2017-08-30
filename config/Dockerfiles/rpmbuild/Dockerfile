@@ -10,6 +10,7 @@ RUN for i in {1..5} ; do dnf -y install ansible \
         @buildsys-build \
         createrepo \
         docker \
+        fedora-packager \
         fedpkg \
         gcc \
         git \
@@ -17,6 +18,7 @@ RUN for i in {1..5} ; do dnf -y install ansible \
         go \
         libsolv \
         mock \
+        perl \
         python-krbV \
         pyxdg \
         PyYAML \

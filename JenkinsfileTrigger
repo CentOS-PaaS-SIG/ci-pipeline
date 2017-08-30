@@ -20,6 +20,8 @@ def job_properties = []
 def messageProperties = ""
 def messageContent = ""
 
+def TRIGGER_RETRY_COUNT = 3
+
 node('master') {
     ansiColor('xterm') {
         timestamps {
@@ -116,8 +118,8 @@ node('master') {
                             messageProperties = "topic=${env.topic}\n" +
                                     "build_url=${BUILD_URL}\n" +
                                     "build_id=${BUILD_ID}\n" +
-                                    "branch=${branch}\n" +
-                                    "ref=fedora/${branch}/x86_64/atomic-host\n" +
+                                    "branch=${env.branch}\n" +
+                                    "ref=fedora/${env.branch}/x86_64/atomic-host\n" +
                                     "rev=${env.fed_rev}\n" +
                                     "repo=${env.fed_repo}\n" +
                                     "namespace=${env.fed_namespace}\n" +
@@ -149,7 +151,21 @@ node('master') {
                             echo "CI_MESSAGE: ${env.CI_MESSAGE}"
                             echo "TARGET_BRANCH: ${env.fed_branch}"
                             echo "MAIN_TOPIC: ${env.MAIN_TOPIC}"
-                            build job: "continuous-infra-ci-pipeline-${env.branch}", parameters: [string(name: 'CI_MESSAGE', value: "${env.CI_MESSAGE}"), string(name: 'TARGET_BRANCH', value: "${env.fed_branch}"), string(name: 'PROJECT_REPO', value: 'ci-pipeline'), string(name: 'MAIN_TOPIC', value: 'org.centos.prod'), string(name: 'MSG_PROVIDER', value: 'fedora-fedmsg')], wait: false
+                            // Let's try 3 times to schedule build
+                            try {
+                                retry(TRIGGER_RETRY_COUNT) {
+                                    try {
+                                        build job: "continuous-infra-ci-pipeline-${env.branch}", parameters: [string(name: 'CI_MESSAGE', value: "${env.CI_MESSAGE}"), string(name: 'TARGET_BRANCH', value: "${env.fed_branch}"), string(name: 'PROJECT_REPO', value: 'ci-pipeline'), string(name: 'MAIN_TOPIC', value: 'org.centos.prod'), string(name: 'MSG_PROVIDER', value: 'fedora-fedmsg')], wait: false
+                                    } catch (Exception e) {
+                                        e.printStackTrace()
+                                        throw e
+                                    }
+                                }
+                            } catch (Exception e) {
+                                currentBuild.result = 'FAILURE'
+                                currentBuild.description = "*TRIGGER FAILURE*"
+                                error "Error: Build could not be added to queue after " + TRIGGER_RETRY_COUNT + " tries"
+                            }
                         }
                     }
                 }
