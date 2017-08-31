@@ -1,7 +1,10 @@
 #!/usr/bin/groovy
 package org.centos.pipeline
 
+import org.centos.Utils
 import groovy.json.JsonSlurper
+
+utils = new Utils()
 
 /**
  * Library to setup and configure the host the way ci-pipeline requires
@@ -92,18 +95,12 @@ def runTaskAndReturnLogs(stage, duffyKey) {
  *
  * variables
  *  stage - current stage running
- *  checkRsyncDir - boolean to determine if our URL path will be the rsync dir or not. Defaults to true
  */
-def checkLastImage(stage, checkRsyncDir=true) {
+def checkLastImage(stage) {
     echo "Currently in stage: ${stage} in checkLastImage"
-    if (checkRsyncDir==true){
-        env.url_path = "${HTTP_BASE}/${RSYNC_DIR}/${branch}/images/latest-atomic.qcow2"
-    } else {
-        env.url_path = "${HTTP_BASE}/${branch}/images/latest-atomic.qcow2"
-    }
 
     sh '''
-        prev=$( date --date="$( curl -I --silent ${url_path} | grep Last-Modified | sed s'/Last-Modified: //' )" +%s )
+        prev=$( date --date="$( curl -I --silent ${HTTP_BASE}/${RSYNC_DIR}/${branch}/images/latest-atomic.qcow2 | grep Last-Modified | sed s'/Last-Modified: //' )" +%s )
         cur=$( date +%s )
         
         elapsed=$((cur - prev))
@@ -143,27 +140,27 @@ def setMessageFields(messageType){
 
     if (messageType == 'compose.running') {
         messageProperties = messageProperties +
-                "compose_url=${HTTP_BASE}/artifacts/${RSYNC_DIR}/${branch}/ostree\n"
+                "compose_url=${env.HTTP_BASE}/artifacts/${env.RSYNC_DIR}/${env.branch}/ostree\n"
                 "compose_rev=''\n"
     } else if ((messageType == 'compose.complete') || (messageType == 'test.integration.queued') ||
             (messageType == 'test.integration.running') || (messageType == 'test.integration.complete')) {
         messageProperties = messageProperties +
-            "compose_url=${HTTP_BASE}/artifacts/${RSYNC_DIR}/${branch}/ostree\n"
-            "compose_rev=${commit}\n"
+            "compose_url=${env.HTTP_BASE}/artifacts/${env.RSYNC_DIR}/${env.branch}/ostree\n"
+            "compose_rev=${env.commit}\n"
     } else if (messageType == 'image.running') {
             messageProperties = messageProperties +
-                "compose_url=${HTTP_BASE}/artifacts/${RSYNC_DIR}/${branch}/ostree\n"
-                "compose_rev=${commit}\n" +
+                "compose_url=${env.HTTP_BASE}/artifacts/${env.RSYNC_DIR}/${env.branch}/ostree\n"
+                "compose_rev=${env.commit}\n" +
                 "image_url=''\n" +
                 "image_name=''\n" +
                 "type=qcow2\n"
     } else if ((messageType == 'image.complete') || (messageType == 'test.smoke.running') ||
             (messageType == 'test.smoke.compelete')) {
         messageProperties = messageProperties +
-                "compose_url=${HTTP_BASE}/artifacts/${RSYNC_DIR}/${branch}/ostree\n"
-                "compose_rev=${commit}\n" +
-                "image_url=${image2boot}\n" +
-                "image_name=${image_name}\n" +
+                "compose_url=${env.HTTP_BASE}/artifacts/${env.RSYNC_DIR}/${env.branch}/ostree\n"
+                "compose_rev=${env.commit}\n" +
+                "image_url=${env.image2boot}\n" +
+                "image_name=${env.image_name}\n" +
                 "type=qcow2\n"
     } else {
         return [ topic, messageProperties, messageContent ]
@@ -179,7 +176,6 @@ def setMessageFields(messageType){
  *  msgContent - The content of the message
  */
 def sendMessage(msgProps, msgContent) {
-    // TODO: Determine if this method can be removed. No usages seen in code.
     sendCIMessage messageContent: msgContent,
             messageProperties: msgProps,
 
@@ -245,22 +241,20 @@ def setDefaultEnvVars(){
  *  currentStage - current stage running
  */
 def setStageEnvVars(currentStage){
-    // branch, basearch, fed_repo, & fed_rev should be accessible after calling injectFedmsgVars()
-
     def stages =
             ["ci-pipeline-rpmbuild"                : [
                     task                     : "./ci-pipeline/tasks/rpmbuild-test",
                     playbook                 : "ci-pipeline/playbooks/setup-rpmbuild-system.yml",
-                    ref                      : "fedora/${branch}/${basearch}/atomic-host",
-                    repo                     : "${fed_repo}",
-                    rev                      : "${fed_rev}",
+                    ref                      : "fedora/${env.branch}/${env.basearch}/atomic-host",
+                    repo                     : "${env.fed_repo}",
+                    rev                      : "${env.fed_rev}",
             ],
              "ci-pipeline-ostree-compose"          : [
                      task                     : "./ci-pipeline/tasks/ostree-compose",
                      playbook                 : "ci-pipeline/playbooks/rdgo-setup.yml",
-                     ref                      : "fedora/${branch}/${basearch}/atomic-host",
-                     repo                     : "${fed_repo}",
-                     rev                      : "${fed_rev}",
+                     ref                      : "fedora/${env.branch}/${env.basearch}/atomic-host",
+                     repo                     : "${env.fed_repo}",
+                     rev                      : "${env.fed_rev}",
                      basearch                 : "x86_64",
              ],
              "ci-pipeline-ostree-image-compose"    : [
@@ -297,25 +291,25 @@ def setStageEnvVars(currentStage){
  *  currentStage - current stage running
  */
 def rsyncData(currentStage){
-    def text = "export JENKINS_JOB_NAME=\"${JOB_NAME}-${currentStage}\"\n" +
-            "export RSYNC_USER=\"${RSYNC_USER}\"\n" +
-            "export RSYNC_SERVER=\"${RSYNC_SERVER}\"\n" +
-            "export RSYNC_DIR=\"${RSYNC_DIR}\"\n" +
-            "export FEDORA_PRINCIPAL=\"${FEDORA_PRINCIPAL}\"\n" +
-            "export JENKINS_BUILD_TAG=\"${BUILD_TAG}-${currentStage}\"\n" +
-            "export OSTREE_BRANCH=\"${OSTREE_BRANCH}\"\n"
+    def text = "export JENKINS_JOB_NAME=\"${env.JOB_NAME}-${currentStage}\"\n" +
+            "export RSYNC_USER=\"${env.RSYNC_USER}\"\n" +
+            "export RSYNC_SERVER=\"${env.RSYNC_SERVER}\"\n" +
+            "export RSYNC_DIR=\"${env.RSYNC_DIR}\"\n" +
+            "export FEDORA_PRINCIPAL=\"${env.FEDORA_PRINCIPAL}\"\n" +
+            "export JENKINS_BUILD_TAG=\"${env.BUILD_TAG}-${currentStage}\"\n" +
+            "export OSTREE_BRANCH=\"${env.OSTREE_BRANCH}\"\n"
 
     if (currentStage in ['ci-pipeline-ostree-compose', 'ci-pipeline-ostree-iamge-compose',
                          'ci-pipeline-ostree-image-boot-sanity', 'ci-pipeline-ostree-boot-sanity']) {
         text = text +
-                "export HTTP_BASE=\"${HTTP_BASE}\"\n" +
-                "export branch=\"${branch}\"\n"
+                "export HTTP_BASE=\"${env.HTTP_BASE}\"\n" +
+                "export branch=\"${env.branch}\"\n"
     }
     if (currentStage == 'ci-pipeline-rpmbuild') {
         text = text +
-                "export fed_repo=\"${fed_repo}\"\n" +
-                "export fed_branch=\"${fed_branch}\"\n" +
-                "export fed_rev=\"${fed_rev}\"\n"
+                "export fed_repo=\"${env.fed_repo}\"\n" +
+                "export fed_branch=\"${env.fed_branch}\"\n" +
+                "export fed_rev=\"${env.fed_rev}\"\n"
 
     } else if (currentStage == 'ci-pipeline-ostree-image-boot-sanity') {
         text = text +
@@ -330,7 +324,7 @@ def rsyncData(currentStage){
 
     writeFile file: "${env.ORIGIN_WORKSPACE}/task.env",
             text: text
-    runTaskAndReturnLogs(currentStage)
+    runTaskAndReturnLogs(currentStage, 'duffy-key')
 
 }
 
@@ -341,16 +335,16 @@ def rsyncData(currentStage){
  *  currentStage - current stage running
  */
 def provisionResources(currentStage){
-    def duffyOp = "--allocate"
-    allocDuffy(currentStage, duffyOp)
 
-    echo "Duffy Allocate ran for stage ${currentStage} with option ${duffyOp}\r\n" +
-            "ORIGIN_WORKSPACE=${ORIGIN_WORKSPACE}\r\n" +
-            "ORIGIN_BUILD_TAG=${ORIGIN_BUILD_TAG}\r\n" +
-            "ORIGIN_CLASS=${ORIGIN_CLASS}"
+    utils.allocateDuffyCciskel()
 
-    job_props = "${ORIGIN_WORKSPACE}/job.props"
-    job_props_groovy = "${ORIGIN_WORKSPACE}/job.groovy"
+    echo "Duffy Allocate ran for stage ${currentStage} with option --allocate\r\n" +
+            "ORIGIN_WORKSPACE=${env.ORIGIN_WORKSPACE}\r\n" +
+            "ORIGIN_BUILD_TAG=${env.ORIGIN_BUILD_TAG}\r\n" +
+            "ORIGIN_CLASS=${env.ORIGIN_CLASS}"
+
+    job_props = "${env.ORIGIN_WORKSPACE}/job.props"
+    job_props_groovy = "${env.ORIGIN_WORKSPACE}/job.groovy"
     convertProps(job_props, job_props_groovy)
     load(job_props_groovy)
 
@@ -363,58 +357,13 @@ def provisionResources(currentStage){
  *   currentStage - current stage running
  */
 def teardownResources(currentStage){
-    def duffyOp = "--teardown"
-    allocDuffy(currentStage, duffyOp)
 
-    // DUFFY_HOST should exist as an env var from injecting the job props
-    // generated by calling provisionResources() for currentStage
-    echo "Duffy Deallocate ran for stage ${currentStage} with option ${duffyOp}\r\n" +
-            "DUFFY_HOST=${DUFFY_HOST}"
+    utils.teardownDuffyCciskel()
+
+    echo "Duffy Deallocate ran for stage ${currentStage} with option --teardown\r\n" +
+            "DUFFY_HOST=${env.DUFFY_HOST}"
 }
 
-/**
- * Library to provision or teardown resources based on the duffyOp
- *
- * variables
- *  stage - current stage running
- *  duffyOp - either "--allocate" or "--teardown"
- */
-
-def allocDuffy(stage, duffyOp) {
-    env.DUFFY_OP = duffyOp
-
-    echo "Currently in stage: ${stage} ${env.DUFFY_OP} resources"
-    env.ORIGIN_WORKSPACE="${env.WORKSPACE}/${stage}"
-    env.ORIGIN_BUILD_TAG="${env.BUILD_TAG}-${stage}"
-    env.ORIGIN_CLASS="builder"
-    env.DUFFY_JOB_TIMEOUT_SECS="3600"
-
-    withCredentials([file(credentialsId: 'duffy-key', variable: 'DUFFY_KEY')]) {
-        sh '''
-            #!/bin/bash
-            set -xeuo pipefail
-    
-            cp ${DUFFY_KEY} ~/duffy.key
-            chmod 600 ~/duffy.key
-
-            mkdir -p ${ORIGIN_WORKSPACE}
-            # If we somehow got called without an op, do nothing.
-            if test -z "${DUFFY_OP:-}"; then
-              exit 0
-            fi
-            if test -n "${ORIGIN_WORKSPACE:-}"; then
-              pushd ${ORIGIN_WORKSPACE}
-            fi
-            if test -n "${ORIGIN_CLASS:-}"; then
-                exec ${WORKSPACE}/cciskel/cciskel-duffy ${DUFFY_OP} --prefix=ci-pipeline --class=${ORIGIN_CLASS} --jobid=${ORIGIN_BUILD_TAG} \
-                    --timeout=${DUFFY_JOB_TIMEOUT_SECS:-0} --count=${DUFFY_COUNT:-1}
-            else
-                exec ${WORKSPACE}/cciskel/cciskel-duffy ${DUFFY_OP}
-            fi
-            exit
-        '''
-    }
-}
 
 def convertProps(file1, file2) {
     def command = $/awk -F'=' '{print "env."$1"=\""$2"\""}' ${file1} > ${file2}/$

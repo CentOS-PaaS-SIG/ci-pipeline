@@ -77,13 +77,13 @@ node('fedora-atomic-inline') {
                     pipelineUtils.provisionResources(currentStage)
 
                     // Stage resources - RPM build system
-                    pipelineUtils.setupStage(current_stage, 'fedora-atomic-key')
+                    pipelineUtils.setupStage(currentStage, 'fedora-atomic-key')
 
                     // Rsync Data
                     pipelineUtils.rsyncData(currentStage)
 
-                    def package_props = "${ORIGIN_WORKSPACE}/logs/package_props.txt"
-                    def package_props_groovy = "${ORIGIN_WORKSPACE}/package_props.groovy"
+                    def package_props = "${env.ORIGIN_WORKSPACE}/logs/package_props.txt"
+                    def package_props_groovy = "${env.ORIGIN_WORKSPACE}/package_props.groovy"
                     pipelineUtils.convertProps(package_props, package_props_groovy)
                     load(package_props_groovy)
 
@@ -95,9 +95,6 @@ node('fedora-atomic-inline') {
 
                     // Send message org.centos.prod.ci.pipeline.package.complete on fedmsg
                     sendMessage(messageProperties, messageContent)
-
-                    pipelineUtils.checkLastImage(currentStage, checkRsyncDataDir=false)
-
                 }
 
                 currentStage = "ci-pipeline-ostree-compose"
@@ -115,7 +112,7 @@ node('fedora-atomic-inline') {
                     pipelineUtils.provisionResources(currentStage)
 
                     // Stage resources - ostree compose
-                    pipelineUtils.setupStage(current_stage, 'fedora-atomic-key')
+                    pipelineUtils.setupStage(currentStage, 'fedora-atomic-key')
 
                     // Rsync Data
                     pipelineUtils.rsyncData(currentStage)
@@ -134,7 +131,7 @@ node('fedora-atomic-inline') {
                     // Send message org.centos.prod.ci.pipeline.package.complete on fedmsg
                     sendMessage(messageProperties, messageContent)
 
-                    checkLastImage(currentStage)
+                    pipelineUtils.checkLastImage(currentStage)
                 }
 
                 currentStage = "ci-pipeline-ostree-image-compose"
@@ -154,7 +151,7 @@ node('fedora-atomic-inline') {
                         pipelineUtils.provisionResources(currentStage)
 
                         // Stage resources - ostree image compose
-                        pipelineUtils.setupStage(current_stage, 'fedora-atomic-key')
+                        pipelineUtils.setupStage(currentStage, 'fedora-atomic-key')
 
                         // Rsync Data
                         pipelineUtils.rsyncData(currentStage)
@@ -193,7 +190,7 @@ node('fedora-atomic-inline') {
                         pipelineUtils.provisionResources(currentStage)
 
                         // Stage resources - ostree image boot sanity
-                        pipelineUtils.setupStage(current_stage, 'fedora-atomic-key')
+                        pipelineUtils.setupStage(currentStage, 'fedora-atomic-key')
 
                         // Rsync Data
                         pipelineUtils.rsyncData(currentStage)
@@ -220,7 +217,7 @@ node('fedora-atomic-inline') {
                     pipelineUtils.provisionResources(currentStage)
 
                     // Stage resources - ostree boot sanity
-                    pipelineUtils.setupStage(current_stage, 'fedora-atomic-key')
+                    pipelineUtils.setupStage(currentStage, 'fedora-atomic-key')
 
                     // Rsync Data
                     pipelineUtils.rsyncData(currentStage)
@@ -255,7 +252,7 @@ node('fedora-atomic-inline') {
                     pipelineUtils.provisionResources(currentStage)
 
                     // Stage resources - atomic host tests
-                    pipelineUtils.setupStage(current_stage, 'fedora-atomic-key')
+                    pipelineUtils.setupStage(currentStage, 'fedora-atomic-key')
 
                     // Teardown resources
                     pipelineUtils.teardownResources(currentStage)
