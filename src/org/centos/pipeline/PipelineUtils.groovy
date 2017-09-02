@@ -178,7 +178,6 @@ def setMessageFields(messageType){
 def sendMessage(msgProps, msgContent) {
     sendCIMessage messageContent: msgContent,
             messageProperties: msgProps,
-
             messageType: 'Custom',
             overrides: [topic: "${topic}"],
             providerName: "${MSG_PROVIDER}"
@@ -316,9 +315,9 @@ def rsyncData(currentStage){
                 "export ANSIBLE_HOST_KEY_CHECKING=\"False\"\n"
     } else if (currentStage == 'ci-pipeline-ostree-boot-sanity') {
         text = text +
-                "export fed_repo=\"${fed_repo}\"\n" +
-                "export image2boot=\"${image2boot}\"\n" +
-                "export commit=\"${commit}\"\n" +
+                "export fed_repo=\"${env.fed_repo}\"\n" +
+                "export image2boot=\"${env.image2boot}\"\n" +
+                "export commit=\"${env.commit}\"\n" +
                 "export ANSIBLE_HOST_KEY_CHECKING=\"False\"\n"
     }
 
