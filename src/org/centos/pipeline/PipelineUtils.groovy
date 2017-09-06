@@ -241,7 +241,7 @@ def setDefaultEnvVars(envMap=null){
     if (env.MAIN_TOPIC.toLowerCase().contains('staging')) {
         env.RSYNC_DIR = env.RSYNC_DIR ?: 'fedora-atomic/staging'
     } else {
-        env.RSYNC_DIR = env.RSYNC_DIR ?: 'fedora-atomic/production'
+        env.RSYNC_DIR = env.RSYNC_DIR ?: 'fedora-atomic'
     }
     env.basearch = env.basearch ?: 'x86_64'
     env.OSTREE_BRANCH = env.OSTREE_BRANCH ?: ''
