@@ -234,7 +234,7 @@ def setDefaultEnvVars(envMap=null){
     // If we're working with a staging instance:
     //      We default to an RSYNC_DIR of fedora-atomic/staging
     // If we're working with a production instance:
-    //      We default to an RSYNC_DIR of fedora-atomic/production
+    //      We default to an RSYNC_DIR of fedora-atomic
     // Regardless of whether we're working with staging or production,
     // if we're provided a value for RSYNC_DIR in the build parameters:
     //      We set the RSYNC_DIR to the value provided (this overwrites staging or production paths)
