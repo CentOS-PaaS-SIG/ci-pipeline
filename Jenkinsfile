@@ -624,10 +624,10 @@ podTemplate(name: 'fedora-atomic-inline', label: 'fedora-atomic-inline', cloud: 
                         echo "Duffy Deallocate ran for stage ${current_stage} with option ${env.DUFFY_OP}\r\n" +
                              "DUFFY_HOST=${env.DUFFY_HOST}"
 
-//                     step([$class: 'XUnitBuilder',
-//                          thresholds: [[$class: 'FailedThreshold', unstableThreshold: '1']],
-//                          tools: [[$class: 'JUnitType', pattern: "${env.ORIGIN_WORKSPACE}/logs/ansible_xunit.xml"]]]
-//                    )
+                     step([$class: 'XUnitBuilder',
+                          thresholds: [[$class: 'FailedThreshold', unstableThreshold: '1']],
+                          tools: [[$class: 'JUnitType', pattern: "**/**/*.xml"]]]
+                     )
 
                         // Send integration test complete message on fedmsg
                         env.topic = "${MAIN_TOPIC}.ci.pipeline.compose.test.integration.complete"
