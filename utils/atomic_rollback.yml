@@ -5,19 +5,27 @@
   - name: Copying wait for reboot logic from projectatomic/atomic-host-tests/common
     set_fact:
       real_ansible_host: "{{ ansible_host }}"
-  - name: Rollback the atomic host
-    shell: "atomic host rollback"
-  - name: Reboot the atomic host
-    shell: "sleep 3 && systemctl reboot"
-    async: 1
-    poll: 0
-  - name: Wait for host to go down
-    local_action:
-      wait_for host={{ real_ansible_host }}
-      port=22 state=absent delay=1 timeout=120
-    become: false
-  - name: Wait for the system to come back up
-    local_action:
-      wait_for host={{ real_ansible_host }}
-      port=22 state=started delay=30 timeout=120
-    become: false
+  - name: Get rpm-ostree status --json output
+    command: rpm-ostree status --json
+    register: ros
+  - name: Convert to JSON
+    set_fact:
+        ros_json: "{{ ros.stdout|from_json }}"
+  - block:
+    - name: Rollback the atomic host
+      shell: "atomic host rollback"
+    - name: Reboot the atomic host
+      shell: "sleep 3 && systemctl reboot"
+      async: 1
+      poll: 0
+    - name: Wait for host to go down
+      local_action:
+        wait_for host={{ real_ansible_host }}
+        port=22 state=absent delay=1 timeout=120
+      become: false
+    - name: Wait for the system to come back up
+      local_action:
+        wait_for host={{ real_ansible_host }}
+        port=22 state=started delay=30 timeout=120
+      become: false
+    when: ros_json['deployments'][1] is defined
