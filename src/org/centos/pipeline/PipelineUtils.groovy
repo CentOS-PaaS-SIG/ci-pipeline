@@ -1,7 +1,13 @@
 #!/usr/bin/groovy
 package org.centos.pipeline
 
+env.cicoPipelineLibRepo = env.cicoPipelineLibRepo ?: 'CentOS/cico-pipeline-library'
+env.cicoPipelineLibCommit = env.cicoPipelineLibCommit ?: 'master'
+library identifier: "cico-pipeline-library@${env.cicoPipelineLibCommit}",
+        retriever: modernSCM([$class: 'GitSCMSource',
+                              remote: "https://github.com/${env.cicoPipelineLibRepo}"])
 import org.centos.Utils
+
 import groovy.json.JsonSlurper
 
 utils = new Utils()
@@ -213,14 +219,30 @@ def injectFedmsgVars() {
 
 /**
  * Library to set default environmental variables. Performed once at start of Jenkinsfile
+ * variables
+ *  envMap - A map of key/value pairs which will be set as environmental variables.
  */
-def setDefaultEnvVars(){
+def setDefaultEnvVars(envMap=null){
     env.MAIN_TOPIC = env.MAIN_TOPIC ?: 'org.centos.prod'
     env.MSG_PROVIDER = env.MSG_PROVIDER ?: 'fedora-fedmsg'
     env.HTTP_BASE = env.HTTP_BASE ?: 'http://artifacts.ci.centos.org/artifacts/fedora-atomic'
     env.RSYNC_USER = env.RSYNC_USER ?: 'fedora-atomic'
     env.RSYNC_SERVER = env.RSYNC_SERVER ?: 'artifacts.ci.centos.org'
-    env.RSYNC_DIR = env.RSYNC_DIR ?: 'fedora-atomic'
+
+    // Check if we're working with a staging or production instance by
+    // seeing if the main topic contains the word 'staging'
+    // If we're working with a staging instance:
+    //      We default to an RSYNC_DIR of fedora-atomic/staging
+    // If we're working with a production instance:
+    //      We default to an RSYNC_DIR of fedora-atomic/production
+    // Regardless of whether we're working with staging or production,
+    // if we're provided a value for RSYNC_DIR in the build parameters:
+    //      We set the RSYNC_DIR to the value provided (this overwrites staging or production paths)
+    if (env.MAIN_TOPIC.toLowerCase().contains('staging')) {
+        env.RSYNC_DIR = env.RSYNC_DIR ?: 'fedora-atomic/staging'
+    } else {
+        env.RSYNC_DIR = env.RSYNC_DIR ?: 'fedora-atomic/production'
+    }
     env.basearch = env.basearch ?: 'x86_64'
     env.OSTREE_BRANCH = env.OSTREE_BRANCH ?: ''
     env.commit = env.commit ?: ''
@@ -231,6 +253,12 @@ def setDefaultEnvVars(){
     env.nvr = env.nvr ?: ''
     env.original_spec_nvr = env.original_spec_nvr ?: ''
     env.ANSIBLE_HOST_KEY_CHECKING = env.ANSIBLE_HOST_KEY_CHECKING ?: 'False'
+
+    // If we've been provided an envMap, we set env.key = value
+    // Note: This may overwrite above specified values.
+    envMap.each { key, value ->
+        env."${key.toSTring().trim()}" = value.toString().trim()
+    }
 }
 
 /**
