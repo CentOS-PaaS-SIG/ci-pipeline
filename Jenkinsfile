@@ -626,7 +626,7 @@ podTemplate(name: 'fedora-atomic-inline', label: 'fedora-atomic-inline', cloud: 
 
                      step([$class: 'XUnitBuilder',
                           thresholds: [[$class: 'FailedThreshold', unstableThreshold: '1']],
-                          tools: [[$class: 'JUnitType', pattern: "**/**/*.xml"]]]
+                          tools: [[$class: 'JUnitType', pattern: "${env.ORIGIN_WORKSPACE}/logs/ansible_xunit.xml"]]]
                      )
 
                         // Send integration test complete message on fedmsg
