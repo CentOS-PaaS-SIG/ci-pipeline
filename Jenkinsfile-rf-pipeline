@@ -9,7 +9,7 @@ library identifier: "ci-pipeline@${env.ghprbActualCommit}",
 	                      traits: [[$class: 'RefSpecsSCMSourceTrait', templates: [[value: '+refs/pull/*:refs/remotes/origin/pr/*']]]],
                               remote: "https://github.com/${env.ghprbGhRepository}"])
 
-import org.centos.pipeline.PipelineUtils
+//import org.centos.pipeline.PipelineUtils
 
 def pipelineUtils = new PipelineUtils()
 
