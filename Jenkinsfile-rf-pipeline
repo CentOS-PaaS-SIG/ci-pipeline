@@ -11,7 +11,7 @@ library identifier: "ci-pipeline@${env.ghprbActualCommit}",
 
 //import org.centos.pipeline.PipelineUtils
 
-def pipelineUtils = new PipelineUtils()
+def pipelineUtils = new org.centos.pipeline.PipelineUtils()
 
 properties(
         [
