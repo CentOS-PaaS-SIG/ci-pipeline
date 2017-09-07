@@ -1,13 +1,14 @@
 env.ghprbGhRepository = env.ghprbGhRepository ?: 'CentOS-PaaS-SIG/ci-pipeline'
-env.ghprbActualCommit = env.ghprbActualCommit ?: 'master'
+//env.ghprbActualCommit = env.ghprbActualCommit ?: 'master'
+env.ghprbActualCommit = 'master'
 
 echo "Repo   : ${env.ghprbGhRepository}"
 echo "Commit : ${env.ghprbActualCommit}"
 
 library identifier: "ci-pipeline@${env.ghprbActualCommit}",
         retriever: modernSCM([$class: 'GitSCMSource',
-	                      traits: [[$class: 'RefSpecsSCMSourceTrait', templates: [[value: '+refs/pull/*:refs/remotes/origin/pr/*']]],
-	                                [$class: 'jenkins.plugins.git.traits.BranchDiscoveryTrait']],
+                      traits: [[$class: 'RefSpecsSCMSourceTrait', templates: [[value: '+refs/pull/*:refs/remotes/origin/pr/*']]],
+                               [$class: 'jenkins.plugins.git.traits.BranchDiscoveryTrait']],
                               remote: "https://github.com/${env.ghprbGhRepository}"])
 
 import org.centos.pipeline.PipelineUtils
