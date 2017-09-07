@@ -6,12 +6,13 @@ echo "Commit : ${env.ghprbActualCommit}"
 
 library identifier: "ci-pipeline@${env.ghprbActualCommit}",
         retriever: modernSCM([$class: 'GitSCMSource',
-	                      traits: [[$class: 'RefSpecsSCMSourceTrait', templates: [[value: '+refs/pull/*:refs/remotes/origin/pr/*']]]],
+	                      traits: [[$class: 'RefSpecsSCMSourceTrait', templates: [[value: '+refs/pull/*:refs/remotes/origin/pr/*']]],
+	                                [$class: 'jenkins.plugins.git.traits.BranchDiscoveryTrait']],
                               remote: "https://github.com/${env.ghprbGhRepository}"])
 
-//import org.centos.pipeline.PipelineUtils
+import org.centos.pipeline.PipelineUtils
 
-def pipelineUtils = new org.centos.pipeline.PipelineUtils()
+def pipelineUtils = new PipelineUtils()
 
 properties(
         [
