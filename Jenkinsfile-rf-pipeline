@@ -1,9 +1,9 @@
-env.ciPipelineUtilsRepo = env.ciPipelineUtilsRepo ?: 'CentOS-PaaS-SIG/ci-pipeline'
-env.ciPipelineUtilsCommit = env.ciPipelineUtilsCommit ?: 'master'
+env.ghprbGhRepository = env.ciPipelineUtilsRepo ?: 'CentOS-PaaS-SIG/ci-pipeline'
+env.ghprbActualCommit = env.ciPipelineUtilsCommit ?: 'master'
 
-library identifier: "ci-pipeline@${env.ciPipelineUtilsCommit}",
+library identifier: "ci-pipeline@${env.ghprbActualCommit}",
         retriever: modernSCM([$class: 'GitSCMSource',
-                              remote: "https://github.com/${env.ciPipelineUtilsRepo}"])
+                              remote: "https://github.com/${env.ghprbGhRepository}"])
 
 import org.centos.pipeline.PipelineUtils
 

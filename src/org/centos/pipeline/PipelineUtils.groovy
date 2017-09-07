@@ -1,11 +1,9 @@
 #!/usr/bin/groovy
 package org.centos.pipeline
 
-env.cicoPipelineLibRepo = env.cicoPipelineLibRepo ?: 'CentOS/cico-pipeline-library'
-env.cicoPipelineLibCommit = env.cicoPipelineLibCommit ?: 'master'
-library identifier: "cico-pipeline-library@${env.cicoPipelineLibCommit}",
+library identifier: "cico-pipeline-library@master",
         retriever: modernSCM([$class: 'GitSCMSource',
-                              remote: "https://github.com/${env.cicoPipelineLibRepo}"])
+                              remote: "https://github.com/CentOS/cico-pipeline-library"])
 import org.centos.Utils
 
 import groovy.json.JsonSlurper
