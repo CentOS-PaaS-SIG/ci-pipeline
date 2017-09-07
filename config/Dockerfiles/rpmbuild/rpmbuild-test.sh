@@ -31,8 +31,9 @@ git checkout -b test_branch
 truenvr=$(rpm -q --define "dist .$fed_branch" --queryformat '%{name}-%{version}-%{release}\n' --specfile ${fed_repo}.spec | head -n 1)
 # Find number of git commits in log to append to RELEASE before %{?dist}
 commits=$(git log --pretty=format:'' | wc -l)
-# Append to release in spec file before dist
-sed -i "/^Release:/s/%{?dist}/.${commits}.${fed_rev:0:7}%{?dist}/" ${fed_repo}.spec
+# %{?dist} seems to only be used when defining $release, but some
+# .spec files use different names for release, so just replace %{?dist}
+sed -i "s/%{?dist}/.${commits}.${fed_rev:0:7}%{?dist}/" ${fed_repo}.spec
 # fedpkg prep to unpack the tarball
 fedpkg --release ${fed_branch} prep
 VERSION=$(rpmspec --queryformat "%{VERSION}\n" -q ${fed_repo}.spec | head -n 1)
