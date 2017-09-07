@@ -62,7 +62,18 @@ node('fedora-atomic-inline') {
 
                     // SCM
                     dir('ci-pipeline') {
-                        git 'https://github.com/CentOS-PaaS-SIG/ci-pipeline'
+                        checkout([$class: 'GitSCM',
+                                  branches: [
+                                          [name: env.ghprbActualCommit]
+                                  ],
+                                  doGenerateSubmoduleConfigurations: false,
+                                  extensions: [],
+                                  submoduleCfg: [],
+                                  userRemoteConfigs: [
+                                          [refspec: '+refs/pull/:refs/remotes/origin/pr/',
+                                           url: "https://github.com/${env.ghprbGhRepository}"]
+                                  ]
+                        ])
                     }
                     dir('cciskel') {
                         git 'https://github.com/cgwalters/centos-ci-skeleton'
