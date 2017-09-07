@@ -62,6 +62,7 @@ node('fedora-atomic-inline') {
 
                     // SCM
                     dir('ci-pipeline') {
+                        // Checkout our ci-pipeline repo based on the value of env.ghprbActualCommit
                         checkout([$class: 'GitSCM',
                                   branches: [
                                           [name: env.ghprbActualCommit]
