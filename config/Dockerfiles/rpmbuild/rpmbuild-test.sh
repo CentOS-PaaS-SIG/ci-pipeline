@@ -83,7 +83,7 @@ popd
 
 ABIGAIL_BRANCH=$(echo ${fed_branch} | sed 's/./&c/1')
 if [ "${fed_branch}" = "master" ]; then
-    ABIGAIL_BRANCH="fc27"
+    ABIGAIL_BRANCH="fc99"
 fi
 # Make repo with the newly created rpm
 rm -rf ${RPMDIR}/*
