@@ -31,8 +31,9 @@ git checkout -b test_branch
 truenvr=$(rpm -q --define "dist .$fed_branch" --queryformat '%{name}-%{version}-%{release}\n' --specfile ${fed_repo}.spec | head -n 1)
 # Find number of git commits in log to append to RELEASE before %{?dist}
 commits=$(git log --pretty=format:'' | wc -l)
-# Append to release in spec file before dist
-sed -i "/^Release:/s/%{?dist}/.${commits}.${fed_rev:0:7}%{?dist}/" ${fed_repo}.spec
+# %{?dist} seems to only be used when defining $release, but some
+# .spec files use different names for release, so just replace %{?dist}
+sed -i "s/%{?dist}/.${commits}.${fed_rev:0:7}%{?dist}/" ${fed_repo}.spec
 # fedpkg prep to unpack the tarball
 fedpkg --release ${fed_branch} prep
 VERSION=$(rpmspec --queryformat "%{VERSION}\n" -q ${fed_repo}.spec | head -n 1)
@@ -40,7 +41,8 @@ VERSION=$(rpmspec --queryformat "%{VERSION}\n" -q ${fed_repo}.spec | head -n 1)
 DIR_TO_GO=$(dirname $(find . -name Makefile | tail -n 1))
 if [ -n "$DIR_TO_GO" ] ; then
     pushd $DIR_TO_GO
-    # Run configure if it exists, if not, no big deal
+    # Run configure if it exists, to prep for make test. If not, no big deal
+    # "Configure script can automatically adjust the Makefile according to the system requirements."
     ./configure
     # Run tests if they are there
     make test >> ${LOGDIR}/make_test_output.txt
