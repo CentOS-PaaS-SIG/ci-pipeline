@@ -1,5 +1,5 @@
-env.ghprbGhRepository = env.ciPipelineUtilsRepo ?: 'CentOS-PaaS-SIG/ci-pipeline'
-env.ghprbActualCommit = env.ciPipelineUtilsCommit ?: 'master'
+env.ghprbGhRepository = env.ghprbGhRepository ?: 'CentOS-PaaS-SIG/ci-pipeline'
+env.ghprbActualCommit = env.ghprbActualCommit ?: 'master'
 
 library identifier: "ci-pipeline@${env.ghprbActualCommit}",
         retriever: modernSCM([$class: 'GitSCMSource',

@@ -221,14 +221,30 @@ def injectFedmsgVars() {
  *  envMap - A map of key/value pairs which will be set as environmental variables.
  */
 def setDefaultEnvVars(envMap=null){
-    env.MAIN_TOPIC = env.MAIN_TOPIC ?: 'org.centos.prod'
+
+    // Check if we're working with a staging or production instance by
+    // evaluating if env.ghprbActual is null, and if it's not, whether
+    // it is something other than 'master'
+    // If we're working with a staging instance:
+    //      We default to an MAIN_TOPIC of 'org.centos.stage'
+    // If we're working with a production instance:
+    //      We default to an MAIN_TOPIC of 'org.centos.prod'
+    // Regardless of whether we're working with staging or production,
+    // if we're provided a value for MAIN_TOPIC in the build parameters:
+
+    if (env.ghprbActualCommit != null && env.ghprbActualCommit != "master") {
+        env.MAIN_TOPIC = env.MAIN_TOPIC ?: 'org.centos.stage'
+    } else {
+        env.MAIN_TOPIC = env.MAIN_TOPIC ?: 'org.centos.prod'
+    }
     env.MSG_PROVIDER = env.MSG_PROVIDER ?: 'fedora-fedmsg'
     env.HTTP_BASE = env.HTTP_BASE ?: 'http://artifacts.ci.centos.org/artifacts/fedora-atomic'
     env.RSYNC_USER = env.RSYNC_USER ?: 'fedora-atomic'
     env.RSYNC_SERVER = env.RSYNC_SERVER ?: 'artifacts.ci.centos.org'
 
     // Check if we're working with a staging or production instance by
-    // seeing if the main topic contains the word 'staging'
+    // evaluating if env.ghprbActual is null, and if it's not, whether
+    // it is something other than 'master'
     // If we're working with a staging instance:
     //      We default to an RSYNC_DIR of fedora-atomic/staging
     // If we're working with a production instance:
@@ -236,10 +252,11 @@ def setDefaultEnvVars(envMap=null){
     // Regardless of whether we're working with staging or production,
     // if we're provided a value for RSYNC_DIR in the build parameters:
     //      We set the RSYNC_DIR to the value provided (this overwrites staging or production paths)
-    if (env.MAIN_TOPIC.toLowerCase().contains('staging')) {
-        env.RSYNC_DIR = env.RSYNC_DIR ?: 'fedora-atomic/staging'
+    
+    if (env.ghprbActualCommit != null && env.ghprbActualCommit != "master") {
+        env.MAIN_TOPIC = env.RSYNC_DIR ?: 'fedora-atomic/staging'
     } else {
-        env.RSYNC_DIR = env.RSYNC_DIR ?: 'fedora-atomic'
+        env.MAIN_TOPIC = env.RSYNC_DIR ?: 'fedora-atomic'
     }
     env.basearch = env.basearch ?: 'x86_64'
     env.OSTREE_BRANCH = env.OSTREE_BRANCH ?: ''
