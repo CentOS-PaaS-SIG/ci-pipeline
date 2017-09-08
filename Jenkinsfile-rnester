@@ -64,4 +64,3 @@ podTemplate(name: 'fedora-atomic-inline', label: 'fedora-atomic-inline', cloud: 
                     }
                 }
             }
-        }
