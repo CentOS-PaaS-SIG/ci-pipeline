@@ -134,7 +134,7 @@ def setMessageFields(messageType){
                         "rev=${env.fed_rev}\n" +
                         "test_guidance=''\n" +
                         "username=${env.RSYNC_USER}\n" +
-                        "status=${currentBuild.currentRelease}\n"
+                        "status=${currentBuild.currentResult}\n"
     messageContent=''
 
     if (messageType == 'compose.running') {
@@ -251,7 +251,7 @@ def setDefaultEnvVars(envMap=null){
     if (env.ghprbActualCommit != null && env.ghprbActualCommit != "master") {
         env.RSYNC_DIR = env.RSYNC_DIR ?: 'fedora-atomic/staging'
     } else {
-        env.RSYNC_DIR = env.RSYNC_DIR ?: 'fedora-atomic'
+        env.RD = env.RSYNC_DIR ?: 'fedora-atomic'
     }
     env.basearch = env.basearch ?: 'x86_64'
     env.OSTREE_BRANCH = env.OSTREE_BRANCH ?: ''
