@@ -110,6 +110,10 @@ if [ -z "${RSYNC_PASSWORD}" ]; then echo "Told to rsync but no RSYNC_PASSWORD en
 # Perform rsync to artifacts.ci.centos.org
 mkdir -p ${RSYNC_BRANCH}
 mkdir repo
+# Rsync the empty directories over first, then the repo directory
+rsync -arv ${RSYNC_BRANCH}/ ${RSYNC_HOST}::${RSYNC_DIR}
+rsync -arv repo/ ${RSYNC_LOCATION}
+
 # Kill backgrounded jobs on exit
 function clean_up {
     # Delete the rsync lock we placed
@@ -135,9 +139,6 @@ while true; do
      fi
      sleep 60
 done
-# Rsync the empty directories over first, then the repo directory
-rsync -arv ${RSYNC_BRANCH}/ ${RSYNC_HOST}::${RSYNC_DIR}
-rsync -arv repo/ ${RSYNC_LOCATION}
 rsync --delete --stats -a ${RPMDIR} ${RSYNC_LOCATION}/repo
 if [ "$?" != 0 ]; then echo "ERROR: RSYNC REPO\nSTATUS: $?"; exit 1; fi
 # Update repo manifest file on artifacts.ci.centos.org
