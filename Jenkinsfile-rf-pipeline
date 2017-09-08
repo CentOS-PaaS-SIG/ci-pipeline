@@ -5,10 +5,6 @@ library identifier: "ci-pipeline@${env.ghprbActualCommit}",
         retriever: modernSCM([$class: 'GitSCMSource',
                               remote: "https://github.com/${env.ghprbGhRepository}"])
 
-import org.centos.pipeline.PipelineUtils
-
-def pipelineUtils = new PipelineUtils()
-
 properties(
         [
                 buildDiscarder(logRotator(artifactDaysToKeepStr: '30', artifactNumToKeepStr: '', daysToKeepStr: '90', numToKeepStr: '')),
