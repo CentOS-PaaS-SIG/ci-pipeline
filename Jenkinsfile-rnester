@@ -14,6 +14,10 @@ properties(
                 disableConcurrentBuilds(),
                 parameters(
                         [
+                                string(defaultValue: 'master', description: '', name: 'ghprbActualCommit'),
+                                string(defaultValue: 'CentOS-PaaS-SIG/ci-pipeline', description: '', name: 'ghprbGhRepository'),
+                                string(description: '', name: 'sha1'),
+                                string(description: '', name: 'ghprbPullId'),
                                 string(description: 'CI Message that triggered the pipeline', name: 'CI_MESSAGE'),
                                 string(defaultValue: 'f26', description: 'Fedora target branch', name: 'TARGET_BRANCH'),
                                 string(defaultValue: '', description: 'URL for rsync content', name: 'HTTP_BASE'),
