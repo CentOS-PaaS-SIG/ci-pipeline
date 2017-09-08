@@ -84,7 +84,7 @@ podTemplate(name: 'fedora-atomic-inline', label: 'fedora-atomic-inline', cloud: 
 
                                 // Set stage specific vars
                                 pipelineUtils.setStageEnvVars(currentStage)
-                                
+
                                 // Provision of resources
                                 pipelineUtils.provisionResources(currentStage)
 

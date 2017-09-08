@@ -5,7 +5,6 @@ import org.centos.Utils
 
 import groovy.json.JsonSlurper
 
-utils = new Utils()
 
 /**
  * Library to setup and configure the host the way ci-pipeline requires
@@ -375,7 +374,7 @@ def rsyncData(currentStage){
  */
 def provisionResources(currentStage){
 
-    utils.allocateDuffyCciskel()
+    Utils.allocateDuffyCciskel(currentStage)
 
     echo "Duffy Allocate ran for stage ${currentStage} with option --allocate\r\n" +
             "ORIGIN_WORKSPACE=${env.ORIGIN_WORKSPACE}\r\n" +
@@ -397,7 +396,7 @@ def provisionResources(currentStage){
  */
 def teardownResources(currentStage){
 
-    utils.teardownDuffyCciskel()
+    Utils.teardownDuffyCciskel(currentStage)
 
     echo "Duffy Deallocate ran for stage ${currentStage} with option --teardown\r\n" +
             "DUFFY_HOST=${env.DUFFY_HOST}"
