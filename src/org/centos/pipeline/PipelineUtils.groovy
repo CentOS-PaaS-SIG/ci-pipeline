@@ -1,10 +1,9 @@
 #!/usr/bin/groovy
 package org.centos.pipeline
 
-import org.centos.Utils
+import org.centos.*
 
 import groovy.json.JsonSlurper
-
 
 /**
  * Library to setup and configure the host the way ci-pipeline requires
