@@ -1,0 +1,55 @@
+env.ghprbGhRepository = env.ghprbGhRepository ?: 'CentOS-PaaS-SIG/ci-pipeline'
+env.ghprbActualCommit = env.ghprbActualCommit ?: 'master'
+
+library identifier: "ci-pipeline@${env.ghprbActualCommit}",
+        retriever: modernSCM([$class: 'GitSCMSource',
+                              remote: "https://github.com/${env.ghprbGhRepository}",
+                              traits: [[$class: 'jenkins.plugins.git.traits.BranchDiscoveryTrait'],
+                                       [$class: 'RefSpecsSCMSourceTrait',
+                                        templates: [[value: '+refs/heads/*:refs/remotes/@{remote}/*'],
+                                                    [value: '+refs/pull/*:refs/remotes/origin/pr/*']]]]])
+properties(
+        [
+                buildDiscarder(logRotator(artifactDaysToKeepStr: '30', artifactNumToKeepStr: '', daysToKeepStr: '90', numToKeepStr: '')),
+                disableConcurrentBuilds(),
+                parameters(
+                        [
+                                string(description: 'CI Message that triggered the pipeline', name: 'CI_MESSAGE'),
+                                string(defaultValue: 'f26', description: 'Fedora target branch', name: 'TARGET_BRANCH'),
+                                string(defaultValue: '', description: 'URL for rsync content', name: 'HTTP_BASE'),
+                                string(defaultValue: '', description: 'RSync User', name: 'RSYNC_USER'),
+                                string(defaultValue: '', description: 'RSync Server', name: 'RSYNC_SERVER'),
+                                string(defaultValue: '', description: 'RSync Dir', name: 'RSYNC_DIR'),
+                                string(defaultValue: 'ci-pipeline', description: 'Main project repo', name: 'PROJECT_REPO'),
+                                string(defaultValue: '', description: 'Main topic to publish on', name: 'MAIN_TOPIC'),
+                                string(defaultValue: 'fedora-fedmsg', description: 'Main provider to send messages on', name: 'MSG_PROVIDER'),
+                                string(defaultValue: '', description: 'Principal for authenticating with fedora build system', name: 'FEDORA_PRINCIPAL'),
+                                booleanParam(defaultValue: false, description: 'Force generation of the image', name: 'GENERATE_IMAGE'),
+                        ]
+                ),
+        ]
+)
+
+podTemplate(name: 'fedora-atomic-inline', label: 'fedora-atomic-inline', cloud: 'openshift', serviceAccount: 'jenkins',
+        idleMinutes: 1,  namespace: 'continuous-infra',
+        containers: [
+                // This adds the custom slave container to the pod. Must be first with name 'jnlp'
+                containerTemplate(name: 'jnlp',
+                        image: '172.30.254.79:5000/continuous-infra/jenkins-continuous-infra-slave',
+                        ttyEnabled: false,
+                        args: '${computer.jnlpmac} ${computer.name}',
+                        command: '',
+                        workingDir: '/tmp'),
+        ])
+
+node('fedora-atomic-inline') {
+    ansiColor('xterm') {
+        timestamps {
+            def currentStage = ""
+            deleteDir()
+
+            // Set our default env variables
+            pipelineUtils.setDefaultEnvVars()
+        }
+    }
+}
