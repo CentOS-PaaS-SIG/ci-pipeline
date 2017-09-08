@@ -205,7 +205,7 @@ def injectFedmsgVars() {
         if (env.fed_branch == 'master'){
             env.branch = 'rawhide'
         } else {
-            env.branch = env.fedbranch
+            env.branch = env.fed_branch
         }
     }
 }
