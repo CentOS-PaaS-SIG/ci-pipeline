@@ -41,6 +41,7 @@ podTemplate(name: 'fedora-atomic-inline', label: 'fedora-atomic-inline', cloud: 
                         command: '',
                         workingDir: '/tmp'),
         ])
+{
 
 node('fedora-atomic-inline') {
     ansiColor('xterm') {
@@ -62,15 +63,15 @@ node('fedora-atomic-inline') {
                     // SCM
                     dir('ci-pipeline') {
                         // Checkout our ci-pipeline repo based on the value of env.ghprbActualCommit
-                        checkout([$class: 'GitSCM',
-                                  branches: [
+                        checkout([$class                           : 'GitSCM', branches: [
                                           [name: env.ghprbActualCommit]
                                   ],
                                   doGenerateSubmoduleConfigurations: false,
-                                  extensions: [],
-                                  submoduleCfg: [],
-                                  userRemoteConfigs: [
-                                          [refspec: '+refs/pull/*:refs/remotes/origin/pr/* ',
+                                  extensions                       : [],
+                                  submoduleCfg                     : [],
+                                  userRemoteConfigs                : [
+                                          [refspec:
+                                                   '+refs/pull/*:refs/remotes/origin/pr/* ',
                                            url: "https://github.com/${env.ghprbGhRepository}"]
                                   ]
                         ])
@@ -255,9 +256,9 @@ node('fedora-atomic-inline') {
                     // Send message org.centos.prod.ci.pipeline.integration.queued on fedmsg
                     pipelineUtils.sendMessage(messageProperties, messageContent)
                 }
-
-                currentStage="ci-pipeline-atomic-host-tests"
-                stage(currentStage) {
+                currentStage= "ci-pipeline-atomic-host-tests"
+                stage(
+                        currentStage) {
                     pipelineUtils.setStageEnvVars(currentStage)
 
                     // Set our message topic, properties, and content
@@ -321,3 +322,4 @@ node('fedora-atomic-inline') {
         }
     }
 }
+    }
