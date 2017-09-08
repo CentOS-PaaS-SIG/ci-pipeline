@@ -42,7 +42,7 @@ podTemplate(name: 'fedora-atomic-inline', label: 'fedora-atomic-inline', cloud: 
                         workingDir: '/tmp'),
         ])
 
-node('fedora-atomic-inline') {
+node() {
     ansiColor('xterm') {
         timestamps {
             def currentStage = ""
