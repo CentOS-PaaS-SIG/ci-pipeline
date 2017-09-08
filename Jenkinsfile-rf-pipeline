@@ -86,7 +86,7 @@ node('fedora-atomic-inline') {
                     (topic, messageProperties, messageContent) = pipelineUtils.setMessageFields("package.running")
 
                     // Send message org.centos.prod.ci.pipeline.package.running on fedmsg
-                    sendMessage(messageProperties, messageContent)
+                    pipelineUtils.sendMessage(messageProperties, messageContent)
 
                     // Provision of resources
                     pipelineUtils.provisionResources(currentStage)
@@ -109,7 +109,7 @@ node('fedora-atomic-inline') {
                     (topic, messageProperties, messageContent) = pipelineUtils.setMessageFields("package.complete")
 
                     // Send message org.centos.prod.ci.pipeline.package.complete on fedmsg
-                    sendMessage(messageProperties, messageContent)
+                    pipelineUtils.sendMessage(messageProperties, messageContent)
                 }
 
                 currentStage = "ci-pipeline-ostree-compose"
@@ -121,7 +121,7 @@ node('fedora-atomic-inline') {
                     (topic, messageProperties, messageContent) = pipelineUtils.setMessageFields("compose.running")
 
                     // Send message org.centos.prod.ci.pipeline.compose.running on fedmsg
-                    sendMessage(messageProperties, messageContent)
+                    pipelineUtils.sendMessage(messageProperties, messageContent)
 
                     // Provision resources
                     pipelineUtils.provisionResources(currentStage)
@@ -144,7 +144,7 @@ node('fedora-atomic-inline') {
                     (topic, messageProperties, messageContent) = pipelineUtils.setMessageFields("package.complete")
 
                     // Send message org.centos.prod.ci.pipeline.package.complete on fedmsg
-                    sendMessage(messageProperties, messageContent)
+                    pipelineUtils.sendMessage(messageProperties, messageContent)
 
                     pipelineUtils.checkLastImage(currentStage)
                 }
@@ -160,7 +160,7 @@ node('fedora-atomic-inline') {
                         (topic, messageProperties, messageContent) = pipelineUtils.setMessageFields("image.running")
 
                         // Send message org.centos.prod.ci.pipeline.image.running on fedmsg
-                        sendMessage(messageProperties, messageContent)
+                        pipelineUtils.sendMessage(messageProperties, messageContent)
 
                         // Provision resources
                         pipelineUtils.provisionResources(currentStage)
@@ -183,7 +183,7 @@ node('fedora-atomic-inline') {
                         (topic, messageProperties, messageContent) = pipelineUtils.setMessageFields("image.complete")
 
                         // Send message org.centos.prod.ci.pipeline.image.complete on fedmsg
-                        sendMessage(messageProperties, messageContent)
+                        pipelineUtils.sendMessage(messageProperties, messageContent)
 
                     } else {
                         echo "Not Generating a New Image"
@@ -199,7 +199,7 @@ node('fedora-atomic-inline') {
                         (topic, messageProperties, messageContent) = pipelineUtils.setMessageFields("smoke.running")
 
                         // Send message org.centos.prod.ci.pipeline.smoke.running on fedmsg
-                        sendMessage(messageProperties, messageContent)
+                        pipelineUtils.sendMessage(messageProperties, messageContent)
 
                         // Provision resources
                         pipelineUtils.provisionResources(currentStage)
@@ -217,7 +217,7 @@ node('fedora-atomic-inline') {
                         (topic, messageProperties, messageContent) = pipelineUtils.setMessageFields("smoke.complete")
 
                         // Send message org.centos.prod.ci.pipeline.smoke.complete on fedmsg
-                        sendMessage(messageProperties, messageContent)
+                        pipelineUtils.sendMessage(messageProperties, messageContent)
 
                     } else {
                         echo "Not Running Image Boot Sanity on Image"
@@ -250,7 +250,7 @@ node('fedora-atomic-inline') {
                     (topic, messageProperties, messageContent) = pipelineUtils.setMessageFields("integration.queued")
 
                     // Send message org.centos.prod.ci.pipeline.integration.queued on fedmsg
-                    sendMessage(messageProperties, messageContent)
+                    pipelineUtils.sendMessage(messageProperties, messageContent)
                 }
 
                 currentStage="ci-pipeline-atomic-host-tests"
@@ -261,7 +261,7 @@ node('fedora-atomic-inline') {
                     (topic, messageProperties, messageContent) = pipelineUtils.setMessageFields("integration.running")
 
                     // Send message org.centos.prod.ci.pipeline.integration.running on fedmsg
-                    sendMessage(messageProperties, messageContent)
+                    pipelineUtils.sendMessage(messageProperties, messageContent)
 
                     // Provision resources
                     pipelineUtils.provisionResources(currentStage)
@@ -281,7 +281,7 @@ node('fedora-atomic-inline') {
                     (topic, messageProperties, messageContent) = pipelineUtils.setMessageFields("integration.complete")
 
                     // Send message org.centos.prod.ci.pipeline.integration.complete on fedmsg
-                    sendMessage(messageProperties, messageContent)
+                    pipelineUtils.sendMessage(messageProperties, messageContent)
                 }
 
             } catch (e) {
@@ -312,7 +312,7 @@ node('fedora-atomic-inline') {
                 (topic, messageProperties, messageContent) = pipelineUtils.setMessageFields("complete")
 
                 // Send message org.centos.prod.ci.pipeline.complete on fedmsg
-                sendMessage(messageProperties, messageContent)
+                pipelineUtils.sendMessage(messageProperties, messageContent)
 
             }
         }
