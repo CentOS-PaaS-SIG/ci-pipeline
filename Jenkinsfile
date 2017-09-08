@@ -772,8 +772,12 @@ def rsyncResults(stage) {
             cp ${FEDORA_KEYTAB} fedora.keytab
             chmod 0600 fedora.keytab
             
-            rm -f ~/.ssh/known_hosts
-            export ANSIBLE_HOST_KEY_CHECKING="False"
+            cat << EOF > ~/.ssh/config
+            Host *.ci.centos.org
+                StrictHostKeyChecking no
+                UserKnownHostsFile /dev/null
+            EOF
+            chmod 400 ~/.ssh/config
 
             source ${ORIGIN_WORKSPACE}/task.env
             (echo -n "export RSYNC_PASSWORD=" && cat ~/duffy.key | cut -c '-13') > rsync-password.sh
