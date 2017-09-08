@@ -162,9 +162,9 @@ def setMessageFields(messageType){
                 "image_name=${env.image_name}\n" +
                 "type=qcow2\n"
     } else {
-        return [ topic, messageProperties, messageContent ]
+        return [ 'topic': topic, 'properties': messageProperties, 'content': messageContent ]
     }
-    return [ topic, messageProperties, messageContent ]
+    return [ 'topic': topic, 'properties': messageProperties, 'content': messageContent ]
 }
 
 /**
@@ -249,9 +249,9 @@ def setDefaultEnvVars(envMap=null){
     //      We set the RSYNC_DIR to the value provided (this overwrites staging or production paths)
     
     if (env.ghprbActualCommit != null && env.ghprbActualCommit != "master") {
-        env.MAIN_TOPIC = env.RSYNC_DIR ?: 'fedora-atomic/staging'
+        env.RSYNC_DIR = env.RSYNC_DIR ?: 'fedora-atomic/staging'
     } else {
-        env.MAIN_TOPIC = env.RSYNC_DIR ?: 'fedora-atomic'
+        env.RSYNC_DIR = env.RSYNC_DIR ?: 'fedora-atomic'
     }
     env.basearch = env.basearch ?: 'x86_64'
     env.OSTREE_BRANCH = env.OSTREE_BRANCH ?: ''

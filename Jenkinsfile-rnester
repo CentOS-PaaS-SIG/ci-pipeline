@@ -14,10 +14,6 @@ properties(
                 disableConcurrentBuilds(),
                 parameters(
                         [
-                                string(defaultValue: 'master', description: '', name: 'ghprbActualCommit'),
-                                string(defaultValue: 'CentOS-PaaS-SIG/ci-pipeline', description: '', name: 'ghprbGhRepository'),
-                                string(defaultValue: '', description: '', name: 'sha1'),
-                                string(defaultValue: '', description: '', name: 'ghprbPullId'),
                                 string(description: 'CI Message that triggered the pipeline', name: 'CI_MESSAGE'),
                                 string(defaultValue: 'f26', description: 'Fedora target branch', name: 'TARGET_BRANCH'),
                                 string(defaultValue: '', description: 'URL for rsync content', name: 'HTTP_BASE'),
@@ -28,6 +24,10 @@ properties(
                                 string(defaultValue: '', description: 'Main topic to publish on', name: 'MAIN_TOPIC'),
                                 string(defaultValue: 'fedora-fedmsg', description: 'Main provider to send messages on', name: 'MSG_PROVIDER'),
                                 string(defaultValue: '', description: 'Principal for authenticating with fedora build system', name: 'FEDORA_PRINCIPAL'),
+                                string(defaultValue: 'master', description: '', name: 'ghprbActualCommit'),
+                                string(defaultValue: 'CentOS-PaaS-SIG/ci-pipeline', description: '', name: 'ghprbGhRepository'),
+                                string(defaultValue: '', description: '', name: 'sha1'),
+                                string(defaultValue: '', description: '', name: 'ghprbPullId'),
                                 booleanParam(defaultValue: false, description: 'Force generation of the image', name: 'GENERATE_IMAGE'),
                         ]
                 ),
@@ -86,6 +86,14 @@ podTemplate(name: 'fedora-atomic-inline', label: 'fedora-atomic-inline', cloud: 
                                 // Set stage specific vars
                                 pipelineUtils.setStageEnvVars(currentStage)
 
+                                //Set our message topic, properties, and content
+                                messageFields = pipelineUtils.setMessageFields("package.running")
+                                messageProperties = messageFields['properties']
+                                messageContent = messageFields['content']
+
+                                // Send message org.centos.prod.ci.pipeline.package.running on fedmsg
+                                pipelineUtils.sendMessage(messageProperties, messageContent)
+
                                 // Provision of resources
                                 pipelineUtils.provisionResources(currentStage)
 
@@ -102,6 +110,15 @@ podTemplate(name: 'fedora-atomic-inline', label: 'fedora-atomic-inline', cloud: 
 
                                 // Teardown resources
                                 pipelineUtils.teardownResources(currentStage)
+
+                                //Set our message topic, properties, and content
+                                messageFields = pipelineUtils.setMessageFields("package.complete")
+                                messageProperties = messageFields['properties']
+                                messageContent = messageFields['content']
+
+                                // Send message org.centos.prod.ci.pipeline.package.complete on fedmsg
+                                pipelineUtils.sendMessage(messageProperties, messageContent)
+
                             }
                         }
                     }
