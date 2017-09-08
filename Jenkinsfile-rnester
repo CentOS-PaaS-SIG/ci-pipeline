@@ -14,10 +14,6 @@ properties(
                 disableConcurrentBuilds(),
                 parameters(
                         [
-                                string(defaultValue: '{"commit":{"username":"zdohnal","stats":{"files":{"README.patches":{"deletions":0,"additions":30,"lines":30},"sources":{"deletions":1,"additions":1,"lines":2},"vim.spec":{"deletions":7,"additions":19,"lines":26},".gitignore":{"deletions":0,"additions":1,"lines":1},"vim-8.0-rhbz1365258.patch":{"deletions":0,"additions":12,"lines":12}},"total":{"deletions":8,"files":5,"additions":63,"lines":71}},"name":"Zdenek Dohnal","rev":"3ff427e02625f810a2cedb754342be44d6161b39","namespace":"rpms","agent":"zdohnal","summary":"Merge branch \'f25\' into f26","repo":"vim","branch":"f26","seen":false,"path":"/srv/git/repositories/rpms/vim.git","message":"Merge branch \'f25\' into f26\\n","email":"zdohnal@redhat.com"},"topic":"org.fedoraproject.prod.git.receive"}', description: '', name: 'CI_MESSAGE'),
-                                string(defaultValue: '', description: 'commit', name: 'ghprbActualCommit'),
-                                string(defaultValue: 'CentOS-PaaS-SIG/ci-pipeline', description: 'repo', name: 'ghprbGhRepository'),
-                                string(defaultValue: '317', description: 'pull id', name: 'ghprbPullId'),
                                 string(description: 'CI Message that triggered the pipeline', name: 'CI_MESSAGE'),
                                 string(defaultValue: 'f26', description: 'Fedora target branch', name: 'TARGET_BRANCH'),
                                 string(defaultValue: '', description: 'URL for rsync content', name: 'HTTP_BASE'),
@@ -45,28 +41,74 @@ podTemplate(name: 'fedora-atomic-inline', label: 'fedora-atomic-inline', cloud: 
                         command: '',
                         workingDir: '/tmp'),
         ])
-
         {
 
-            node() {
+            node('fedora-atomic-inline') {
                 ansiColor('xterm') {
                     timestamps {
                         def currentStage = ""
-                        deleteDir()
+                            deleteDir()
 
-                        // Set our default env variables
-                        pipelineUtils.setDefaultEnvVars()
+                            // Set our default env variables
+                            pipelineUtils.setDefaultEnvVars()
 
-                        // Parse the CI_MESSAGE and inject it as env vars
-                        pipelineUtils.injectFedmsgVars()
+                            // Parse the CI_MESSAGE and inject it as env vars
+                            pipelineUtils.injectFedmsgVars()
 
-                        // Set our current stage value
-                        currentStage = "ci-pipeline-rpmbuild"
-                        stage(currentStage) {
-                            // Set stage specific vars
-                            pipelineUtils.setStageEnvVars(currentStage)
+                            // Set our current stage value
+                            currentStage = "ci-pipeline-rpmbuild"
+                            stage(currentStage) {
+
+                                // SCM
+                                dir('ci-pipeline') {
+                                    // Checkout our ci-pipeline repo based on the value of env.ghprbActualCommit
+                                    checkout([$class                           : 'GitSCM', branches: [
+                                            [name: env.ghprbActualCommit]
+                                    ],
+                                              doGenerateSubmoduleConfigurations: false,
+                                              extensions                       : [],
+                                              submoduleCfg                     : [],
+                                              userRemoteConfigs                : [
+                                                      [refspec:
+                                                               '+refs/pull/*:refs/remotes/origin/pr/* ',
+                                                       url    : "https://github.com/${env.ghprbGhRepository}"]
+                                              ]
+                                    ])
+                                }
+                                dir('cciskel') {
+                                    git 'https://github.com/cgwalters/centos-ci-skeleton'
+                                }
+                                dir('sig-atomic-buildscripts') {
+                                    git 'https://github.com/CentOS/sig-atomic-buildscripts'
+                                }
+
+                                // Set stage specific vars
+                                pipelineUtils.setStageEnvVars(currentStage)
+
+                                //Set our message topic, properties, and content
+                                (topic, messageProperties, messageContent) = pipelineUtils.setMessageFields("package.running")
+
+                                // Send message org.centos.prod.ci.pipeline.package.running on fedmsg
+                                pipelineUtils.sendMessage(messageProperties, messageContent)
+
+                                // Provision of resources
+                                pipelineUtils.provisionResources(currentStage)
+
+                                // Stage resources - RPM build system
+                                pipelineUtils.setupStage(currentStage, 'fedora-atomic-key')
+
+                                // Rsync Data
+                                pipelineUtils.rsyncData(currentStage)
+
+                                def package_props = "${env.ORIGIN_WORKSPACE}/logs/package_props.txt"
+                                def package_props_groovy = "${env.ORIGIN_WORKSPACE}/package_props.groovy"
+                                pipelineUtils.convertProps(package_props, package_props_groovy)
+                                load(package_props_groovy)
+
+                                // Teardown resources
+                                pipelineUtils.teardownResources(currentStage)
+                            }
                         }
                     }
                 }
             }
-        }
