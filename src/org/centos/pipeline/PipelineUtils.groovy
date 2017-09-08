@@ -372,8 +372,9 @@ def rsyncData(currentStage){
  *  currentStage - current stage running
  */
 def provisionResources(currentStage){
+    def utils = new Utils()
 
-    Utils.allocateDuffyCciskel(currentStage)
+    utils.allocateDuffyCciskel(currentStage)
 
     echo "Duffy Allocate ran for stage ${currentStage} with option --allocate\r\n" +
             "ORIGIN_WORKSPACE=${env.ORIGIN_WORKSPACE}\r\n" +
@@ -394,8 +395,9 @@ def provisionResources(currentStage){
  *   currentStage - current stage running
  */
 def teardownResources(currentStage){
+    def utils = new Utils()
 
-    Utils.teardownDuffyCciskel(currentStage)
+    utils.teardownDuffyCciskel(currentStage)
 
     echo "Duffy Deallocate ran for stage ${currentStage} with option --teardown\r\n" +
             "DUFFY_HOST=${env.DUFFY_HOST}"
