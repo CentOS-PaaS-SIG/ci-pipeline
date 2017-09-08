@@ -84,13 +84,7 @@ podTemplate(name: 'fedora-atomic-inline', label: 'fedora-atomic-inline', cloud: 
 
                                 // Set stage specific vars
                                 pipelineUtils.setStageEnvVars(currentStage)
-
-                                //Set our message topic, properties, and content
-                                (topic, messageProperties, messageContent) = pipelineUtils.setMessageFields("package.running")
-
-                                // Send message org.centos.prod.ci.pipeline.package.running on fedmsg
-                                pipelineUtils.sendMessage(messageProperties, messageContent)
-
+                                
                                 // Provision of resources
                                 pipelineUtils.provisionResources(currentStage)
 
