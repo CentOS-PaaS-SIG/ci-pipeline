@@ -1,6 +1,6 @@
 import org.centos.pipeline.PipelineUtils
 
-class pipelineUtils implements Serializable {
+class pipelineUtils {
 
     def pipelineUtils = new PipelineUtils()
 
