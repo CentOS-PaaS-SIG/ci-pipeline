@@ -60,7 +60,13 @@ podTemplate(name: 'fedora-atomic-inline', label: 'fedora-atomic-inline', cloud: 
                         // Parse the CI_MESSAGE and inject it as env vars
                         pipelineUtils.injectFedmsgVars()
 
+                        // Set our current stage value
+                        currentStage = "ci-pipeline-rpmbuild"
+                        stage(currentStage) {
+                            // Set stage specific vars
+                            pipelineUtils.setStageEnvVars(currentStage)
                         }
                     }
                 }
             }
+        }
