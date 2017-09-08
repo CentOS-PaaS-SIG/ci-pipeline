@@ -772,11 +772,9 @@ def rsyncResults(stage) {
             cp ${FEDORA_KEYTAB} fedora.keytab
             chmod 0600 fedora.keytab
             
-            cat << EOF > ~/.ssh/config
-            Host *.ci.centos.org
-                StrictHostKeyChecking no
-                UserKnownHostsFile /dev/null
-            EOF
+            echo "Host *.ci.centos.org" > ~/.ssh/config
+            echo "    StrictHostKeyChecking no" >> ~/.ssh/config
+            echo "    UserKnownHostsFile /dev/null" >> ~/.ssh/config
             chmod 400 ~/.ssh/config
 
             source ${ORIGIN_WORKSPACE}/task.env
