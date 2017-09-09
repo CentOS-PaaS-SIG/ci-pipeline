@@ -103,7 +103,7 @@ echo "package_url=${HTTP_BASE}/${fed_branch}/repo/${fed_repo}_repo/$RPM_NAME" >>
 echo "original_spec_nvr=${truenvr}" >> ${LOGDIR}/package_props.txt
 RPM_NAME=$(echo $RPM_NAME | rev | cut -d '.' -f 2- | rev)
 echo "nvr=${RPM_NAME}" >> ${LOGDIR}/package_props.txt
-RSYNC_LOCATION="${RSYNC_HOST}::${RSYNC_DIR}/${RSYNC_BRANCH}/"
+RSYNC_LOCATION="${RSYNC_HOST}::${RSYNC_DIR}/${RSYNC_BRANCH}"
 
 # If we do rsync, make sure we have the password
 if [ -z "${RSYNC_PASSWORD}" ]; then echo "Told to rsync but no RSYNC_PASSWORD env var" ; exit 1 ; fi
@@ -111,8 +111,8 @@ if [ -z "${RSYNC_PASSWORD}" ]; then echo "Told to rsync but no RSYNC_PASSWORD en
 mkdir -p ${RSYNC_BRANCH}
 mkdir repo
 # Rsync the empty directories over first, then the repo directory
-rsync -arv ${RSYNC_BRANCH}/ ${RSYNC_HOST}::${RSYNC_DIR}/
-rsync -arv repo/ ${RSYNC_LOCATION}
+rsync -arv ${RSYNC_BRANCH}/ ${RSYNC_HOST}::${RSYNC_DIR}
+rsync -arvR repo/ ${RSYNC_LOCATION}
 
 # Kill backgrounded jobs on exit
 function clean_up {
