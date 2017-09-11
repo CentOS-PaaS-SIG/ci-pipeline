@@ -104,7 +104,7 @@ def checkLastImage(stage) {
     echo "Currently in stage: ${stage} in checkLastImage"
 
     sh '''
-        prev=$( date --date="$( curl -I --silent ${HTTP_BASE}/${RSYNC_DIR}/${branch}/images/latest-atomic.qcow2 | grep Last-Modified | sed s'/Last-Modified: //' )" +%s )
+        prev=$( date --date="$( curl -I --silent ${HTTP_BASE}/${branch}/images/latest-atomic.qcow2 | grep Last-Modified | sed s'/Last-Modified: //' )" +%s )
         cur=$( date +%s )
         
         elapsed=$((cur - prev))
@@ -144,16 +144,16 @@ def setMessageFields(messageType){
 
     if (messageType == 'compose.running') {
         messageProperties = messageProperties +
-                "compose_url=${env.HTTP_BASE}/artifacts/${env.RSYNC_DIR}/${env.branch}/ostree\n"
+                "compose_url=${env.HTTP_BASE}/${env.branch}/ostree\n"
                 "compose_rev=''\n"
     } else if ((messageType == 'compose.complete') || (messageType == 'test.integration.queued') ||
             (messageType == 'test.integration.running') || (messageType == 'test.integration.complete')) {
         messageProperties = messageProperties +
-            "compose_url=${env.HTTP_BASE}/artifacts/${env.RSYNC_DIR}/${env.branch}/ostree\n"
+            "compose_url=${env.HTTP_BASE}/${env.branch}/ostree\n"
             "compose_rev=${env.commit}\n"
     } else if (messageType == 'image.running') {
             messageProperties = messageProperties +
-                "compose_url=${env.HTTP_BASE}/artifacts/${env.RSYNC_DIR}/${env.branch}/ostree\n"
+                "compose_url=${env.HTTP_BASE}/${env.branch}/ostree\n"
                 "compose_rev=${env.commit}\n" +
                 "image_url=''\n" +
                 "image_name=''\n" +
@@ -161,7 +161,7 @@ def setMessageFields(messageType){
     } else if ((messageType == 'image.complete') || (messageType == 'test.smoke.running') ||
             (messageType == 'test.smoke.compelete')) {
         messageProperties = messageProperties +
-                "compose_url=${env.HTTP_BASE}/artifacts/${env.RSYNC_DIR}/${env.branch}/ostree\n"
+                "compose_url=${env.HTTP_BASE}/${env.branch}/ostree\n"
                 "compose_rev=${env.commit}\n" +
                 "image_url=${env.image2boot}\n" +
                 "image_name=${env.image_name}\n" +
@@ -237,27 +237,42 @@ def setDefaultEnvVars(envMap=null){
     } else {
         env.MAIN_TOPIC = env.MAIN_TOPIC ?: 'org.centos.prod'
     }
-    env.MSG_PROVIDER = env.MSG_PROVIDER ?: 'fedora-fedmsg'
-    env.HTTP_BASE = env.HTTP_BASE ?: 'http://artifacts.ci.centos.org/artifacts/fedora-atomic'
-    env.RSYNC_USER = env.RSYNC_USER ?: 'fedora-atomic'
+
+    // Set our base HTTP_SERVER value
+    env.HTTP_SERVER = env.HTTP_SERVER ?: 'http://artifacts.ci.centos.org'
+
+    // Set our base RSYNC_SERVER value
     env.RSYNC_SERVER = env.RSYNC_SERVER ?: 'artifacts.ci.centos.org'
+
+    env.RSYNC_USER = env.RSYNC_USER ?: 'fedora-atomic'
 
     // Check if we're working with a staging or production instance by
     // evaluating if env.ghprbActual is null, and if it's not, whether
     // it is something other than 'master'
     // If we're working with a staging instance:
     //      We default to an RSYNC_DIR of fedora-atomic/staging
+    //      We default to an HTTP_DIR of fedora-atomic/staging
     // If we're working with a production instance:
     //      We default to an RSYNC_DIR of fedora-atomic
+    //      We default to an HTTP_DIR of fedora-atomic
     // Regardless of whether we're working with staging or production,
-    // if we're provided a value for RSYNC_DIR in the build parameters:
-    //      We set the RSYNC_DIR to the value provided (this overwrites staging or production paths)
-    
+    // if we're provided a value for RSYNC_DIR or HTTP_DIR in the build parameters:
+    //      We set the RSYNC_DIR or HTTP_DIR to the value(s) provided (this overwrites staging or production paths)
+
     if (env.ghprbActualCommit != null && env.ghprbActualCommit != "master") {
         env.RSYNC_DIR = env.RSYNC_DIR ?: 'fedora-atomic/staging'
+        env.HTTP_DIR = env.HTTP_DIR ?: 'fedora-atomic/staging'
     } else {
         env.RSYNC_DIR = env.RSYNC_DIR ?: 'fedora-atomic'
+        env.HTTP_DIR = env.HTTP_DIR ?: 'fedora-atomic'
     }
+
+    // Set env.HTTP_BASE to our env.HTTP_SERVER/HTTP_DIR,
+    //  ex: http://artifacts.ci.centos.org/fedora-atomic/ (production)
+    //  ex: http://artifacts.ci.centos.org/fedora-atomic/staging (staging)
+    env.HTTP_BASE = "${env.HTTP_SERVER}/${env.HTTP_DIR}"
+
+    env.MSG_PROVIDER = env.MSG_PROVIDER ?: 'fedora-fedmsg'
     env.basearch = env.basearch ?: 'x86_64'
     env.OSTREE_BRANCH = env.OSTREE_BRANCH ?: ''
     env.commit = env.commit ?: ''

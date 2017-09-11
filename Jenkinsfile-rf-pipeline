@@ -16,7 +16,8 @@ properties(
                         [
                                 string(description: 'CI Message that triggered the pipeline', name: 'CI_MESSAGE'),
                                 string(defaultValue: 'f26', description: 'Fedora target branch', name: 'TARGET_BRANCH'),
-                                string(defaultValue: '', description: 'URL for rsync content', name: 'HTTP_BASE'),
+                                string(defaultValue: '', description: 'HTTP Server', name: 'HTTP_SERVER'),
+                                string(defaultValue: '', description: 'HTTP dir', name: 'HTTP_DIR'),
                                 string(defaultValue: '', description: 'RSync User', name: 'RSYNC_USER'),
                                 string(defaultValue: '', description: 'RSync Server', name: 'RSYNC_SERVER'),
                                 string(defaultValue: '', description: 'RSync Dir', name: 'RSYNC_DIR'),
