@@ -3,6 +3,7 @@ LABEL maintainer "https://github.com/CentOS-PaaS-SIG/ci-pipeline"
 LABEL description="This container is meant to \
 use fedpkg mock to create rpms.  It also rsyncs \
 them to artifacts.ci.centos.org."
+USER root
 
 # Install all package requirements
 RUN for i in {1..5} ; do dnf -y update && dnf clean all && break || sleep 10 ; done
@@ -18,6 +19,7 @@ RUN for i in {1..5} ; do dnf -y install ansible \
         go \
         libsolv \
         mock \
+        ncurses-devel \
         perl \
         python-krbV \
         pyxdg \

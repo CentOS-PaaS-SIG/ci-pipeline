@@ -44,6 +44,13 @@ class pipelineUtils implements Serializable {
         pipelineUtils.provisionResources(stage)
     }
 
+    def prepareCredentials() {
+        pipelineUtils.prepareCredentials()
+    }
+    def executeInContainer(containerName, script) {
+        pipelineUtils.executeInContainer(containerName, script)
+    }
+
     def teardownResources(stage) {
         pipelineUtils.teardownResources(stage)
     }
