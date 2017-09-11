@@ -107,12 +107,10 @@ RSYNC_LOCATION="${RSYNC_HOST}::${RSYNC_DIR}/${RSYNC_BRANCH}"
 
 # If we do rsync, make sure we have the password
 if [ -z "${RSYNC_PASSWORD}" ]; then echo "Told to rsync but no RSYNC_PASSWORD env var" ; exit 1 ; fi
-# Perform rsync to artifacts.ci.centos.org
-mkdir -p ${RSYNC_BRANCH}
-mkdir repo
-# Rsync the empty directories over first, then the repo directory
-rsync -arv ${RSYNC_BRANCH}/ ${RSYNC_HOST}::${RSYNC_DIR}
-rsync -arvR repo/ ${RSYNC_LOCATION}
+# Create our ${RSYNC_BRANCH}/repo directory structure
+mkdir -p ${RSYNC_BRANCH}/repo
+# Rsync our ${RSYNC_BRANCH}/repo directory structure over first
+rsync -arv ${RSYNC_BRANCH} ${RSYNC_HOST}::${RSYNC_DIR}
 
 # Kill backgrounded jobs on exit
 function clean_up {
