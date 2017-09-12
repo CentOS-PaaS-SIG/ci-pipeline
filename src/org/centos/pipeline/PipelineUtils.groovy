@@ -434,7 +434,7 @@ def rsyncData(currentStage){
             "export JENKINS_BUILD_TAG=\"${env.BUILD_TAG}-${currentStage}\"\n" +
             "export OSTREE_BRANCH=\"${env.OSTREE_BRANCH}\"\n"
 
-    if (currentStage in ['ci-pipeline-ostree-compose', 'ci-pipeline-ostree-iamge-compose',
+    if (currentStage in ['ci-pipeline-ostree-compose', 'ci-pipeline-ostree-image-compose',
                          'ci-pipeline-ostree-image-boot-sanity', 'ci-pipeline-ostree-boot-sanity']) {
         text = text +
                 "export HTTP_BASE=\"${env.HTTP_BASE}\"\n" +
