@@ -122,28 +122,30 @@ def checkLastImage(stage) {
 }
 
 /**
- * Library to check image last modified date
+ * Library to check last modified date for a given image file.
  *
  * variables
  *  stage - current stage running
+ *  imageFilePath - path to the file to examine last modified time for. Defaults to 'images/latest-atomic.qcow2'
  */
 
-def checkImageLastModifiedTime(stage){
-    echo "Currently in stage: ${stage} in checkImageLastModifiedTime"
+def checkImageLastModifiedTime(stage, String imageFilePath='images/latest-atomic.qcow2'){
 
-    def url = new URL("${HTTP_BASE}/${branch}/images/latest-atomic.qcow2")
+    def url = new URL("${HTTP_BASE}/${branch}/${imageFilePath}")
+    def fileName = imageFilePath.split('/')[-1]
+    def filePath = imageFilePath.split('/')[0..-2].join('/').replaceAll("^/", "")
+
+    echo "Currently in stage: ${stage} in checkImageLastModifiedTime for ${fileName} in /${filePath}/"
 
     def connection = (HttpURLConnection)url.openConnection()
     connection.setRequestMethod("HEAD")
 
     try {
         connection.connect()
-
-        def code = connection.getResponseCode()
-
+        def reponseCode = connection.getResponseCode()
         def needNewImage = false
 
-        if (code == 200) {
+        if (reponseCode == 200) {
             // Get our last modified date for the file in milliseconds
             def lastModifiedDate = connection.getLastModified()
 
@@ -160,7 +162,7 @@ def checkImageLastModifiedTime(stage){
             } else {
                 echo "Not creating new image. Last modified time of existing image is < 24 hours ago."
             }
-        } else if (code == 404) {
+        } else if (reponseCode == 404) {
             echo "Creating new image. Unable to locate existing image."
             needNewImage = true
         } else {
@@ -174,7 +176,7 @@ def checkImageLastModifiedTime(stage){
         }
 
     } catch (err) {
-        echo "There was a ERROR: ${err}, unable to determine if new image is needed"
+        echo "There was a fatal error getting the last modified time: ${err}, unable to determine if new image is needed"
     }
 }
 
