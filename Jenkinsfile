@@ -537,10 +537,10 @@ podTemplate(name: 'fedora-atomic-inline', label: 'fedora-atomic-inline', cloud: 
                         echo "Duffy Deallocate ran for stage ${current_stage} with option ${env.DUFFY_OP}\r\n" +
                              "DUFFY_HOST=${env.DUFFY_HOST}"
 
-//                    step([$class: 'XUnitBuilder',
-//                          thresholds: [[$class: 'FailedThreshold', unstableThreshold: '1']],
-//                          tools: [[$class: 'JUnitType', pattern: "${env.ORIGIN_WORKSPACE}/logs/*.xml"]]]
-//                    )
+                        step([$class: 'XUnitBuilder',
+                              thresholds: [[$class: 'FailedThreshold', unstableThreshold: '1']],
+                              tools: [[$class: 'JUnitType', pattern: "**/logs/ansible_xunit.xml"]]]
+                         )
 
                         // Send integration test queued message on fedmsg
                         env.topic = "${MAIN_TOPIC}.ci.pipeline.compose.test.integration.queued"
@@ -771,6 +771,11 @@ def rsyncResults(stage) {
     
             cp ${FEDORA_KEYTAB} fedora.keytab
             chmod 0600 fedora.keytab
+            
+            echo "Host *.ci.centos.org" > ~/.ssh/config
+            echo "    StrictHostKeyChecking no" >> ~/.ssh/config
+            echo "    UserKnownHostsFile /dev/null" >> ~/.ssh/config
+            chmod 600 ~/.ssh/config
 
             source ${ORIGIN_WORKSPACE}/task.env
             (echo -n "export RSYNC_PASSWORD=" && cat ~/duffy.key | cut -c '-13') > rsync-password.sh
@@ -801,12 +806,15 @@ def checkLastImage(stage) {
     echo "Currently in stage: ${stage} in checkLastImage"
 
     sh '''
-        prev=$( date --date="$( curl -I --silent ${HTTP_BASE}/${branch}/images/latest-atomic.qcow2 | grep Last-Modified | sed s'/Last-Modified: //' )" +%s )
+        meta=$(curl -f -I --silent ${HTTP_BASE}/${branch}/images/latest-atomic.qcow2)
+        curl_rc=$?
+
+        prev=$( date --date="$( echo $meta| grep Last-Modified | sed s'/Last-Modified: //' )" +%s )
         cur=$( date +%s )
         
         elapsed=$((cur - prev))
-        if [ $elapsed -gt 86400 ]; then
-            echo "Time for a new image since time elapsed is ${elapsed}"
+        if [ $curl_rc -ne 0 -o $elapsed -gt 86400 ]; then
+            echo "Time for a new image since time elapsed is ${elapsed} or no image exists curl return code:${curl_rc}"
             touch ${WORKSPACE}/NeedNewImage.txt
         else
             echo "No need for a new image not time yet since time elapsed is ${elapsed}"
