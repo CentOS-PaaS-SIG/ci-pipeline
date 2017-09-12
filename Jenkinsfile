@@ -806,12 +806,15 @@ def checkLastImage(stage) {
     echo "Currently in stage: ${stage} in checkLastImage"
 
     sh '''
-        prev=$( date --date="$( curl -I --silent ${HTTP_BASE}/${branch}/images/latest-atomic.qcow2 | grep Last-Modified | sed s'/Last-Modified: //' )" +%s )
+        meta=$(curl -f -I --silent ${HTTP_BASE}/${branch}/images/latest-atomic.qcow2)
+        curl_rc=$?
+
+        prev=$( date --date="$( echo $meta| grep Last-Modified | sed s'/Last-Modified: //' )" +%s )
         cur=$( date +%s )
         
         elapsed=$((cur - prev))
-        if [ $elapsed -gt 86400 ]; then
-            echo "Time for a new image since time elapsed is ${elapsed}"
+        if [ $curl_rc -ne 0 -o $elapsed -gt 86400 ]; then
+            echo "Time for a new image since time elapsed is ${elapsed} or no image exists curl return code:${curl_rc}"
             touch ${WORKSPACE}/NeedNewImage.txt
         else
             echo "No need for a new image not time yet since time elapsed is ${elapsed}"
