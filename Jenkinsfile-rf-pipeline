@@ -152,8 +152,7 @@ podTemplate(name: 'fedora-atomic-inline', label: 'fedora-atomic-inline', cloud: 
                         // Send message org.centos.prod.ci.pipeline.package.complete on fedmsg
                         pipelineUtils.sendMessage(messageFields['properties'], messageFields['content'])
 
-//                        pipelineUtils.checkLastImage(currentStage)
-                        pipelineUtils.checkImageLastModifiedTime(currentStage)
+                        pipelineUtils.checkLastImage(currentStage)
                     }
 
                     currentStage = "ci-pipeline-ostree-image-compose"

@@ -104,7 +104,7 @@ def checkLastImage(stage) {
     echo "Currently in stage: ${stage} in checkLastImage"
 
     sh '''
-        meta=$(curl -I --silent ${HTTP_BASE}/${branch}/images/latest-atomic.qcow2)
+        meta=$(curl -f -I --silent ${HTTP_BASE}/${branch}/images/latest-atomic.qcow2)
         curl_rc=$?
 
         prev=$( date --date="$( echo $meta| grep Last-Modified | sed s'/Last-Modified: //' )" +%s )
