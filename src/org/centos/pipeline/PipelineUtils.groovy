@@ -122,6 +122,64 @@ def checkLastImage(stage) {
 }
 
 /**
+ * Library to check image last modified date
+ *
+ * variables
+ *  stage - current stage running
+ */
+
+def checkImageLastModifiedTime(stage){
+    echo "Currently in stage: ${stage} in checkImageLastModifiedTime"
+
+    def url = new URL("${HTTP_BASE}/${branch}/images/latest-atomic.qcow2")
+
+    def connection = (HttpURLConnection)url.openConnection()
+    connection.setRequestMethod("HEAD")
+
+    try {
+        connection.connect()
+
+        def code = connection.getResponseCode()
+
+        def needNewImage = false
+
+        if (code == 200) {
+            // Get our last modified date for the file in milliseconds
+            def lastModifiedDate = connection.getLastModified()
+
+            // Create a calendar instance for right now and subtract 24 hours,
+            // then get that time in milliseconds
+            def calendar = Calendar.getInstance()
+            calendar.add(Calendar.HOUR_OF_DAY, -24) // 24 hours ago
+            def comparisonDate = calendar.getTimeInMillis()
+
+            // Determine if our last modified date is greater than or equal to 24 hours ago.
+            if ( lastModifiedDate <= comparisonDate ) {
+                echo "Creating new image. Last modified time of existing image >= 24 hours ago."
+                needNewImage = true
+            } else {
+                echo "Not creating new image. Last modified time of existing image is < 24 hours ago."
+            }
+        } else if (code == 404) {
+            echo "Creating new image. Unable to locate existing image."
+            needNewImage = true
+        } else {
+            echo "Error: ${connection.responseCode}: ${connection.getResponseMessage()}"
+            echo "Creating new image due to some error when getting last modified time of previous image"
+            needNewImage = true
+        }
+
+        if (needNewImage) {
+            new File("${WORKSPACE}/NeedNewImage.txt").createNewFile()
+        }
+
+    } catch (err) {
+        echo "There was a ERROR: ${err}, unable to determine if new image is needed"
+    }
+}
+
+
+/**
  * Library to set message fields to be published
  *
  * variables

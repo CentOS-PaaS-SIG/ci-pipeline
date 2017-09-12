@@ -12,6 +12,10 @@ class pipelineUtils implements Serializable {
         pipelineUtils.checkLastImage(stage)
     }
 
+    def checkImageLastModifiedTime(stage) {
+        pipelineUtils.checkImageLastModifiedTime(stage)
+    }
+
     def setMessageFields(messageType) {
         pipelineUtils.setMessageFields(messageType)
     }
