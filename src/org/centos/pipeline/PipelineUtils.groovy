@@ -127,8 +127,6 @@ def checkLastImage(stage) {
             fi
         }
 
-        HTTP_BASE="http://artifacts.ci.centos.org/fedora-atomic/staging"
-        branch="f26"
         headers=$(curl -f -I --silent ${HTTP_BASE}/${branch}/images/latest-atomic.qcow2)
         curl_rc=$?
         checkResponseCode $curl_rc $headers
