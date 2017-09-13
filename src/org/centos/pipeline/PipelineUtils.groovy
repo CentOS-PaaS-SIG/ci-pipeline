@@ -105,32 +105,25 @@ def checkLastImage(stage) {
 
     sh '''
         set +e
-
-        function checkResponseCode() {
-            curl_rc=$1
-            headers=$2
-        
-            if [ $curl_rc -eq 0 ]; then
-                meta=$(echo "${headers}" | grep -Fi 'Last-Modified' | sed s'/Last-Modified: //')
-                prev=$( date --date="$meta" +%s )
-                cur=$( date +%s )
-                elapsed=$((cur - prev))
-                if [ $elapsed -gt 86400 ]; then
-                    echo "Time for a new image since time elapsed is: ${elapsed}"
-                else
-                    echo "No need for a new image not time yet since time elapsed is ${elapsed}"
-                fi
+                
+        header=$(curl -sI "${HTTP_BASE}/${branch}/images/latest-atomic.qcow2"|grep -i '^Last-Modified:')
+        curl_rc=$?
+        if [ ${curl_rc} -eq 0 ]; then
+            l_modified=$(echo ${header}|sed s'/Last-Modified: //')
+            prev=$( date --date="$l_modified" +%s )
+            cur=$( date +%s )
+            if [ $((cur - prev)) -gt 86400 ]; then
+                echo "New atomic image needed. Existing atomic image is more than 24 hours old"
+                touch ${WORKSPACE}/NeedNewImage.txt
         
             else
-                echo "Time for a new image since no image exists. curl return code: $curl_rc"
-                touch ${WORKSPACE}/NeedNewImage.txt
+                echo "No new atomic image need. Existing atomic image is less than 24 hours old"
             fi
-        }
-
-        headers=$(curl -f -I --silent ${HTTP_BASE}/${branch}/images/latest-atomic.qcow2)
-        curl_rc=$?
-        checkResponseCode $curl_rc $headers
-
+        else
+            echo "New atomic image needed. Unable to find existing atomic image"
+            touch ${WORKSPACE}/NeedNewImage.txt
+        
+        fi
     '''
 }
 
