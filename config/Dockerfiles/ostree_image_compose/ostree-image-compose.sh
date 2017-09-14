@@ -50,11 +50,13 @@ release=$(ostree --repo=/home/output/ostree rev-parse $REF| cut -c -15)
 
 if [ -d "/home/output/images" ]; then
     for image in /home/output/images/fedora-atomic-*.qcow2; do
-        # Find the last image we pushed
-        prev_img=$(ls -tr /home/output/images/fedora-atomic-*.qcow2 | tail -n 1)
-        prev_rel=$(echo $prev_img | sed -e 's/.*-\([^-]*\).qcow2/\1/')
-        # Don't fail if the previous build has been pruned
-        (rpm-ostree db --repo=/home/output/ostree diff $prev_rel $release || echo "Previous build has been pruned") | tee /home/output/logs/packages.txt
+        if [ -e "$image" ]; then
+            # Find the last image we pushed
+            prev_img=$(ls -tr /home/output/images/fedora-atomic-*.qcow2 | tail -n 1)
+            prev_rel=$(echo $prev_img | sed -e 's/.*-\([^-]*\).qcow2/\1/')
+            # Don't fail if the previous build has been pruned
+            (rpm-ostree db --repo=/home/output/ostree diff $prev_rel $release || echo "Previous build has been pruned") | tee /home/output/logs/packages.txt
+        fi
         break
     done
 else
