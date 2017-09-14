@@ -43,8 +43,13 @@ properties(
         ]
 )
 
-podTemplate(name: 'fedora-atomic-inline-rf', label: 'fedora-atomic-inline-rf', cloud: 'openshift', serviceAccount: 'jenkins',
-        idleMinutes: 1,  namespace: OPENSHIFT_NAMESPACE,
+podTemplate(name: 'fedora-atomic-' + env.ghprbActualCommit,
+            label: 'fedora-atomic-' + env.ghprbActualCommit,
+            cloud: 'openshift',
+            serviceAccount: 'jenkins',
+            idleMinutes: 1,
+            namespace: OPENSHIFT_NAMESPACE,
+
         containers: [
                 // This adds the custom slave container to the pod. Must be first with name 'jnlp'
                 containerTemplate(name: 'jnlp',
@@ -63,7 +68,17 @@ podTemplate(name: 'fedora-atomic-inline-rf', label: 'fedora-atomic-inline-rf', c
                         workingDir: '/workDir'),
         ])
 {
-    node('fedora-atomic-inline-rf') {
+    node('fedora-atomic-' + env.ghprbActualCommit) {
+
+        def currentStage = ""
+
+        // Gather some info about the node we are running on for diagnostics
+        //
+        currentStage = "verify-pod"
+        stage(currentStage) {
+            pipelineUtils.verifyPod(OPENSHIFT_NAMESPACE, env.NODE_NAME)
+        }
+
         // We need to set env.HOME because the openshift slave image
         // forces this to /home/jenkins and then ~ expands to that
         // even though id == "root"
@@ -77,7 +92,6 @@ podTemplate(name: 'fedora-atomic-inline-rf', label: 'fedora-atomic-inline-rf', c
         //
         ansiColor('xterm') {
             timestamps {
-                def currentStage = ""
                 try {
                     deleteDir()
 
@@ -124,9 +138,9 @@ podTemplate(name: 'fedora-atomic-inline-rf', label: 'fedora-atomic-inline-rf', c
                         pipelineUtils.sendMessage(messageFields['properties'], messageFields['content'])
 
                         // Execute rpmbuild-test script in rpmbuild container
-                        pipelineUtils.executeInContainer("rpmbuild", "/tmp/rpmbuild-test.sh")
+                        pipelineUtils.executeInContainer(currentStage, "rpmbuild", "/tmp/rpmbuild-test.sh")
 
-                        def package_props = "${env.WORKSPACE}/logs/package_props.txt"
+                        def package_props = "${env.WORKSPACE}/" + currentStage + "/logs/package_props.txt"
                         def package_props_groovy = "${env.WORKSPACE}/package_props.groovy"
                         pipelineUtils.convertProps(package_props, package_props_groovy)
                         load(package_props_groovy)

@@ -510,7 +510,7 @@ def provisionResources(currentStage){
  * @param script Complete path to the script to execute
  * @return
  */
-def executeInContainer(containerName, script) {
+def executeInContainer(stageName, containerName, script) {
     //
     // Kubernetes plugin does not let containers inherit
     // env vars from host. We force them in.
@@ -525,8 +525,43 @@ def executeInContainer(containerName, script) {
             sh "ls -lR logs"
         }
     }
+    sh 'mkdir -p ' + stageName
+    sh 'mv -vf logs ' + stageName + "/logs"
 }
 
+def verifyPod(openshiftProject, nodeName) {
+    openshift.withCluster() {
+        openshift.withProject(openshiftProject) {
+            def describeStr = openshift.selector("pods", nodeName).describe()
+            out = describeStr.out.trim()
+            writeFile file: 'node-pod-description-' + nodeName + '.txt',
+                    text: out
+            archiveArtifacts 'node-pod-description-' + nodeName + '.txt'
+
+            timeout(60) {
+                echo "Ensuring all containers are running in pod: ${env.NODE_NAME}"
+                echo "Container names in pod ${env.NODE_NAME}: "
+                def names       = openshift.raw("get", "pod",  "${env.NODE_NAME}", '-o=jsonpath="{.status.containerStatuses[*].name}"')
+                echo names.out.trim()
+
+                waitUntil {
+                    def readyStates = openshift.raw("get", "pod",  "${env.NODE_NAME}", '-o=jsonpath="{.status.containerStatuses[*].ready}"')
+
+                    echo "Container statuses: "
+                    echo readyStates.out.trim()
+                    def anyNotReady = readyStates.out.trim().contains("false")
+                    if (anyNotReady) {
+                        echo "One or more containers not ready...see above message ^^"
+                        return false
+                    } else {
+                        echo "All containers ready!"
+                        return true
+                    }
+                }
+            }
+        }
+    }
+}
 /**
  *
  * @param credentialsId Credential ID for Duffy Key
@@ -557,6 +592,5 @@ def teardownResources(currentStage){
 
 def convertProps(file1, file2) {
     def command = $/awk -F'=' '{print "env."$1"=\""$2"\""}' ${file1} > ${file2}/$
-    echo command
     sh command
 }

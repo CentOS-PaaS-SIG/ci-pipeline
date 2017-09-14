@@ -1,6 +1,5 @@
 #!/bin/bash
 set +e
-set -x
 
 # Check to make sure we have all required vars
 if [ -z "${fed_repo}" ]; then echo "No fed_repo env var" ; exit 1 ; fi

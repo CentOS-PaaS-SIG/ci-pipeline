@@ -49,7 +49,7 @@ pipeline {
                                 openshift.withProject(openshiftProject) {
                                     def result = openshift.startBuild("rpmbuild",
                                             "--commit",
-                                            env.ghprbActualCommit,
+                                            "refs/pull/" + env.ghprbPullId + "/head",
                                             "--wait")
                                     def out = result.out.trim()
                                     echo "Resulting Build: " + out
