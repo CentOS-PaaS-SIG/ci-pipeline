@@ -1,4 +1,3 @@
-import org.centos.Messaging
 import org.centos.Utils
 import org.centos.pipeline.PipelineUtils
 
@@ -16,47 +15,13 @@ def call(body) {
 
     try {
         stage(current_stage) {
-            // Python script to parse the ${CI_MESSAGE} and write out a fedmsg_fields.groovy file
-            writeFile file: "${env.WORKSPACE}/parse_fedmsg.py",
-                    text: "#! /usr/bin/env python\n" +
-                            "\n" +
-                            "import json\n" +
-                            "import os\n" +
-                            "\n" +
-                            "ci_message = json.loads(os.environ['CI_MESSAGE'], encoding='utf-8')\n" +
-                            "\n" +
-                            "if 'commit' in ci_message:\n" +
-                            "    ci_message = ci_message.get('commit')\n" +
-                            "\n" +
-                            "    with open(\"{0}/fedmsg_fields.groovy\".format(os.environ['WORKSPACE']), 'wb') as f:\n" +
-                            "        for k in ci_message:\n" +
-                            "            if isinstance(ci_message[k], basestring):\n" +
-                            "                ci_message[k] = ci_message[k].replace('\"', \"'\").encode('utf-8')\n" +
-                            "            if k == 'message':\n" +
-                            "                ci_message[k] = ci_message[k].split('\\n')[0]\n" +
-                            "            f.write('env.fed_{0}=\"{1}\"\\n'.format(k.replace('-', '_'), ci_message[k]))"
 
-            // Chmod the python script to make it executable
-            sh 'chmod +x ${WORKSPACE}/parse_fedmsg.py'
-
-            // Execute the python script
-            sh '${WORKSPACE}/parse_fedmsg.py'
-
-            // Load fedmsg fields as environment variables
-            def fedmsg_fields_groovy = "${env.WORKSPACE}/fedmsg_fields.groovy"
-            load(fedmsg_fields_groovy)
+            // Parse the CI_MESSAGE and write it to ${env.WORKSPACE}/fedmsg_fields.groovy
+            pipelineUtils.injectFedmsgVars()
 
             // Add Branch and Message Topic to properties and inject
             sh '''
-                    set +e
-                    branch=${fed_branch}
-                    if [ "${branch}" = "master" ]; then
-                      branch="rawhide"
-                    fi
-                    
-                    
-                    # Save the bramch in job.properties
-                    echo "branch=${branch}" >> ${WORKSPACE}/job.properties
+                    set +e                                        
                     echo "topic=${MAIN_TOPIC}.ci.pipeline.package.queued" >> ${WORKSPACE}/job.properties
                     exit
                 '''
