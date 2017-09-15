@@ -1,6 +1,11 @@
 env.ghprbGhRepository = env.ghprbGhRepository ?: 'CentOS-PaaS-SIG/ci-pipeline'
 env.ghprbActualCommit = env.ghprbActualCommit ?: 'master'
 
+// Needed for podTemplate()
+env.RPMBUILD_TAG = env.RPMBUILD_TAG ?: 'stable'
+env.DOCKER_REPO_URL = env.DOCKER_REPO_URL ?: '172.30.254.79:5000'
+env.OPENSHIFT_NAMESPACE = env.OPENSHIFT_NAMESPACE ?: 'continuous-infra'
+
 library identifier: "ci-pipeline@${env.ghprbActualCommit}",
         retriever: modernSCM([$class: 'GitSCMSource',
                               remote: "https://github.com/${env.ghprbGhRepository}",
@@ -29,33 +34,71 @@ properties(
                                 string(defaultValue: 'CentOS-PaaS-SIG/ci-pipeline', description: '', name: 'ghprbGhRepository'),
                                 string(defaultValue: '', description: '', name: 'sha1'),
                                 string(defaultValue: '', description: '', name: 'ghprbPullId'),
+                                string(defaultValue: 'stable', description: 'Tag for rpmbuild image', name: 'RPMBUILD_TAG'),
+                                string(defaultValue: '172.30.254.79:5000', description: 'Docker repo url for Openshift instance', name: 'DOCKER_REPO_URL'),
+                                string(defaultValue: 'continuous-infra', description: 'Project namespace for Openshift operations', name: 'OPENSHIFT_NAMESPACE'),
                                 booleanParam(defaultValue: false, description: 'Force generation of the image', name: 'GENERATE_IMAGE'),
                         ]
                 ),
         ]
 )
 
-podTemplate(name: 'fedora-atomic-inline', label: 'fedora-atomic-inline', cloud: 'openshift', serviceAccount: 'jenkins',
-        idleMinutes: 1,  namespace: 'continuous-infra',
+podTemplate(name: 'fedora-atomic-' + env.ghprbActualCommit,
+            label: 'fedora-atomic-' + env.ghprbActualCommit,
+            cloud: 'openshift',
+            serviceAccount: 'jenkins',
+            idleMinutes: 1,
+            namespace: OPENSHIFT_NAMESPACE,
+
         containers: [
                 // This adds the custom slave container to the pod. Must be first with name 'jnlp'
                 containerTemplate(name: 'jnlp',
-                        image: '172.30.254.79:5000/continuous-infra/jenkins-continuous-infra-slave',
+                        image: DOCKER_REPO_URL + '/' + OPENSHIFT_NAMESPACE + '/jenkins-continuous-infra-slave',
                         ttyEnabled: false,
                         args: '${computer.jnlpmac} ${computer.name}',
                         command: '',
-                        workingDir: '/tmp'),
+                        workingDir: '/workDir'),
+                // This adds the rpmbuild test container to the pod.
+                containerTemplate(name: 'rpmbuild',
+                        alwaysPullImage: true,
+                        image: DOCKER_REPO_URL + '/' + OPENSHIFT_NAMESPACE + '/rpmbuild:' + RPMBUILD_TAG,
+                        ttyEnabled: true,
+                        command: 'cat',
+                        privileged: true,
+                        workingDir: '/workDir'),
         ])
 {
-    node('fedora-atomic-inline') {
+    node('fedora-atomic-' + env.ghprbActualCommit) {
+
+        def currentStage = ""
+
+        // Gather some info about the node we are running on for diagnostics
+        //
+        currentStage = "verify-pod"
+        stage(currentStage) {
+            pipelineUtils.verifyPod(OPENSHIFT_NAMESPACE, env.NODE_NAME)
+        }
+
+        // We need to set env.HOME because the openshift slave image
+        // forces this to /home/jenkins and then ~ expands to that
+        // even though id == "root"
+        // See https://github.com/openshift/jenkins/blob/master/slave-base/Dockerfile#L5
+        //
+        // Even the kubernetes plugin will create a pod with containers
+        // who $HOME env var will be its workingDir
+        // See https://github.com/jenkinsci/kubernetes-plugin/blob/master/src/main/java/org/csanchez/jenkins/plugins/kubernetes/KubernetesLauncher.java#L311
+        //
+        env.HOME = "/root"
+        //
         ansiColor('xterm') {
             timestamps {
-                def currentStage = ""
                 try {
                     deleteDir()
 
                     // Set our default env variables
                     pipelineUtils.setDefaultEnvVars()
+                    // Prepare Credentials (keys, passwords, etc)
+                    pipelineUtils.prepareCredentials()
 
                     // Parse the CI_MESSAGE and inject it as env vars
                     pipelineUtils.injectFedmsgVars()
@@ -94,22 +137,13 @@ podTemplate(name: 'fedora-atomic-inline', label: 'fedora-atomic-inline', cloud: 
                         // Send message org.centos.prod.ci.pipeline.package.running on fedmsg
                         pipelineUtils.sendMessage(messageFields['properties'], messageFields['content'])
 
-                        // Provision of resources
-                        pipelineUtils.provisionResources(currentStage)
+                        // Execute rpmbuild-test script in rpmbuild container
+                        pipelineUtils.executeInContainer(currentStage, "rpmbuild", "/tmp/rpmbuild-test.sh")
 
-                        // Stage resources - RPM build system
-                        pipelineUtils.setupStage(currentStage, 'fedora-atomic-key')
-
-                        // Rsync Data
-                        pipelineUtils.rsyncData(currentStage)
-
-                        def package_props = "${env.ORIGIN_WORKSPACE}/logs/package_props.txt"
-                        def package_props_groovy = "${env.ORIGIN_WORKSPACE}/package_props.groovy"
+                        def package_props = "${env.WORKSPACE}/" + currentStage + "/logs/package_props.txt"
+                        def package_props_groovy = "${env.WORKSPACE}/package_props.groovy"
                         pipelineUtils.convertProps(package_props, package_props_groovy)
                         load(package_props_groovy)
-
-                        // Teardown resources
-                        pipelineUtils.teardownResources(currentStage)
 
                         // Set our message topic, properties, and content
                         messageFields = pipelineUtils.setMessageFields("package.complete")

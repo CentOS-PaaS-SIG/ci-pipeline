@@ -40,8 +40,19 @@ class pipelineUtils implements Serializable {
         pipelineUtils.rsyncData(stage)
     }
 
+    def verifyPod(openshiftProject, nodeName) {
+        pipelineUtils.verifyPod(openshiftProject, nodeName)
+    }
+
     def provisionResources(stage) {
         pipelineUtils.provisionResources(stage)
+    }
+
+    def prepareCredentials() {
+        pipelineUtils.prepareCredentials()
+    }
+    def executeInContainer(stageName, containerName, script) {
+        pipelineUtils.executeInContainer(stageName, containerName, script)
     }
 
     def teardownResources(stage) {
