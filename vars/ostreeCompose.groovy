@@ -64,7 +64,7 @@ def call(body) {
                           "export JENKINS_JOB_NAME=\"${JOB_NAME}-${current_stage}\"\n" +
                           "export JENKINS_BUILD_TAG=\"${BUILD_TAG}-${current_stage}\"\n" +
                           "export OSTREE_BRANCH=\"${OSTREE_BRANCH}\"\n"
-            pipelineUtils.rsyncResults(current_stage, 'duffy-key')
+            pipelineUtils.runTaskAndReturnLogs(current_stage, 'duffy-key')
 
             def ostree_props = "${env.ORIGIN_WORKSPACE}/logs/ostree.props"
             def ostree_props_groovy = utils.convertProps(ostree_props)

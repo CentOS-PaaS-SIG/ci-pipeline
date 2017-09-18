@@ -62,7 +62,7 @@ def call(body) {
                               "export JENKINS_BUILD_TAG=\"${BUILD_TAG}-${current_stage}\"\n" +
                               "export OSTREE_BRANCH=\"${OSTREE_BRANCH}\"\n" +
                               "export ANSIBLE_HOST_KEY_CHECKING=\"False\"\n"
-                pipelineUtils.rsyncResults(current_stage, 'duffy-key')
+                pipelineUtils.runTaskAndReturnLogs(current_stage, 'duffy-key')
             } else {
                 echo "Not Running Image Boot Sanity on Image"
             }

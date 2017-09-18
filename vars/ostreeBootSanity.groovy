@@ -67,7 +67,7 @@ def call(body) {
                           "export OSTREE_BRANCH=\"${OSTREE_BRANCH}\"\n" +
                           "export ANSIBLE_HOST_KEY_CHECKING=\"False\"\n"
 
-            pipelineUtils.rsyncResults(current_stage, 'duffy-key')
+            pipelineUtils.runTaskAndReturnLogs(current_stage, 'duffy-key')
         }
     } catch (err) {
         echo "Error: Exception from " + current_stage + ":"
