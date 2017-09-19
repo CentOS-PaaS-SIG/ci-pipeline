@@ -44,10 +44,6 @@ pipeline {
         stage("Checkout") {
             steps {
                 checkout scm
-                script {
-                    echo "Prepare GHI tool"
-                    sh 'curl -sL https://raw.githubusercontent.com/stephencelis/ghi/master/ghi > ghi && chmod 755 ghi'
-                }
             }
         }
         stage("jenkins-continuous-infra-slave image build") {
@@ -124,18 +120,21 @@ def printLabelMap(map) {
  * @return
  */
 def sendPRCommentforTags(map) {
-    def msg = "\nOnce this PR is merged, the following manual commands are needed to place image(s) into production:\n"
-    msg = msg + "oc project " + openshiftProject + "\n"
+    def msg = "\nOnce this PR is merged, the following manual commands are needed to place image(s) into production:\n\n"
+    msg = msg + "\n+ oc login ```<openshift url>```\n"
+    msg = msg + "\n+ oc project " + openshiftProject + "\n"
     boolean onlyStable = true
     for (tag in map) {
         if (!tag.value.equals(STABLE_LABEL)) {
-            msg = msg + "oc tag ${openshiftProject}/${tag.key}:${tag.value} ${openshiftProject}/${tag.key}:${STABLE_LABEL}\n"
+            msg = msg + "+ oc tag ${openshiftProject}/${tag.key}:${tag.value} ${openshiftProject}/${tag.key}:${STABLE_LABEL}\n"
             onlyStable = false
         }
     }
     if (!onlyStable) {
+        echo "Prepare GHI tool"
         withCredentials([string(credentialsId: 'paas-bot', variable: 'TOKEN')]) {
             sh "git config --global ghi.token ${TOKEN}"
+            sh 'curl -sL https://raw.githubusercontent.com/stephencelis/ghi/master/ghi > ghi && chmod 755 ghi'
             sh './ghi comment ' + env.ghprbPullId + ' -m "' + msg + '"'
         }
     }
