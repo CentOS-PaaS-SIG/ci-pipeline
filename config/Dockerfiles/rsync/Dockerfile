@@ -11,7 +11,7 @@ RUN yum clean expire-cache
 RUN yum -y install rsync 
 
 # Copy the build script to the container
-COPY rsync.sh $HOME/
+COPY rsync.sh /tmp/rsync.sh
 
 # Run the build script
-ENTRYPOINT ["bash", "/root/rsync.sh"]
+ENTRYPOINT ["bash", "/tmp/rsync.sh"]
