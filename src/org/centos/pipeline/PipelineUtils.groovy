@@ -7,17 +7,17 @@ import groovy.json.JsonSlurper
 
 /**
  * Library to setup and configure the host the way ci-pipeline requires
- *
- * variables
- *  stage - current stage running
- *  sshKey - ssh file credential name stored in Jenkins credentials
+ * @param stage
+ * @param sshKey
+ * @return
  */
-def setupStage(stage, sshKey) {
+def setupStage(String stage, String sshKey) {
     echo "Currently in stage: ${stage} in setupStage"
 
     // TODO: Either remove sshKey arg, or determine how to invoke second credentialsID and variable name based on arg.
     // Currently having an sshKey isn't that useful as we're still hard-coding the public credentialsID entry
-    withCredentials([file(credentialsId: sshKey, variable: 'FEDORA_ATOMIC_KEY'), file(credentialsId: 'fedora-atomic-pub-key', variable: 'FEDORA_ATOMIC_PUB_KEY')]) {
+    withCredentials([file(credentialsId: sshKey, variable: 'FEDORA_ATOMIC_KEY'),
+                     file(credentialsId: 'fedora-atomic-pub-key', variable: 'FEDORA_ATOMIC_PUB_KEY')]) {
         sh '''
             #!/bin/bash
             set -xeuo pipefail
@@ -45,15 +45,15 @@ def setupStage(stage, sshKey) {
 
 /**
  * Library to execute a task and rsync the logs back to artifacts.ci.centos.org
- *
- * variables
- *  stage - current stage running
- *  duffyKey - duffy file credential name stored in Jenkins credentials
+ * @param stage
+ * @param duffyKey
+ * @return
  */
-def runTaskAndReturnLogs(stage, duffyKey) {
+def runTaskAndReturnLogs(String stage, String duffyKey) {
     echo "Currently in stage: ${stage} in runTaskAndReturnLogs"
 
-    withCredentials([file(credentialsId: duffyKey, variable: 'DUFFY_KEY'), file(credentialsId: 'fedora-keytab', variable: 'FEDORA_KEYTAB')]) {
+    withCredentials([file(credentialsId: duffyKey, variable: 'DUFFY_KEY'),
+                     file(credentialsId: 'fedora-keytab', variable: 'FEDORA_KEYTAB')]) {
         sh '''
             #!/bin/bash
             set -xeuo pipefail
@@ -96,11 +96,10 @@ def runTaskAndReturnLogs(stage, duffyKey) {
 
 /**
  * Library to check last image
- *
- * variables
- *  stage - current stage running
+ * @param stage
+ * @return
  */
-def checkLastImage(stage) {
+def checkLastImage(String stage) {
     echo "Currently in stage: ${stage} in checkLastImage"
 
     sh '''
@@ -128,14 +127,19 @@ def checkLastImage(stage) {
 }
 
 /**
- * Library to check last modified date for a given image file.
+ *
  *
  * variables
  *  stage - current stage running
  *  imageFilePath - path to the file to examine last modified time for. Defaults to 'images/latest-atomic.qcow2'
  */
-
-def checkImageLastModifiedTime(stage, String imageFilePath='images/latest-atomic.qcow2'){
+/**
+ * Library to check last modified date for a given image file.
+ * @param stage
+ * @param imageFilePath
+ * @return
+ */
+def checkImageLastModifiedTime(String stage, String imageFilePath='images/latest-atomic.qcow2'){
 
     def url = new URL("${HTTP_BASE}/${branch}/${imageFilePath}")
     def fileName = imageFilePath.split('/')[-1]
@@ -189,11 +193,10 @@ def checkImageLastModifiedTime(stage, String imageFilePath='images/latest-atomic
 
 /**
  * Library to set message fields to be published
- *
- * variables
- *  messageType - ${MAIN_TOPIC}.ci.pipeline.<defined-in-README>
+ * @param messageType: ${MAIN_TOPIC}.ci.pipeline.<defined-in-README>
+ * @return
  */
-def setMessageFields(messageType){
+def setMessageFields(String messageType){
     topic = "${env.MAIN_TOPIC}.ci.pipeline.${messageType}"
     messageProperties = "topic=${topic}\n" +
                         "build_url=${env.BUILD_URL}\n" +
@@ -243,12 +246,11 @@ def setMessageFields(messageType){
 
 /**
  * Library to send message
- *
- * variables
- *  msgProps - The message properties
- *  msgContent - The content of the message
+ * @param msgProps - The message properties in key=value form, one key/value per line ending in '\n'
+ * @param msgContent - Message content.
+ * @return
  */
-def sendMessage(msgProps, msgContent) {
+def sendMessage(String msgProps, String msgContent) {
     sendCIMessage messageContent: msgContent,
             messageProperties: msgProps,
             messageType: 'Custom',
@@ -286,10 +288,10 @@ def injectFedmsgVars() {
 
 /**
  * Library to set default environmental variables. Performed once at start of Jenkinsfile
- * variables
- *  envMap - A map of key/value pairs which will be set as environmental variables.
+ * @param envMap: Key/value pairs which will be set as environmental variables.
+ * @return
  */
-def setDefaultEnvVars(envMap=null){
+def setDefaultEnvVars(Map envMap=null){
 
     // Check if we're working with a staging or production instance by
     // evaluating if env.ghprbActual is null, and if it's not, whether
@@ -361,12 +363,11 @@ def setDefaultEnvVars(envMap=null){
 }
 
 /**
- * Library to set stage specific environmental variables
- *
- * variables
- *  currentStage - current stage running
+ * Library to set stage specific environmental variables.
+ * @param stage - Current stage
+ * @return
  */
-def setStageEnvVars(currentStage){
+def setStageEnvVars(String stage){
     def stages =
             ["ci-pipeline-rpmbuild"                : [
                     task                     : "./ci-pipeline/tasks/rpmbuild-test",
@@ -404,43 +405,42 @@ def setStageEnvVars(currentStage){
             ]
 
     // Get the map of env var keys and values and write them to the env global variable
-    stages.get(currentStage).each { key, value ->
+    stages.get(stage).each { key, value ->
         env."${key}" = value
     }
 }
 
 /**
- * Library to create text and write to file based on current stage and calls runTaskAndReturnLogs() which rsyncs
- * the logs produced from executing a task to artifacts.ci.centos.org
- *
- * variables
- *  currentStage - current stage running
+ * Library to create a text string which is written to the file 'task.env' in the {env.ORIGIN_WORKSPACE} and call
+ * runTaskAndReturnLogs()
+ * @param stage - Current stage
+ * @return
  */
-def rsyncData(currentStage){
-    def text = "export JENKINS_JOB_NAME=\"${env.JOB_NAME}-${currentStage}\"\n" +
+def rsyncData(String stage){
+    def text = "export JENKINS_JOB_NAME=\"${env.JOB_NAME}-${stage}\"\n" +
             "export RSYNC_USER=\"${env.RSYNC_USER}\"\n" +
             "export RSYNC_SERVER=\"${env.RSYNC_SERVER}\"\n" +
             "export RSYNC_DIR=\"${env.RSYNC_DIR}\"\n" +
             "export FEDORA_PRINCIPAL=\"${env.FEDORA_PRINCIPAL}\"\n" +
-            "export JENKINS_BUILD_TAG=\"${env.BUILD_TAG}-${currentStage}\"\n" +
+            "export JENKINS_BUILD_TAG=\"${env.BUILD_TAG}-${stage}\"\n" +
             "export OSTREE_BRANCH=\"${env.OSTREE_BRANCH}\"\n"
 
-    if (currentStage in ['ci-pipeline-ostree-compose', 'ci-pipeline-ostree-image-compose',
+    if (stage in ['ci-pipeline-ostree-compose', 'ci-pipeline-ostree-image-compose',
                          'ci-pipeline-ostree-image-boot-sanity', 'ci-pipeline-ostree-boot-sanity']) {
         text = text +
                 "export HTTP_BASE=\"${env.HTTP_BASE}\"\n" +
                 "export branch=\"${env.branch}\"\n"
     }
-    if (currentStage == 'ci-pipeline-rpmbuild') {
+    if (stage == 'ci-pipeline-rpmbuild') {
         text = text +
                 "export fed_repo=\"${env.fed_repo}\"\n" +
                 "export fed_branch=\"${env.fed_branch}\"\n" +
                 "export fed_rev=\"${env.fed_rev}\"\n"
 
-    } else if (currentStage == 'ci-pipeline-ostree-image-boot-sanity') {
+    } else if (stage == 'ci-pipeline-ostree-image-boot-sanity') {
         text = text +
                 "export ANSIBLE_HOST_KEY_CHECKING=\"False\"\n"
-    } else if (currentStage == 'ci-pipeline-ostree-boot-sanity') {
+    } else if (stage == 'ci-pipeline-ostree-boot-sanity') {
         text = text +
                 "export fed_repo=\"${env.fed_repo}\"\n" +
                 "export image2boot=\"${env.image2boot}\"\n" +
@@ -450,22 +450,21 @@ def rsyncData(currentStage){
 
     writeFile file: "${env.ORIGIN_WORKSPACE}/task.env",
             text: text
-    runTaskAndReturnLogs(currentStage, 'duffy-key')
+    runTaskAndReturnLogs(stage, 'duffy-key')
 
 }
 
 /**
- * Library to provision resources used in the current stage
- *
- * variables
- *  currentStage - current stage running
+ * Library to provision resources used in the stage
+ * @param stage - Current stage
+ * @return
  */
-def provisionResources(currentStage){
+def provisionResources(String stage){
     def utils = new Utils()
 
-    utils.allocateDuffyCciskel(currentStage)
+    utils.allocateDuffyCciskel(stage)
 
-    echo "Duffy Allocate ran for stage ${currentStage} with option --allocate\r\n" +
+    echo "Duffy Allocate ran for stage ${stage} with option --allocate\r\n" +
             "ORIGIN_WORKSPACE=${env.ORIGIN_WORKSPACE}\r\n" +
             "ORIGIN_BUILD_TAG=${env.ORIGIN_BUILD_TAG}\r\n" +
             "ORIGIN_CLASS=${env.ORIGIN_CLASS}"
@@ -478,22 +477,26 @@ def provisionResources(currentStage){
 }
 
 /**
- * Library to teardown resources used in the current stage
- *
- * variables
- *   currentStage - current stage running
+ * Library to teardown resources used in the stage
+ * @param stage - Current stage
+ * @return
  */
-def teardownResources(currentStage){
+def teardownResources(String stage){
     def utils = new Utils()
 
-    utils.teardownDuffyCciskel(currentStage)
+    utils.teardownDuffyCciskel(stage)
 
-    echo "Duffy Deallocate ran for stage ${currentStage} with option --teardown\r\n" +
+    echo "Duffy Deallocate ran for stage ${stage} with option --teardown\r\n" +
             "DUFFY_HOST=${env.DUFFY_HOST}"
 }
 
-
-def convertProps(file1, file2) {
-    def command = $/awk -F'=' '{print "env."$1"=\""$2"\""}' ${file1} > ${file2}/$
+/**
+ * Library to prepend 'env.' to the keys in source file and write them in a format of env.key=value in the destination file.
+ * @param sourceFile - The file to read from
+ * @param destinationFile - The file to write to
+ * @return
+ */
+def convertProps(String sourceFile, String destinationFile) {
+    def command = $/awk -F'=' '{print "env."$1"=\""$2"\""}' ${sourceFile} > ${destinationFile}/$
     sh command
 }
