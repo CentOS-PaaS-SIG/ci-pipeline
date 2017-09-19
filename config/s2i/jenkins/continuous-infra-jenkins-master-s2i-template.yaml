@@ -149,6 +149,7 @@ objects:
             value: --logfile=/var/log/jenkins/jenkins.log
           - name: JAVA_OPTS
             value: >-
+                -Dhudson.model.ParametersAction.keepUndefinedParameters=true
                 -Djenkins.model.Jenkins.logStartupPerformance=true
                 -Djava.security.egd=file:/dev/./urandom
                 -Djenkins.install.runSetupWizard=false
