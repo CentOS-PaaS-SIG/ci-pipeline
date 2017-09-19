@@ -2,6 +2,12 @@
 
 set -x
 
+CURRENTDIR=$(pwd)
+if [ ${CURRENTDIR} == "/" ] ; then
+    cd /home
+    CURRENTDIR=/home
+fi
+
 base_dir="$(dirname $0)"
 
 if [ "${branch}" = "rawhide" ]; then
@@ -12,15 +18,18 @@ fi
 
 REF="fedora/${branch}/x86_64/atomic-host"
 
-mkdir -p /home/output/logs
-touch /home/output/logs/ostree.props
+LOGDIR=${CURRENTDIR}/logs
+mkdir -p "${LOGDIR}"
+touch "${LOGDIR}/ostree.props"
 
-if [[ ! -e /home/output/ostree ]]; then
-    mkdir /home/output/ostree
-    ostree --repo=/home/output/ostree init --mode=archive-z2
+mkdir -p $CURRENTDIR/config/ostree
+
+if [[ ! -e $CURRENTDIR/output/ostree ]]; then
+    mkdir -p $CURRENTDIR/output/ostree
+    ostree --repo=$CURRENTDIR/output/ostree init --mode=archive-z2
 fi
 
-ostree --repo=/home/output/ostree prune \
+ostree --repo=$CURRENTDIR/output/ostree prune \
     --keep-younger-than='1 week ago' --refs-only
 
 # get list of repos
@@ -33,7 +42,7 @@ for repo in $repos; do
     else
         f_repos="$f_repos, \"${repo}\""
     fi
-    cat << EOF > $base_dir/config/ostree/${repo}.repo
+    cat << EOF > $CURRENTDIR/config/ostree/${repo}.repo
 [${repo}]
 name=Testing ${repo}
 baseurl=${HTTP_BASE}/${branch}/repo/${repo}
@@ -48,7 +57,7 @@ if [ "$VERSION" = "rawhide" ]; then
 else
     fedora_repo="fedora-$VERSION"
 fi
-cat << EOF > $base_dir/config/ostree/fedora-${VERSION}.repo
+cat << EOF > $CURRENTDIR/config/ostree/fedora-${VERSION}.repo
 [fedora-${VERSION}]
 name=Fedora ${branch}
 failovermethod=priority
@@ -59,7 +68,7 @@ gpgcheck=0
 skip_if_unavailable=False
 EOF
 
-cat << EOF > $base_dir/config/ostree/fedora-atomic-testing.json
+cat << EOF > $CURRENTDIR/config/ostree/fedora-atomic-testing.json
 {
     "include": "fedora-atomic-testing-docker-host.json",
     "ref": "fedora/${branch}/\${basearch}/atomic-host",
@@ -69,16 +78,18 @@ cat << EOF > $base_dir/config/ostree/fedora-atomic-testing.json
 }
 EOF
 
-rpm-ostree compose tree --repo=/home/output/ostree $base_dir/config/ostree/fedora-atomic-testing.json || exit 1
+ls -lR $CURRENTDIR/
 
-ostree --repo=/home/output/ostree summary -u
+rpm-ostree compose tree --repo=$CURRENTDIR/output/ostree $CURRENTDIR/config/ostree/fedora-atomic-testing.json || exit 1
 
-if ostree --repo=/home/output/ostree rev-parse ${REF}^ >/dev/null 2>&1; then
-    rpm-ostree db --repo=/home/output/ostree diff ${REF}{^,} | tee /home/output/logs/packages.txt
+ostree --repo=$CURRENTDIR/output/ostree summary -u
+
+if ostree --repo=$CURRENTDIR/output/ostree rev-parse ${REF}^ >/dev/null 2>&1; then
+    rpm-ostree db --repo=$CURRENTDIR/output/ostree diff ${REF}{^,} | tee ${LOGDIR}/packages.txt
 fi
 
 # Record the commit so we can test it later
-commit=$(ostree --repo=/home/output/ostree rev-parse ${REF})
-cat << EOF > /home/output/logs/ostree.props
+commit=$(ostree --repo=$CURRENTDIR/output/ostree rev-parse ${REF})
+cat << EOF > ${LOGDIR}/ostree.props
 commit=$commit
 EOF

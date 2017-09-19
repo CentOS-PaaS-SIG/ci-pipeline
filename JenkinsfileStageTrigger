@@ -21,7 +21,7 @@ tagMap = [:]
 // Initialize
 tagMap['jenkins-continuous-infra-slave'] = STABLE_LABEL
 tagMap['rpmbuild'] = STABLE_LABEL
-tagMap['ostree'] = STABLE_LABEL
+tagMap['ostree-compose'] = STABLE_LABEL
 
 // CI_MESSAGE known to build successfully
 def CANNED_CI_MESSAGE = '{"commit":{"username":"zdohnal","stats":{"files":{"README.patches":{"deletions":0,"additions":30,"lines":30},"sources":{"deletions":1,"additions":1,"lines":2},"vim.spec":{"deletions":7,"additions":19,"lines":26},".gitignore":{"deletions":0,"additions":1,"lines":1},"vim-8.0-rhbz1365258.patch":{"deletions":0,"additions":12,"lines":12}},"total":{"deletions":8,"files":5,"additions":63,"lines":71}},"name":"Zdenek Dohnal","rev":"3ff427e02625f810a2cedb754342be44d6161b39","namespace":"rpms","agent":"zdohnal","summary":"Merge branch \'f25\' into f26","repo":"vim","branch":"f26","seen":false,"path":"/srv/git/repositories/rpms/vim.git","message":"Merge branch \'f25\' into f26\\n","email":"zdohnal@redhat.com"},"topic":"org.fedoraproject.prod.git.receive"}'
@@ -41,11 +41,6 @@ pipeline {
         }
     }
     stages {
-        stage("Checkout") {
-            steps {
-                checkout scm
-            }
-        }
         stage("jenkins-continuous-infra-slave image build") {
             when {
                 // Only build if we have related files in changeset
@@ -68,6 +63,17 @@ pipeline {
                 }
             }
         }
+        stage("ostree-compose image build") {
+            when {
+                // Only build if we have related files in changeset
+                changeset "config/Dockerfiles/ostree_compose/**"
+            }
+            steps {
+                script {
+                    buildImage("ostree-compose")
+                }
+            }
+        }
         stage("Run Stage Job") {
             steps {
                 script {
@@ -83,7 +89,9 @@ pipeline {
                                     string(name: 'sha1', value: "${env.sha1}"),
                                     string(name: 'ghprbPullId', value: "${env.ghprbPullId}"),
                                     string(name: 'SLAVE_TAG', value: tagMap['jenkins-continuous-infra-slave']),
-                                    string(name: 'RPMBUILD_TAG', value: tagMap['rpmbuild'])]
+                                    string(name: 'RPMBUILD_TAG', value: tagMap['rpmbuild']),
+                                    string(name: 'OSTREE_COMPOSE_TAG', value: tagMap['ostree-compose'])
+                            ]
                     wait: true
                 }
             }
