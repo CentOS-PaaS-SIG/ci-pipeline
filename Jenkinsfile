@@ -49,7 +49,7 @@ podTemplate(name: 'fedora-atomic-' + env.ghprbActualCommit,
             label: 'fedora-atomic-' + env.ghprbActualCommit,
             cloud: 'openshift',
             serviceAccount: 'jenkins',
-            idleMinutes: 1,
+            idleMinutes: 0,
             namespace: OPENSHIFT_NAMESPACE,
 
         containers: [
