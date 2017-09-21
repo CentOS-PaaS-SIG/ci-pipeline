@@ -57,7 +57,9 @@ def runTaskAndReturnLogs(String stage, String duffyKey) {
         sh '''
             #!/bin/bash
             set -xeuo pipefail
-    
+
+            echo $HOME
+                
             cp ${DUFFY_KEY} ~/duffy.key
             chmod 600 ~/duffy.key
     
@@ -68,7 +70,7 @@ def runTaskAndReturnLogs(String stage, String duffyKey) {
             echo "    StrictHostKeyChecking no" >> ~/.ssh/config
             echo "    UserKnownHostsFile /dev/null" >> ~/.ssh/config
             chmod 600 ~/.ssh/config
-
+            
             source ${ORIGIN_WORKSPACE}/task.env
             (echo -n "export RSYNC_PASSWORD=" && cat ~/duffy.key | cut -c '-13') > rsync-password.sh
             
@@ -287,6 +289,30 @@ def injectFedmsgVars() {
 }
 
 /**
+ * Library to prepare credentials
+ * @return
+ */
+def prepareCredentials() {
+    withCredentials([file(credentialsId: 'fedora-keytab', variable: 'FEDORA_KEYTAB')]) {
+        sh '''
+            #!/bin/bash
+            set -xeuo pipefail
+    
+            cp ${FEDORA_KEYTAB} fedora.keytab
+            chmod 0600 fedora.keytab
+            
+            mkdir -p ~/.ssh
+
+            echo "Host *.ci.centos.org" > ~/.ssh/config
+            echo "    StrictHostKeyChecking no" >> ~/.ssh/config
+            echo "    UserKnownHostsFile /dev/null" >> ~/.ssh/config
+            chmod 600 ~/.ssh/config
+        '''
+    }
+    // Initialize RSYNC_PASSWORD from credentialsId
+    env.RSYNC_PASSWORD = getPasswordFromDuffyKey('duffy-key')
+}
+/**
  * Library to set default environmental variables. Performed once at start of Jenkinsfile
  * @param envMap: Key/value pairs which will be set as environmental variables.
  * @return
@@ -314,7 +340,6 @@ def setDefaultEnvVars(Map envMap=null){
 
     // Set our base RSYNC_SERVER value
     env.RSYNC_SERVER = env.RSYNC_SERVER ?: 'artifacts.ci.centos.org'
-
     env.RSYNC_USER = env.RSYNC_USER ?: 'fedora-atomic'
 
     // Check if we're working with a staging or production instance by
@@ -477,9 +502,82 @@ def provisionResources(String stage){
 }
 
 /**
- * Library to teardown resources used in the stage
- * @param stage - Current stage
+ * Library to execute script in container
+ * Container must have been defined in a podTemplate
+ *
+ * @param containerName Name of the container for script execution
+ * @param script Complete path to the script to execute
  * @return
+ */
+def executeInContainer(stageName, containerName, script) {
+    //
+    // Kubernetes plugin does not let containers inherit
+    // env vars from host. We force them in.
+    //
+    containerEnv = env.getEnvironment().collect { key, value -> return key+'='+value }
+    withEnv(containerEnv) {
+        container(containerName) {
+            sh 'pwd'
+            sh 'cp -fv fedora.keytab /home/fedora.keytab'
+            sh 'env'
+            sh script
+            sh "ls -lR logs"
+        }
+    }
+    sh 'mkdir -p ' + stageName
+    sh 'mv -vf logs ' + stageName + "/logs"
+}
+
+def verifyPod(openshiftProject, nodeName) {
+    openshift.withCluster() {
+        openshift.withProject(openshiftProject) {
+            def describeStr = openshift.selector("pods", nodeName).describe()
+            out = describeStr.out.trim()
+            writeFile file: 'node-pod-description-' + nodeName + '.txt',
+                    text: out
+            archiveArtifacts 'node-pod-description-' + nodeName + '.txt'
+
+            timeout(60) {
+                echo "Ensuring all containers are running in pod: ${env.NODE_NAME}"
+                echo "Container names in pod ${env.NODE_NAME}: "
+                def names       = openshift.raw("get", "pod",  "${env.NODE_NAME}", '-o=jsonpath="{.status.containerStatuses[*].name}"')
+                echo names.out.trim()
+
+                waitUntil {
+                    def readyStates = openshift.raw("get", "pod",  "${env.NODE_NAME}", '-o=jsonpath="{.status.containerStatuses[*].ready}"')
+
+                    echo "Container statuses: "
+                    echo readyStates.out.trim()
+                    def anyNotReady = readyStates.out.trim().contains("false")
+                    if (anyNotReady) {
+                        echo "One or more containers not ready...see above message ^^"
+                        return false
+                    } else {
+                        echo "All containers ready!"
+                        return true
+                    }
+                }
+            }
+        }
+    }
+}
+/**
+ *
+ * @param credentialsId Credential ID for Duffy Key
+ * @return password
+ */
+def getPasswordFromDuffyKey(credentialsId) {
+    withCredentials([file(credentialsId: credentialsId, variable: 'DUFFY_KEY')]) {
+        return sh(script: 'cat ' + DUFFY_KEY +
+                ' | cut -c \'-13\'', returnStdout: true).trim()
+    }
+}
+
+/**
+ * Library to teardown resources used in the current stage
+ *
+ * variables
+ *   currentStage - current stage running
  */
 def teardownResources(String stage){
     def utils = new Utils()

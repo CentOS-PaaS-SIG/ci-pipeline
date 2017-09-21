@@ -1,0 +1,182 @@
+/**
+ * CI Stage Pipeline Trigger
+ *
+ * This is a declarative pipeline for the CI stage pipeline
+ * that includes the building of images based on PRs
+ *
+ */
+
+// Openshift project
+openshiftProject = "continuous-infra"
+DOCKER_REPO_URL = '172.30.254.79:5000'
+
+// Defaults for SCM operations
+env.ghprbGhRepository = env.ghprbGhRepository ?: 'CentOS-PaaS-SIG/ci-pipeline'
+env.ghprbActualCommit = env.ghprbActualCommit ?: 'master'
+
+// If this PR does not include an image change, then use this tag
+STABLE_LABEL = "stable"
+tagMap = [:]
+
+// Initialize
+tagMap['jenkins-continuous-infra-slave'] = STABLE_LABEL
+tagMap['rpmbuild'] = STABLE_LABEL
+tagMap['ostree'] = STABLE_LABEL
+
+// CI_MESSAGE known to build successfully
+def CANNED_CI_MESSAGE = '{"commit":{"username":"zdohnal","stats":{"files":{"README.patches":{"deletions":0,"additions":30,"lines":30},"sources":{"deletions":1,"additions":1,"lines":2},"vim.spec":{"deletions":7,"additions":19,"lines":26},".gitignore":{"deletions":0,"additions":1,"lines":1},"vim-8.0-rhbz1365258.patch":{"deletions":0,"additions":12,"lines":12}},"total":{"deletions":8,"files":5,"additions":63,"lines":71}},"name":"Zdenek Dohnal","rev":"3ff427e02625f810a2cedb754342be44d6161b39","namespace":"rpms","agent":"zdohnal","summary":"Merge branch \'f25\' into f26","repo":"vim","branch":"f26","seen":false,"path":"/srv/git/repositories/rpms/vim.git","message":"Merge branch \'f25\' into f26\\n","email":"zdohnal@redhat.com"},"topic":"org.fedoraproject.prod.git.receive"}'
+
+pipeline {
+    agent {
+        kubernetes {
+            cloud 'openshift'
+            label 'stage-trigger-' + env.ghprbActualCommit
+            containerTemplate {
+                name 'jnlp'
+                args '${computer.jnlpmac} ${computer.name}'
+                image DOCKER_REPO_URL + '/' + openshiftProject + '/jenkins-continuous-infra-slave:' + STABLE_LABEL
+                ttyEnabled false
+                command ''
+            }
+        }
+    }
+    stages {
+        stage("Checkout") {
+            steps {
+                checkout scm
+            }
+        }
+        stage("jenkins-continuous-infra-slave image build") {
+            when {
+                // Only build if we have related files in changeset
+                changeset "config/s2i/jenkins/slave/**"
+            }
+            steps {
+                script {
+                    buildImage("jenkins-continuous-infra-slave")
+                }
+            }
+        }
+        stage("rpmbuild image build") {
+            when {
+                // Only build if we have related files in changeset
+                changeset "config/Dockerfiles/rpmbuild/**"
+            }
+            steps {
+                script {
+                    buildImage("rpmbuild")
+                }
+            }
+        }
+        stage("Run Stage Job") {
+            steps {
+                script {
+                    // Use tags derived from above image builds
+                    //
+                    printLabelMap(tagMap)
+
+                    def build = build job: 'ci-stage-pipeline-f26',
+                            parameters: [
+                                    string(name: 'CI_MESSAGE', value: CANNED_CI_MESSAGE),
+                                    string(name: 'ghprbActualCommit', value: "${env.ghprbActualCommit}"),
+                                    string(name: 'ghprbGhRepository', value: "${env.ghprbGhRepository}"),
+                                    string(name: 'sha1', value: "${env.sha1}"),
+                                    string(name: 'ghprbPullId', value: "${env.ghprbPullId}"),
+                                    string(name: 'SLAVE_TAG', value: tagMap['jenkins-continuous-infra-slave']),
+                                    string(name: 'RPMBUILD_TAG', value: tagMap['rpmbuild'])]
+                    wait: true
+                }
+            }
+        }
+    }
+    post {
+        success {
+            echo "yay!"
+            script {
+                sendPRCommentforTags(tagMap)
+            }
+        }
+        failure {
+            error "build failed!"
+        }
+    }
+}
+
+/**
+ * info about tags to be used
+ * @param map
+ */
+def printLabelMap(map) {
+    for (tag in map) {
+        echo "tag to be used for ${tag.key} -> ${tag.value}"
+    }
+}
+
+/**
+ * Based on tagMap, add comment to GH with
+ * instructions to manual commands
+ *
+ * @param map of tags
+ * @return
+ */
+def sendPRCommentforTags(map) {
+    def msg = "\nOnce this PR is merged, the following manual commands are needed to place image(s) into production:\n\n"
+    msg = msg + "\n+ oc login ```<openshift url>```\n"
+    msg = msg + "\n+ oc project " + openshiftProject + "\n"
+    boolean onlyStable = true
+    for (tag in map) {
+        if (!tag.value.equals(STABLE_LABEL)) {
+            msg = msg + "+ oc tag ${openshiftProject}/${tag.key}:${tag.value} ${openshiftProject}/${tag.key}:${STABLE_LABEL}\n"
+            onlyStable = false
+        }
+    }
+    if (!onlyStable) {
+        echo "Prepare GHI tool"
+        withCredentials([string(credentialsId: 'paas-bot', variable: 'TOKEN')]) {
+            sh "git config --global ghi.token ${TOKEN}"
+            sh 'curl -sL https://raw.githubusercontent.com/stephencelis/ghi/master/ghi > ghi && chmod 755 ghi'
+            sh './ghi comment ' + env.ghprbPullId + ' -m "' + msg + '"'
+        }
+    }
+}
+
+/**
+ * Build image in openshift
+ * @param buildConfig
+ * @return
+ */
+def buildImage(String buildConfig) {
+    // - build in Openshift
+    // - startBuild with a commit
+    // - Get result Build and get imagestream manifest
+    // - Use that to create a unique tag
+    // - This tag will then be passed as an image input
+    //   to the podTemplate/containerTemplate to create
+    //   our slave pod.
+    openshift.withCluster() {
+        openshift.withProject(openshiftProject) {
+            def result = openshift.startBuild(buildConfig,
+                    "--commit",
+                    "refs/pull/" + env.ghprbPullId + "/head",
+                    "--wait")
+            def out = result.out.trim()
+            echo "Resulting Build: " + out
+
+            def describeStr = openshift.selector(out).describe()
+            out = describeStr.out.trim()
+
+            def imageHash = sh(
+                    script: "echo \"${out}\" | grep 'Image Digest:' | cut -f2- -d:",
+                    returnStdout: true
+            ).trim()
+            echo "imageHash: ${imageHash}"
+
+            echo "Creating CI tag for ${openshiftProject}/${buildConfig}: ${buildConfig}:${env.ghprbActualCommit}"
+
+            openshift.tag("${openshiftProject}/${buildConfig}@${imageHash}",
+                    "${openshiftProject}/${buildConfig}:${env.ghprbActualCommit}")
+
+            tagMap[buildConfig] = env.ghprbActualCommit
+        }
+    }
+}
