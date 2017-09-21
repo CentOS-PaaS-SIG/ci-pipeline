@@ -1,4 +1,5 @@
 import org.centos.pipeline.PipelineUtils
+import org.centos.*
 
 /**
  * A class of methods used in the Jenkinsfile pipeline.
@@ -7,6 +8,7 @@ import org.centos.pipeline.PipelineUtils
 class pipelineUtils implements Serializable {
 
     def pipelineUtils = new PipelineUtils()
+    def utils = new Utils()
 
     /**
      * Method to setup and configure the host the way ci-pipeline requires
@@ -119,6 +121,6 @@ class pipelineUtils implements Serializable {
      * @return
      */
     def convertProps(String sourceFile, String destinationFile) {
-        pipelineUtils.convertProps(sourceFile, destinationFile)
+        utils.convertProps(sourceFile, destinationFile)
     }
 }
