@@ -6,6 +6,7 @@ env.SLAVE_TAG = env.SLAVE_TAG ?: 'stable'
 env.RPMBUILD_TAG = env.RPMBUILD_TAG ?: 'stable'
 env.DOCKER_REPO_URL = env.DOCKER_REPO_URL ?: '172.30.254.79:5000'
 env.OPENSHIFT_NAMESPACE = env.OPENSHIFT_NAMESPACE ?: 'continuous-infra'
+env.OPENSHIFT_SERVICE_ACCOUNT = env.OPENSHIFT_SERVICE_ACCOUNT ?: 'jenkins'
 
 library identifier: "ci-pipeline@${env.ghprbActualCommit}",
         retriever: modernSCM([$class: 'GitSCMSource',
@@ -39,6 +40,7 @@ properties(
                                 string(defaultValue: 'stable', description: 'Tag for rpmbuild image', name: 'RPMBUILD_TAG'),
                                 string(defaultValue: '172.30.254.79:5000', description: 'Docker repo url for Openshift instance', name: 'DOCKER_REPO_URL'),
                                 string(defaultValue: 'continuous-infra', description: 'Project namespace for Openshift operations', name: 'OPENSHIFT_NAMESPACE'),
+                                string(defaultValue: 'jenkins', description: 'Service Account for Openshift operations', name: 'OPENSHIFT_SERVICE_ACCOUNT'),
                                 booleanParam(defaultValue: false, description: 'Force generation of the image', name: 'GENERATE_IMAGE'),
                         ]
                 ),
@@ -48,7 +50,7 @@ properties(
 podTemplate(name: 'fedora-atomic-' + env.ghprbActualCommit,
             label: 'fedora-atomic-' + env.ghprbActualCommit,
             cloud: 'openshift',
-            serviceAccount: 'jenkins',
+            serviceAccount: OPENSHIFT_SERVICE_ACCOUNT,
             idleMinutes: 0,
             namespace: OPENSHIFT_NAMESPACE,
 
