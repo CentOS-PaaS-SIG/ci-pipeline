@@ -65,7 +65,7 @@ if [ -n "$DIR_TO_GO" ] ; then
 fi
 # Prepare concurrent koji build
 cp -rp ../${fed_repo}/** ~/rpmbuild/SOURCES
-rpmbuild -bs ${fed_repo}.spec
+rpmbuild -bs --define "dist .$fed_branch" ${fed_repo}.spec
 ls
 # Set up koji creds
 # TODO - we can just keep fedora.keytab in ${CURRENTDIR} and have it here via the free mount, so we don't need to copy it to /home wherever we do
