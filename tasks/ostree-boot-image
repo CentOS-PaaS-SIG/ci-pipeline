@@ -4,8 +4,8 @@ set -xe
 env
 
 # Find the base dir
-base_dir="$(dirname $0)/.."
 HOMEDIR=$(pwd)
+base_dir=$(dirname ${HOMEDIR})
 
 function clean_up {
     set +e
