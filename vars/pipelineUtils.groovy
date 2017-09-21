@@ -1,5 +1,5 @@
 import org.centos.pipeline.PipelineUtils
-import org.centos.*
+import org.centos.Utils
 
 /**
  * A class of methods used in the Jenkinsfile pipeline.

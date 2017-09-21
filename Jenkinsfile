@@ -147,7 +147,7 @@ podTemplate(name: 'fedora-atomic-' + env.ghprbActualCommit,
 
                         def package_props = "${env.WORKSPACE}/" + currentStage + "/logs/package_props.txt"
                         def package_props_groovy = "${env.WORKSPACE}/package_props.groovy"
-                        convertProps(package_props, package_props_groovy)
+                        pipelineUtils.convertProps(package_props, package_props_groovy)
                         load(package_props_groovy)
 
                         // Set our message topic, properties, and content
@@ -179,7 +179,7 @@ podTemplate(name: 'fedora-atomic-' + env.ghprbActualCommit,
 
                         def ostree_props = "${env.ORIGIN_WORKSPACE}/logs/ostree.props"
                         def ostree_props_groovy = "${env.ORIGIN_WORKSPACE}/ostree.props.groovy"
-                        convertProps(ostree_props, ostree_props_groovy)
+                        pipelineUtils.convertProps(ostree_props, ostree_props_groovy)
                         load(ostree_props_groovy)
 
                         // Teardown resource
@@ -218,7 +218,7 @@ podTemplate(name: 'fedora-atomic-' + env.ghprbActualCommit,
 
                             ostree_props = "${env.ORIGIN_WORKSPACE}/logs/ostree.props"
                             ostree_props_groovy = "${env.ORIGIN_WORKSPACE}/ostree.props.groovy"
-                            convertProps(ostree_props, ostree_props_groovy)
+                            pipelineUtils.convertProps(ostree_props, ostree_props_groovy)
                             load(ostree_props_groovy)
 
                             // Teardown resources
