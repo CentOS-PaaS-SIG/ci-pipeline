@@ -10,7 +10,7 @@ HOMEDIR=$(pwd)
 function clean_up {
     set +e
     # Tear down the atomic host and image
-    sudo docker run --privileged -it --link libvirtd:libvirtd -e commit=${commit} -e image2boot=${image2boot} -e state=absent -v /var/lib/libvirt/:/var/lib/libvirt/ -v ${HOMEDIR}/output/:/root/output/ -v ${basedir}/:/root/ci-pipeline ostree_boot_image
+    sudo docker run --privileged -it --link libvirtd:libvirtd -e commit=${commit} -e image2boot=${image2boot} -e state=absent -v /var/lib/libvirt/:/var/lib/libvirt/ -v ${HOMEDIR}/output/:/root/output/ -v ${base_dir}/:/root/ci-pipeline ostree_boot_image
 
     # Kill our libvirtd docker instance.
     #  We can change this in the future to have it stick around if needed
@@ -53,7 +53,7 @@ sudo docker run --privileged -d \
 -v /var/lib/libvirt/:/var/lib/libvirt/ \
 -v /sys/fs/cgroup:/sys/fs/cgroup:rw --name libvirtd libvirtd
 
-sudo docker run --privileged -it --link libvirtd:libvirtd -e commit=${commit} -e image2boot=${image2boot} -e state=present -v /var/lib/libvirt/:/var/lib/libvirt/ -v ${HOMEDIR}/output/:/root/output/ -v ${basedir}/:/root/ci-pipeline ostree_boot_image
+sudo docker run --privileged -it --link libvirtd:libvirtd -e commit=${commit} -e image2boot=${image2boot} -e state=present -v /var/lib/libvirt/:/var/lib/libvirt/ -v ${HOMEDIR}/output/:/root/output/ -v ${base_dir}/:/root/ci-pipeline ostree_boot_image
 echo $?
 
 # Logs need to be in a specific place to be picked up.
