@@ -1,0 +1,6 @@
+[Service]
+ExecStart=/usr/bin/socat -s TCP-LISTEN:2222,fork TCP:192.168.122.200:22
+Restart=always
+
+[Install]
+WantedBy=multi-user.target

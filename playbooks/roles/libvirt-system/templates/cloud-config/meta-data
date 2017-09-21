@@ -1,2 +1,14 @@
 instance-id: {{ item.key }};
 local-hostname: {{ item.key }}
+{% if item.value.ip is defined %}
+network-interfaces: |
+  auto eth0
+  iface eth0 inet static
+  address {{ item.value.ip }}
+  network 192.168.1.0
+  netmask 255.255.255.0
+  broadcast 192.168.1.255
+  gateway {{ gateway }}
+  dns-nameservers 192.168.1.1
+  dns-search {{ domain }}
+{% endif %}
