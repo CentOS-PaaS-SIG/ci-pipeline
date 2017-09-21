@@ -56,6 +56,9 @@ sudo docker run --privileged -d \
 sudo docker run --privileged -it --link libvirtd:libvirtd -e commit=${commit} -e image2boot=${image2boot} -e state=present -v /var/lib/libvirt/:/var/lib/libvirt/ -v ${HOMEDIR}/output/:/root/output/ -v ${basedir}/:/root/ci-pipeline ostree_boot_image
 echo $?
 
+# Logs need to be in a specific place to be picked up.
+sudo mv ${HOMEDIR}/output/logs ${HOMEDIR}
+
 # If image2boot is defined then symlink it as latest
 if [ -n "$image2boot" ]; then
     pushd ${HOMEDIR}/output/images
