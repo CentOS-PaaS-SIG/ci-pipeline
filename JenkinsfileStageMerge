@@ -1,0 +1,34 @@
+
+openshiftProject = "continuous-infra"
+
+imageList = ["jenkins-continuous-infra-slave", "rpmbuild", "ostree-compose", "rsync"]
+
+node() {
+    // need this for ghprb plugin since it is really
+    // a post build step and it assumes the build is complete.
+    //
+    currentBuild.result = 'SUCCESS'
+
+    openshift.withCluster() {
+        openshift.withProject(openshiftProject) {
+
+            imageList.each {
+                String tagList = sh(
+                        script: "oc get is -n ${openshiftProject} -o=jsonpath=\'{.items[?(@.metadata.name==\"${it}\")].status.tags[*].tag}\'",
+                        returnStdout: true
+                ).trim()
+                def prTag = tagList.tokenize(' ').find { it == "PR-" + env.ghprbPullId }
+                if (prTag != null) {
+                    echo "Found PR tag: " + prTag + " for image ${it}"
+                    echo "Updating ${it}:stable tag to point to ${prTag}"
+                    openshift.tag("${openshiftProject}/${it}:${prTag}",
+                            "${openshiftProject}/${it}:stable")
+                } else {
+                    echo "No tag found for image ${it}!"
+                }
+            }
+        }
+    }
+
+    step([$class: 'GhprbPullRequestMerge', allowMergeWithoutTriggerPhrase: false, deleteOnMerge: false, disallowOwnCode: false, failOnNonMerge: false, mergeComment: 'testing the merge', onlyAdminsMerge: false])
+}

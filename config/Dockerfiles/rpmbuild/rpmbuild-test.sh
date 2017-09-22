@@ -18,6 +18,7 @@ if [ "${fed_branch}" = "master" ]; then
     RSYNC_BRANCH=rawhide
 fi
 mkdir -p ~/rpmbuild/{BUILD,RPMS,SOURCES,SPECS,SRPMS}
+
 # Create one dir to store logs in that will be mounted
 LOGDIR=${CURRENTDIR}/logs
 rm -rf ${LOGDIR}/*
