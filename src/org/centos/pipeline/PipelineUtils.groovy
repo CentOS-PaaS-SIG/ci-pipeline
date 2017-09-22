@@ -496,7 +496,7 @@ def provisionResources(String stage){
 
     job_props = "${env.ORIGIN_WORKSPACE}/job.props"
     job_props_groovy = "${env.ORIGIN_WORKSPACE}/job.groovy"
-    convertProps(job_props, job_props_groovy)
+    utils.convertProps(job_props, job_props_groovy)
     load(job_props_groovy)
 
 }
@@ -586,15 +586,4 @@ def teardownResources(String stage){
 
     echo "Duffy Deallocate ran for stage ${stage} with option --teardown\r\n" +
             "DUFFY_HOST=${env.DUFFY_HOST}"
-}
-
-/**
- * Library to prepend 'env.' to the keys in source file and write them in a format of env.key=value in the destination file.
- * @param sourceFile - The file to read from
- * @param destinationFile - The file to write to
- * @return
- */
-def convertProps(String sourceFile, String destinationFile) {
-    def command = $/awk -F'=' '{print "env."$1"=\""$2"\""}' ${sourceFile} > ${destinationFile}/$
-    sh command
 }
