@@ -62,7 +62,7 @@ echo $?
 if [ -n "$image2boot" ]; then
     pushd ${HOMEDIR}/output
     pushd images
-    ln -sf $(basename $image2boot) latest-atomic.qcow2
+    sudo ln -sf $(basename $image2boot) latest-atomic.qcow2
     popd
     # rsync the images directory back if we update the symlink
     for v in images; do
