@@ -41,9 +41,17 @@ pipeline {
         }
     }
     stages {
-        stage("Checkout") {
+        stage("Get Changelog") {
             steps {
-                checkout scm
+                node('master') {
+                    script {
+                        echo "PR number is: ${env.ghprbPullId}"
+                        env.changeLogStr = getChangeLogFromCurrentBuild()
+                        echo env.changeLogStr
+                    }
+                    writeFile file: 'changelog.txt', text: env.changeLogStr
+                    archiveArtifacts allowEmptyArchive: true, artifacts: 'changelog.txt'
+                }
             }
         }
         stage("jenkins-continuous-infra-slave image build") {
@@ -165,18 +173,50 @@ def buildImage(String buildConfig) {
             def describeStr = openshift.selector(out).describe()
             out = describeStr.out.trim()
 
-            def imageHash = sh(
-                    script: "echo \"${out}\" | grep 'Image Digest:' | cut -f2- -d:",
-                    returnStdout: true
-            ).trim()
+                def imageHash = sh(
+                        script: "echo \"${out}\" | grep 'Image Digest:' | cut -f2- -d:",
+                        returnStdout: true
+                ).trim()
             echo "imageHash: ${imageHash}"
 
-            echo "Creating CI tag for ${openshiftProject}/${buildConfig}: ${buildConfig}:${env.ghprbActualCommit}"
+            echo "Creating CI tag for ${openshiftProject}/${buildConfig}: ${buildConfig}:PR-${env.ghprbPullId}"
 
             openshift.tag("${openshiftProject}/${buildConfig}@${imageHash}",
-                    "${openshiftProject}/${buildConfig}:${env.ghprbActualCommit}")
+                    "${openshiftProject}/${buildConfig}:PR-${env.ghprbPullId}")
 
-            tagMap[buildConfig] = env.ghprbActualCommit
+            tagMap[buildConfig] = "PR-" + env.ghprbPullId
         }
     }
+}
+
+/**
+ * Using the currentBuild, get a string representation
+ * of the changelog.
+ * @return String of changelog
+ */
+@NonCPS
+def getChangeLogFromCurrentBuild() {
+    MAX_MSG_LEN = 100
+    def changeString = ""
+
+    echo "Gathering SCM changes"
+    def changeLogSets = currentBuild.changeSets
+    for (int i = 0; i < changeLogSets.size(); i++) {
+        def entries = changeLogSets[i].items
+        for (int j = 0; j < entries.length; j++) {
+            def entry = entries[j]
+            truncated_msg = entry.msg.take(MAX_MSG_LEN)
+            changeString += " - ${truncated_msg} [${entry.author}]\n"
+            def files = new ArrayList(entry.affectedFiles)
+            for (int k = 0; k < files.size(); k++) {
+                def file = files[k]
+                changeString += "    | (${file.editType.name})  ${file.path}\n"
+            }
+        }
+    }
+
+    if (!changeString) {
+        changeString = " - No new changes\n"
+    }
+    return changeString
 }
