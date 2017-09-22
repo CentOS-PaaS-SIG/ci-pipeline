@@ -4,6 +4,7 @@ node() {
   }
   stage('test-image') {
     echo "to be implemented"
+    openshiftVerifyBuild bldCfg: 'rpmbuild', namespace: 'continuous-infra'
   }
   /**
   stage('tag') {
