@@ -60,7 +60,7 @@ echo $?
 
 # If image2boot is defined then symlink it as latest
 if [ -n "$image2boot" ]; then
-    pushd ${HOMEDIR}/output/images
+    pushd ${HOMEDIR}/output
     pushd images
     ln -sf $(basename $image2boot) latest-atomic.qcow2
     popd
