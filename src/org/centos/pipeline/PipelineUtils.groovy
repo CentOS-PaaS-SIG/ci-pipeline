@@ -496,7 +496,7 @@ def provisionResources(String stage){
 
     job_props = "${env.ORIGIN_WORKSPACE}/job.props"
     job_props_groovy = "${env.ORIGIN_WORKSPACE}/job.groovy"
-    convertProps(job_props, job_props_groovy)
+    utils.convertProps(job_props, job_props_groovy)
     load(job_props_groovy)
 
 }
