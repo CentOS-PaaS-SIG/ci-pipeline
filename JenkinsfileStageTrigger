@@ -179,12 +179,12 @@ def buildImage(String buildConfig) {
             ).trim()
             echo "imageHash: ${imageHash}"
 
-            echo "Creating CI tag for ${openshiftProject}/${buildConfig}: ${buildConfig}:${env.ghprbActualCommit}"
+            echo "Creating CI tag for ${openshiftProject}/${buildConfig}: ${buildConfig}:PR-${env.ghprbPullId}"
 
             openshift.tag("${openshiftProject}/${buildConfig}@${imageHash}",
-                    "${openshiftProject}/${buildConfig}:${env.ghprbActualCommit}")
+                    "${openshiftProject}/${buildConfig}:PR-${env.ghprbPullId}")
 
-            tagMap[buildConfig] = env.ghprbActualCommit
+            tagMap[buildConfig] = "PR-" + env.ghprbPullId
         }
     }
 }
