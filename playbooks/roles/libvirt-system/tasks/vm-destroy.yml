@@ -1,10 +1,14 @@
 - name: Stop VM
-  virt: name={{ item.key }}
-        state=destroyed
+  virt:
+      name: "{{ item.key }}"
+      state: destroyed
+      uri: "{{ virt_uri | default('qemu:///system') }}"
 
 - name: Undefine VM
-  virt: name={{ item.key }}
-        command=undefine
+  virt:
+      name: "{{ item.key }}"
+      command: undefine
+      uri: "{{ virt_uri | default('qemu:///system') }}"
 
 - name: Remove libvirt image
   file: path="{{ qemu_img_path }}/{{ item.key }}.img" state=absent

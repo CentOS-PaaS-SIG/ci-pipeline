@@ -4,6 +4,15 @@
   become_user: '{{ become_user | default("root") }}'
   remote_user: '{{ remote_user | default("root") }}'
   tasks:
+      - set_fact:
+          real_ansible_host: "{{ ansible_host | default(inventory_hostname) }}"
+
+      - name: Make sure OSTREE_REPO_SERVER is in /etc/hosts
+        lineinfile: >
+            dest=/etc/hosts
+            regexp='^192.168.122.1'
+            line='192.168.122.1 artifacts.ci.centos.org'
+            owner=root group=root mode=0644
       - name: 01 Get rpm-ostree status --json output
         command: rpm-ostree status --json
         register: ros
@@ -35,45 +44,34 @@
         ignore_errors: true
         when: ros_booted['checksum'] != commit
 
-      - name: 07 ssh started {{ ansible_ssh_host | default(inventory_hostname) }}
+      - name: 07 ssh started {{ real_ansible_host }}
         become: false
-        local_action:
-            wait_for host={{ ansible_ssh_host | default(inventory_hostname) }}
-            port=22 state=started delay=70 search_regex=OpenSSH
+        wait_for: host={{ real_ansible_host }}
+            port={{ ansible_port }} state=started delay=70 search_regex=OpenSSH
+        delegate_to: localhost
         when: ros_booted['checksum'] != commit
 
-      - name: 08 pause 5 seconds
-        pause: seconds=5
-        when: ros_booted['checksum'] != commit
-
-      - name: 09 ssh started {{ ansible_ssh_host | default(inventory_hostname) }}
-        become: false
-        local_action:
-            wait_for host={{ ansible_ssh_host | default(inventory_hostname) }}
-            port=22 state=started search_regex=OpenSSH
-        when: ros_booted['checksum'] != commit
-
-      - name: 10 Get rpm-ostree status --json output
+      - name: 08 Get rpm-ostree status --json output
         command: rpm-ostree status --json
         register: ros
 
-      - name: 11 Convert to JSON
+      - name: 09 Convert to JSON
         set_fact:
             ros_json: "{{ ros.stdout|from_json }}"
 
-      - name: 12 Set ros variable if deployment 0 is booted
+      - name: 10 Set ros variable if deployment 0 is booted
         set_fact:
             ros_booted: "{{ ros_json['deployments'][0] }}"
             ros_not_booted: "{{ ros_json['deployments'][1] if ros_json['deployments'][1] is defined else false }}"
         when: ros_json['deployments'][0] is defined and ros_json['deployments'][0]['booted']
 
-      - name: 13 Set ros variable if deployment 1 is booted
+      - name: 11 Set ros variable if deployment 1 is booted
         set_fact:
             ros_booted: "{{ ros_json['deployments'][1] }}"
             ros_not_booted: "{{ ros_json['deployments'][0] if ros_json['deployments'][0] is defined else false }}"
         when: ros_json['deployments'][1] is defined and ros_json['deployments'][1]['booted']
 
-      - name: 14 Verify specific commit
+      - name: 12 Verify specific commit
         fail:
             msg: "{{ ros_booted['checksum'] }} != {{ commit }}"
         when: ros_booted['checksum'] != commit

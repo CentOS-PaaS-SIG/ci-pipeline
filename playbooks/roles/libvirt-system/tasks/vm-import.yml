@@ -1,34 +1,43 @@
 - name: VM template folder
-  action: file dest=/tmp/vm-{{ item.key }} state=directory
+  action: file dest={{ qemu_img_path }}/vm-{{ item.key }} state=directory
 
 - name: Figure out Base Image Name
   set_fact:
      base_image: "{{ item.value.img_url | basename | regex_replace('\\.(gz|xz)$', '') }}"
 
-- name: Get {{ item.value.img_url }}
-  get_url: url="{{ item.value.img_url }}" dest="/tmp/{{ item.value.img_url | basename }}"
+- set_fact:
+    base_path: "/tmp"
+  when: item.value.img_url.startswith('http')
 
-- stat: path="/tmp/{{ base_image }}.gz"
+- set_fact:
+    base_path: "{{ item.value.img_url | dirname }}"
+  when: item.value.img_url.startswith('/')
+
+- name: Get {{ item.value.img_url }}
+  get_url: url="{{ item.value.img_url }}" dest="{{ base_path }}/{{ item.value.img_url | basename }}"
+  when: item.value.img_url.startswith('http')
+
+- stat: path="{{ base_path }}/{{ base_image }}.gz"
   register: base_image_gz
 
-- stat: path="/tmp/{{ base_image }}.xz"
+- stat: path="{{ base_path }}/{{ base_image }}.xz"
   register: base_image_xz
 
 - name: Extract {{ base_image }}.xz"
-  command: xz -d /tmp/{{ base_image }}.xz
+  command: xz -d {{ base_path }}/{{ base_image }}.xz
   when: base_image_xz.stat.exists == True
 
 - name: Extract {{ base_image }}.gz"
-  command: gzip -d /tmp/{{ base_image }}.gz
+  command: gzip -d {{ base_path }}/{{ base_image }}.gz
   when: base_image_gz.stat.exists == True
 
 - name: Install {{ base_image }} to LVM
-  command: qemu-img convert -O raw /tmp/{{ base_image }} /dev/{{ storage }}/lv_{{ item.key }}_root
+  command: qemu-img convert -O raw {{ base_path }}/{{ base_image }} /dev/{{ storage }}/lv_{{ item.key }}_root
   when: storage is defined
 
 - name: Install {{ base_image }} to FILE
   command: creates="{{ qemu_img_path }}/{{ item.key }}.img"
-           cp "/tmp/{{ base_image }}" "{{ qemu_img_path }}/{{ item.key }}.img"
+           cp "{{ base_path }}/{{ base_image }}" "{{ qemu_img_path }}/{{ item.key }}.img"
   when: qemu_img_path is defined
 
 - name: Resize {{ item.key }}.img to {{ disk }}
@@ -36,22 +45,23 @@
   when: qemu_img_path is defined
 
 - name: Remove {{ base_image }}
-  file: path="/tmp/{{ base_image }}" state=absent
+  file: path="{{ base_path }}/{{ base_image }}" state=absent
+  when: base_path == "/tmp"
 
 - name: Prepare cloud-config/user-data
-  template: src="templates/cloud-config/user-data" dest="/tmp/vm-{{ item.key }}/user-data"
+  template: src="templates/cloud-config/user-data" dest="{{ qemu_img_path }}/vm-{{ item.key }}/user-data"
 
 - name: Prepare cloud-config/meta-data
-  template: src="templates/cloud-config/meta-data" dest="/tmp/vm-{{ item.key }}/meta-data"
+  template: src="templates/cloud-config/meta-data" dest="{{ qemu_img_path }}/vm-{{ item.key }}/meta-data"
 
 - name: Generate cidata cd image for cloud-init
-  command: mkisofs -o /tmp/vm-{{ item.key }}.iso -V cidata -r -J --quiet /tmp/vm-{{ item.key }}/user-data /tmp/vm-{{ item.key }}/meta-data
+  command: mkisofs -o {{ qemu_img_path }}/vm-{{ item.key }}.iso -V cidata -r -J --quiet {{ qemu_img_path }}/vm-{{ item.key }}/user-data {{ qemu_img_path }}/vm-{{ item.key }}/meta-data
 
 - name: Generate add admin script
-  template: src="templates/add_account.sh" dest="/tmp/add_account-{{ item.key }}"
+  template: src="templates/add_account.sh" dest="{{ qemu_img_path }}/add_account-{{ item.key }}"
 
 - name: Execute add admin script
-  command: virt-customize --run /tmp/add_account-{{ item.key }} --selinux-relabel -a "{{ qemu_img_path }}/{{ item.key }}.img"
+  command: virt-customize --run {{ qemu_img_path }}/add_account-{{ item.key }} --selinux-relabel -a "{{ qemu_img_path }}/{{ item.key }}.img"
   when: item.value.virt_customize is defined
 
 - name: Disable cloud-config for virt-install
@@ -61,7 +71,7 @@
 
 - name: Enable cloud-config for virt-install
   set_fact:
-     disk_cdrom: "--disk path=/tmp/vm-{{ item.key }}.iso,device=cdrom --wait 10"
+     disk_cdrom: "--disk path={{ qemu_img_path }}/vm-{{ item.key }}.iso,device=cdrom --wait 10"
   when: item.value.virt_customize is not defined
 
 - name: Enable LVM Install
@@ -83,8 +93,10 @@
   when: item.value.virt_customize is not defined
 
 - name: Start VM
-  virt: name={{ item.key }}
-        state=running
+  virt:
+      name: "{{ item.key }}"
+      state: running
+      uri: "{{ virt_uri | default('qemu:///system') }}"
   when: item.value.virt_customize is not defined
 
 - name: Give host time to boot
@@ -94,12 +106,20 @@
 - name: Register hosts ip address
   shell: arp -na | grep $(virsh dumpxml {{ item.key }} | xmllint --xpath 'string(//mac/@address)' -) | awk '{ print $2}' | sed 's/[\(\)]//g'
   register: ip_address
+  when: item.value.ip is not defined
 
 - name: Record hosts ip address
   template: src="templates/hosts" dest="{{ inventory_dir }}/libvirt-hosts"
   delegate_to: 127.0.0.1
+  when: item.value.ip is not defined
 
-- wait_for: host={{ ip_address.stdout }} port=22 state=started timeout=1200
+- name: "wait_for {{ item.value.remoteip | default(ip_address.stdout) }} {{ item.value.sshport | default('22') }}"
+  wait_for:
+      host: "{{ item.value.remoteip | default(ip_address.stdout) }}"
+      port: "{{ item.value.sshport | default('22') }}"
+      state: started
+      timeout: 1200
+      search_regex: OpenSSH
+      delay: 10
   tags:
   - post_install
-
