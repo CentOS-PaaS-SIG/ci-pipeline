@@ -7,6 +7,3 @@
     - genisoimage
 - name: Enable/Start libvirtd
   service: name=libvirtd state=started enabled=yes
-- name: get list of vms
-  virt: command=list_vms
-  register: virt_vms

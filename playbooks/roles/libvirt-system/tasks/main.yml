@@ -1,5 +1,7 @@
 ---
 - include: vm-init.yml
+  when: "skip_init | default('false') == 'false'"
+- include: vm-list.yml
 - include: vm-storage.yml
   when: state == 'present'
 - include: vm-import.yml

@@ -1,0 +1,5 @@
+- name: get list of vms
+  virt:
+      command: list_vms
+      uri: "{{ virt_uri | default('qemu:///system') }}"
+  register: virt_vms
