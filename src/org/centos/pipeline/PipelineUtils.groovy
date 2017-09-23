@@ -587,3 +587,111 @@ def teardownResources(String stage){
     echo "Duffy Deallocate ran for stage ${stage} with option --teardown\r\n" +
             "DUFFY_HOST=${env.DUFFY_HOST}"
 }
+
+/**
+ * Based on tagMap, add comment to GH with
+ * instructions to manual commands
+ *
+ * @param map of tags
+ * @return
+ */
+def sendPRCommentforTags(imageOperationsList) {
+    if (imageOperationsList.size() == 0) {
+        return
+    }
+    def msg = "\nThe following image promotions have taken place:\n\n"
+    imageOperationsList.each {
+        msg = msg + "+ ${it}\n"
+    }
+
+    echo "Prepare GHI tool"
+    withCredentials([string(credentialsId: 'paas-bot', variable: 'TOKEN')]) {
+        sh "git config --global ghi.token ${TOKEN}"
+        sh 'curl -sL https://raw.githubusercontent.com/stephencelis/ghi/master/ghi > ghi && chmod 755 ghi'
+        sh './ghi comment ' + env.ghprbPullId + ' -m "' + msg + '"'
+    }
+}
+
+/**
+ * info about tags to be used
+ * @param map
+ */
+def printLabelMap(map) {
+    for (tag in map) {
+        echo "tag to be used for ${tag.key} -> ${tag.value}"
+    }
+}
+
+/**
+ * Build image in openshift
+ * @param openshiftProject Openshift Project
+ * @param buildConfig
+ * @return
+ */
+def buildImage(String openshiftProject, String buildConfig) {
+    // - build in Openshift
+    // - startBuild with a commit
+    // - Get result Build and get imagestream manifest
+    // - Use that to create a unique tag
+    // - This tag will then be passed as an image input
+    //   to the podTemplate/containerTemplate to create
+    //   our slave pod.
+    openshift.withCluster() {
+        openshift.withProject(openshiftProject) {
+            def result = openshift.startBuild(buildConfig,
+                    "--commit",
+                    "refs/pull/" + env.ghprbPullId + "/head",
+                    "--wait")
+            def out = result.out.trim()
+            echo "Resulting Build: " + out
+
+            def describeStr = openshift.selector(out).describe()
+            out = describeStr.out.trim()
+
+            def imageHash = sh(
+                    script: "echo \"${out}\" | grep 'Image Digest:' | cut -f2- -d:",
+                    returnStdout: true
+            ).trim()
+            echo "imageHash: ${imageHash}"
+
+            echo "Creating CI tag for ${openshiftProject}/${buildConfig}: ${buildConfig}:PR-${env.ghprbPullId}"
+
+            openshift.tag("${openshiftProject}/${buildConfig}@${imageHash}",
+                    "${openshiftProject}/${buildConfig}:PR-${env.ghprbPullId}")
+
+            return "PR-" + env.ghprbPullId
+        }
+    }
+}
+
+/**
+ * Using the currentBuild, get a string representation
+ * of the changelog.
+ * @return String of changelog
+ */
+@NonCPS
+def getChangeLogFromCurrentBuild() {
+    MAX_MSG_LEN = 100
+    def changeString = ""
+
+    echo "Gathering SCM changes"
+    def changeLogSets = currentBuild.changeSets
+    for (int i = 0; i < changeLogSets.size(); i++) {
+        def entries = changeLogSets[i].items
+        for (int j = 0; j < entries.length; j++) {
+            def entry = entries[j]
+            truncated_msg = entry.msg.take(MAX_MSG_LEN)
+            changeString += " - ${truncated_msg} [${entry.author}]\n"
+            def files = new ArrayList(entry.affectedFiles)
+            for (int k = 0; k < files.size(); k++) {
+                def file = files[k]
+                changeString += "    | (${file.editType.name})  ${file.path}\n"
+            }
+        }
+    }
+
+    if (!changeString) {
+        changeString = " - No new changes\n"
+    }
+    return changeString
+}

@@ -1,34 +1,76 @@
-
+// Openshift project
 openshiftProject = "continuous-infra"
+DOCKER_REPO_URL = '172.30.254.79:5000'
+STABLE_LABEL = "stable"
 
+// Defaults for SCM operations
+env.ghprbGhRepository = env.ghprbGhRepository ?: 'CentOS-PaaS-SIG/ci-pipeline'
+env.ghprbActualCommit = env.ghprbActualCommit ?: 'master'
+
+// Add new images here
 imageList = ["jenkins-continuous-infra-slave", "rpmbuild", "ostree-compose", "rsync"]
+imageOperations = []
 
-node() {
-    // need this for ghprb plugin since it is really
-    // a post build step and it assumes the build is complete.
-    //
-    currentBuild.result = 'SUCCESS'
+library identifier: "ci-pipeline@${env.ghprbActualCommit}",
+        retriever: modernSCM([$class: 'GitSCMSource',
+                              remote: "https://github.com/${env.ghprbGhRepository}",
+                              traits: [[$class: 'jenkins.plugins.git.traits.BranchDiscoveryTrait'],
+                                       [$class: 'RefSpecsSCMSourceTrait',
+                                        templates: [[value: '+refs/heads/*:refs/remotes/@{remote}/*'],
+                                                    [value: '+refs/pull/*:refs/remotes/origin/pr/*']]]]])
 
-    openshift.withCluster() {
-        openshift.withProject(openshiftProject) {
-
-            imageList.each {
-                String tagList = sh(
-                        script: "oc get is -n ${openshiftProject} -o=jsonpath=\'{.items[?(@.metadata.name==\"${it}\")].status.tags[*].tag}\'",
-                        returnStdout: true
-                ).trim()
-                def prTag = tagList.tokenize(' ').find { it == "PR-" + env.ghprbPullId }
-                if (prTag != null) {
-                    echo "Found PR tag: " + prTag + " for image ${it}"
-                    echo "Updating ${it}:stable tag to point to ${prTag}"
-                    openshift.tag("${openshiftProject}/${it}:${prTag}",
-                            "${openshiftProject}/${it}:stable")
-                } else {
-                    echo "No tag found for image ${it}!"
-                }
+pipeline {
+    agent {
+        kubernetes {
+            cloud 'openshift'
+            label 'merge-trigger-' + env.ghprbActualCommit
+            containerTemplate {
+                name 'jnlp'
+                args '${computer.jnlpmac} ${computer.name}'
+                image DOCKER_REPO_URL + '/' + openshiftProject + '/jenkins-continuous-infra-slave:' + STABLE_LABEL
+                ttyEnabled false
+                command ''
             }
         }
     }
-
-    step([$class: 'GhprbPullRequestMerge', allowMergeWithoutTriggerPhrase: false, deleteOnMerge: false, disallowOwnCode: false, failOnNonMerge: false, mergeComment: 'testing the merge', onlyAdminsMerge: false])
+    stages {
+        stage("Image Promotion") {
+            steps {
+                script {
+                    openshift.withCluster() {
+                        openshift.withProject(openshiftProject) {
+                            imageList.each {
+                                String tagList = sh(
+                                        script: "oc get is -n ${openshiftProject} -o=jsonpath=\'{.items[?(@.metadata.name==\"${it}\")].status.tags[*].tag}\'",
+                                        returnStdout: true
+                                ).trim()
+                                def prTag = tagList.tokenize(' ').find { it == "PR-" + env.ghprbPullId }
+                                if (prTag != null) {
+                                    echo "Found PR tag: " + prTag + " for image ${it}"
+                                    echo "Updating ${it}:stable tag to point to ${prTag}"
+                                    openshift.tag("${openshiftProject}/${it}:${prTag}",
+                                            "${openshiftProject}/${it}:stable")
+                                    imageOperations.add("${it}:stable now points to ${it}:${prTag}")
+                                } else {
+                                    echo "No tag found for image ${it}!"
+                                }
+                            }
+                        }
+                    }
+                    pipelineUtils.sendPRCommentforTags(imageOperations)
+                }
+            }
+        }
+        stage("Merge PR") {
+            steps {
+                script {
+                    // need this for ghprb plugin since it is really
+                    // a post build step and it assumes the build is complete.
+                    currentBuild.result = 'SUCCESS'
+                }
+                step([$class: 'GhprbPullRequestMerge', allowMergeWithoutTriggerPhrase: false, deleteOnMerge: false, disallowOwnCode: false, failOnNonMerge: false, mergeComment: 'testing the merge', onlyAdminsMerge: false])
+            }
+        }
+    }
 }
+

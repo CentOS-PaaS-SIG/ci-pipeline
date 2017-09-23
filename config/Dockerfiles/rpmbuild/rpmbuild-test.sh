@@ -1,6 +1,6 @@
 #!/bin/bash
-set +e
 
+set +e
 # Check to make sure we have all required vars
 if [ -z "${fed_repo}" ]; then echo "No fed_repo env var" ; exit 1 ; fi
 if [ -z "${fed_branch}" ]; then echo "No fed_branch env var" ; exit 1 ; fi

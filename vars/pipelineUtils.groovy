@@ -123,4 +123,46 @@ class pipelineUtils implements Serializable {
     def convertProps(String sourceFile, String destinationFile) {
         utils.convertProps(sourceFile, destinationFile)
     }
+
+    /**
+     * Send comment to GH about image operations.
+     * @param imageOperationsList list of image operation messages
+     * @return
+     */
+    def sendPRCommentforTags(imageOperationsList) {
+        pipelineUtils.sendPRCommentforTags(imageOperationsList)
+    }
+
+    /**
+     * info about tags to be used
+     * @param map
+     */
+    def printLabelMap(map) {
+        pipelineUtils.printLabelMap(map)
+    }
+
+    /**
+     * Build image in openshift
+     * @param buildConfig
+     * @return
+     */
+    /**
+     * Build image in openshift
+     * @param openshiftProject Openshift Project
+     * @param buildConfig
+     * @return
+     */
+    def buildImage(String openshiftProject, String buildConfig) {
+        return pipelineUtils.buildImage(openshiftProject, buildConfig)
+    }
+
+    /**
+     * Using the currentBuild, get a string representation
+     * of the changelog.
+     * @return String of changelog
+     */
+    @NonCPS
+    def getChangeLogFromCurrentBuild() {
+        pipelineUtils.getChangeLogFromCurrentBuild()
+    }
 }
