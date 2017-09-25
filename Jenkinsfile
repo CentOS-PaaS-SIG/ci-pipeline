@@ -6,6 +6,7 @@ env.SLAVE_TAG = env.SLAVE_TAG ?: 'stable'
 env.RPMBUILD_TAG = env.RPMBUILD_TAG ?: 'stable'
 env.RSYNC_TAG = env.RSYNC_TAG ?: 'stable'
 env.OSTREE_COMPOSE_TAG = env.OSTREE_COMPOSE_TAG ?: 'stable'
+env.OSTREE_IMAGE_COMPOSE_TAG = env.OSTREE_IMAGE_COMPOSE_TAG ?: 'stable'
 
 env.DOCKER_REPO_URL = env.DOCKER_REPO_URL ?: '172.30.254.79:5000'
 env.OPENSHIFT_NAMESPACE = env.OPENSHIFT_NAMESPACE ?: 'continuous-infra'
@@ -43,6 +44,7 @@ properties(
                                 string(defaultValue: 'stable', description: 'Tag for rpmbuild image', name: 'RPMBUILD_TAG'),
                                 string(defaultValue: 'stable', description: 'Tag for rpmbuild image', name: 'RSYNC_TAG'),
                                 string(defaultValue: 'stable', description: 'Tag for ostree-compose image', name: 'OSTREE_COMPOSE_TAG'),
+                                string(defaultValue: 'stable', description: 'Tag for ostree-image-compose image', name: 'OSTREE_IMAGE_COMPOSE_TAG'),
                                 string(defaultValue: '172.30.254.79:5000', description: 'Docker repo url for Openshift instance', name: 'DOCKER_REPO_URL'),
                                 string(defaultValue: 'continuous-infra', description: 'Project namespace for Openshift operations', name: 'OPENSHIFT_NAMESPACE'),
                                 string(defaultValue: 'jenkins', description: 'Service Account for Openshift operations', name: 'OPENSHIFT_SERVICE_ACCOUNT'),
@@ -87,6 +89,13 @@ podTemplate(name: 'fedora-atomic-' + env.ghprbActualCommit,
                 containerTemplate(name: 'ostree-compose',
                         alwaysPullImage: true,
                         image: DOCKER_REPO_URL + '/' + OPENSHIFT_NAMESPACE + '/ostree-compose:' + OSTREE_COMPOSE_TAG,
+                        ttyEnabled: true,
+                        command: 'cat',
+                        privileged: true,
+                        workingDir: '/workDir'),
+                containerTemplate(name: 'ostree-image-compose',
+                        alwaysPullImage: true,
+                        image: DOCKER_REPO_URL + '/' + OPENSHIFT_NAMESPACE + '/ostree-image-compose:' + OSTREE_IMAGE_COMPOSE_TAG,
                         ttyEnabled: true,
                         command: 'cat',
                         privileged: true,

@@ -11,6 +11,7 @@ set -xeuo pipefail
 # problems with converted images - just force it
 # TODO: Point the working directories at the bind mounted location?
 
+
 base_dir="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 
 # Start libvirtd
