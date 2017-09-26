@@ -21,7 +21,7 @@ RUN yum -y install --disablerepo=epel-testing rsync mock libsolv glib2 ostree rp
 RUN git clone https://github.com/CentOS-PaaS-SIG/ci-pipeline
 
 # Copy the build script to the container
-COPY ostree-compose.sh $HOME/ci-pipeline/
+COPY ostree-compose.sh /tmp/ostree-compose.sh
 
 # Run the build script
-ENTRYPOINT ["bash", "/root/ci-pipeline/ostree-compose.sh"]
+ENTRYPOINT ["bash", "/tmp/ostree-compose.sh"]

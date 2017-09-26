@@ -1,0 +1,55 @@
+apiVersion: v1
+kind: Template
+labels:
+  template: ostree-compose-builder
+metadata:
+  annotations:
+    description: ostree-compose container
+    iconClass: ostree-compose
+    tags: instant-app
+  name: ostree-compose-builder
+objects:
+- apiVersion: v1
+  kind: ImageStream
+  metadata:
+    annotations:
+    labels:
+    name: ostree-compose
+  spec: {}
+- apiVersion: v1
+  kind: BuildConfig
+  metadata:
+    name: ostree-compose
+  spec:
+    output:
+      to:
+        kind: ImageStreamTag
+        name: ostree-compose:latest
+    resources: {}
+    source:
+      contextDir: ${REPO_CONTEXTDIR}
+      git:
+        ref: ${REPO_REF}
+        uri: ${REPO_URL}
+      type: Git
+    strategy:
+      dockerStrategy:
+        env:
+          - name: CONTAINER_NAME
+            value: ostree-compose
+      type: Docker
+    triggers:
+    - type: ConfigChange
+parameters:
+- description: Git repository with Dockerfile and slave entrypoint.
+  displayName: Repository URL
+  name: REPO_URL
+  value: https://github.com/CentOS-PaaS-SIG/ci-pipeline.git
+- description: The sub-directory inside the repository.
+  displayName: Context Directory
+  name: REPO_CONTEXTDIR
+  value: config/Dockerfiles/ostree_compose
+- description: The git ref or tag to use for customization.
+  displayName: Git Reference
+  name: REPO_REF
+  value: master
