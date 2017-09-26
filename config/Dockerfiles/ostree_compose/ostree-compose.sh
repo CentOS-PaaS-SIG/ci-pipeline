@@ -2,7 +2,9 @@
 
 set -x
 
-base_dir="$(dirname $0)"
+base_dir="$(pwd)"
+output_dir="/home/output/"
+pwd
 
 if [ "${branch}" = "rawhide" ]; then
     VERSION="rawhide"
@@ -12,15 +14,15 @@ fi
 
 REF="fedora/${branch}/x86_64/atomic-host"
 
-mkdir -p /home/output/logs
-touch /home/output/logs/ostree.props
+mkdir -p $base_dir/logs
+touch $base_dir/logs/ostree.props
 
-if [[ ! -e /home/output/ostree ]]; then
-    mkdir /home/output/ostree
-    ostree --repo=/home/output/ostree init --mode=archive-z2
+if [[ ! -e $output_dir/ostree ]]; then
+    mkdir $output_dir/ostree
+    ostree --repo=$output_dir/ostree init --mode=archive-z2
 fi
 
-ostree --repo=/home/output/ostree prune \
+ostree --repo=$output_dir/ostree prune \
     --keep-younger-than='1 week ago' --refs-only
 
 # get list of repos
@@ -69,16 +71,16 @@ cat << EOF > $base_dir/config/ostree/fedora-atomic-testing.json
 }
 EOF
 
-rpm-ostree compose tree --repo=/home/output/ostree $base_dir/config/ostree/fedora-atomic-testing.json || exit 1
+rpm-ostree compose tree --repo=$output_dir/ostree $base_dir/config/ostree/fedora-atomic-testing.json || exit 1
 
-ostree --repo=/home/output/ostree summary -u
+ostree --repo=$output_dir/ostree summary -u
 
-if ostree --repo=/home/output/ostree rev-parse ${REF}^ >/dev/null 2>&1; then
-    rpm-ostree db --repo=/home/output/ostree diff ${REF}{^,} | tee /home/output/logs/packages.txt
+if ostree --repo=$output_dir/ostree rev-parse ${REF}^ >/dev/null 2>&1; then
+    rpm-ostree db --repo=$output_dir/ostree diff ${REF}{^,} | tee $base_dir/logs/packages.txt
 fi
 
 # Record the commit so we can test it later
-commit=$(ostree --repo=/home/output/ostree rev-parse ${REF})
-cat << EOF > /home/output/logs/ostree.props
+commit=$(ostree --repo=$output_dir/ostree rev-parse ${REF})
+cat << EOF > $base_dir/logs/ostree.props
 commit=$commit
 EOF
