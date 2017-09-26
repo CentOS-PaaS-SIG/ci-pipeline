@@ -40,6 +40,12 @@ RUN echo "config_opts['plugin_conf']['lvm_root_opts']['size'] = '16G'" >> /etc/m
 RUN echo "config_opts['plugin_conf']['lvm_root_opts']['poolmetadatasize'] = '30G'" >> /etc/mock/site-defaults.cfg
 RUN echo "config_opts['basedir'] = '/home/rpmbuild/'" >> /etc/mock/site-defaults.cfg
 
+# Change the anongiturl for fedpkg
+# See https://bugzilla.redhat.com/show_bug.cgi?id=1495378
+# and https://pagure.io/fedpkg/issue/145
+#
+RUN sed -i 's@anongiturl.*$@anongiturl = https://src.fedoraproject.org/%(module)s@g' /etc/rpkg/fedpkg.conf
+
 # Copy the build script to the container
 COPY rpmbuild-test.sh /tmp/rpmbuild-test.sh
 
