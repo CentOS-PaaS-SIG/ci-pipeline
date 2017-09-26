@@ -307,6 +307,9 @@ podTemplate(name: 'fedora-atomic-' + env.ghprbActualCommit,
                         // Stage resources - atomic host tests
                         pipelineUtils.setupStage(currentStage, 'fedora-atomic-key')
 
+                        // Rsync Data
+                        pipelineUtils.rsyncData(currentStage)
+
                         // Teardown resources
                         pipelineUtils.teardownResources(currentStage)
 
