@@ -165,4 +165,12 @@ class pipelineUtils implements Serializable {
     def getChangeLogFromCurrentBuild() {
         pipelineUtils.getChangeLogFromCurrentBuild()
     }
+
+    /**
+     * Sets the Build displayName and Description based on whether it
+     * is a PR or a prod run.
+     */
+    def setBuildDisplayAndDescription() {
+        pipelineUtils.setBuildDisplayAndDescription()
+    }
 }
