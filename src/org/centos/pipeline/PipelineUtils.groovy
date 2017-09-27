@@ -465,7 +465,7 @@ def rsyncData(String stage){
     } else if (stage == 'ci-pipeline-ostree-image-boot-sanity') {
         text = text +
                 "export ANSIBLE_HOST_KEY_CHECKING=\"False\"\n"
-    } else if (stage == 'ci-pipeline-ostree-boot-sanity') {
+    } else if (stage in ['ci-pipeline-ostree-boot-sanity', 'ci-pipeline-atomic-host-tests']) {
         text = text +
                 "export fed_repo=\"${env.fed_repo}\"\n" +
                 "export image2boot=\"${env.image2boot}\"\n" +

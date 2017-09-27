@@ -320,8 +320,7 @@ podTemplate(name: 'fedora-atomic-' + env.ghprbActualCommit,
                         pipelineUtils.sendMessage(messageFields['properties'], messageFields['content'])
                     }
                     currentStage = "ci-pipeline-atomic-host-tests"
-                    stage(
-                            currentStage) {
+                    stage(currentStage) {
                         pipelineUtils.setStageEnvVars(currentStage)
 
                         // Set our message topic, properties, and content
@@ -335,6 +334,9 @@ podTemplate(name: 'fedora-atomic-' + env.ghprbActualCommit,
 
                         // Stage resources - atomic host tests
                         pipelineUtils.setupStage(currentStage, 'fedora-atomic-key')
+
+                        // Rsync Data
+                        pipelineUtils.rsyncData(currentStage)
 
                         // Teardown resources
                         pipelineUtils.teardownResources(currentStage)
