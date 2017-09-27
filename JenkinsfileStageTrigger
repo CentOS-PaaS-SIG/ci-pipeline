@@ -27,6 +27,10 @@ tagMap['ostree-compose'] = STABLE_LABEL
 // CI_MESSAGE known to build successfully
 def CANNED_CI_MESSAGE = '{"commit":{"username":"zdohnal","stats":{"files":{"README.patches":{"deletions":0,"additions":30,"lines":30},"sources":{"deletions":1,"additions":1,"lines":2},"vim.spec":{"deletions":7,"additions":19,"lines":26},".gitignore":{"deletions":0,"additions":1,"lines":1},"vim-8.0-rhbz1365258.patch":{"deletions":0,"additions":12,"lines":12}},"total":{"deletions":8,"files":5,"additions":63,"lines":71}},"name":"Zdenek Dohnal","rev":"3ff427e02625f810a2cedb754342be44d6161b39","namespace":"rpms","agent":"zdohnal","summary":"Merge branch \'f25\' into f26","repo":"vim","branch":"f26","seen":false,"path":"/srv/git/repositories/rpms/vim.git","message":"Merge branch \'f25\' into f26\\n","email":"zdohnal@redhat.com"},"topic":"org.fedoraproject.prod.git.receive"}'
 
+// These taken from above message
+env.fed_repo = "vim"
+env.fed_rev = "3ff427e02625f810a2cedb754342be44d6161b39"
+
 library identifier: "ci-pipeline@${env.ghprbActualCommit}",
         retriever: modernSCM([$class: 'GitSCMSource',
                               remote: "https://github.com/${env.ghprbGhRepository}",
@@ -114,19 +118,38 @@ pipeline {
                     //
                     pipelineUtils.printLabelMap(tagMap)
 
-                    def build = build job: 'ci-stage-pipeline-f26',
-                            parameters: [
-                                    string(name: 'CI_MESSAGE', value: CANNED_CI_MESSAGE),
-                                    string(name: 'ghprbActualCommit', value: "${env.ghprbActualCommit}"),
-                                    string(name: 'ghprbGhRepository', value: "${env.ghprbGhRepository}"),
-                                    string(name: 'sha1', value: "${env.sha1}"),
-                                    string(name: 'ghprbPullId', value: "${env.ghprbPullId}"),
-                                    string(name: 'SLAVE_TAG', value: tagMap['jenkins-continuous-infra-slave']),
-                                    string(name: 'RPMBUILD_TAG', value: tagMap['rpmbuild']),
-                                    string(name: 'RSYNC_TAG', value: tagMap['rsync']),
-                                    string(name: 'OSTREE_COMPOSE_TAG', value: tagMap['ostree-compose'])
-                            ]
-                    wait: true
+                    parallel watchdog: {
+                        script {
+                            def watchDogBuild = build job: 'ci-stage-pipeline-watchdog-f26',
+                                    parameters: [
+                                            string(name: 'fed_repo', value: env.fed_repo),
+                                            string(name: 'fed_rev', value: env.fed_rev),
+                                            string(name: 'ghprbActualCommit', value: "${env.ghprbActualCommit}"),
+                                            string(name: 'ghprbGhRepository', value: "${env.ghprbGhRepository}"),
+                                    ]
+                            wait: true
+                        }
+                    }, stagejob: {
+                        sleep 60
+                        script {
+                            def build = build job: 'ci-stage-pipeline-f26',
+                                    parameters: [
+                                            string(name: 'CI_MESSAGE', value: CANNED_CI_MESSAGE),
+                                            string(name: 'ghprbActualCommit', value: "${env.ghprbActualCommit}"),
+                                            string(name: 'ghprbGhRepository', value: "${env.ghprbGhRepository}"),
+                                            string(name: 'sha1', value: "${env.sha1}"),
+                                            string(name: 'ghprbPullId', value: "${env.ghprbPullId}"),
+                                            string(name: 'SLAVE_TAG', value: tagMap['jenkins-continuous-infra-slave']),
+                                            string(name: 'RPMBUILD_TAG', value: tagMap['rpmbuild']),
+                                            string(name: 'RSYNC_TAG', value: tagMap['rsync']),
+                                            string(name: 'OSTREE_COMPOSE_TAG', value: tagMap['ostree-compose'])
+                                    ]
+                            wait: true
+                        }
+                    },
+                    failFast: true
+
+
                 }
             }
         }

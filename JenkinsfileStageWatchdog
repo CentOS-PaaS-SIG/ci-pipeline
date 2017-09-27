@@ -1,0 +1,68 @@
+/**
+ * CI Stage Pipeline Watchdog
+ *
+ * This is a declarative pipeline for the CI stage pipeline
+ * that watches to make sure we are sending correct messages
+ *
+ */
+
+// Openshift project
+openshiftProject = "continuous-infra"
+DOCKER_REPO_URL = '172.30.254.79:5000'
+
+// Defaults for SCM operations
+env.ghprbGhRepository = env.ghprbGhRepository ?: 'CentOS-PaaS-SIG/ci-pipeline'
+env.ghprbActualCommit = env.ghprbActualCommit ?: 'master'
+
+// If this PR does not include an image change, then use this tag
+STABLE_LABEL = "stable"
+
+properties(
+        [
+                parameters(
+                        [
+                                string(description: 'fed repo', name: 'fed_repo'),
+                                string(description: 'fed rev', name: 'fed_rev'),
+                                string(defaultValue: 'master', description: '', name: 'ghprbActualCommit'),
+                                string(defaultValue: 'CentOS-PaaS-SIG/ci-pipeline', description: '', name: 'ghprbGhRepository'),
+                        ]
+                )
+        ]
+)
+
+library identifier: "ci-pipeline@${env.ghprbActualCommit}",
+        retriever: modernSCM([$class: 'GitSCMSource',
+                              remote: "https://github.com/${env.ghprbGhRepository}",
+                              traits: [[$class: 'jenkins.plugins.git.traits.BranchDiscoveryTrait'],
+                                       [$class: 'RefSpecsSCMSourceTrait',
+                                        templates: [[value: '+refs/heads/*:refs/remotes/@{remote}/*'],
+                                                    [value: '+refs/pull/*:refs/remotes/origin/pr/*']]]]])
+
+pipeline {
+    agent {
+        label 'master'
+    }
+    stages {
+        stage("Wait for package.running") {
+            steps {
+                script {
+                        def msg = waitForCIMessage providerName: 'fedora-fedmsg',
+                                selector: "topic = \'org.centos.stage.ci.pipeline.package.running\'",
+                                checks: [[expectedValue: "${env.fed_repo}", field: '$.repo'],
+                                         [expectedValue: "${env.fed_rev}", field: '$.rev']],
+                                topic: 'org.centos.stage.ci.pipeline.package.running',
+                                timeout: 10
+                        echo msg
+                }
+            }
+        }
+    }
+    post {
+        success {
+            echo "yay!"
+        }
+        failure {
+            error "build failed!"
+        }
+    }
+}
