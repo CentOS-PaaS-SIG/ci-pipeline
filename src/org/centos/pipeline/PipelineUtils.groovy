@@ -509,7 +509,7 @@ def provisionResources(String stage){
  * @param script Complete path to the script to execute
  * @return
  */
-def executeInContainer(stageName, containerName, script) {
+def executeInContainer(String stageName, String containerName, String script) {
     //
     // Kubernetes plugin does not let containers inherit
     // env vars from host. We force them in.
@@ -518,17 +518,24 @@ def executeInContainer(stageName, containerName, script) {
     withEnv(containerEnv) {
         container(containerName) {
             sh 'pwd'
-            sh 'cp -fv fedora.keytab /home/fedora.keytab'
+            sh 'ls -l /tmp'
+            sh "cp -fv ${WORKSPACE}/fedora.keytab /home/fedora.keytab"
             sh 'env'
             sh script
-            sh "ls -lR logs"
+            sh "ls -lR logs || true"
         }
     }
-    sh 'mkdir -p ' + stageName
-    sh 'mv -vf logs ' + stageName + "/logs"
+    sh "mkdir -p " + stageName
+    sh "mv -vf logs " + stageName + "/logs || true"
 }
 
-def verifyPod(openshiftProject, nodeName) {
+/**
+ *
+ * @param openshiftProject name of openshift namespace/project.
+ * @param nodeName podName we are going to verify.
+ * @return
+ */
+def verifyPod(String openshiftProject, String nodeName) {
     openshift.withCluster() {
         openshift.withProject(openshiftProject) {
             def describeStr = openshift.selector("pods", nodeName).describe()
@@ -566,7 +573,7 @@ def verifyPod(openshiftProject, nodeName) {
  * @param credentialsId Credential ID for Duffy Key
  * @return password
  */
-def getPasswordFromDuffyKey(credentialsId) {
+def getPasswordFromDuffyKey(String credentialsId) {
     withCredentials([file(credentialsId: credentialsId, variable: 'DUFFY_KEY')]) {
         return sh(script: 'cat ' + DUFFY_KEY +
                 ' | cut -c \'-13\'', returnStdout: true).trim()
