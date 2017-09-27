@@ -101,6 +101,8 @@ cp ${CURRENTDIR}/${fed_repo}/results_${fed_repo}/${VERSION}/*/*.rpm ${RPMDIR}/
 # Run rpmlint
 rpmlint ${RPMDIR}/ > ${LOGDIR}/rpmlint_out.txt
 pushd ${RPMDIR} && createrepo .
+mkdir logs
+cp ${CURRENTDIR}/${fed_repo}/results_${fed_repo}/${VERSION}/*/*.log logs/
 popd
 # Run fedabipkgdiff against the newly created rpm
 rm -rf libabigail
