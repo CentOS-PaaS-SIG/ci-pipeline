@@ -1,0 +1,51 @@
+---
+- hosts: localhost
+  connection: local
+  remote_user: root
+  become: true
+  tasks:
+    - name: "cat inventory out generated inventory"
+      shell: "cat /linchpin_workspace/inventories/libvirt.inventory"
+      register: inventory_output
+    - name: "debug: inventory get first ip address in inventory"
+      debug:
+        msg: "{{ inventory_output.stdout | get_first_ip }}"
+    - name: "Set fact for ip_address"
+      set_fact:
+        ipaddr: "{{ inventory_output.stdout | get_first_ip  }}"
+    - name: "enable the network service"
+      shell: "ansible -i /linchpin_workspace/inventories/libvirt.inventory all -u admin --become --private-key ~/.ssh/ex -a\"systemctl enable network\""
+      environment:
+        ANSIBLE_HOST_KEY_CHECKING: False
+    - name: "Start the network service"
+      shell: "ansible -i /linchpin_workspace/inventories/libvirt.inventory all -u admin --become --private-key ~/.ssh/ex -a\"systemctl start network\""
+      environment:
+        ANSIBLE_HOST_KEY_CHECKING: False
+    #- name: "Add ip to /etc/hosts file "
+    #  shell: ansible -i localhost  localhost -m lineinfile  -a"line='{{ ipaddr }} atomic01 atomic01.example.com' destfile='/etc/hosts' state='present'"
+    #  environment:
+    #    ANSIBLE_HOST_KEY_CHECKING: False
+    - name: "Copy hosts file to tmp"
+      copy:
+        src: /etc/hosts
+        dest: /tmp/hosts
+        remote_src: true
+    - name: "Add ip to /etc/hosts on tmp hosts"
+      lineinfile:
+        line: "{{ ipaddr }} atomic01 atomic01.example.com"
+        destfile: "/tmp/hosts"
+        state: "present"
+    - name: "Copy hosts file to /etc/"
+      shell: "cat /tmp/hosts > /etc/hosts"                                                                                                                                                                                               
+    - name: "Add ip to /etc/hosts file"
+      shell: ansible -i /linchpin_workspace/inventories/libvirt.inventory all -u admin --become --private-key ~/.ssh/ex -m lineinfile -a"line='{{ ipaddr }} atomic01 atomic01.example.com' destfile='/etc/hosts' state='present'"
+      environment:
+        ANSIBLE_HOST_KEY_CHECKING: False
+    - name: "Use ansible adhoc command to hostnamectl set-hostname to atomic01.example.com"
+      shell: "ansible -i /linchpin_workspace/inventories/libvirt.inventory all -u admin --become --private-key ~/.ssh/ex -a \"hostnamectl set-hostname atomic01.example.com\""
+      environment:
+        ANSIBLE_HOST_KEY_CHECKING: False
+    - name: "Generate single node deployment inventory"
+      template:
+        src: singlenode.j2
+        dest: /tmp/singlenode.inv

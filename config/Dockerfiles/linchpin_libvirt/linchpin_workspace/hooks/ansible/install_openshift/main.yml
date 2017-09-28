@@ -1,0 +1,10 @@
+---
+- hosts: localhost
+  connection: local
+  tasks:
+    - name: "Install openshift"
+      shell: ansible-playbook -i /tmp/singlenode.inv --private-key /root/.ssh/ex /linchpin_workspace/hooks/ansible/openshift-ansible/playbooks/byo/config.yml -e'openshift_disable_check=disk_availability,docker_storage,memory_availability' -e 'ansible_python_interpreter=/usr/bin/python3'
+      register: openshift_out
+    - name: "debug"
+      debug:
+        msg: "{{ openshift_out }}"
