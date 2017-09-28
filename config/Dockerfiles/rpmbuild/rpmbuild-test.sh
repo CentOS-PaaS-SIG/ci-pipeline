@@ -73,7 +73,7 @@ ls
 kinit -k -t /home/fedora.keytab $FEDORA_PRINCIPAL
 # Build the package into ./results_${fed_repo}/$VERSION/$RELEASE/ and concurrently do a koji build
 { time fedpkg --release ${fed_branch} mockbuild ; } 2> ${LOGDIR}/mockbuild.txt &
-{ time koji build --wait --arch-override=x86_64 --scratch $RSYNC_BRANCH /root/rpmbuild/SRPMS/${fed_repo}*.src.rpm ; } 2> ${LOGDIR}/kojibuildtime.txt &
+{ time python2 /usr/bin/koji build --wait --arch-override=x86_64 --scratch $RSYNC_BRANCH /root/rpmbuild/SRPMS/${fed_repo}*.src.rpm ; } 2> ${LOGDIR}/kojibuildtime.txt &
 # Set status if either job fails to build the rpm
 MOCKBUILD_RC=0
 for job in `jobs -p`; do
@@ -101,6 +101,9 @@ cp ${CURRENTDIR}/${fed_repo}/results_${fed_repo}/${VERSION}/*/*.rpm ${RPMDIR}/
 # Run rpmlint
 rpmlint ${RPMDIR}/ > ${LOGDIR}/rpmlint_out.txt
 pushd ${RPMDIR} && createrepo .
+mkdir logs
+cp ${CURRENTDIR}/${fed_repo}/results_${fed_repo}/${VERSION}/*/*.log logs/
+cp ${CURRENTDIR}/${fed_repo}/results_${fed_repo}/${VERSION}/*/*.log ${LOGDIR}/
 popd
 # Run fedabipkgdiff against the newly created rpm
 rm -rf libabigail

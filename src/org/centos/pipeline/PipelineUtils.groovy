@@ -702,3 +702,16 @@ def getChangeLogFromCurrentBuild() {
     }
     return changeString
 }
+
+/**
+ * Sets the Build displayName and Description based on whether it
+ * is a PR or a prod run.
+ */
+def setBuildDisplayAndDescription() {
+    currentBuild.displayName = "Build#: ${env.BUILD_NUMBER} - Branch: ${env.branch} - Package: ${env.fed_repo}"
+    if (env.ghprbActualCommit != null && env.ghprbActualCommit != "master") {
+        currentBuild.description = "<a href=\"https://github.com/${env.ghprbGhRepository}/pull/${env.ghprbPullId}\">PR #${env.ghprbPullId}</a>"
+    } else {
+        currentBuild.description = "${currentBuild.currentResult}"
+    }
+}

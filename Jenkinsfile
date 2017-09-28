@@ -362,10 +362,7 @@ podTemplate(name: 'fedora-atomic-' + env.ghprbActualCommit,
 
                 } finally {
                     // Set the build display name and description
-                    currentBuild.displayName = "Build#: ${env.BUILD_NUMBER} - Branch: ${env.branch} - Package: ${env.fed_repo}"
-                    currentBuild.description = "${currentBuild.currentResult}"
-
-                    //emailext subject: "${env.JOB_NAME} - Build # ${env.BUILD_NUMBER} - STATUS = ${currentBuild.currentResult}", to: "ari@redhat.com", body: "This pipeline was a ${currentBuild.currentResult}"
+                    pipelineUtils.setBuildDisplayAndDescription()
 
                     // Archive our artifacts
                     step([$class: 'ArtifactArchiver', allowEmptyArchive: true, artifacts: '**/logs/**,*.txt,*.groovy,**/job.*,**/*.groovy,**/inventory.*', excludes: '**/job.props,**/job.props.groovy,**/*.example', fingerprint: true])
