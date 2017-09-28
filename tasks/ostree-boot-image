@@ -3,6 +3,11 @@
 set -xe
 env
 
+# The paths to this project and dir
+TASKDIR="$(dirname $0)"
+BASEDIR="$(realpath $TASKDIR/..)"
+
+# The directory that we write output to
 HOMEDIR=$(pwd)
 
 function clean_up {
@@ -12,7 +17,7 @@ function clean_up {
     sudo mv ${HOMEDIR}/output/logs ${HOMEDIR}
 
     # Tear down the atomic host and image
-    sudo docker run --privileged -it --link libvirtd:libvirtd -e commit=${commit} -e image2boot=${image2boot} -e state=absent -v /var/lib/libvirt/:/var/lib/libvirt/ -v ${HOMEDIR}/output/:/root/output/ -v ${HOMEDIR}/ci-pipeline/:/root/ci-pipeline ostree_boot_image
+    sudo docker run --privileged -it --link libvirtd:libvirtd -e commit=${commit} -e image2boot=${image2boot} -e state=absent -v /var/lib/libvirt/:/var/lib/libvirt/ -v ${HOMEDIR}/output/:/root/output/ -v ${BASEDIR}/:/root/ci-pipeline ostree_boot_image
 
     # Kill our libvirtd docker instance.
     #  We can change this in the future to have it stick around if needed
@@ -36,15 +41,15 @@ if [ -e "${HOMEDIR}/output/logs" ]; then
 fi
 mkdir -p ${HOMEDIR}/output
 
-pushd $HOMEDIR/ci-pipeline/config/Dockerfiles/rsync
+pushd ${BASEDIR}/config/Dockerfiles/rsync
 sudo docker build -t rsync-container .
 popd
 
-pushd $HOMEDIR/ci-pipeline/config/Dockerfiles/libvirtd
+pushd ${BASEDIR}/config/Dockerfiles/libvirtd
 sudo docker build --build-arg OSTREE_REPO_SERVER=artifacts.ci.centos.org -t libvirtd .
 popd
 
-pushd $HOMEDIR/ci-pipeline/config/Dockerfiles/ostree_boot_image
+pushd ${BASEDIR}/config/Dockerfiles/ostree_boot_image
 sudo docker build -t ostree_boot_image .
 popd
 
@@ -55,7 +60,7 @@ sudo docker run --privileged -d \
 -v /var/lib/libvirt/:/var/lib/libvirt/ \
 -v /sys/fs/cgroup:/sys/fs/cgroup:rw --name libvirtd libvirtd
 
-sudo docker run --privileged -it --link libvirtd:libvirtd -e commit=${commit} -e image2boot=${image2boot} -e state=present -v /var/lib/libvirt/:/var/lib/libvirt/ -v ${HOMEDIR}/output/:/root/output/ -v ${HOMEDIR}/ci-pipeline/:/root/ci-pipeline ostree_boot_image
+sudo docker run --privileged -it --link libvirtd:libvirtd -e commit=${commit} -e image2boot=${image2boot} -e state=present -v /var/lib/libvirt/:/var/lib/libvirt/ -v ${HOMEDIR}/output/:/root/output/ -v ${BASEDIR}/:/root/ci-pipeline ostree_boot_image
 echo $?
 
 # If image2boot is defined then symlink it as latest
