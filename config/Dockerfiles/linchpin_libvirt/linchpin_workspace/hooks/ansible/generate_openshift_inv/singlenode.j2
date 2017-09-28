@@ -1,0 +1,32 @@
+# Create an OSEv3 group that contains the masters and nodes groups
+[OSEv3:children]
+masters
+nodes
+
+# Set variables common for all OSEv3 hosts
+[OSEv3:vars]
+ansible_user=admin
+ansible_become=true
+
+openshift_master_default_subdomain={{ ipaddr }}.xip.io
+
+deployment_type=origin
+openshift_deployment_type=origin
+openshift_release=v3.6
+openshift_image_tag=v3.6.0
+#deployment_subtype=registry
+containerized=true
+ansible_ssh_private_key_file=/root/.ssh/ex
+# enable htpasswd auth
+openshift_master_identity_providers=[{'name': 'htpasswd_auth', 'login': 'true', 'challenge': 'true', 'kind': 'HTPasswdPasswordIdentityProvider', 'filename': '/etc/origin/master/htpasswd'}]
+openshift_master_htpasswd_users={'admin': '$apr1$zgSjCrLt$1KSuj66CggeWSv.D.BXOA1'}
+
+# host group for masters
+[masters]
+{{ ipaddr }}
+
+# host group for worker nodes, we list master node here so that
+# openshift-sdn gets installed. We mark the master node as not
+# schedulable.
+[nodes]
+{{ ipaddr }} openshift_node_labels="{'region': 'infra', 'zone': 'default'}" openshift_schedulable=true
