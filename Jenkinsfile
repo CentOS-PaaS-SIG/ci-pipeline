@@ -2,6 +2,8 @@ env.ghprbGhRepository = env.ghprbGhRepository ?: 'CentOS-PaaS-SIG/ci-pipeline'
 env.ghprbActualCommit = env.ghprbActualCommit ?: 'master'
 env.ghprbPullAuthorLogin = env.ghprbPullAuthorLogin ?: ''
 
+env.TARGET_BRANCH = env.TARGET_BRANCH ?: 'master'
+
 // Needed for podTemplate()
 env.SLAVE_TAG = env.SLAVE_TAG ?: 'stable'
 env.RPMBUILD_TAG = env.RPMBUILD_TAG ?: 'stable'
@@ -146,7 +148,7 @@ podTemplate(name: podName,
                         // Prepare Credentials (keys, passwords, etc)
                         pipelineUtils.prepareCredentials()
                         // Parse the CI_MESSAGE and inject it as env vars
-                        pipelineUtils.injectFedmsgVars()
+                        pipelineUtils.injectFedmsgVars(env.CI_MESSAGE)
                         // Decorate our build
                         pipelineUtils.updateBuildDisplayAndDescription()
                         // Gather some info about the node we are running on for diagnostics

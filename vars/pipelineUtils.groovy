@@ -62,11 +62,12 @@ class pipelineUtils implements Serializable {
     }
 
     /**
-     * Method to parse CI_MESSAGE and inject its key/value pairs as env variables.
+     * Method to parse message and inject its key/value pairs as env variables.
+     * @param message message from dist-git to parse
      * @return
      */
-    def injectFedmsgVars() {
-        pipelineUtils.injectFedmsgVars()
+    def injectFedmsgVars(String message) {
+        pipelineUtils.injectFedmsgVars(message)
     }
 
     /**
@@ -218,5 +219,14 @@ class pipelineUtils implements Serializable {
      */
     def initializeAuditFile(String auditFile) {
         pipelineUtils.initializeAuditFile(auditFile)
+    }
+
+/**
+ * Watch for messages
+ * @param msg_provider jms-messaging message provider
+ * @param message trigger message
+ */
+    def watchForMessages(String msg_provider, String message) {
+        pipelineUtils.watchForMessages(msg_provider, message)
     }
 }
