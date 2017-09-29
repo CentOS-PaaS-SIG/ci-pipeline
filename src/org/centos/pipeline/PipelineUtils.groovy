@@ -423,6 +423,9 @@ def setStageEnvVars(String stage){
                      playbook: "ci-pipeline/playbooks/system-setup.yml",
                      DUFFY_OP: "--allocate"
              ],
+             "ci-pipeline-functional-tests"            : [
+                     package                  : "${env.fed_repo}"
+             ],
              "ci-pipeline-atomic-host-tests"       : [
                      task    : "./ci-pipeline/tasks/atomic-host-tests",
                      playbook: "ci-pipeline/playbooks/system-setup.yml",
@@ -472,6 +475,9 @@ def rsyncData(String stage){
                 "export image2boot=\"${env.image2boot}\"\n" +
                 "export commit=\"${env.commit}\"\n" +
                 "export ANSIBLE_HOST_KEY_CHECKING=\"False\"\n"
+    } else if (stage == 'ci-pipeline-functional-tests') {
+        text = text +
+                "export package=\"${env.fed_repo}\"\n"
     }
 
     writeFile file: "${env.ORIGIN_WORKSPACE}/task.env",
