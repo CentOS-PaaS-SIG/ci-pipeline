@@ -1,9 +1,24 @@
 #!/bin/sh
 
-# set -x so I can see stuff for easier debug for now
-set -x
-# Find the base dir
-base_dir="$(dirname $0)/.."
+set -xe
+
+HOMEDIR=$(pwd)
+
+function clean_up {
+    set +e
+
+    # Logs need to be in a specific place to be picked up.
+    sudo mv ${HOMEDIR}/logs ${HOMEDIR}
+
+    # Tear down the atomic host and image
+    sudo docker run --privileged -it --link libvirtd:libvirtd -e commit=${commit} -e image2boot=${image2boot} -e state=absent -e suite=host -v /var/lib/libvirt/:/var/lib/libvirt/ -v ${HOMEDIR}/:/root/ runtest
+
+    # Kill our libvirtd docker instance.
+    #  We can change this in the future to have it stick around if needed
+    sudo docker kill libvirtd
+    sudo docker rm libvirtd
+}
+trap clean_up ERR SIGHUP SIGINT SIGTERM
 
 if [ "${branch}" = "master" -o "${branch}" = "rawhide" ]; then
     branch="rawhide"
@@ -12,111 +27,31 @@ else
     VERSION=$(echo $branch | sed -e 's/[a-zA-Z]*//')
 fi
 
-export ara_location=$(python -c "import os,ara; print(os.path.dirname(ara.__file__))")
-export ANSIBLE_CALLBACK_PLUGINS=$ara_location/plugins/callbacks
-export ANSIBLE_ACTION_PLUGINS=$ara_location/plugins/actions
-export ANSIBLE_LIBRARY=$ara_location/plugins/modules
-
-REF="fedora/${branch}/x86_64/atomic-host"
-
-rm -rf logs
-mkdir -p logs
-HOMEDIR=$(pwd)
-
-for v in ostree images; do
-    rsync --delete --stats -a ${RSYNC_USER}@${RSYNC_SERVER}::${RSYNC_DIR}/${branch}/${v}/ ${v}/
-done
-
-# Create directory for temporary files
-tmpdir=$(mktemp -d)
-
-# Kill backgrounded jobs on exit
-function clean_up {
-    ansible-playbook -i hosts ci-pipeline/playbooks/setup-libvirt-image.yml -l atomic_host_tests_slave -e 'state=absent'
-    kill $(jobs -p)
-    sudo rm -rf $tmpdir
-    ara generate junit - > ${HOMEDIR}/logs/ansible_xunit.xml
-    rm -rf $HOME/.ara
-}
-trap clean_up EXIT SIGHUP SIGINT SIGTERM
-
-version=$(ostree --repo=ostree show --print-metadata-key=version $REF| sed -e "s/'//g")
-if [ -d "images" ]; then
-    # Find the last image we pushed
-    prev_img=$(ls -tr images/*.qcow2 | tail -n 1)
-    IMG_URL="${HTTP_BASE}/${branch}/$prev_img"
+# Make sure logs are empty so we don't report previous build
+# if we fail
+if [ -e "${HOMEDIR}/logs" ]; then
+    sudo rm -rf ${HOMEDIR}/logs >/dev/null 2>&1
+    echo "rm -rf ${HOMEDIR}/logs rc:$?"
 fi
 
-# If image2boot is defined use that image, but if not fall back to the
-# previous image built
-image2boot=${image2boot:-$IMG_URL}
-
-if ! [ -f ~/.ssh/id_rsa ]; then
-    ssh-keygen -t rsa -f ~/.ssh/id_rsa -N ''
-    cat ~/.ssh/id_rsa.pub >> ~/.ssh/authorized_keys
-fi
-
-pubkey=$(cat ~/.ssh/id_rsa.pub)
-
-mkdir -p host_vars
-cat << 'EOF' > host_vars/atomic_host_tests_slave.yml
-qemu_img_path: /var/lib/libvirt/images
-bridge: virbr0
-libvirt_systems:
- atomic-host-tests:
-   admin_passwd: $5$uX5x24soDWv3G2TH$BYxhEq4HmxjKmyChV0.VTpqxfhqMaRk8LCr34KOg2C7
-   memory: 3072
-   disk: 10G
-EOF
-cat << EOF >> host_vars/atomic_host_tests_slave.yml
-   img_url: $image2boot
-   admin_ssh_rsa: $pubkey
-EOF
-cat << EOF > hosts
-[libvirt-hosts]
-atomic_host_tests_slave ansible_ssh_host=127.0.0.1 ansible_user=builder become=true
-EOF
-# Install net-tools
-sudo yum -y install net-tools
-# Start test VM
-ansible-playbook -i hosts ci-pipeline/playbooks/setup-libvirt-image.yml -l atomic_host_tests_slave -e 'state=present'
-
-PROVISION_STATUS=$?
-if [ "$PROVISION_STATUS" != 0 ]; then
-    echo "ERROR: Provisioning\nSTATUS: $PROVISION_STATUS"
-    exit 1
-fi
-
-# Get libvirt IP
-IP=$(cat libvirt-hosts | tail -n 1 | cut -d '=' -f 2)
-
-# Create ansible inventory for atomic host to test
-cat << EOF > ${HOMEDIR}/ansible_inventory.txt
-[testsystems]
-$IP ansible_user=admin ansible_ssh_pass=admin ansible_become=true ansible_become_pass=admin
-EOF
-
-# Set up the atomic host for testing
-which ansible
-if [ "$?" != 0 ]; then echo "ERROR: ansible unavailable: $?"; exit 1; fi
-ansible-playbook -i ${HOMEDIR}/ansible_inventory.txt -l testsystems ${base_dir}/utils/ostree_install_rpms.yml -u root
-if [ "$?" != 0 ]; then echo "ERROR: Failed to set up ostree with proper rpms: $?"; exit 1; fi
-
-# All tests currently available are admin-unlock, docker-build-httpd, docker-swarm, docker, improved-sanity-test, k8-cluster, pkg-layering, runc, system-containers, unique-machine-id
-ENABLED_TESTS="admin-unlock docker-build-httpd docker-swarm docker pkg-layering rpm-ostree system-containers"
-
-# Test the atomic host with playbooks from https://github.com/projectatomic/atomic-host-tests
-git clone https://github.com/projectatomic/atomic-host-tests
-pushd atomic-host-tests
-
-# Do setup steps
-sed -i s/true/false/ tests/docker/vars.yml
-
-for test in $ENABLED_TESTS; do
-     ansible-playbook -i ${HOMEDIR}/ansible_inventory.txt -l testsystems tests/$test/main.yml -u root -v > ${HOMEDIR}/logs/${test}.out
-     ansible-playbook -i ${HOMEDIR}/ansible_inventory.txt -l testsystems ../${base_dir}/utils/atomic_rollback.yml
-done
-
+pushd $HOMEDIR/ci-pipeline/config/Dockerfiles/rsync
+sudo docker build -t rsync-container .
 popd
 
-exit 0
+pushd $HOMEDIR/ci-pipeline/config/Dockerfiles/libvirtd
+sudo docker build --build-arg OSTREE_REPO_SERVER=artifacts.ci.centos.org -t libvirtd .
+popd
+
+pushd $HOMEDIR/ci-pipeline/config/Dockerfiles/runtest
+sudo docker build -t runtest .
+popd
+
+sudo docker run --privileged --cap-add=SYS_ADMIN -v ${HOMEDIR}:/home/output -e rsync_paths="images" -e rsync_from="${RSYNC_USER}@${RSYNC_SERVER}::${RSYNC_DIR}/${branch}/" -e rsync_to="/home/output/" -e RSYNC_PASSWORD="$RSYNC_PASSWORD" rsync-container
+echo $?
+
+sudo docker run --privileged -d \
+-v /var/lib/libvirt/:/var/lib/libvirt/ \
+-v /sys/fs/cgroup:/sys/fs/cgroup:rw --name libvirtd libvirtd
+
+sudo docker run --privileged -it --link libvirtd:libvirtd -e commit=${commit} -e image2boot=${image2boot} -e state=present -e suite=host -v /var/lib/libvirt/:/var/lib/libvirt/ -v ${HOMEDIR}/:/root/ runtest
+echo $?
