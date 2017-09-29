@@ -224,34 +224,42 @@ podTemplate(name: 'fedora-atomic-' + env.ghprbActualCommit,
 
                     currentStage = "ci-pipeline-ostree-image-compose"
                     stage(currentStage) {
+                        // Set stage specific vars
+                        pipelineUtils.setStageEnvVars(currentStage)
+                        // We always run, but don't always push to artifacts
+                        env.PUSH_IMAGE = "false"
+
                         // Check if a new ostree image compose is needed
                         if (fileExists("${env.WORKSPACE}/NeedNewImage.txt") || ("${env.GENERATE_IMAGE}" == "true")) {
-                            // Set stage specific vars
-                            pipelineUtils.setStageEnvVars(currentStage)
+                            // We will push a new qcow2 to artifacts
+                            env.PUSH_IMAGE = "true"
 
                             // Set our message topic, properties, and content
                             messageFields = pipelineUtils.setMessageFields("image.running")
 
                             // Send message org.centos.prod.ci.pipeline.image.running on fedmsg
                             pipelineUtils.sendMessage(messageFields['properties'], messageFields['content'])
+                        }
 
-                            // Provision resources
-                            pipelineUtils.provisionResources(currentStage)
+                        // Provision resources
+                        pipelineUtils.provisionResources(currentStage)
 
-                            // Stage resources - ostree image compose
-                            pipelineUtils.setupStage(currentStage, 'fedora-atomic-key')
+                        // Stage resources - ostree image compose
+                        pipelineUtils.setupStage(currentStage, 'fedora-atomic-key')
 
-                            // Rsync Data
-                            pipelineUtils.rsyncData(currentStage)
+                        // Rsync Data
+                        pipelineUtils.rsyncData(currentStage)
 
-                            ostree_props = "${env.ORIGIN_WORKSPACE}/logs/ostree.props"
-                            ostree_props_groovy = "${env.ORIGIN_WORKSPACE}/ostree.props.groovy"
-                            pipelineUtils.convertProps(ostree_props, ostree_props_groovy)
-                            load(ostree_props_groovy)
+                        ostree_props = "${env.ORIGIN_WORKSPACE}/logs/ostree.props"
+                        ostree_props_groovy = "${env.ORIGIN_WORKSPACE}/ostree.props.groovy"
+                        sh "mv -f ${env.ORIGIN_WORKSPACE}/latest-atomic.qcow2 ${env.WORKSPACE}/"
+                        pipelineUtils.convertProps(ostree_props, ostree_props_groovy)
+                        load(ostree_props_groovy)
 
-                            // Teardown resources
-                            pipelineUtils.teardownResources(currentStage)
+                        // Teardown resources
+                        pipelineUtils.teardownResources(currentStage)
 
+                        if (fileExists("${env.WORKSPACE}/NeedNewImage.txt") || ("${env.GENERATE_IMAGE}" == "true")) {
                             // Set our message topic, properties, and content
                             messageFields = pipelineUtils.setMessageFields("image.complete")
 
@@ -259,7 +267,7 @@ podTemplate(name: 'fedora-atomic-' + env.ghprbActualCommit,
                             pipelineUtils.sendMessage(messageFields['properties'], messageFields['content'])
 
                         } else {
-                            echo "Not Generating a New Image"
+                            echo "Not Pushing a New Image"
                         }
                     }
 

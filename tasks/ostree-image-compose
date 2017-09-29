@@ -30,5 +30,9 @@ sudo docker run --privileged -e 'container=docker' -v /sys/fs/cgroup:/sys/fs/cgr
 
 # Logs need to be in a specific place to be picked up.
 sudo mv ${HOMEDIR}/output/logs ${HOMEDIR}
+sudo cp ${HOMEDIR}/output/images/latest-atomic.qcow2 ${HOMEDIR}/
 
-sudo docker run --privileged --cap-add=SYS_ADMIN -v ${HOMEDIR}/output:/home/output -e rsync_paths="images" -e rsync_to="${RSYNC_USER}@${RSYNC_SERVER}::${RSYNC_DIR}/${branch}/" -e rsync_from="/home/output/" -e RSYNC_PASSWORD="$RSYNC_PASSWORD" rsync-container
+# Only rsync image to artifacts.ci.centos.org if PUSH_IMAGE = true
+if [ ${PUSH_IMAGE} = "true" ]; then
+     sudo docker run --privileged --cap-add=SYS_ADMIN -v ${HOMEDIR}/output:/home/output -e rsync_paths="images" -e rsync_to="${RSYNC_USER}@${RSYNC_SERVER}::${RSYNC_DIR}/${branch}/" -e rsync_from="/home/output/" -e RSYNC_PASSWORD="$RSYNC_PASSWORD" rsync-container
+fi
