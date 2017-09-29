@@ -76,11 +76,11 @@ if [ "$state" = "absent" ]; then
     ansible-playbook -i hosts /root/ci-pipeline/playbooks/setup-libvirt-image.yml -e state=absent -e skip_init=true
 else
     # Start test VM
-    ansible-playbook -v -i hosts /root/ci-pipeline/playbooks/setup-libvirt-image.yml -e state=present -e skip_init=true
+    ansible-playbook -vvvv -i hosts /root/ci-pipeline/playbooks/setup-libvirt-image.yml -e state=present -e skip_init=true
 
     PROVISION_STATUS=$?
     if [ "$PROVISION_STATUS" != 0 ]; then
-        echo "ERROR: Provisioning\nSTATUS: $PROVISION_STATUS"
+        echo -e "ERROR: Provisioning\nSTATUS: $PROVISION_STATUS"
         exit 1
     fi
 
@@ -104,12 +104,15 @@ EOF
      
      # Do setup steps
      sed -i s/true/false/ tests/docker/vars.yml
-     
+
      for test in $ENABLED_TESTS; do
           ansible-playbook -i ${INVENTORY} -l atomic-host tests/$test/main.yml -u root -v > ${MNT_DIR}/logs/${test}.out
+          if [ $? -ne 0 ]; then
+               RC=1
+          fi
           ansible-playbook -i ${INVENTORY} -l atomic-host /root/ci-pipeline/utils/atomic_rollback.yml
      done
      popd
      popd
-     exit 0
+     exit $RC
 fi
