@@ -105,7 +105,7 @@ CI Pipeline messages sent via fedmsg for this stage are captured by the topics o
 
 If functional tests are successful in the previous stage of the pipeline then an OStree compose is generated.
 
-CI Pipeline messages sent via fedmsg for this stage are captured by the topics org.centos.prod.ci.pipeline.compose.[queued,running,complete].
+CI Pipeline messages sent via fedmsg for this stage are captured by the topics org.centos.prod.ci.pipeline.compose.[running,complete].
 
 ### Integration Tests on OStree
 
@@ -121,13 +121,13 @@ If integration tests of the images are successful an openshift cluster will be c
 
 An image will be initially generated at a certain interval when there has been successful integration test execution on an OStree compose. Success or failure will result with a fedmsg back to the Fedora reviewer/maintainer.  Also, this can trigger the Red Hat continuous delivery process to run more comprehensive testing if desired.
 
-CI Pipeline messages sent via fedmsg for this stage are captured by the topics org.centos.prod.ci.pipeline.image.[queued,running,complete].
+CI Pipeline messages sent via fedmsg for this stage are captured by the topics org.centos.prod.ci.pipeline.image.[running,complete].
 
 ### Image Smoke Test Validation
 
 The validation left is to make sure the image can boot and more smoke tests may follow if required.  Success or failure will result with a fedmsg back to the Fedora reviewer/maintainer.  Also, this can trigger the Red Hat continuous delivery process to run more comprehensive testing.
 
-CI Pipeline messages sent via fedmsg for this stage are captured by the topics org.centos.prod.ci.pipeline.image.test.smoke.[queued,running,complete].
+CI Pipeline messages sent via fedmsg for this stage are captured by the topics org.centos.prod.ci.pipeline.image.test.smoke.[running,complete].
 
 ## Message Bus
 
