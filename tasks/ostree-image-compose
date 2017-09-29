@@ -29,8 +29,8 @@ sudo docker run --privileged --cap-add=SYS_ADMIN -v ${HOMEDIR}/output:/home/outp
 sudo docker run --privileged -e 'container=docker' -v /sys/fs/cgroup:/sys/fs/cgroup:rw -v ${HOMEDIR}/output:/home/output -e branch="${branch}" -e HTTP_BASE="${HTTP_BASE}" ostree_image_compose-container
 
 # Logs need to be in a specific place to be picked up.
+sudo cp -f ${HOMEDIR}/output/images/latest-atomic.qcow2 ${HOMEDIR}/output/logs/latest-atomic.qcow2
 sudo mv ${HOMEDIR}/output/logs ${HOMEDIR}
-sudo cp ${HOMEDIR}/output/images/latest-atomic.qcow2 ${HOMEDIR}/
 
 # Only rsync image to artifacts.ci.centos.org if PUSH_IMAGE = true
 if [ ${PUSH_IMAGE} = "true" ]; then

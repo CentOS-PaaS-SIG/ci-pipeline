@@ -252,7 +252,7 @@ podTemplate(name: 'fedora-atomic-' + env.ghprbActualCommit,
 
                         ostree_props = "${env.ORIGIN_WORKSPACE}/logs/ostree.props"
                         ostree_props_groovy = "${env.ORIGIN_WORKSPACE}/ostree.props.groovy"
-                        sh "mv -f ${env.ORIGIN_WORKSPACE}/latest-atomic.qcow2 ${env.WORKSPACE}/"
+                        sh "mv -f ${env.ORIGIN_WORKSPACE}/logs/latest-atomic.qcow2 ${env.WORKSPACE}/"
                         pipelineUtils.convertProps(ostree_props, ostree_props_groovy)
                         load(ostree_props_groovy)
 
