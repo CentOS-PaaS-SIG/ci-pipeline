@@ -220,8 +220,8 @@ def setMessageFields(String messageType){
         messageProperties = messageProperties +
                 "compose_url=${env.HTTP_BASE}/${env.branch}/ostree\n"
                 "compose_rev=''\n"
-    } else if ((messageType == 'compose.complete') || (messageType == 'test.integration.queued') ||
-            (messageType == 'test.integration.running') || (messageType == 'test.integration.complete')) {
+    } else if ((messageType == 'compose.complete') || (messageType == 'compose.test.integration.queued') ||
+            (messageType == 'compose.test.integration.running') || (messageType == 'compose.test.integration.complete')) {
         messageProperties = messageProperties +
             "compose_url=${env.HTTP_BASE}/${env.branch}/ostree\n"
             "compose_rev=${env.commit}\n"
@@ -232,8 +232,8 @@ def setMessageFields(String messageType){
                 "image_url=''\n" +
                 "image_name=''\n" +
                 "type=qcow2\n"
-    } else if ((messageType == 'image.complete') || (messageType == 'test.smoke.running') ||
-            (messageType == 'test.smoke.compelete')) {
+    } else if ((messageType == 'image.complete') || (messageType == 'image.test.smoke.running') ||
+            (messageType == 'image.test.smoke.compelete')) {
         messageProperties = messageProperties +
                 "compose_url=${env.HTTP_BASE}/${env.branch}/ostree\n"
                 "compose_rev=${env.commit}\n" +
@@ -426,6 +426,7 @@ def setStageEnvVars(String stage){
              "ci-pipeline-atomic-host-tests"       : [
                      task    : "./ci-pipeline/tasks/atomic-host-tests",
                      playbook: "ci-pipeline/playbooks/system-setup.yml",
+                     DUFFY_OP: "--allocate"
              ]
             ]
 
@@ -451,7 +452,7 @@ def rsyncData(String stage){
             "export OSTREE_BRANCH=\"${env.OSTREE_BRANCH}\"\n"
 
     if (stage in ['ci-pipeline-ostree-compose', 'ci-pipeline-ostree-image-compose',
-                         'ci-pipeline-ostree-image-boot-sanity', 'ci-pipeline-ostree-boot-sanity']) {
+                         'ci-pipeline-ostree-image-boot-sanity', 'ci-pipeline-ostree-boot-sanity', 'ci-pipeline-atomic-host-tests']) {
         text = text +
                 "export HTTP_BASE=\"${env.HTTP_BASE}\"\n" +
                 "export branch=\"${env.branch}\"\n"
@@ -465,7 +466,7 @@ def rsyncData(String stage){
     } else if (stage == 'ci-pipeline-ostree-image-boot-sanity') {
         text = text +
                 "export ANSIBLE_HOST_KEY_CHECKING=\"False\"\n"
-    } else if (stage == 'ci-pipeline-ostree-boot-sanity') {
+    } else if (stage in ['ci-pipeline-ostree-boot-sanity', 'ci-pipeline-atomic-host-tests']) {
         text = text +
                 "export fed_repo=\"${env.fed_repo}\"\n" +
                 "export image2boot=\"${env.image2boot}\"\n" +

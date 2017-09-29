@@ -216,10 +216,63 @@ podTemplate(name: 'fedora-atomic-' + env.ghprbActualCommit,
                         // Set our message topic, properties, and content
                         messageFields = pipelineUtils.setMessageFields("compose.complete")
 
-                        // Send message org.centos.prod.ci.pipeline.package.complete on fedmsg
+                        // Send message org.centos.prod.ci.pipeline.compose.complete on fedmsg
                         pipelineUtils.sendMessage(messageFields['properties'], messageFields['content'])
 
                         pipelineUtils.checkLastImage(currentStage)
+                    }
+
+                    currentStage = "ci-pipeline-ostree-boot-sanity"
+                    stage(currentStage) {
+                        pipelineUtils.setStageEnvVars(currentStage)
+
+                        // Provision resources
+                        pipelineUtils.provisionResources(currentStage)
+
+                        // Stage resources - ostree boot sanity
+                        pipelineUtils.setupStage(currentStage, 'fedora-atomic-key')
+
+                        // Rsync Data
+                        pipelineUtils.rsyncData(currentStage)
+
+                        // Teardown resources
+                        pipelineUtils.teardownResources(currentStage)
+
+                        // Set our message topic, properties, and content
+                        messageFields = pipelineUtils.setMessageFields("compose.test.integration.queued")
+
+                        // Send message org.centos.prod.ci.pipeline.compose.test.integration.queued on fedmsg
+                        pipelineUtils.sendMessage(messageFields['properties'], messageFields['content'])
+                    }
+
+                    currentStage = "ci-pipeline-atomic-host-tests"
+                    stage(currentStage) {
+                        pipelineUtils.setStageEnvVars(currentStage)
+
+                        // Set our message topic, properties, and content
+                        messageFields = pipelineUtils.setMessageFields("compose.test.integration.running")
+
+                        // Send message org.centos.prod.ci.pipeline.compose.test.integration.running on fedmsg
+                        pipelineUtils.sendMessage(messageFields['properties'], messageFields['content'])
+
+                        // Provision resources
+                        pipelineUtils.provisionResources(currentStage)
+
+                        // Stage resources - ostree boot sanity
+                        pipelineUtils.setupStage(currentStage, 'fedora-atomic-key')
+
+                        // Rsync Data
+                        pipelineUtils.rsyncData(currentStage)
+
+                        // Teardown resources
+                        pipelineUtils.teardownResources(currentStage)
+
+                        // Set our message topic, properties, and content
+                        messageFields = pipelineUtils.setMessageFields("compose.test.integration.complete")
+
+                        // Send message org.centos.prod.ci.pipeline.compose.test.integration.complete on fedmsg
+                        pipelineUtils.sendMessage(messageFields['properties'], messageFields['content'])
+
                     }
 
                     currentStage = "ci-pipeline-ostree-image-compose"
@@ -269,9 +322,9 @@ podTemplate(name: 'fedora-atomic-' + env.ghprbActualCommit,
                             pipelineUtils.setStageEnvVars(currentStage)
 
                             // Set our message topic, properties, and content
-                            messageFields = pipelineUtils.setMessageFields("smoke.running")
+                            messageFields = pipelineUtils.setMessageFields("image.test.smoke.running")
 
-                            // Send message org.centos.prod.ci.pipeline.smoke.running on fedmsg
+                            // Send message org.centos.prod.ci.pipeline.image.test.smoke.running on fedmsg
                             pipelineUtils.sendMessage(messageFields['properties'], messageFields['content'])
 
                             // Provision resources
@@ -287,65 +340,15 @@ podTemplate(name: 'fedora-atomic-' + env.ghprbActualCommit,
                             pipelineUtils.teardownResources(currentStage)
 
                             // Set our message topic, properties, and content
-                            messageFields = pipelineUtils.setMessageFields("smoke.complete")
+                            messageFields = pipelineUtils.setMessageFields("image.test.smoke.complete")
 
-                            // Send message org.centos.prod.ci.pipeline.smoke.complete on fedmsg
+                            // Send message org.centos.prod.ci.pipeline.image.test.smoke.complete on fedmsg
                             pipelineUtils.sendMessage(messageFields['properties'], messageFields['content'])
 
                         } else {
                             echo "Not Running Image Boot Sanity on Image"
                         }
                     }
-
-                    currentStage = "ci-pipeline-ostree-boot-sanity"
-                    stage(currentStage) {
-                        pipelineUtils.setStageEnvVars(currentStage)
-
-                        // Provision resources
-                        pipelineUtils.provisionResources(currentStage)
-
-                        // Stage resources - ostree boot sanity
-                        pipelineUtils.setupStage(currentStage, 'fedora-atomic-key')
-
-                        // Rsync Data
-                        pipelineUtils.rsyncData(currentStage)
-
-                        // Teardown resources
-                        pipelineUtils.teardownResources(currentStage)
-
-                        // Set our message topic, properties, and content
-                        messageFields = pipelineUtils.setMessageFields("integration.queued")
-
-                        // Send message org.centos.prod.ci.pipeline.integration.queued on fedmsg
-                        pipelineUtils.sendMessage(messageFields['properties'], messageFields['content'])
-                    }
-                    currentStage = "ci-pipeline-atomic-host-tests"
-                    stage(
-                            currentStage) {
-                        pipelineUtils.setStageEnvVars(currentStage)
-
-                        // Set our message topic, properties, and content
-                        messageFields = pipelineUtils.setMessageFields("integration.running")
-
-                        // Send message org.centos.prod.ci.pipeline.integration.running on fedmsg
-                        pipelineUtils.sendMessage(messageFields['properties'], messageFields['content'])
-
-                        // Provision resources
-                        pipelineUtils.provisionResources(currentStage)
-
-                        // Stage resources - atomic host tests
-                        pipelineUtils.setupStage(currentStage, 'fedora-atomic-key')
-
-                        // Teardown resources
-                        pipelineUtils.teardownResources(currentStage)
-
-                        // Set our message topic, properties, and content
-                        messageFields = pipelineUtils.setMessageFields("integration.complete")
-
-                        // Send message org.centos.prod.ci.pipeline.integration.complete on fedmsg
-                        pipelineUtils.sendMessage(messageFields['properties'], messageFields['content'])
-                    }
-
                 } catch (e) {
                     // Set build result
                     currentBuild.result = 'FAILURE'
