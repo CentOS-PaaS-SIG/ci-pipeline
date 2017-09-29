@@ -250,10 +250,14 @@ podTemplate(name: 'fedora-atomic-' + env.ghprbActualCommit,
                         // Rsync Data
                         pipelineUtils.rsyncData(currentStage)
 
-                        ostree_props = "${env.ORIGIN_WORKSPACE}/logs/ostree.props"
-                        ostree_props_groovy = "${env.ORIGIN_WORKSPACE}/ostree.props.groovy"
+                        if (fileExists("${env.WORKSPACE}/NeedNewImage.txt") || ("${env.GENERATE_IMAGE}" == "true")) {
+                            // These variables will mess with boot sanity jobs
+                            // later if they are injected from a non pushed img
+                            ostree_props = "${env.ORIGIN_WORKSPACE}/logs/ostree.props"
+                            ostree_props_groovy = "${env.ORIGIN_WORKSPACE}/ostree.props.groovy"
+                            pipelineUtils.convertProps(ostree_props, ostree_props_groovy)
+                        }
                         sh "mv -f ${env.ORIGIN_WORKSPACE}/logs/latest-atomic.qcow2 ${env.WORKSPACE}/"
-                        pipelineUtils.convertProps(ostree_props, ostree_props_groovy)
                         load(ostree_props_groovy)
 
                         // Teardown resources
