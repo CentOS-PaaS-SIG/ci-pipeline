@@ -63,7 +63,8 @@ RUN yum install -y python34 --nogpgcheck
 RUN pip install pip --upgrade && pip install setuptools --upgrade
 RUN ssh-keygen -f /root/.ssh/id_rsa -t rsa -N ''
 RUN printf "Host *\n    StrictHostKeyChecking no" > /root/.ssh/config
-ADD linchpin_workspace linchpin_workspace
+#ADD linchpin_workspace linchpin_workspace
+ADD linchpin_workspace /tmp/linchpin_workspace
 WORKDIR "/linchpin_workspace/hooks/ansible/"
 RUN git clone -b release-3.6 https://github.com/openshift/openshift-ansible 
 RUN git clone https://github.com/samvarankashyap/paas-sig-ci

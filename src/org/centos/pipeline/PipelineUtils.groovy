@@ -606,15 +606,44 @@ def executeInContainer(String stageName, String containerName, String script) {
         container(containerName) {
             sh 'pwd'
             sh 'ls -l /tmp'
-            sh "cp -fv ${WORKSPACE}/fedora.keytab /home/fedora.keytab"
+            //sh "cp -fv ${WORKSPACE}/fedora.keytab /home/fedora.keytab"
             sh 'env'
             sh script
-            sh "ls -lR logs || true"
+            //sh "ls -lR logs || true"
         }
     }
     sh "mkdir -p " + stageName
-    sh "mv -vf logs " + stageName + "/logs || true"
+   // sh "mv -vf logs " + stageName + "/logs || true"
 }
+
+/**
+ * Library to execute script in container
+ * Container must have been defined in a podTemplate
+ *
+ * @param containerName Name of the container for script execution
+ * @param script Complete path to the script to execute
+ * @return
+ */
+def executeInContainerNoPrep(String stageName, String containerName, String script) {
+    //
+    // Kubernetes plugin does not let containers inherit
+    // env vars from host. We force them in.
+    //
+    containerEnv = env.getEnvironment().collect { key, value -> return key+'='+value }
+    withEnv(containerEnv) {
+        container(containerName) {
+            sh 'pwd'
+            sh 'ls -l /tmp'
+            //sh "cp -fv ${WORKSPACE}/fedora.keytab /home/fedora.keytab"
+            sh 'env'
+            sh script
+            //sh "ls -lR logs || true"
+        }
+    }
+    sh "mkdir -p " + stageName+"/logs"
+    sh "mv -vf /tmp/*.log " + stageName + "/logs || true"
+}
+
 
 /**
  *
