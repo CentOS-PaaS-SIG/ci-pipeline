@@ -33,6 +33,6 @@ sudo cp -f ${HOMEDIR}/output/images/latest-atomic.qcow2 ${HOMEDIR}/output/logs/l
 sudo mv ${HOMEDIR}/output/logs ${HOMEDIR}
 
 # Only rsync image to artifacts.ci.centos.org if PUSH_IMAGE = true
-if [ ${PUSH_IMAGE} = "true" ]; then
+if [ "${PUSH_IMAGE}" = "true" ]; then
      sudo docker run --privileged --cap-add=SYS_ADMIN -v ${HOMEDIR}/output:/home/output -e rsync_paths="images" -e rsync_to="${RSYNC_USER}@${RSYNC_SERVER}::${RSYNC_DIR}/${branch}/" -e rsync_from="/home/output/" -e RSYNC_PASSWORD="$RSYNC_PASSWORD" rsync-container
 fi
