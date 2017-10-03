@@ -13,6 +13,9 @@ env.DOCKER_REPO_URL = env.DOCKER_REPO_URL ?: '172.30.254.79:5000'
 env.OPENSHIFT_NAMESPACE = env.OPENSHIFT_NAMESPACE ?: 'continuous-infra'
 env.OPENSHIFT_SERVICE_ACCOUNT = env.OPENSHIFT_SERVICE_ACCOUNT ?: 'jenkins'
 
+// Audit file for all messages sent.
+msgAuditFile = "messages/message-audit.json"
+
 library identifier: "ci-pipeline@${env.ghprbActualCommit}",
         retriever: modernSCM([$class: 'GitSCMSource',
                               remote: "https://github.com/${env.ghprbGhRepository}",
@@ -110,40 +113,38 @@ podTemplate(name: 'fedora-atomic-' + env.ghprbActualCommit,
 
         def currentStage = ""
 
-        // Gather some info about the node we are running on for diagnostics
-        //
-        currentStage = "verify-pod"
-        stage(currentStage) {
-            pipelineUtils.verifyPod(OPENSHIFT_NAMESPACE, env.NODE_NAME)
-        }
-
-        // We need to set env.HOME because the openshift slave image
-        // forces this to /home/jenkins and then ~ expands to that
-        // even though id == "root"
-        // See https://github.com/openshift/jenkins/blob/master/slave-base/Dockerfile#L5
-        //
-        // Even the kubernetes plugin will create a pod with containers
-        // whose $HOME env var will be its workingDir
-        // See https://github.com/jenkinsci/kubernetes-plugin/blob/master/src/main/java/org/csanchez/jenkins/plugins/kubernetes/KubernetesLauncher.java#L311
-        //
-        env.HOME = "/root"
-        //
         ansiColor('xterm') {
             timestamps {
+                // We need to set env.HOME because the openshift slave image
+                // forces this to /home/jenkins and then ~ expands to that
+                // even though id == "root"
+                // See https://github.com/openshift/jenkins/blob/master/slave-base/Dockerfile#L5
+                //
+                // Even the kubernetes plugin will create a pod with containers
+                // whose $HOME env var will be its workingDir
+                // See https://github.com/jenkinsci/kubernetes-plugin/blob/master/src/main/java/org/csanchez/jenkins/plugins/kubernetes/KubernetesLauncher.java#L311
+                //
+                env.HOME = "/root"
+                //
                 try {
-                    deleteDir()
+                    // Prepare our environment
+                    currentStage = "prepare-environment"
+                    stage(currentStage) {
+                        deleteDir()
+                        // Set our default env variables
+                        pipelineUtils.setDefaultEnvVars()
+                        // Prepare Credentials (keys, passwords, etc)
+                        pipelineUtils.prepareCredentials()
+                        // Parse the CI_MESSAGE and inject it as env vars
+                        pipelineUtils.injectFedmsgVars()
+                        // Decorate our build
+                        pipelineUtils.updateBuildDisplayAndDescription()
+                        // Gather some info about the node we are running on for diagnostics
+                        pipelineUtils.verifyPod(OPENSHIFT_NAMESPACE, env.NODE_NAME)
+                        // create audit message file
+                        pipelineUtils.initializeAuditFile(msgAuditFile)
+                    }
 
-                    // Set our default env variables
-                    pipelineUtils.setDefaultEnvVars()
-
-                    // Prepare Credentials (keys, passwords, etc)
-                    pipelineUtils.prepareCredentials()
-
-                    // Parse the CI_MESSAGE and inject it as env vars
-                    pipelineUtils.injectFedmsgVars()
-
-                    // Decorate our build
-                    pipelineUtils.updateBuildDisplayAndDescription()
 
                     // Set our current stage value
                     currentStage = "ci-pipeline-rpmbuild"
@@ -177,7 +178,7 @@ podTemplate(name: 'fedora-atomic-' + env.ghprbActualCommit,
                         messageFields = pipelineUtils.setMessageFields("package.running")
 
                         // Send message org.centos.prod.ci.pipeline.package.running on fedmsg
-                        pipelineUtils.sendMessage(messageFields['properties'], messageFields['content'])
+                        pipelineUtils.sendMessageWithAudit(messageFields['properties'], messageFields['content'], msgAuditFile)
 
                         // Execute rpmbuild-test script in rpmbuild container
                         pipelineUtils.executeInContainer(currentStage, "rpmbuild", "/tmp/rpmbuild-test.sh")
@@ -193,7 +194,7 @@ podTemplate(name: 'fedora-atomic-' + env.ghprbActualCommit,
                         messageFields = pipelineUtils.setMessageFields("package.complete")
 
                         // Send message org.centos.prod.ci.pipeline.package.complete on fedmsg
-                        pipelineUtils.sendMessage(messageFields['properties'], messageFields['content'])
+                        pipelineUtils.sendMessageWithAudit(messageFields['properties'], messageFields['content'], msgAuditFile)
                     }
 
                     currentStage = "ci-pipeline-ostree-compose"
@@ -205,7 +206,7 @@ podTemplate(name: 'fedora-atomic-' + env.ghprbActualCommit,
                         messageFields = pipelineUtils.setMessageFields("compose.running")
 
                         // Send message org.centos.prod.ci.pipeline.compose.running on fedmsg
-                        pipelineUtils.sendMessage(messageFields['properties'], messageFields['content'])
+                        pipelineUtils.sendMessageWithAudit(messageFields['properties'], messageFields['content'], msgAuditFile)
 
                         // Execute in containers
                         env.rsync_paths = "ostree"
@@ -233,8 +234,8 @@ podTemplate(name: 'fedora-atomic-' + env.ghprbActualCommit,
                         // Set our message topic, properties, and content
                         messageFields = pipelineUtils.setMessageFields("compose.complete")
 
-                        // Send message org.centos.prod.ci.pipeline.compose.complete on fedmsg
-                        pipelineUtils.sendMessage(messageFields['properties'], messageFields['content'])
+                        // Send message org.centos.prod.ci.pipeline.package.complete on fedmsg
+                        pipelineUtils.sendMessageWithAudit(messageFields['properties'], messageFields['content'], msgAuditFile)
 
                         pipelineUtils.checkLastImage(currentStage)
                     }
@@ -255,7 +256,7 @@ podTemplate(name: 'fedora-atomic-' + env.ghprbActualCommit,
                             messageFields = pipelineUtils.setMessageFields("image.running")
 
                             // Send message org.centos.prod.ci.pipeline.image.running on fedmsg
-                            pipelineUtils.sendMessage(messageFields['properties'], messageFields['content'])
+                            pipelineUtils.sendMessageWithAudit(messageFields['properties'], messageFields['content'], msgAuditFile)
                         }
 
                         // Provision resources
@@ -285,7 +286,7 @@ podTemplate(name: 'fedora-atomic-' + env.ghprbActualCommit,
                             messageFields = pipelineUtils.setMessageFields("image.complete")
 
                             // Send message org.centos.prod.ci.pipeline.image.complete on fedmsg
-                            pipelineUtils.sendMessage(messageFields['properties'], messageFields['content'])
+                            pipelineUtils.sendMessageWithAudit(messageFields['properties'], messageFields['content'], msgAuditFile)
 
                         } else {
                             echo "Not Pushing a New Image"
@@ -300,8 +301,8 @@ podTemplate(name: 'fedora-atomic-' + env.ghprbActualCommit,
                             // Set our message topic, properties, and content
                             messageFields = pipelineUtils.setMessageFields("image.test.smoke.running")
 
-                            // Send message org.centos.prod.ci.pipeline.images.test.smoke.running on fedmsg
-                            pipelineUtils.sendMessage(messageFields['properties'], messageFields['content'])
+                            // Send message org.centos.prod.ci.pipeline.smoke.running on fedmsg
+                            pipelineUtils.sendMessageWithAudit(messageFields['properties'], messageFields['content'], msgAuditFile)
 
                             // Provision resources
                             pipelineUtils.provisionResources(currentStage)
@@ -318,8 +319,8 @@ podTemplate(name: 'fedora-atomic-' + env.ghprbActualCommit,
                             // Set our message topic, properties, and content
                             messageFields = pipelineUtils.setMessageFields("image.test.smoke.complete")
 
-                            // Send message org.centos.prod.ci.pipeline.image.test.smoke.complete on fedmsg
-                            pipelineUtils.sendMessage(messageFields['properties'], messageFields['content'])
+                            // Send message org.centos.prod.ci.pipeline.smoke.complete on fedmsg
+                            pipelineUtils.sendMessageWithAudit(messageFields['properties'], messageFields['content'], msgAuditFile)
 
                         } else {
                             echo "Not Running Image Boot Sanity on Image"
@@ -373,9 +374,8 @@ podTemplate(name: 'fedora-atomic-' + env.ghprbActualCommit,
                         // Set our message topic, properties, and content
                         messageFields = pipelineUtils.setMessageFields("compose.test.integration.queued")
 
-                        // Send message org.centos.prod.ci.pipeline.compose.test.integration.queued on fedmsg
-                        pipelineUtils.sendMessage(messageFields['properties'], messageFields['content'])
-
+                        // Send message org.centos.prod.ci.pipeline.integration.queued on fedmsg
+                        pipelineUtils.sendMessageWithAudit(messageFields['properties'], messageFields['content'], msgAuditFile)
                     }
 
                     currentStage = "ci-pipeline-atomic-host-tests"
@@ -385,8 +385,8 @@ podTemplate(name: 'fedora-atomic-' + env.ghprbActualCommit,
                         // Set our message topic, properties, and content
                         messageFields = pipelineUtils.setMessageFields("compose.test.integration.running")
 
-                        // Send message org.centos.prod.ci.pipeline.compose.test.integration.running on fedmsg
-                        pipelineUtils.sendMessage(messageFields['properties'], messageFields['content'])
+                        // Send message org.centos.prod.ci.pipeline.integration.running on fedmsg
+                        pipelineUtils.sendMessageWithAudit(messageFields['properties'], messageFields['content'], msgAuditFile)
 
                         // Provision resources
                         pipelineUtils.provisionResources(currentStage)
@@ -400,8 +400,7 @@ podTemplate(name: 'fedora-atomic-' + env.ghprbActualCommit,
                         // Set our message topic, properties, and content
                         messageFields = pipelineUtils.setMessageFields("compose.test.integration.complete")
 
-                        // Send message org.centos.prod.ci.pipeline.compose.test.integration.complete on fedmsg
-                        pipelineUtils.sendMessage(messageFields['properties'], messageFields['content'])
+                        pipelineUtils.sendMessageWithAudit(messageFields['properties'], messageFields['content'], msgAuditFile)
                     }
 
                 } catch (e) {
@@ -429,7 +428,7 @@ podTemplate(name: 'fedora-atomic-' + env.ghprbActualCommit,
                     messageFields = pipelineUtils.setMessageFields("complete")
 
                     // Send message org.centos.prod.ci.pipeline.complete on fedmsg
-                    pipelineUtils.sendMessage(messageFields['properties'], messageFields['content'])
+                    pipelineUtils.sendMessageWithAudit(messageFields['properties'], messageFields['content'], msgAuditFile)
 
                 }
             }

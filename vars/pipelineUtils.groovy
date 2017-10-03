@@ -50,6 +50,17 @@ class pipelineUtils implements Serializable {
     }
 
     /**
+     * Method to send message and store an audit
+     * @param msgProps The message properties in key=value form, one key/value per line ending in '\n'
+     * @param msgContent Message content.
+     * @param msgAuditFile - File containing all past messages. It will get appended to.
+     * @return
+     */
+    def sendMessageWithAudit(String msgProps, String msgContent, String msgAuditFile) {
+        pipelineUtils.sendMessageWithAudit(msgProps, msgContent, msgAuditFile)
+    }
+
+    /**
      * Method to parse CI_MESSAGE and inject its key/value pairs as env variables.
      * @return
      */
@@ -187,5 +198,23 @@ class pipelineUtils implements Serializable {
      */
     def updateBuildDisplayAndDescription() {
         pipelineUtils.updateBuildDisplayAndDescription()
+    }
+
+    /**
+     * Check data grepper for presence of a message
+     * @param messageID message ID to track.
+     * @return
+     */
+    def trackMessage(String messageID) {
+        pipelineUtils.trackMessage(messageID)
+    }
+
+    /**
+     * Initialize message audit file
+     * @param auditFile audit file for messages
+     * @return
+     */
+    def initializeAuditFile(String auditFile) {
+        pipelineUtils.initializeAuditFile(auditFile)
     }
 }
