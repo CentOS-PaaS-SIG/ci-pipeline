@@ -218,24 +218,24 @@ def setMessageFields(String messageType){
 
     if (messageType == 'compose.running') {
         messageProperties = messageProperties +
-                "compose_url=${env.HTTP_BASE}/${env.branch}/ostree\n"
+                "compose_url=${env.HTTP_BASE}/${env.branch}/ostree\n" +
                 "compose_rev=''\n"
     } else if ((messageType == 'compose.complete') || (messageType == 'compose.test.integration.queued') ||
             (messageType == 'compose.test.integration.running') || (messageType == 'compose.test.integration.complete')) {
         messageProperties = messageProperties +
-            "compose_url=${env.HTTP_BASE}/${env.branch}/ostree\n"
+            "compose_url=${env.HTTP_BASE}/${env.branch}/ostree\n" +
             "compose_rev=${env.commit}\n"
     } else if (messageType == 'image.running') {
             messageProperties = messageProperties +
-                "compose_url=${env.HTTP_BASE}/${env.branch}/ostree\n"
+                "compose_url=${env.HTTP_BASE}/${env.branch}/ostree\n" +
                 "compose_rev=${env.commit}\n" +
                 "image_url=''\n" +
                 "image_name=''\n" +
                 "type=qcow2\n"
     } else if ((messageType == 'image.complete') || (messageType == 'image.test.smoke.running') ||
-            (messageType == 'image.test.smoke.compelete')) {
+            (messageType == 'image.test.smoke.complete')) {
         messageProperties = messageProperties +
-                "compose_url=${env.HTTP_BASE}/${env.branch}/ostree\n"
+                "compose_url=${env.HTTP_BASE}/${env.branch}/ostree\n" +
                 "compose_rev=${env.commit}\n" +
                 "image_url=${env.image2boot}\n" +
                 "image_name=${env.image_name}\n" +
