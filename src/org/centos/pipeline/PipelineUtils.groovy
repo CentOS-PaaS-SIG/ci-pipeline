@@ -454,6 +454,7 @@ def rsyncData(String stage){
                          'ci-pipeline-ostree-image-boot-sanity', 'ci-pipeline-ostree-boot-sanity']) {
         text = text +
                 "export HTTP_BASE=\"${env.HTTP_BASE}\"\n" +
+                "export PUSH_IMAGE=\"${env.PUSH_IMAGE}\"\n" +
                 "export branch=\"${env.branch}\"\n"
     }
     if (stage == 'ci-pipeline-rpmbuild') {
