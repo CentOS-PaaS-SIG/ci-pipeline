@@ -34,7 +34,7 @@ pipeline {
         }
     }
     stages {
-        stage("Image Promotion") {
+        stage("Detect Images to Promote") {
             steps {
                 script {
                     openshift.withCluster() {
@@ -47,28 +47,39 @@ pipeline {
                                 def prTag = tagList.tokenize(' ').find { it == "PR-" + env.ghprbPullId }
                                 if (prTag != null) {
                                     echo "Found PR tag: " + prTag + " for image ${it}"
-                                    echo "Updating ${it}:stable tag to point to ${prTag}"
-                                    openshift.tag("${openshiftProject}/${it}:${prTag}",
-                                            "${openshiftProject}/${it}:stable")
-                                    imageOperations.add("${it}:stable now points to ${it}:${prTag}")
+                                    imageOperations.add(it)
                                 } else {
                                     echo "No tag found for image ${it}!"
                                 }
                             }
                         }
                     }
-                    pipelineUtils.sendPRCommentforTags(imageOperations)
                 }
             }
         }
-        stage("Merge PR") {
+        stage("Merge PR and Rebuild Images") {
             steps {
-                script {
-                    // need this for ghprb plugin since it is really
-                    // a post build step and it assumes the build is complete.
-                    currentBuild.result = 'SUCCESS'
+                // lock to make sure only one is allowed at anytime
+                lock('merge-and-image-rebuild-lock') {
+                    script {
+                        // need this for ghprb plugin since it is really
+                        // a post build step and it assumes the build is complete.
+                        currentBuild.result = 'SUCCESS'
+                    }
+
+                    step([$class: 'GhprbPullRequestMerge', allowMergeWithoutTriggerPhrase: false, deleteOnMerge: false, disallowOwnCode: false, failOnNonMerge: false, mergeComment: ' ', onlyAdminsMerge: false])
+
+                    script {
+                        openshift.withCluster() {
+                            openshift.withProject(openshiftProject) {
+                                imageOperations.each {
+                                    pipelineUtils.buildStableImage(openshiftProject, it)
+                                }
+                            }
+                        }
+                        pipelineUtils.sendPRCommentforTags(imageOperations)
+                    }
                 }
-                step([$class: 'GhprbPullRequestMerge', allowMergeWithoutTriggerPhrase: false, deleteOnMerge: false, disallowOwnCode: false, failOnNonMerge: false, mergeComment: ' ', onlyAdminsMerge: false])
             }
         }
     }

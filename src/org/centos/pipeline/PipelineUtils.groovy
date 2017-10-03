@@ -218,24 +218,24 @@ def setMessageFields(String messageType){
 
     if (messageType == 'compose.running') {
         messageProperties = messageProperties +
-                "compose_url=${env.HTTP_BASE}/${env.branch}/ostree\n"
+                "compose_url=${env.HTTP_BASE}/${env.branch}/ostree\n" +
                 "compose_rev=''\n"
     } else if ((messageType == 'compose.complete') || (messageType == 'compose.test.integration.queued') ||
             (messageType == 'compose.test.integration.running') || (messageType == 'compose.test.integration.complete')) {
         messageProperties = messageProperties +
-            "compose_url=${env.HTTP_BASE}/${env.branch}/ostree\n"
+            "compose_url=${env.HTTP_BASE}/${env.branch}/ostree\n" +
             "compose_rev=${env.commit}\n"
     } else if (messageType == 'image.running') {
             messageProperties = messageProperties +
-                "compose_url=${env.HTTP_BASE}/${env.branch}/ostree\n"
+                "compose_url=${env.HTTP_BASE}/${env.branch}/ostree\n" +
                 "compose_rev=${env.commit}\n" +
                 "image_url=''\n" +
                 "image_name=''\n" +
                 "type=qcow2\n"
     } else if ((messageType == 'image.complete') || (messageType == 'image.test.smoke.running') ||
-            (messageType == 'image.test.smoke.compelete')) {
+            (messageType == 'image.test.smoke.complete')) {
         messageProperties = messageProperties +
-                "compose_url=${env.HTTP_BASE}/${env.branch}/ostree\n"
+                "compose_url=${env.HTTP_BASE}/${env.branch}/ostree\n" +
                 "compose_rev=${env.commit}\n" +
                 "image_url=${env.image2boot}\n" +
                 "image_name=${env.image_name}\n" +
@@ -668,6 +668,42 @@ def buildImage(String openshiftProject, String buildConfig) {
                     "${openshiftProject}/${buildConfig}:PR-${env.ghprbPullId}")
 
             return "PR-" + env.ghprbPullId
+        }
+    }
+}
+
+/**
+ * Build stable image in openshift
+ * @param openshiftProject Openshift Project
+ * @param buildConfig
+ * @return
+ */
+def buildStableImage(String openshiftProject, String buildConfig) {
+    // - build in Openshift
+    // - startBuild using ref in openshift
+    // - Get result Build and get imagestream manifest
+    // - Use that to create a stable tag
+    openshift.withCluster() {
+        openshift.withProject(openshiftProject) {
+            def result = openshift.startBuild(buildConfig,
+                    "--wait")
+            def out = result.out.trim()
+            echo "Resulting Build: " + out
+
+            def describeStr = openshift.selector(out).describe()
+            out = describeStr.out.trim()
+
+            def imageHash = sh(
+                    script: "echo \"${out}\" | grep 'Image Digest:' | cut -f2- -d:",
+                    returnStdout: true
+            ).trim()
+            echo "imageHash: ${imageHash}"
+
+            echo "Creating stable tag for ${openshiftProject}/${buildConfig}: ${buildConfig}:stable"
+
+            openshift.tag("${openshiftProject}/${buildConfig}@${imageHash}",
+                        "${openshiftProject}/${buildConfig}:stable")
+
         }
     }
 }

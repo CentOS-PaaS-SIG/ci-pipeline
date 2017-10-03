@@ -67,8 +67,9 @@ pushd /home/output/ostree
 python -m SimpleHTTPServer &
 popd
 
-# Grab the kickstart file
-cp $base_dir/config/ostree/fedora-atomic-${branch}.ks /home/output/logs/fedora-atomic.ks
+# Grab the kickstart file from fedora upstream
+curl -o /home/output/logs/fedora-atomic.ks https://pagure.io/fedora-kickstarts/blob/${branch}/f/fedora-atomic.ks
+#cp $base_dir/config/ostree/fedora-atomic-${branch}.ks /home/output/logs/fedora-atomic.ks
 
 # Put new url into the kickstart file
 sed -i "s|^ostreesetup.*|ostreesetup --nogpg --osname=fedora-atomic --remote=fedora-atomic --url=http://192.168.122.1:8000/ --ref=$REF|" /home/output/logs/fedora-atomic.ks
