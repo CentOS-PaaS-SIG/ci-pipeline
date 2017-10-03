@@ -37,6 +37,7 @@ git checkout ${fed_rev}
 git checkout -b test_branch
 # Get current NVR
 truenvr=$(rpm -q --define "dist .$fed_branch" --queryformat '%{name}-%{version}-%{release}\n' --specfile ${fed_repo}.spec | head -n 1)
+echo "original_spec_nvr=${truenvr}" >> ${LOGDIR}/package_props.txt
 # Find number of git commits in log to append to RELEASE before %{?dist}
 commits=$(git log --pretty=format:'' | wc -l)
 # %{?dist} seems to only be used when defining $release, but some
@@ -69,7 +70,6 @@ cp -rp ../${fed_repo}/** ~/rpmbuild/SOURCES
 rpmbuild -bs --define "dist .$fed_branch" ${fed_repo}.spec
 ls
 # Set up koji creds
-# TODO - we can just keep fedora.keytab in ${CURRENTDIR} and have it here via the free mount, so we don't need to copy it to /home wherever we do
 kinit -k -t /home/fedora.keytab $FEDORA_PRINCIPAL
 # Build the package into ./results_${fed_repo}/$VERSION/$RELEASE/ and concurrently do a koji build
 { time fedpkg --release ${fed_branch} mockbuild ; } 2> ${LOGDIR}/mockbuild.txt &
@@ -117,7 +117,6 @@ else
 fi
 RPM_NAME=$(basename $RPM_TO_CHECK)
 echo "package_url=${HTTP_BASE}/${fed_branch}/repo/${fed_repo}_repo/$RPM_NAME" >> ${LOGDIR}/package_props.txt
-echo "original_spec_nvr=${truenvr}" >> ${LOGDIR}/package_props.txt
 RPM_NAME=$(echo $RPM_NAME | rev | cut -d '.' -f 2- | rev)
 echo "nvr=${RPM_NAME}" >> ${LOGDIR}/package_props.txt
 RSYNC_LOCATION="${RSYNC_USER}@${RSYNC_SERVER}::${RSYNC_DIR}/${RSYNC_BRANCH}"

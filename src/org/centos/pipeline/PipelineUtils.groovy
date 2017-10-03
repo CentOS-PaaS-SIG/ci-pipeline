@@ -220,8 +220,8 @@ def setMessageFields(String messageType){
         messageProperties = messageProperties +
                 "compose_url=${env.HTTP_BASE}/${env.branch}/ostree\n"
                 "compose_rev=''\n"
-    } else if ((messageType == 'compose.complete') || (messageType == 'test.integration.queued') ||
-            (messageType == 'test.integration.running') || (messageType == 'test.integration.complete')) {
+    } else if ((messageType == 'compose.complete') || (messageType == 'compose.test.integration.queued') ||
+            (messageType == 'compose.test.integration.running') || (messageType == 'compose.test.integration.complete')) {
         messageProperties = messageProperties +
             "compose_url=${env.HTTP_BASE}/${env.branch}/ostree\n"
             "compose_rev=${env.commit}\n"
@@ -232,8 +232,8 @@ def setMessageFields(String messageType){
                 "image_url=''\n" +
                 "image_name=''\n" +
                 "type=qcow2\n"
-    } else if ((messageType == 'image.complete') || (messageType == 'test.smoke.running') ||
-            (messageType == 'test.smoke.compelete')) {
+    } else if ((messageType == 'image.complete') || (messageType == 'image.test.smoke.running') ||
+            (messageType == 'image.test.smoke.compelete')) {
         messageProperties = messageProperties +
                 "compose_url=${env.HTTP_BASE}/${env.branch}/ostree\n"
                 "compose_rev=${env.commit}\n" +
