@@ -222,24 +222,6 @@ podTemplate(name: 'fedora-atomic-' + env.ghprbActualCommit,
                         pipelineUtils.checkLastImage(currentStage)
                     }
 
-                    currentStage = "ci-pipeline-ostree-boot-sanity"
-                    stage(currentStage) {
-                        pipelineUtils.setStageEnvVars(currentStage)
-
-                        // Provision resources
-                        pipelineUtils.provisionResources(currentStage)
-
-                        // Stage resources - ostree boot sanity
-                        pipelineUtils.setupStage(currentStage, 'fedora-atomic-key')
-
-                        // Rsync Data
-                        pipelineUtils.rsyncData(currentStage)
-
-                        // Teardown resources
-                        pipelineUtils.teardownResources(currentStage)
-
-                    }
-
                     currentStage = "ci-pipeline-ostree-image-compose"
                     stage(currentStage) {
                         // Set stage specific vars
@@ -276,7 +258,7 @@ podTemplate(name: 'fedora-atomic-' + env.ghprbActualCommit,
                             pipelineUtils.convertProps(ostree_props, ostree_props_groovy)
                             load(ostree_props_groovy)
                         }
-                        sh "mv -f ${env.ORIGIN_WORKSPACE}/logs/latest-atomic.qcow2 ${env.WORKSPACE}/"
+                        sh "mv -f ${env.ORIGIN_WORKSPACE}/logs/untested-atomic.qcow2 ${env.WORKSPACE}/"
 
                         // Teardown resources
                         pipelineUtils.teardownResources(currentStage)
@@ -326,11 +308,30 @@ podTemplate(name: 'fedora-atomic-' + env.ghprbActualCommit,
                             echo "Not Running Image Boot Sanity on Image"
                         }
 
+                    }
+
+                    currentStage = "ci-pipeline-ostree-boot-sanity"
+                    stage(currentStage) {
+                        pipelineUtils.setStageEnvVars(currentStage)
+
+                        // Provision resources
+                        pipelineUtils.provisionResources(currentStage)
+
+                        // Stage resources - ostree boot sanity
+                        pipelineUtils.setupStage(currentStage, 'fedora-atomic-key')
+
+                        // Rsync Data
+                        pipelineUtils.rsyncData(currentStage)
+
+                        // Teardown resources
+                        pipelineUtils.teardownResources(currentStage)
+
                         // Set our message topic, properties, and content
                         messageFields = pipelineUtils.setMessageFields("compose.test.integration.queued")
 
                         // Send message org.centos.prod.ci.pipeline.integration.queued on fedmsg
                         pipelineUtils.sendMessage(messageFields['properties'], messageFields['content'])
+
                     }
 
                     currentStage = "ci-pipeline-atomic-host-tests"
