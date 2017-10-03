@@ -673,6 +673,42 @@ def buildImage(String openshiftProject, String buildConfig) {
 }
 
 /**
+ * Build stable image in openshift
+ * @param openshiftProject Openshift Project
+ * @param buildConfig
+ * @return
+ */
+def buildStableImage(String openshiftProject, String buildConfig) {
+    // - build in Openshift
+    // - startBuild using ref in openshift
+    // - Get result Build and get imagestream manifest
+    // - Use that to create a stable tag
+    openshift.withCluster() {
+        openshift.withProject(openshiftProject) {
+            def result = openshift.startBuild(buildConfig,
+                    "--wait")
+            def out = result.out.trim()
+            echo "Resulting Build: " + out
+
+            def describeStr = openshift.selector(out).describe()
+            out = describeStr.out.trim()
+
+            def imageHash = sh(
+                    script: "echo \"${out}\" | grep 'Image Digest:' | cut -f2- -d:",
+                    returnStdout: true
+            ).trim()
+            echo "imageHash: ${imageHash}"
+
+            echo "Creating stable tag for ${openshiftProject}/${buildConfig}: ${buildConfig}:stable"
+
+            openshift.tag("${openshiftProject}/${buildConfig}@${imageHash}",
+                        "${openshiftProject}/${buildConfig}:stable")
+
+        }
+    }
+}
+
+/**
  * Using the currentBuild, get a string representation
  * of the changelog.
  * @return String of changelog
