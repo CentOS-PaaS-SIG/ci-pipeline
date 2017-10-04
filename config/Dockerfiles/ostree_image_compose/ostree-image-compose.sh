@@ -81,6 +81,14 @@ sed -i "s|\(%end.*$\)|ostree remote delete fedora-atomic\nostree remote add --se
 sed -i "s|^ostree refs.*||" /home/output/logs/fedora-atomic.ks
 sed -i "s|^ostree admin set-origin.*||" /home/output/logs/fedora-atomic.ks
 
+# Pull down Fedora net install image if needed
+pushd /home/output/netinst
+iso=$(wget -c -r -nd -A iso --accept-regex "Fedora-Everything-netinst-.*\.iso" "http://dl.fedoraproject.org/pub/fedora/linux/development/${VERSION}/Everything/x86_64/iso/" 2>&1 | awk '/Saving to: ‘Fedora-Everything-netinst/ { print $3 }' | sed -e 's/^‘//' -e 's/’$//')
+if [ -n "$iso" ]; then
+    ln -s $iso Fedora-Everything-netinst-x86_64.iso
+fi
+popd
+
 # Create a tdl file for imagefactory
 #       <install type='url'>
 #           <url>http://download.fedoraproject.org/pub/fedora/linux/releases/25/Everything/x86_64/os/</url>
