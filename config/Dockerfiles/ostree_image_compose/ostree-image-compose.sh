@@ -68,7 +68,7 @@ python -m SimpleHTTPServer &
 popd
 
 # Grab the kickstart file from fedora upstream
-curl -o /home/output/logs/fedora-atomic.ks https://pagure.io/fedora-kickstarts/blob/${branch}/f/fedora-atomic.ks
+curl -o /home/output/logs/fedora-atomic.ks https://pagure.io/fedora-kickstarts/raw/${branch}/f/fedora-atomic.ks
 #cp $base_dir/config/ostree/fedora-atomic-${branch}.ks /home/output/logs/fedora-atomic.ks
 
 # Put new url into the kickstart file
