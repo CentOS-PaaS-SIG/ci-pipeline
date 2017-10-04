@@ -78,7 +78,8 @@ sed -i "s|^ostreesetup.*|ostreesetup --nogpg --osname=fedora-atomic --remote=fed
 sed -i "s|\(%end.*$\)|ostree remote delete fedora-atomic\nostree remote add --set=gpg-verify=false fedora-atomic ${HTTP_BASE}/${branch}/ostree\n\1|" /home/output/logs/fedora-atomic.ks
 
 # Remove ostree refs create form upstream kickstart
-sed -i "s|^ostree refs.*--create.*||" /home/output/logs/fedora-atomic.ks
+sed -i "s|^ostree refs.*||" /home/output/logs/fedora-atomic.ks
+sed -i "s|^ostree admin set-origin.*||" /home/output/logs/fedora-atomic.ks
 
 # Create a tdl file for imagefactory
 #       <install type='url'>
