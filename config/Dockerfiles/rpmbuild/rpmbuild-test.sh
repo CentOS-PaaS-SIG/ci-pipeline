@@ -36,7 +36,11 @@ git checkout ${fed_rev}
 # Create new branch because fedpkg wont build with detached head
 git checkout -b test_branch
 # Get current NVR
-truenvr=$(rpm -q --define "dist .$fed_branch" --queryformat '%{name}-%{version}-%{release}\n' --specfile ${fed_repo}.spec | head -n 1)
+ABIGAIL_BRANCH=$(echo ${fed_branch} | sed 's/./&c/1')
+if [ "${fed_branch}" = "master" ]; then
+    ABIGAIL_BRANCH=$(curl -s https://src.fedoraproject.org/rpms/fedora-release/raw/master/f/fedora-release.spec | awk '/%define dist_version/ {print $3}')
+fi
+truenvr=$(rpm -q --define "dist .$ABIGAIL_BRANCH" --queryformat '%{name}-%{version}-%{release}\n' --specfile ${fed_repo}.spec | head -n 1)
 echo "original_spec_nvr=${truenvr}" >> ${LOGDIR}/package_props.txt
 # Find number of git commits in log to append to RELEASE before %{?dist}
 commits=$(git log --pretty=format:'' | wc -l)
@@ -90,10 +94,6 @@ fi
 echo "status=SUCCESS" >> ${LOGDIR}/package_props.txt
 popd
 
-ABIGAIL_BRANCH=$(echo ${fed_branch} | sed 's/./&c/1')
-if [ "${fed_branch}" = "master" ]; then
-    ABIGAIL_BRANCH="fc99"
-fi
 # Make repo with the newly created rpm
 rm -rf ${RPMDIR}
 mkdir -p ${RPMDIR}
