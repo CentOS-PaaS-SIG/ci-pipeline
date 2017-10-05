@@ -1,5 +1,7 @@
 #!/bin/sh
 
+set -xe
+
 if [ "${branch}" = "master" ]; then
     branch="rawhide"
 fi
@@ -7,6 +9,15 @@ fi
 # Find the base dir
 base_dir="$(dirname $0)/.."
 HOMEDIR=$(pwd)
+
+function clean_up {
+    set +e
+    # Logs need to be in a specific place to be picked up.
+    sudo cp -f $(ls -tr /${HOMEDIR}/output/images/fedora-atomic-*.qcow2 | tail -n 1) ${HOMEDIR}/output/logs/untested-atomic.qcow2
+    sudo mv ${HOMEDIR}/output/logs ${HOMEDIR}
+}
+
+trap clean_up EXIT SIGHUP SIGINT SIGTERM
 
 # Make sure logs are empty so we don't report previous build
 # if we fail
@@ -27,10 +38,6 @@ popd
 sudo docker run --privileged --cap-add=SYS_ADMIN -v ${HOMEDIR}/output:/home/output -e rsync_paths="netinst ostree images" -e rsync_from="${RSYNC_USER}@${RSYNC_SERVER}::${RSYNC_DIR}/${branch}/" -e rsync_to="/home/output/" -e RSYNC_PASSWORD="$RSYNC_PASSWORD" rsync-container
 
 sudo docker run --privileged -e 'container=docker' -v /sys/fs/cgroup:/sys/fs/cgroup:rw -v ${HOMEDIR}/output:/home/output -e branch="${branch}" -e HTTP_BASE="${HTTP_BASE}" ostree_image_compose-container
-
-# Logs need to be in a specific place to be picked up.
-sudo cp -f $(ls -tr /${HOMEDIR}/output/images/fedora-atomic-*.qcow2 | tail -n 1) ${HOMEDIR}/output/logs/untested-atomic.qcow2
-sudo mv ${HOMEDIR}/output/logs ${HOMEDIR}
 
 sudo docker run --privileged --cap-add=SYS_ADMIN -v ${HOMEDIR}/output:/home/output -e rsync_paths="netinst" -e rsync_to="${RSYNC_USER}@${RSYNC_SERVER}::${RSYNC_DIR}/${branch}/" -e rsync_from="/home/output/" -e RSYNC_PASSWORD="$RSYNC_PASSWORD" rsync-container
 
