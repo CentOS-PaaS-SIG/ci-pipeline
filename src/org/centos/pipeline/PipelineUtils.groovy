@@ -247,9 +247,6 @@ def setMessageFields(String messageType) {
         messageProperties.image_name = messageType == 'image.running' ? "''" : env.image_name
     }
 
-    // Sort our properties hash map, because I'm anal retentive.
-    messageProperties = messageProperties.sort()
-
     // Create a string to hold the data from the messageProperties hash map
     String messagePropertiesString = new String()
 
