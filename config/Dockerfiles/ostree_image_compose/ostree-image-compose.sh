@@ -27,8 +27,6 @@ function clean_up {
   for screenshot in /var/lib/oz/screenshots/*.ppm; do
       [ -e "$screenshot" ] && cp $screenshot /home/output/logs
   done
-
-  exit 0
 }
 trap clean_up EXIT SIGHUP SIGINT SIGTERM
 
