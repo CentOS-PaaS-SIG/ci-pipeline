@@ -24,9 +24,12 @@ LOGDIR=${CURRENTDIR}/logs
 rm -rf ${LOGDIR}/*
 mkdir -p ${LOGDIR}
 
+# Need to debug git clone errors
+export GIT_CURL_VERBOSE=1
+
 # Clone the fedoraproject git repo
 rm -rf ${fed_repo}
-fedpkg clone -a ${fed_repo}
+for i in 1 2 3 4 5 ; do fedpkg clone -a ${fed_repo} && break || sleep 10 ; done
 if [ "$?" != 0 ]; then echo -e "ERROR: FEDPKG CLONE\nSTATUS: $?"; exit 1; fi
 pushd ${fed_repo}
 # Checkout the proper branch, likely unneeded since we checkout commit anyways
@@ -69,12 +72,20 @@ if [ -n "$DIR_TO_GO" ] ; then
          echo "description='${fed_repo} - make test unknown rc'" >> ${LOGDIR}/package_props.txt
     fi
 fi
+
 # Prepare concurrent koji build
 cp -rp ../${fed_repo}/** ~/rpmbuild/SOURCES
 rpmbuild -bs --define "dist .$fed_branch" ${fed_repo}.spec
 ls
 # Set up koji creds
 kinit -k -t /home/fedora.keytab $FEDORA_PRINCIPAL
+
+# Want to archive build logs if mock build exits uncleanly
+function archive_logs {
+     cp ${CURRENTDIR}/${fed_repo}/results_${fed_repo}/${VERSION}/*/*.log ${LOGDIR}/
+}
+trap archive_logs EXIT SIGHUP SIGINT SIGTERM
+
 # Build the package into ./results_${fed_repo}/$VERSION/$RELEASE/ and concurrently do a koji build
 { time fedpkg --release ${fed_branch} mockbuild ; } 2> ${LOGDIR}/mockbuild.txt &
 { time python2 /usr/bin/koji build --wait --arch-override=x86_64 --scratch $RSYNC_BRANCH /root/rpmbuild/SRPMS/${fed_repo}*.src.rpm ; } 2> ${LOGDIR}/kojibuildtime.txt &
@@ -103,7 +114,7 @@ rpmlint ${RPMDIR}/ > ${LOGDIR}/rpmlint_out.txt
 pushd ${RPMDIR} && createrepo .
 mkdir logs
 cp ${CURRENTDIR}/${fed_repo}/results_${fed_repo}/${VERSION}/*/*.log logs/
-cp ${CURRENTDIR}/${fed_repo}/results_${fed_repo}/${VERSION}/*/*.log ${LOGDIR}/
+archive_logs
 popd
 # Run fedabipkgdiff against the newly created rpm
 rm -rf libabigail
