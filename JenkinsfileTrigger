@@ -155,7 +155,13 @@ node('master') {
                             try {
                                 retry(TRIGGER_RETRY_COUNT) {
                                     try {
-                                        build job: "continuous-infra-ci-pipeline-${env.branch}", parameters: [string(name: 'CI_MESSAGE', value: "${env.CI_MESSAGE}"), string(name: 'TARGET_BRANCH', value: "${env.fed_branch}"), string(name: 'PROJECT_REPO', value: 'ci-pipeline'), string(name: 'MAIN_TOPIC', value: 'org.centos.prod'), string(name: 'MSG_PROVIDER', value: 'fedora-fedmsg')], wait: false
+                                        build job: "continuous-infra-ci-pipeline-${env.branch}",
+                                                parameters: [string(name: 'CI_MESSAGE', value: "${env.CI_MESSAGE}"),
+                                                             string(name: 'TARGET_BRANCH', value: "${env.fed_branch}"),
+                                                             string(name: 'PROJECT_REPO', value: 'ci-pipeline'),
+                                                             string(name: 'MAIN_TOPIC', value: 'org.centos.prod'),
+                                                             string(name: 'MSG_PROVIDER', value: 'fedora-fedmsg')],
+                                                wait: false
                                     } catch (Exception e) {
                                         e.printStackTrace()
                                         throw e
