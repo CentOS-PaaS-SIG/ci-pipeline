@@ -262,7 +262,7 @@ def setMessageFields(String messageType) {
         }
     }
 
-    messageContentString = ''
+    def messageContentString = ''
 
     return [ 'topic': topic, 'properties': messagePropertiesString, 'content': messageContentString ]
 }
