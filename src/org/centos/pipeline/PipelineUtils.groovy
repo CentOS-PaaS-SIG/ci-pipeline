@@ -248,7 +248,7 @@ def setMessageFields(String messageType) {
     }
 
     // Create a string to hold the data from the messageProperties hash map
-    String messagePropertiesString = new String()
+    String messagePropertiesString = ''
 
     messageProperties.each { k,v ->
         // Don't add a new line to the last item in the hash map when adding it to the messagePropertiesString
