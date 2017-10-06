@@ -199,7 +199,7 @@ def checkImageLastModifiedTime(String stage, String imageFilePath='images/latest
  * @return
  */
 def setMessageFields(String messageType) {
-    def topic = "${MAIN_TOPIC}.ci.pipeline.${messageType}"
+    topic = "${MAIN_TOPIC}.ci.pipeline.${messageType}"
 
     // Create a HashMap of default message property keys and values
     // These properties should be applicable to ALL message types.
