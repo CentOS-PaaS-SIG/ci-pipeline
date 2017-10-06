@@ -23,6 +23,7 @@ virtlogd &
 chmod 666 /dev/kvm
 
 function clean_up {
+  set +e
   kill $(jobs -p)
   for screenshot in /var/lib/oz/screenshots/*.ppm; do
       [ -e "$screenshot" ] && cp $screenshot /home/output/logs
