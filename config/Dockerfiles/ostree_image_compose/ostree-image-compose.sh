@@ -23,12 +23,11 @@ virtlogd &
 chmod 666 /dev/kvm
 
 function clean_up {
+  set +e
   kill $(jobs -p)
   for screenshot in /var/lib/oz/screenshots/*.ppm; do
       [ -e "$screenshot" ] && cp $screenshot /home/output/logs
   done
-
-  exit 0
 }
 trap clean_up EXIT SIGHUP SIGINT SIGTERM
 
@@ -80,6 +79,14 @@ sed -i "s|\(%end.*$\)|ostree remote delete fedora-atomic\nostree remote add --se
 # Remove ostree refs create form upstream kickstart
 sed -i "s|^ostree refs.*||" /home/output/logs/fedora-atomic.ks
 sed -i "s|^ostree admin set-origin.*||" /home/output/logs/fedora-atomic.ks
+
+# Pull down Fedora net install image if needed
+pushd /home/output/netinst
+iso=$(wget -c -r -nd -A iso --accept-regex "Fedora-Everything-netinst-.*\.iso" "http://dl.fedoraproject.org/pub/fedora/linux/development/${VERSION}/Everything/x86_64/iso/" 2>&1 | awk '/Saving to: ‘Fedora-Everything-netinst/ { print $3 }' | sed -e 's/^‘//' -e 's/’$//' || true)
+if [ -n "$iso" ]; then
+    ln -s $iso Fedora-Everything-netinst-x86_64.iso
+fi
+popd
 
 # Create a tdl file for imagefactory
 #       <install type='url'>
