@@ -7,6 +7,7 @@ env.SLAVE_TAG = env.SLAVE_TAG ?: 'stable'
 env.RPMBUILD_TAG = env.RPMBUILD_TAG ?: 'stable'
 env.RSYNC_TAG = env.RSYNC_TAG ?: 'stable'
 env.OSTREE_COMPOSE_TAG = env.OSTREE_COMPOSE_TAG ?: 'stable'
+env.PACKAGE_TEST_TAG = env.PACKAGE_TEST_TAG ?: 'stable'
 
 env.DOCKER_REPO_URL = env.DOCKER_REPO_URL ?: '172.30.254.79:5000'
 env.OPENSHIFT_NAMESPACE = env.OPENSHIFT_NAMESPACE ?: 'continuous-infra'
@@ -45,6 +46,7 @@ properties(
                                 string(defaultValue: 'stable', description: 'Tag for rpmbuild image', name: 'RPMBUILD_TAG'),
                                 string(defaultValue: 'stable', description: 'Tag for rsync image', name: 'RSYNC_TAG'),
                                 string(defaultValue: 'stable', description: 'Tag for ostree-compose image', name: 'OSTREE_COMPOSE_TAG'),
+                                string(defaultValue: 'stable', description: 'Tag for package test image', name: 'PACKAGE_TEST_TAG'),
                                 string(defaultValue: '172.30.254.79:5000', description: 'Docker repo url for Openshift instance', name: 'DOCKER_REPO_URL'),
                                 string(defaultValue: 'continuous-infra', description: 'Project namespace for Openshift operations', name: 'OPENSHIFT_NAMESPACE'),
                                 string(defaultValue: 'jenkins', description: 'Service Account for Openshift operations', name: 'OPENSHIFT_SERVICE_ACCOUNT'),
@@ -89,6 +91,14 @@ podTemplate(name: 'fedora-atomic-' + env.ghprbActualCommit,
                 containerTemplate(name: 'ostree-compose',
                         alwaysPullImage: true,
                         image: DOCKER_REPO_URL + '/' + OPENSHIFT_NAMESPACE + '/ostree-compose:' + OSTREE_COMPOSE_TAG,
+                        ttyEnabled: true,
+                        command: 'cat',
+                        privileged: true,
+                        workingDir: '/workDir'),
+                // This adds the package test container to the pod.
+                containerTemplate(name: 'package-test',
+                        alwaysPullImage: true,
+                        image: DOCKER_REPO_URL + '/' + OPENSHIFT_NAMESPACE + '/package-test:' + PACKAGE_TEST_TAG,
                         ttyEnabled: true,
                         command: 'cat',
                         privileged: true,
@@ -176,6 +186,8 @@ podTemplate(name: 'fedora-atomic-' + env.ghprbActualCommit,
                         def package_props_groovy = "${env.WORKSPACE}/package_props.groovy"
                         pipelineUtils.convertProps(package_props, package_props_groovy)
                         load(package_props_groovy)
+                        // Save RSYNC_PASSWORD for post duffy stages
+                        env.REAL_RSYNC_PASSWORD = "${env.RSYNC_PASSWORD}"
 
                         // Set our message topic, properties, and content
                         messageFields = pipelineUtils.setMessageFields("package.complete")
@@ -221,7 +233,7 @@ podTemplate(name: 'fedora-atomic-' + env.ghprbActualCommit,
                         // Set our message topic, properties, and content
                         messageFields = pipelineUtils.setMessageFields("compose.complete")
 
-                        // Send message org.centos.prod.ci.pipeline.package.complete on fedmsg
+                        // Send message org.centos.prod.ci.pipeline.compose.complete on fedmsg
                         pipelineUtils.sendMessage(messageFields['properties'], messageFields['content'])
 
                         pipelineUtils.checkLastImage(currentStage)
@@ -288,7 +300,7 @@ podTemplate(name: 'fedora-atomic-' + env.ghprbActualCommit,
                             // Set our message topic, properties, and content
                             messageFields = pipelineUtils.setMessageFields("image.test.smoke.running")
 
-                            // Send message org.centos.prod.ci.pipeline.smoke.running on fedmsg
+                            // Send message org.centos.prod.ci.pipeline.images.test.smoke.running on fedmsg
                             pipelineUtils.sendMessage(messageFields['properties'], messageFields['content'])
 
                             // Provision resources
@@ -306,7 +318,7 @@ podTemplate(name: 'fedora-atomic-' + env.ghprbActualCommit,
                             // Set our message topic, properties, and content
                             messageFields = pipelineUtils.setMessageFields("image.test.smoke.complete")
 
-                            // Send message org.centos.prod.ci.pipeline.smoke.complete on fedmsg
+                            // Send message org.centos.prod.ci.pipeline.image.test.smoke.complete on fedmsg
                             pipelineUtils.sendMessage(messageFields['properties'], messageFields['content'])
 
                         } else {
@@ -332,9 +344,36 @@ podTemplate(name: 'fedora-atomic-' + env.ghprbActualCommit,
                         pipelineUtils.teardownResources(currentStage)
 
                         // Set our message topic, properties, and content
+                        messageFields = pipelineUtils.setMessageFields("package.test.functional.queued")
+
+                        // Send message org.centos.prod.ci.pipeline.package.test.functional.queued on fedmsg
+                        pipelineUtils.sendMessage(messageFields['properties'], messageFields['content'])
+                    }
+
+                    currentStage = "ci-pipeline-functional-tests"
+                    stage(currentStage) {
+                        // Set stage specific vars
+                        pipelineUtils.setStageEnvVars(currentStage)
+                        env.RSYNC_PASSWORD = "${env.REAL_RSYNC_PASSWORD}"
+
+                        //Set our message topic, properties, and content
+                        messageFields = pipelineUtils.setMessageFields("package.test.functional.running")
+
+                        // Send message org.centos.prod.ci.pipeline.package.test.functional.running on fedmsg
+                        pipelineUtils.sendMessage(messageFields['properties'], messageFields['content'])
+
+                        pipelineUtils.executeInContainer(currentStage, "package-test", "/tmp/package-test.sh")
+
+                        // Set our message topic, properties, and content
+                        messageFields = pipelineUtils.setMessageFields("package.test.functional.complete")
+
+                        // Send message org.centos.prod.ci.pipeline.package.test.functional.complete on fedmsg
+                        pipelineUtils.sendMessage(messageFields['properties'], messageFields['content'])
+
+                        // Set our message topic, properties, and content
                         messageFields = pipelineUtils.setMessageFields("compose.test.integration.queued")
 
-                        // Send message org.centos.prod.ci.pipeline.integration.queued on fedmsg
+                        // Send message org.centos.prod.ci.pipeline.compose.test.integration.queued on fedmsg
                         pipelineUtils.sendMessage(messageFields['properties'], messageFields['content'])
 
                     }
@@ -346,7 +385,7 @@ podTemplate(name: 'fedora-atomic-' + env.ghprbActualCommit,
                         // Set our message topic, properties, and content
                         messageFields = pipelineUtils.setMessageFields("compose.test.integration.running")
 
-                        // Send message org.centos.prod.ci.pipeline.integration.running on fedmsg
+                        // Send message org.centos.prod.ci.pipeline.compose.test.integration.running on fedmsg
                         pipelineUtils.sendMessage(messageFields['properties'], messageFields['content'])
 
                         // Provision resources
@@ -361,7 +400,7 @@ podTemplate(name: 'fedora-atomic-' + env.ghprbActualCommit,
                         // Set our message topic, properties, and content
                         messageFields = pipelineUtils.setMessageFields("compose.test.integration.complete")
 
-                        // Send message org.centos.prod.ci.pipeline.integration.complete on fedmsg
+                        // Send message org.centos.prod.ci.pipeline.compose.test.integration.complete on fedmsg
                         pipelineUtils.sendMessage(messageFields['properties'], messageFields['content'])
                     }
 

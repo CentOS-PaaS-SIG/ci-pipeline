@@ -23,8 +23,10 @@ tagMap['jenkins-continuous-infra-slave'] = STABLE_LABEL
 tagMap['rpmbuild'] = STABLE_LABEL
 tagMap['rsync'] = STABLE_LABEL
 tagMap['ostree-compose'] = STABLE_LABEL
+tagMap['package-test'] = STABLE_LABEL
 
 // CI_MESSAGE known to build successfully
+//def CANNED_CI_MESSAGE = '{"commit":{"username":"kdudka","stats":{"files":{"curl.spec":{"deletions":1,"additions":8,"lines":9},"0005-curl-7.53.1-CVE-2017-1000254.patch":{"deletions":0,"additions":136,"lines":136}},"total":{"deletions":1,"files":2,"additions":144,"lines":145}},"name":"Kamil Dudka","rev":"d1d232206aed8ef12596ec3939b72a6476845149","namespace":"rpms","agent":"kdudka","summary":"Resolves: CVE-2017-1000254 - fix out of bounds read in FTP PWD response parser","repo":"curl","branch":"f26","seen":false,"path":"/srv/git/repositories/rpms/curl.git","message":"Resolves: CVE-2017-1000254 - fix out of bounds read in FTP PWD response parser\n","email":"kdudka@redhat.com"},"topic":"org.fedoraproject.prod.git.receive"}'
 def CANNED_CI_MESSAGE = '{"commit":{"username":"zdohnal","stats":{"files":{"README.patches":{"deletions":0,"additions":30,"lines":30},"sources":{"deletions":1,"additions":1,"lines":2},"vim.spec":{"deletions":7,"additions":19,"lines":26},".gitignore":{"deletions":0,"additions":1,"lines":1},"vim-8.0-rhbz1365258.patch":{"deletions":0,"additions":12,"lines":12}},"total":{"deletions":8,"files":5,"additions":63,"lines":71}},"name":"Zdenek Dohnal","rev":"3ff427e02625f810a2cedb754342be44d6161b39","namespace":"rpms","agent":"zdohnal","summary":"Merge branch \'f25\' into f26","repo":"vim","branch":"f26","seen":false,"path":"/srv/git/repositories/rpms/vim.git","message":"Merge branch \'f25\' into f26\\n","email":"zdohnal@redhat.com"},"topic":"org.fedoraproject.prod.git.receive"}'
 
 library identifier: "ci-pipeline@${env.ghprbActualCommit}",
@@ -107,6 +109,17 @@ pipeline {
                 }
             }
         }
+        stage("package-test image build") {
+            when {
+                // Only build if we have related files in changeset
+                changeset "config/Dockerfiles/package-test/**"
+            }
+            steps {
+                script {
+                    tagMap['package-test'] = pipelineUtils.buildImage(openshiftProject, "package-test")
+                }
+            }
+        }
         stage("Run Stage Job") {
             steps {
                 script {
@@ -125,7 +138,8 @@ pipeline {
                                     string(name: 'SLAVE_TAG', value: tagMap['jenkins-continuous-infra-slave']),
                                     string(name: 'RPMBUILD_TAG', value: tagMap['rpmbuild']),
                                     string(name: 'RSYNC_TAG', value: tagMap['rsync']),
-                                    string(name: 'OSTREE_COMPOSE_TAG', value: tagMap['ostree-compose'])
+                                    string(name: 'OSTREE_COMPOSE_TAG', value: tagMap['ostree-compose']),
+                                    string(name: 'PACKAGE_TEST_TAG', value: tagMap['package-test'])
                             ]
                     wait: true
                 }
