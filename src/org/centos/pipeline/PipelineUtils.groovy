@@ -253,13 +253,69 @@ def setMessageFields(String messageType){
  * @return
  */
 def sendMessage(String msgProps, String msgContent) {
-    sendCIMessage messageContent: msgContent,
+
+    // Send message and return SendResult
+    sendResult = sendCIMessage messageContent: msgContent,
             messageProperties: msgProps,
             messageType: 'Custom',
             overrides: [topic: "${topic}"],
             providerName: "${MSG_PROVIDER}"
+
+    return sendResult
 }
 
+/**
+ * Library to send message
+ * @param msgProps - The message properties in key=value form, one key/value per line ending in '\n'
+ * @param msgContent - Message content.
+ * @param msgAuditFile - File containing all past messages. It will get appended to.
+ * @return
+ */
+def sendMessageWithAudit(String msgProps, String msgContent, String msgAuditFile) {
+    // Get contents of auditFile
+    auditContent = readJSON file: msgAuditFile
+
+    // Send message and get handle on SendResult
+    sendResult = sendMessage(msgProps, msgContent)
+
+    String id = sendResult.getMessageId()
+    String msg = sendResult.getMessageContent()
+
+    auditContent[id] = msg
+
+    // write to auditFile and archive
+    writeJSON file: msgAuditFile, json: auditContent
+
+    archiveArtifacts allowEmptyArchive: false, artifacts: msgAuditFile
+
+    trackMessage(id)
+}
+
+/**
+ * Initialize message audit file
+ * @param auditFile audit file for messages
+ * @return
+ */
+def initializeAuditFile(String auditFile) {
+    // Ensure auditFile is available
+    sh "rm -f " + auditFile
+    String msgAuditFileDir = sh(script: 'dirname ' + auditFile, returnStdout: true).trim()
+    sh 'mkdir -p ' + msgAuditFileDir
+    sh 'touch ' + auditFile
+    sh 'echo "{}" >> ' + auditFile
+}
+/**
+ * Check data grepper for presence of a message
+ * @param messageID message ID to track.
+ * @return
+ */
+def trackMessage(String messageID) {
+    retry(10) {
+        echo "Checking datagrapper for presence of message..."
+        sh "curl --silent --show-error --fail \'${env.dataGrepperUrl}/id?id=${messageID}&chrome=false&is_raw=false\'"
+        echo "found!"
+    }
+}
 /**
  * Library to parse CI_MESSAGE and inject its key/value pairs as env variables.
  *
@@ -329,10 +385,17 @@ def setDefaultEnvVars(Map envMap=null){
     // Regardless of whether we're working with staging or production,
     // if we're provided a value for MAIN_TOPIC in the build parameters:
 
+    // We also set dataGrepperUrl which is needed for message tracking
+    // and the correct jms-messaging message provider
+
     if (env.ghprbActualCommit != null && env.ghprbActualCommit != "master") {
         env.MAIN_TOPIC = env.MAIN_TOPIC ?: 'org.centos.stage'
+        env.dataGrepperUrl = 'https://apps.stg.fedoraproject.org/datagrepper'
+        env.MSG_PROVIDER = "fedora-fedmsg-stage"
     } else {
         env.MAIN_TOPIC = env.MAIN_TOPIC ?: 'org.centos.prod'
+        env.dataGrepperUrl = 'https://apps.fedoraproject.org/datagrepper'
+        env.MSG_PROVIDER = "fedora-fedmsg"
     }
 
     // Set our base HTTP_SERVER value
@@ -368,7 +431,6 @@ def setDefaultEnvVars(Map envMap=null){
     //  ex: http://artifacts.ci.centos.org/fedora-atomic/staging (staging)
     env.HTTP_BASE = "${env.HTTP_SERVER}/${env.HTTP_DIR}"
 
-    env.MSG_PROVIDER = env.MSG_PROVIDER ?: 'fedora-fedmsg'
     env.basearch = env.basearch ?: 'x86_64'
     env.OSTREE_BRANCH = env.OSTREE_BRANCH ?: ''
     env.commit = env.commit ?: ''
