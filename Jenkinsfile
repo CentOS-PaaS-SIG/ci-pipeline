@@ -1,5 +1,6 @@
 env.ghprbGhRepository = env.ghprbGhRepository ?: 'CentOS-PaaS-SIG/ci-pipeline'
 env.ghprbActualCommit = env.ghprbActualCommit ?: 'master'
+env.ghprbPullAuthorLogin = env.ghprbPullAuthorLogin ?: ''
 
 // Needed for podTemplate()
 env.SLAVE_TAG = env.SLAVE_TAG ?: 'stable'
@@ -39,6 +40,7 @@ properties(
                                 string(defaultValue: 'CentOS-PaaS-SIG/ci-pipeline', description: '', name: 'ghprbGhRepository'),
                                 string(defaultValue: '', description: '', name: 'sha1'),
                                 string(defaultValue: '', description: '', name: 'ghprbPullId'),
+                                string(defaultValue: '', description: '', name: 'ghprbPullAuthorLogin'),
                                 string(defaultValue: 'stable', description: 'Tag for slave image', name: 'SLAVE_TAG'),
                                 string(defaultValue: 'stable', description: 'Tag for rpmbuild image', name: 'RPMBUILD_TAG'),
                                 string(defaultValue: 'stable', description: 'Tag for rsync image', name: 'RSYNC_TAG'),
@@ -129,6 +131,9 @@ podTemplate(name: 'fedora-atomic-' + env.ghprbActualCommit,
 
                     // Parse the CI_MESSAGE and inject it as env vars
                     pipelineUtils.injectFedmsgVars()
+
+                    // Decorate our build
+                    pipelineUtils.updateBuildDisplayAndDescription()
 
                     // Set our current stage value
                     currentStage = "ci-pipeline-rpmbuild"

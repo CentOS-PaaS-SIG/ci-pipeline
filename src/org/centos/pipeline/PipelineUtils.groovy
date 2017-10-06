@@ -765,8 +765,20 @@ def getChangeLogFromCurrentBuild() {
 def setBuildDisplayAndDescription() {
     currentBuild.displayName = "Build#: ${env.BUILD_NUMBER} - Branch: ${env.branch} - Package: ${env.fed_repo}"
     if (env.ghprbActualCommit != null && env.ghprbActualCommit != "master") {
-        currentBuild.description = "<a href=\"https://github.com/${env.ghprbGhRepository}/pull/${env.ghprbPullId}\">PR #${env.ghprbPullId}</a>"
+        currentBuild.description = "<a href=\"https://github.com/${env.ghprbGhRepository}/pull/${env.ghprbPullId}\">PR #${env.ghprbPullId} (${env.ghprbPullAuthorLogin})</a>"
     } else {
         currentBuild.description = "${currentBuild.currentResult}"
+    }
+}
+
+/**
+ * Update the Build displayName and Description based on whether it
+ * is a PR or a prod run.
+ * Used at start of pipeline to decorate the build with info
+ */
+def updateBuildDisplayAndDescription() {
+    currentBuild.displayName = "Build#: ${env.BUILD_NUMBER} - Branch: ${env.branch} - Package: ${env.fed_repo}"
+    if (env.ghprbActualCommit != null && env.ghprbActualCommit != "master") {
+        currentBuild.description = "<a href=\"https://github.com/${env.ghprbGhRepository}/pull/${env.ghprbPullId}\">PR #${env.ghprbPullId} (${env.ghprbPullAuthorLogin})</a>"
     }
 }

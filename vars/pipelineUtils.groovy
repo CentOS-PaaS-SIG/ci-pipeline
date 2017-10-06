@@ -100,7 +100,7 @@ class pipelineUtils implements Serializable {
      * @return
      */
     def teardownResources(String stage) {
-      pipelineUtils.teardownResources(stage)
+        pipelineUtils.teardownResources(stage)
     }
 
     def verifyPod(openshiftProject, nodeName) {
@@ -110,10 +110,11 @@ class pipelineUtils implements Serializable {
     def prepareCredentials() {
         pipelineUtils.prepareCredentials()
     }
+
     def executeInContainer(stageName, containerName, script) {
         pipelineUtils.executeInContainer(stageName, containerName, script)
     }
-        
+
     /**
      * Method to prepend 'env.' to the keys in source file and write them in a format of env.key=value in the destination file.
      * @param sourceFile The file to read from
@@ -177,5 +178,14 @@ class pipelineUtils implements Serializable {
      */
     def setBuildDisplayAndDescription() {
         pipelineUtils.setBuildDisplayAndDescription()
+    }
+
+    /**
+     * Update the Build displayName and Description based on whether it
+     * is a PR or a prod run.
+     * Used at start of pipeline to decorate the build with info
+     */
+    def updateBuildDisplayAndDescription() {
+        pipelineUtils.updateBuildDisplayAndDescription()
     }
 }

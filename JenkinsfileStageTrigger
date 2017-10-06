@@ -121,6 +121,7 @@ pipeline {
                                     string(name: 'ghprbGhRepository', value: "${env.ghprbGhRepository}"),
                                     string(name: 'sha1', value: "${env.sha1}"),
                                     string(name: 'ghprbPullId', value: "${env.ghprbPullId}"),
+                                    string(name: 'ghprbPullAuthorLogin', value: "${env.ghprbPullAuthorLogin}"),
                                     string(name: 'SLAVE_TAG', value: tagMap['jenkins-continuous-infra-slave']),
                                     string(name: 'RPMBUILD_TAG', value: tagMap['rpmbuild']),
                                     string(name: 'RSYNC_TAG', value: tagMap['rsync']),
