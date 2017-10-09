@@ -34,6 +34,7 @@ objects:
       type: Git
     strategy:
       dockerStrategy:
+        noCache: true
         env:
           - name: CONTAINER_NAME
             value: linchpin-libvirt
