@@ -23,6 +23,7 @@ tagMap['jenkins-continuous-infra-slave'] = STABLE_LABEL
 tagMap['rpmbuild'] = STABLE_LABEL
 tagMap['rsync'] = STABLE_LABEL
 tagMap['ostree-compose'] = STABLE_LABEL
+tagMap['ostree-image-compose'] = STABLE_LABEL
 tagMap['singlehost-test'] = STABLE_LABEL
 
 // Fedora Fedmsg Message Provider for stage
@@ -116,6 +117,17 @@ pipeline {
                 }
             }
         }
+        stage("ostree-image-compose image build") {
+            when {
+                // Only build if we have related files in changeset
+                changeset "config/Dockerfiles/ostree-image-compose/**"
+            }
+            steps {
+                script {
+                    tagMap['ostree-image-compose'] = pipelineUtils.buildImage(openshiftProject, "ostree-image-compose")
+                }
+            }
+        }
         stage("singlehost-test image build") {
             when {
                 // Only build if we have related files in changeset
@@ -177,6 +189,7 @@ pipeline {
                                         string(name: 'RPMBUILD_TAG', value: tagMap['rpmbuild']),
                                         string(name: 'RSYNC_TAG', value: tagMap['rsync']),
                                         string(name: 'OSTREE_COMPOSE_TAG', value: tagMap['ostree-compose']),
+                                        string(name: 'OSTREE_IMAGE_COMPOSE_TAG', value: tagMap['ostree-image-compose']),
                                         string(name: 'SINGLEHOST_TEST_TAG', value: tagMap['singlehost-test'])
                                 ],
                         wait: true
@@ -198,6 +211,7 @@ pipeline {
                                         string(name: 'RPMBUILD_TAG', value: tagMap['rpmbuild']),
                                         string(name: 'RSYNC_TAG', value: tagMap['rsync']),
                                         string(name: 'OSTREE_COMPOSE_TAG', value: tagMap['ostree-compose']),
+                                        string(name: 'OSTREE_IMAGE_COMPOSE_TAG', value: tagMap['ostree-image-compose']),
                                         string(name: 'SINGLEHOST_TEST_TAG', value: tagMap['singlehost-test'])
                                 ],
                         wait: true

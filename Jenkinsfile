@@ -9,6 +9,7 @@ env.SLAVE_TAG = env.SLAVE_TAG ?: 'stable'
 env.RPMBUILD_TAG = env.RPMBUILD_TAG ?: 'stable'
 env.RSYNC_TAG = env.RSYNC_TAG ?: 'stable'
 env.OSTREE_COMPOSE_TAG = env.OSTREE_COMPOSE_TAG ?: 'stable'
+env.OSTREE_IMAGE_COMPOSE_TAG = env.OSTREE_IMAGE_COMPOSE_TAG ?: 'stable'
 env.SINGLEHOST_TEST_TAG = env.SINGLEHOST_TEST_TAG ?: 'stable'
 
 env.DOCKER_REPO_URL = env.DOCKER_REPO_URL ?: '172.30.254.79:5000'
@@ -61,6 +62,7 @@ properties(
                                 string(defaultValue: 'stable', description: 'Tag for rpmbuild image', name: 'RPMBUILD_TAG'),
                                 string(defaultValue: 'stable', description: 'Tag for rsync image', name: 'RSYNC_TAG'),
                                 string(defaultValue: 'stable', description: 'Tag for ostree-compose image', name: 'OSTREE_COMPOSE_TAG'),
+                                string(defaultValue: 'stable', description: 'Tag for ostree-image-compose image', name: 'OSTREE_IMAGE_COMPOSE_TAG'),
                                 string(defaultValue: 'stable', description: 'Tag for singlehost test image', name: 'SINGLEHOST_TEST_TAG'),
                                 string(defaultValue: '172.30.254.79:5000', description: 'Docker repo url for Openshift instance', name: 'DOCKER_REPO_URL'),
                                 string(defaultValue: 'continuous-infra', description: 'Project namespace for Openshift operations', name: 'OPENSHIFT_NAMESPACE'),
@@ -110,6 +112,14 @@ podTemplate(name: podName,
                         command: 'cat',
                         privileged: true,
                         workingDir: '/workDir'),
+                // This adds the ostree-image-compose test container to the pod.
+                containerTemplate(name: 'ostree-image-compose',
+                        alwaysPullImage: true,
+                        image: DOCKER_REPO_URL + '/' + OPENSHIFT_NAMESPACE + '/ostree-image-compose:' + OSTREE_IMAGE_COMPOSE_TAG,
+                        ttyEnabled: true,
+                        command: 'cat',
+                        privileged: true,
+                        workingDir: '/workDir'),
                 // This adds the package test container to the pod.
                 containerTemplate(name: 'singlehost-test',
                         alwaysPullImage: true,
@@ -119,7 +129,8 @@ podTemplate(name: podName,
                         privileged: true,
                         workingDir: '/workDir')
         ],
-        volumes: [emptyDirVolume(memory: false, mountPath: '/home/output')])
+        volumes: [emptyDirVolume(memory: false, mountPath: '/home/output'),
+                  emptyDirVolume(memory: false, mountPath: '/sys/class/net')])
 {
     node(podName) {
 
@@ -271,29 +282,35 @@ podTemplate(name: podName,
                             pipelineUtils.sendMessageWithAudit(messageFields['properties'], messageFields['content'], msgAuditFile, fedmsgRetryCount)
                         }
 
-                        // Provision resources
-                        pipelineUtils.provisionResources(currentStage)
+                        // Rsync pull from artifacts
+                        env.rsync_paths = "netinst ostree images"
+                        env.rsync_from = "${env.RSYNC_USER}@${env.RSYNC_SERVER}::${env.RSYNC_DIR}/${env.branch}/"
+                        env.rsync_to = "/home/output/"
+                        pipelineUtils.executeInContainer(currentStage + "-rsync-before", "rsync", "/tmp/rsync.sh")
 
-                        // Stage resources - ostree image compose
-                        pipelineUtils.setupStage(currentStage, 'fedora-atomic-key')
+                        // Compose image
+                        pipelineUtils.executeInContainer(currentStage, "ostree-image-compose", "/tmp/ostree-image-compose.sh")
 
-                        // Rsync Data
-                        pipelineUtils.rsyncData(currentStage)
+                        // Rsync push netinst
+                        env.rsync_paths = "netinst"
+                        env.rsync_from = "/home/output/"
+                        env.rsync_to = "${env.RSYNC_USER}@${env.RSYNC_SERVER}::${env.RSYNC_DIR}/${env.branch}/"
+                        pipelineUtils.executeInContainer(currentStage + "-rsync-after-netinst", "rsync", "/tmp/rsync.sh")
 
+                        String untested_img_loc = "/home/output/logs/untested-atomic.qcow2"
+                        sh "mv -f ${untested_img_loc} ${env.WORKSPACE}/"
                         if (fileExists("${env.WORKSPACE}/NeedNewImage.txt") || ("${env.GENERATE_IMAGE}" == "true")) {
+                            // Rsync push images
+                            env.rsync_paths = "images"
+                            pipelineUtils.executeInContainer(currentStage + "-rsync-after-netinst", "rsync", "/tmp/rsync.sh")
+
                             // These variables will mess with boot sanity jobs
                             // later if they are injected from a non pushed img
                             ostree_props = "${env.ORIGIN_WORKSPACE}/logs/ostree.props"
                             ostree_props_groovy = "${env.ORIGIN_WORKSPACE}/ostree.props.groovy"
                             pipelineUtils.convertProps(ostree_props, ostree_props_groovy)
                             load(ostree_props_groovy)
-                        }
-                        sh "mv -f ${env.ORIGIN_WORKSPACE}/logs/untested-atomic.qcow2 ${env.WORKSPACE}/"
 
-                        // Teardown resources
-                        pipelineUtils.teardownResources(currentStage)
-
-                        if (fileExists("${env.WORKSPACE}/NeedNewImage.txt") || ("${env.GENERATE_IMAGE}" == "true")) {
                             // Set our message topic, properties, and content
                             messageFields = pipelineUtils.setMessageFields("image.complete")
 
