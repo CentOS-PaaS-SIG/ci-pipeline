@@ -1,4 +1,4 @@
-env.ghprbGhRepository = env.ghprbGhRepository ?: 'samvarankashyap/ci-pipeline'
+env.ghprbGhRepository = env.ghprbGhRepository ?: 'CentOS-PaaS-SIG/ci-pipeline'
 env.ghprbActualCommit = env.ghprbActualCommit ?: 'master'
 env.ghprbPullAuthorLogin = env.ghprbPullAuthorLogin ?: ''
 
@@ -13,7 +13,7 @@ env.OSTREE_IMAGE_COMPOSE_TAG = env.OSTREE_IMAGE_COMPOSE_TAG ?: 'stable'
 env.SINGLEHOST_TEST_TAG = env.SINGLEHOST_TEST_TAG ?: 'stable'
 env.OSTREE_BOOT_IMAGE_TAG = env.OSTREE_BOOT_IMAGE_TAG ?: 'stable'
 
-env.DOCKER_REPO_URL = '172.30.1.1:5000'
+env.DOCKER_REPO_URL = env.DOCKER_REPO_URL ?: '172.30.254.79:5000'
 env.OPENSHIFT_NAMESPACE = env.OPENSHIFT_NAMESPACE ?: 'continuous-infra'
 env.OPENSHIFT_SERVICE_ACCOUNT = env.OPENSHIFT_SERVICE_ACCOUNT ?: 'jenkins'
 
@@ -136,6 +136,13 @@ podTemplate(name: podName,
                         image: DOCKER_REPO_URL + '/' + OPENSHIFT_NAMESPACE + '/ostree-boot-image:' + OSTREE_BOOT_IMAGE_TAG,
                         ttyEnabled: true,
                         command: '/usr/sbin/init',
+                        privileged: true,
+                        workingDir: '/workDir'),
+                containerTemplate(name: 'linchpin-libvirt',
+                        alwaysPullImage: true,
+                        image: DOCKER_REPO_URL + '/' + OPENSHIFT_NAMESPACE + '/linchpin-libvirt:latest',
+                        ttyEnabled: true,
+                        command: 'cat',
                         privileged: true,
                         workingDir: '/workDir')
         ],
@@ -262,7 +269,7 @@ podTemplate(name: podName,
                         // Send message org.centos.prod.ci.pipeline.compose.complete on fedmsg
                         pipelineUtils.sendMessageWithAudit(messageFields['properties'], messageFields['content'], msgAuditFile, fedmsgRetryCount)
 
-                        pipelineUtils.checkLastImage(currentStage)
+				pipelineUtils.checkLastImage(currentStage)
                     }
 
                     currentStage = "ci-pipeline-ostree-image-compose"
@@ -425,6 +432,12 @@ podTemplate(name: podName,
                         // Send message org.centos.prod.ci.pipeline.compose.test.integration.complete on fedmsg
                         pipelineUtils.sendMessageWithAudit(messageFields['properties'], messageFields['content'], msgAuditFile, fedmsgRetryCount)
 
+                    }
+                    currentStage = "openshift-e2e-tests"
+                    stage(currentStage) {
+                        // run linchpin up and other steps
+                        // note: need to be updated
+                        pipelineUtils.executeInContainerNoPrep(currentStage, "linchpin-libvirt", "/tmp/linchpin_workspace/run_e2e_tests.sh")
                     }
 
                 } catch (e) {
