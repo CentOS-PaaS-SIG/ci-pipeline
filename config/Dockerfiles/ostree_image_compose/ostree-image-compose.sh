@@ -81,6 +81,9 @@ sed -i "s|^ostree refs.*||" /home/output/logs/fedora-atomic.ks
 sed -i "s|^ostree admin set-origin.*||" /home/output/logs/fedora-atomic.ks
 
 # Pull down Fedora net install image if needed
+if [ ! -e "/home/output/netinst" ]; then
+    mkdir -p /home/output/netinst
+fi
 pushd /home/output/netinst
 iso=$(wget -c -r -nd -A iso --accept-regex "Fedora-Everything-netinst-.*\.iso" "http://dl.fedoraproject.org/pub/fedora/linux/development/${VERSION}/Everything/x86_64/iso/" 2>&1 | awk '/Saving to: ‘Fedora-Everything-netinst/ { print $3 }' | sed -e 's/^‘//' -e 's/’$//' || true)
 if [ -n "$iso" ]; then
