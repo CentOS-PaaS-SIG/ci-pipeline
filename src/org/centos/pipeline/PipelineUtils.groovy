@@ -198,52 +198,70 @@ def checkImageLastModifiedTime(String stage, String imageFilePath='images/latest
  * @param messageType: ${MAIN_TOPIC}.ci.pipeline.<defined-in-README>
  * @return
  */
-def setMessageFields(String messageType){
-    topic = "${env.MAIN_TOPIC}.ci.pipeline.${messageType}"
-    messageProperties = "topic=${topic}\n" +
-                        "build_url=${env.BUILD_URL}\n" +
-                        "build_id=${env.BUILD_ID}\n" +
-                        "branch=${env.branch}\n" +
-                        "compose_rev=${env.commit}\n" +
-                        "namespace=${env.fed_namespace}\n" +
-                        "ref=fedora/${env.branch}/${env.basearch}/atomic-host\n" +
-                        "repo=${env.fed_repo}\n" +
-                        "original_spec_nvr=${env.original_spec_nvr}\n" +
-                        "nvr=${env.nvr}\n" +
-                        "rev=${env.fed_rev}\n" +
-                        "test_guidance=''\n" +
-                        "username=${env.RSYNC_USER}\n" +
-                        "status=${currentBuild.currentResult}\n"
-    messageContent=''
+def setMessageFields(String messageType) {
+    topic = "${MAIN_TOPIC}.ci.pipeline.${messageType}"
 
-    if (messageType == 'compose.running') {
-        messageProperties = messageProperties +
-                "compose_url=${env.HTTP_BASE}/${env.branch}/ostree\n" +
-                "compose_rev=''\n"
-    } else if ((messageType == 'compose.complete') || (messageType == 'compose.test.integration.queued') ||
-            (messageType == 'compose.test.integration.running') || (messageType == 'compose.test.integration.complete')) {
-        messageProperties = messageProperties +
-            "compose_url=${env.HTTP_BASE}/${env.branch}/ostree\n" +
-            "compose_rev=${env.commit}\n"
-    } else if (messageType == 'image.running') {
-            messageProperties = messageProperties +
-                "compose_url=${env.HTTP_BASE}/${env.branch}/ostree\n" +
-                "compose_rev=${env.commit}\n" +
-                "image_url=''\n" +
-                "image_name=''\n" +
-                "type=qcow2\n"
-    } else if ((messageType == 'image.complete') || (messageType == 'image.test.smoke.running') ||
-            (messageType == 'image.test.smoke.complete')) {
-        messageProperties = messageProperties +
-                "compose_url=${env.HTTP_BASE}/${env.branch}/ostree\n" +
-                "compose_rev=${env.commit}\n" +
-                "image_url=${env.image2boot}\n" +
-                "image_name=${env.image_name}\n" +
-                "type=qcow2\n"
-    } else {
-        return [ 'topic': topic, 'properties': messageProperties, 'content': messageContent ]
+    // Create a HashMap of default message property keys and values
+    // These properties should be applicable to ALL message types.
+    // If something is applicable to only some subset of messages,
+    // add it below per the existing examples.
+
+    def messageProperties = [
+            branch           : env.branch,
+            build_id         : env.BUILD_ID,
+            build_url        : env.BUILD_URL,
+            compose_rev      : messageType == 'compose.running' ? '' : env.commit,
+            namespace        : env.fed_namespace,
+            nvr              : env.nvr,
+            original_spec_nvr: env.original_spec_nvr,
+            ref              : env.basearch,
+            repo             : env.fed_repo,
+            rev              : env.fed_rev,
+            status           : currentBuild.currentResult,
+            test_guidance    : "''",
+            topic            : topic,
+            username         : env.RSYNC_USER,
+    ]
+
+    // Add compose_url to appropriate message types
+    if (messageType in ['compose.running', 'compose.complete', 'compose.test.integration.queued',
+                        'compose.test.integration.running', 'compose.test.integration.complete', 'image.running', 'image.complete',
+                        'image.test.smoke.running', 'image.test.smoke.complete'
+    ]) {
+        messageProperties.compose_url = "${env.HTTP_BASE}/${env.branch}/ostree"
     }
-    return [ 'topic': topic, 'properties': messageProperties, 'content': messageContent ]
+
+    // Add image type to appropriate message types
+    if (messageType in ['image.running', 'image.complete', 'image.test.smoke.running', 'image.test.smoke.complete'
+    ]) {
+        messageProperties.type = messageType == 'image.running' ? "''" : 'qcow2'
+    }
+
+    // Add image_url to appropriate message types
+    if (messageType in ['image.complete', 'image.test.smoke.running', 'image.test.smoke.complete']) {
+        messageProperties.image_url = messageType == 'image.running' ? "''" : env.image2boot
+    }
+
+    // Add image_name to appropriate message types
+    if (messageType in ['image.complete', 'image.test.smoke.running', 'image.test.smoke.complete']) {
+        messageProperties.image_name = messageType == 'image.running' ? "''" : env.image_name
+    }
+
+    // Create a string to hold the data from the messageProperties hash map
+    String messagePropertiesString = ''
+
+    messageProperties.each { k,v ->
+        // Don't add a new line to the last item in the hash map when adding it to the messagePropertiesString
+        if ( k == messageProperties.keySet().last()){
+            messagePropertiesString += "${k}=${v}"
+        } else {
+            messagePropertiesString += "${k}=${v}\n"
+        }
+    }
+
+    def messageContentString = ''
+
+    return [ 'topic': topic, 'properties': messagePropertiesString, 'content': messageContentString ]
 }
 
 /**
