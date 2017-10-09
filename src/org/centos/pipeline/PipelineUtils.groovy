@@ -606,14 +606,14 @@ def executeInContainer(String stageName, String containerName, String script) {
         container(containerName) {
             sh 'pwd'
             sh 'ls -l /tmp'
-            //sh "cp -fv ${WORKSPACE}/fedora.keytab /home/fedora.keytab"
+            sh "cp -fv ${WORKSPACE}/fedora.keytab /home/fedora.keytab"
             sh 'env'
             sh script
-            //sh "ls -lR logs || true"
+            sh "ls -lR logs || true"
         }
     }
     sh "mkdir -p " + stageName
-   // sh "mv -vf logs " + stageName + "/logs || true"
+    sh "mv -vf logs " + stageName + "/logs || true"
 }
 
 /**
