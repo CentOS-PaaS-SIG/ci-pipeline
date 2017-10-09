@@ -234,7 +234,7 @@ podTemplate(name: 'fedora-atomic-' + env.ghprbActualCommit,
                         // Set our message topic, properties, and content
                         messageFields = pipelineUtils.setMessageFields("compose.complete")
 
-                        // Send message org.centos.prod.ci.pipeline.package.complete on fedmsg
+                        // Send message org.centos.prod.ci.pipeline.compose.complete on fedmsg
                         pipelineUtils.sendMessageWithAudit(messageFields['properties'], messageFields['content'], msgAuditFile)
 
                         pipelineUtils.checkLastImage(currentStage)
@@ -301,7 +301,7 @@ podTemplate(name: 'fedora-atomic-' + env.ghprbActualCommit,
                             // Set our message topic, properties, and content
                             messageFields = pipelineUtils.setMessageFields("image.test.smoke.running")
 
-                            // Send message org.centos.prod.ci.pipeline.smoke.running on fedmsg
+                            // Send message org.centos.prod.ci.pipeline.image.test.smoke.running on fedmsg
                             pipelineUtils.sendMessageWithAudit(messageFields['properties'], messageFields['content'], msgAuditFile)
 
                             // Provision resources
@@ -319,7 +319,7 @@ podTemplate(name: 'fedora-atomic-' + env.ghprbActualCommit,
                             // Set our message topic, properties, and content
                             messageFields = pipelineUtils.setMessageFields("image.test.smoke.complete")
 
-                            // Send message org.centos.prod.ci.pipeline.smoke.complete on fedmsg
+                            // Send message org.centos.prod.ci.pipeline.image.test.smoke.complete on fedmsg
                             pipelineUtils.sendMessageWithAudit(messageFields['properties'], messageFields['content'], msgAuditFile)
 
                         } else {
@@ -363,6 +363,7 @@ podTemplate(name: 'fedora-atomic-' + env.ghprbActualCommit,
                         // Send message org.centos.prod.ci.pipeline.package.test.functional.running on fedmsg
                         pipelineUtils.sendMessage(messageFields['properties'], messageFields['content'])
 
+                        // Run functional tests
                         pipelineUtils.executeInContainer(currentStage, "package-test", "/tmp/package-test.sh")
 
                         // Set our message topic, properties, and content
@@ -374,32 +375,29 @@ podTemplate(name: 'fedora-atomic-' + env.ghprbActualCommit,
                         // Set our message topic, properties, and content
                         messageFields = pipelineUtils.setMessageFields("compose.test.integration.queued")
 
-                        // Send message org.centos.prod.ci.pipeline.integration.queued on fedmsg
+                        // Send message org.centos.prod.ci.pipeline.compose.test.integration.queued on fedmsg
                         pipelineUtils.sendMessageWithAudit(messageFields['properties'], messageFields['content'], msgAuditFile)
                     }
 
                     currentStage = "ci-pipeline-atomic-host-tests"
                     stage(currentStage) {
+                        // Set stage specific vars
                         pipelineUtils.setStageEnvVars(currentStage)
+                        env.RSYNC_PASSWORD = "${env.REAL_RSYNC_PASSWORD}"
 
                         // Set our message topic, properties, and content
                         messageFields = pipelineUtils.setMessageFields("compose.test.integration.running")
 
-                        // Send message org.centos.prod.ci.pipeline.integration.running on fedmsg
+                        // Send message org.centos.prod.ci.pipeline.compose.test.integration.running on fedmsg
                         pipelineUtils.sendMessageWithAudit(messageFields['properties'], messageFields['content'], msgAuditFile)
 
-                        // Provision resources
-                        pipelineUtils.provisionResources(currentStage)
-
-                        // Stage resources - atomic host tests
-                        pipelineUtils.setupStage(currentStage, 'fedora-atomic-key')
-
-                        // Teardown resources
-                        pipelineUtils.teardownResources(currentStage)
+                        // Run integration tests
+                        pipelineUtils.executeInContainer(currentStage, "package-test", "/tmp/integration-test.sh")
 
                         // Set our message topic, properties, and content
                         messageFields = pipelineUtils.setMessageFields("compose.test.integration.complete")
 
+                        // Send message org.centos.prod.ci.pipeline.compose.test.integration.complete on fedmsg
                         pipelineUtils.sendMessageWithAudit(messageFields['properties'], messageFields['content'], msgAuditFile)
                     }
 

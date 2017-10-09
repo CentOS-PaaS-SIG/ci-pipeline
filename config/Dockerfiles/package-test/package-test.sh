@@ -62,7 +62,10 @@ if [[ -z "${RSYNC_USER}" || -z "${RSYNC_SERVER}" || -z "${RSYNC_DIR}" || -z "${R
          RSYNC_BRANCH=rawhide
      fi
      RSYNC_LOCATION="${RSYNC_USER}@${RSYNC_SERVER}::${RSYNC_DIR}/${RSYNC_BRANCH}"
-     rsync --stats -a ${TEST_ARTIFACTS}/* ${RSYNC_LOCATION}/repo/${package}_repo/logs
+     rm -rf tests/package
+     mkdir -p tests/package
+     cp ${TEST_ARTIFACTS}/* tests/package/
+     rsync --stats -arv tests ${RSYNC_LOCATION}/repo/${package}_repo/logs
 }
 trap clean_up EXIT SIGHUP SIGINT SIGTERM
 
