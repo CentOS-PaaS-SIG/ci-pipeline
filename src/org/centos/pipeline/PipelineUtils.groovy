@@ -580,12 +580,6 @@ def provisionResources(String stage){
             "ORIGIN_WORKSPACE=${env.ORIGIN_WORKSPACE}\r\n" +
             "ORIGIN_BUILD_TAG=${env.ORIGIN_BUILD_TAG}\r\n" +
             "ORIGIN_CLASS=${env.ORIGIN_CLASS}"
-
-    job_props = "${env.ORIGIN_WORKSPACE}/job.props"
-    job_props_groovy = "${env.ORIGIN_WORKSPACE}/job.groovy"
-    utils.convertProps(job_props, job_props_groovy)
-    load(job_props_groovy)
-
 }
 
 /**
