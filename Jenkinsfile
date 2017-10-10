@@ -115,8 +115,8 @@ podTemplate(name: podName,
                 containerTemplate(name: 'linchpin-libvirt',
                         alwaysPullImage: true,
                         image: DOCKER_REPO_URL + '/' + OPENSHIFT_NAMESPACE + '/linchpin-libvirt:latest',
-                        ttyEnabled: true,
-                        command: 'cat',
+                        ttyEnabled: false,
+                        command: '',
                         privileged: true,
                         workingDir: '/workDir')
         ],
@@ -418,7 +418,7 @@ podTemplate(name: podName,
                     stage(currentStage) {
                         // run linchpin up and other steps
                         // note: need to be updated
-                        pipelineUtils.executeInContainerNoPrep(currentStage, "linchpin-libvirt", "/tmp/linchpin_workspace/run_e2e_tests.sh")
+                        pipelineUtils.executeInContainerNoPrep(currentStage, "linchpin-libvirt", "/root/linchpin_workspace/run_e2e_tests.sh")
                     }
 
                 } catch (e) {
