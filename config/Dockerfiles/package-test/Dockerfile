@@ -4,7 +4,9 @@ LABEL description="This container is meant to \
 use dist-git tests to test packages, \
 provided a package name and an image to test against. \
 If there are no dist-git tests, it checks \
-upstreamfirst.fedorainfracloud.org."
+upstreamfirst.fedorainfracloud.org. It also can run \
+integration tests from the projectatomic repo by calling \
+the integration-test.sh script."
 
 # Copy restraint repo into container
 RUN curl -o /etc/yum.repos.d/bpeck-restraint-fedora-26.repo https://copr.fedorainfracloud.org/coprs/bpeck/restraint/repo/fedora-26/bpeck-restraint-fedora-26.repo
@@ -17,6 +19,7 @@ RUN for i in {1..5} ; do dnf -y install ansible \
         findutils \
         git \
         restraint-rhts \
+        rsync \
         sudo \
         wget \
         && dnf clean all \
@@ -28,6 +31,7 @@ Run dnf -y install standard-test-roles \
 
 # Copy the build script to the container
 COPY package-test.sh /tmp/package-test.sh
+COPY integration-test.sh /tmp/integration-test.sh
 
 # Run the build script
 ENTRYPOINT ["bash", "/tmp/package-test.sh"]
