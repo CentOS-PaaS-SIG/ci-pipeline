@@ -113,9 +113,9 @@
   delegate_to: 127.0.0.1
   when: item.value.ip is not defined
 
-- name: "wait_for {{ item.value.remoteip | default(ip_address.stdout) }} {{ item.value.sshport | default('22') }}"
+- name: "wait_for {{ item.value.ip | default(ip_address.stdout) }} {{ item.value.sshport | default('22') }}"
   wait_for:
-      host: "{{ item.value.remoteip | default(ip_address.stdout) }}"
+      host: "{{ item.value.ip | default(ip_address.stdout) }}"
       port: "{{ item.value.sshport | default('22') }}"
       state: started
       timeout: 1200
