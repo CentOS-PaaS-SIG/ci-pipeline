@@ -12,8 +12,12 @@ Jenkins.instance.injector.getInstance(AdminWhitelistRule.class).setMasterKillSwi
 Jenkins.instance.save()
 
 logger.info("Setup fedora-fedmsg Messaging Provider")
-FedMsgMessagingProvider fedmsg = new FedMsgMessagingProvider("fedora-fedmsg", "tcp://hub.fedoraproject.org:9940", "tcp://hub.fedoraproject.org:9940", "org.fedoraproject");
+FedMsgMessagingProvider fedmsg = new FedMsgMessagingProvider("fedora-fedmsg", "tcp://hub.fedoraproject.org:9940", "tcp://172.19.4.24:9941", "org.fedoraproject");
 GlobalCIConfiguration.get().addMessageProvider(fedmsg)
+
+logger.info("Setup fedora-fedmsg-stage Messaging Provider")
+FedMsgMessagingProvider fedmsgState = new FedMsgMessagingProvider("fedora-fedmsg-stage", "tcp://stg.fedoraproject.org:9940", "tcp://172.19.4.36:9941", "org.fedoraproject");
+GlobalCIConfiguration.get().addMessageProvider(fedmsgState)
 
 logger.info("Setting Time Zone to be EST")
 System.setProperty('org.apache.commons.jelly.tags.fmt.timeZone', 'America/New_York')
