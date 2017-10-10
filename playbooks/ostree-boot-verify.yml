@@ -7,12 +7,6 @@
       - set_fact:
           real_ansible_host: "{{ ansible_host | default(inventory_hostname) }}"
 
-      - name: Make sure OSTREE_REPO_SERVER is in /etc/hosts
-        lineinfile: >
-            dest=/etc/hosts
-            regexp='^192.168.122.1'
-            line='192.168.122.1 artifacts.ci.centos.org'
-            owner=root group=root mode=0644
       - name: 01 Get rpm-ostree status --json output
         command: rpm-ostree status --json
         register: ros
@@ -47,7 +41,7 @@
       - name: 07 ssh started {{ real_ansible_host }}
         become: false
         wait_for: host={{ real_ansible_host }}
-            port={{ ansible_port }} state=started delay=70 search_regex=OpenSSH
+            port=22 state=started delay=70 search_regex=OpenSSH
         delegate_to: localhost
         when: ros_booted['checksum'] != commit
 
