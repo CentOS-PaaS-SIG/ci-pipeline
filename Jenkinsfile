@@ -16,6 +16,12 @@ env.OPENSHIFT_SERVICE_ACCOUNT = env.OPENSHIFT_SERVICE_ACCOUNT ?: 'jenkins'
 // Audit file for all messages sent.
 msgAuditFile = "messages/message-audit.json"
 
+// Execution ID for this run of the pipeline
+executionID = UUID.randomUUID().toString()
+
+// Pod name to use
+podName = 'fedora-atomic-' + executionID + '-' + TARGET_BRANCH
+
 library identifier: "ci-pipeline@${env.ghprbActualCommit}",
         retriever: modernSCM([$class: 'GitSCMSource',
                               remote: "https://github.com/${env.ghprbGhRepository}",
@@ -59,8 +65,8 @@ properties(
         ]
 )
 
-podTemplate(name: 'fedora-atomic-' + env.ghprbActualCommit,
-            label: 'fedora-atomic-' + env.ghprbActualCommit,
+podTemplate(name: podName,
+            label: podName,
             cloud: 'openshift',
             serviceAccount: OPENSHIFT_SERVICE_ACCOUNT,
             idleMinutes: 0,
@@ -109,7 +115,7 @@ podTemplate(name: 'fedora-atomic-' + env.ghprbActualCommit,
         ],
         volumes: [emptyDirVolume(memory: false, mountPath: '/home/output')])
 {
-    node('fedora-atomic-' + env.ghprbActualCommit) {
+    node(podName) {
 
         def currentStage = ""
 
