@@ -295,44 +295,43 @@ podTemplate(name: 'fedora-atomic-' + env.ghprbActualCommit,
 
                     parallel ostreeImageBootSanity: {
                         currentStage = "ci-pipeline-ostree-image-boot-sanity"
-                        withEnv(pipelineUtils.setStageEnvVars(currentStage, returnEnvList=true)) {
                             stage(currentStage) {
                                 if (fileExists("${env.WORKSPACE}/NeedNewImage.txt") || ("${env.GENERATE_IMAGE}" == "true")) {
-                                    pipelineUtils.setStageEnvVars(currentStage)
+                                    withEnv(pipelineUtils.setStageEnvVars(currentStage, true)) {
 
-                                    // Set our message topic, properties, and content
-                                    messageFields = pipelineUtils.setMessageFields("image.test.smoke.running")
+                                        // Set our message topic, properties, and content
+                                        messageFields = pipelineUtils.setMessageFields("image.test.smoke.running")
 
-                                    // Send message org.centos.prod.ci.pipeline.image.test.smoke.running on fedmsg
-                                    pipelineUtils.sendMessageWithAudit(messageFields['properties'], messageFields['content'], msgAuditFile)
+                                        // Send message org.centos.prod.ci.pipeline.image.test.smoke.running on fedmsg
+                                        pipelineUtils.sendMessageWithAudit(messageFields['properties'], messageFields['content'], msgAuditFile)
 
-                                    // Provision resources
-                                    pipelineUtils.provisionResources(currentStage)
+                                        // Provision resources
+                                        pipelineUtils.provisionResources(currentStage)
 
-                                    // Stage resources - ostree image boot sanity
-                                    pipelineUtils.setupStage(currentStage, 'fedora-atomic-key')
+                                        // Stage resources - ostree image boot sanity
+                                        pipelineUtils.setupStage(currentStage, 'fedora-atomic-key')
 
-                                    // Rsync Data
-                                    pipelineUtils.rsyncData(currentStage)
+                                        // Rsync Data
+                                        pipelineUtils.rsyncData(currentStage)
 
-                                    // Teardown resources
-                                    pipelineUtils.teardownResources(currentStage)
+                                        // Teardown resources
+                                        pipelineUtils.teardownResources(currentStage)
 
-                                    // Set our message topic, properties, and content
-                                    messageFields = pipelineUtils.setMessageFields("image.test.smoke.complete")
+                                        // Set our message topic, properties, and content
+                                        messageFields = pipelineUtils.setMessageFields("image.test.smoke.complete")
 
-                                    // Send message org.centos.prod.ci.pipeline.image.test.smoke.complete on fedmsg
-                                    pipelineUtils.sendMessageWithAudit(messageFields['properties'], messageFields['content'], msgAuditFile)
+                                        // Send message org.centos.prod.ci.pipeline.image.test.smoke.complete on fedmsg
+                                        pipelineUtils.sendMessageWithAudit(messageFields['properties'], messageFields['content'], msgAuditFile)
+                                    }
 
                                 } else {
                                     echo "Not Running Image Boot Sanity on Image"
                                 }
 
                             }
-                        }
                     }, ostreeBootSanity: {
                         currentStage = "ci-pipeline-ostree-boot-sanity"
-                        withEnv(pipelineUtils.setStageEnvVars(currentStage, returnEnvList=true)) {
+                        withEnv(pipelineUtils.setStageEnvVars(currentStage, true)) {
                             stage(currentStage) {
                                 pipelineUtils.setStageEnvVars(currentStage)
 
@@ -357,7 +356,7 @@ podTemplate(name: 'fedora-atomic-' + env.ghprbActualCommit,
                         }
                     }, functionalTests: {
                         currentStage = "ci-pipeline-functional-tests"
-                        withEnv(pipelineUtils.setStageEnvVars(currentStage, returnEnvList=true)) {
+                        withEnv(pipelineUtils.setStageEnvVars(currentStage, true)) {
                             stage(currentStage) {
                                 // Set stage specific vars
                                 pipelineUtils.setStageEnvVars(currentStage)
@@ -387,7 +386,7 @@ podTemplate(name: 'fedora-atomic-' + env.ghprbActualCommit,
                         }
                     }, atomicHostTests: {
                         currentStage = "ci-pipeline-atomic-host-tests"
-                        withEnv(pipelineUtils.setStageEnvVars(currentStage, returnEnvList=true)) {
+                        withEnv(pipelineUtils.setStageEnvVars(currentStage, true)) {
                             stage(currentStage) {
                                 // Set stage specific vars
                                 pipelineUtils.setStageEnvVars(currentStage)
