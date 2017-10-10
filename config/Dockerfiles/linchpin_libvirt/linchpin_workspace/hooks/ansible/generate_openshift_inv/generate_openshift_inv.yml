@@ -4,6 +4,9 @@
   remote_user: root
   become: true
   tasks:
+    - name: "Pause for a while for dhcp to catch up"
+      pause: 
+        minutes: 2
     - name: "cat inventory out generated inventory"
       shell: "cat /root/linchpin_workspace/inventories/libvirt.inventory"
       register: inventory_output
