@@ -85,7 +85,12 @@ if [ ! -e "/home/output/netinst" ]; then
     mkdir -p /home/output/netinst
 fi
 pushd /home/output/netinst
+# First try and download iso from development
 iso=$(wget -c -r -nd -A iso --accept-regex "Fedora-Everything-netinst-.*\.iso" "http://dl.fedoraproject.org/pub/fedora/linux/development/${VERSION}/Everything/x86_64/iso/" 2>&1 | awk '/Saving to: ‘Fedora-Everything-netinst/ { print $3 }' | sed -e 's/^‘//' -e 's/’$//' || true)
+if [ -z "$iso" ]; then
+    # If unable to download from development then try downloading from releases
+    iso=$(wget -c -r -nd -A iso --accept-regex "Fedora-Everything-netinst-.*\.iso" "http://dl.fedoraproject.org/pub/fedora/linux/releases/${VERSION}/Everything/x86_64/iso/" 2>&1 | awk '/Saving to: ‘Fedora-Everything-netinst/ { print $3 }' | sed -e 's/^‘//' -e 's/’$//' || true)
+fi
 if [ -n "$iso" ]; then
     ln -s $iso Fedora-Everything-netinst-x86_64.iso
 fi
