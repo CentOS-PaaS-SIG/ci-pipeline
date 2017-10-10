@@ -472,7 +472,7 @@ def setDefaultEnvVars(Map envMap=null){
  * @param stage - Current stage
  * @return
  */
-def setStageEnvVars(String stage, returnEnvList=false) {
+def setStageEnvVars(String stage, Boolean returnEnvList=false) {
     def stages =
             ["ci-pipeline-rpmbuild"                : [
                     task    : "./ci-pipeline/tasks/rpmbuild-test",
