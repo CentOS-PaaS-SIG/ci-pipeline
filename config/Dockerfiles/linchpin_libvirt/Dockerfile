@@ -65,7 +65,7 @@ RUN ssh-keygen -f /root/.ssh/id_rsa -t rsa -N ''
 RUN printf "Host *\n    StrictHostKeyChecking no" > /root/.ssh/config
 #ADD linchpin_workspace linchpin_workspace
 ADD linchpin_workspace /root/linchpin_workspace
-WORKDIR "/linchpin_workspace/hooks/ansible/"
+WORKDIR "/root/linchpin_workspace/hooks/ansible/"
 RUN git clone -b release-3.6 https://github.com/openshift/openshift-ansible 
 RUN git clone https://github.com/samvarankashyap/paas-sig-ci
 WORKDIR "/tmp/"
@@ -73,6 +73,6 @@ RUN git clone -b libvirt_cloudconfig2 https://github.com/samvarankashyap/linchpi
 WORKDIR "/tmp/linchpin"
 RUN "$PWD/install.sh"
 RUN cd /tmp/linchpin && python /tmp/linchpin/setup.py install
-WORKDIR "/linchpin_workspace/"
+WORKDIR "/root/linchpin_workspace/"
 VOLUME [ "/sys/fs/cgroup", "/var/run/libvirt"]
 CMD ["/usr/sbin/init"]

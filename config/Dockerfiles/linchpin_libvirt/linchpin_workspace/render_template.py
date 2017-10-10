@@ -18,5 +18,5 @@ def write_to_file(tpl_str, dest):
 context = {
     'IMAGE_URL': os.getenv('IMAGE_URL', default="https://pubmirror2.math.uh.edu/fedora-buffet/alt/atomic/stable/Fedora-Atomic-25-20170705.0/CloudImages/x86_64/images/Fedora-Atomic-25-20170705.0.x86_64.qcow2"),
 }
-result = render('/linchpin_workspace/linchpin_templates/example-topology.yml.j2',context)
-write_to_file(result, '/linchpin_workspace/linchpin_workspace/topologies/example-topology.yml')
+result = render('/root/linchpin_workspace/linchpin_templates/example-topology.yml.j2',context)
+write_to_file(result, '/root/linchpin_workspace/linchpin_workspace/topologies/example-topology.yml')
