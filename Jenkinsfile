@@ -11,6 +11,7 @@ env.RSYNC_TAG = env.RSYNC_TAG ?: 'stable'
 env.OSTREE_COMPOSE_TAG = env.OSTREE_COMPOSE_TAG ?: 'stable'
 env.OSTREE_IMAGE_COMPOSE_TAG = env.OSTREE_IMAGE_COMPOSE_TAG ?: 'stable'
 env.SINGLEHOST_TEST_TAG = env.SINGLEHOST_TEST_TAG ?: 'stable'
+env.OSTREE_BOOT_IMAGE_TAG = env.OSTREE_BOOT_IMAGE_TAG ?: 'stable'
 
 env.DOCKER_REPO_URL = env.DOCKER_REPO_URL ?: '172.30.254.79:5000'
 env.OPENSHIFT_NAMESPACE = env.OPENSHIFT_NAMESPACE ?: 'continuous-infra'
@@ -59,6 +60,7 @@ properties(
                                 string(defaultValue: '', description: '', name: 'ghprbPullId'),
                                 string(defaultValue: '', description: '', name: 'ghprbPullAuthorLogin'),
                                 string(defaultValue: 'stable', description: 'Tag for slave image', name: 'SLAVE_TAG'),
+                                string(defaultValue: 'stable', description: 'Tag for ostree boot image', name: 'OSTREE_BOOT_IMAGE_TAG'),
                                 string(defaultValue: 'stable', description: 'Tag for rpmbuild image', name: 'RPMBUILD_TAG'),
                                 string(defaultValue: 'stable', description: 'Tag for rsync image', name: 'RSYNC_TAG'),
                                 string(defaultValue: 'stable', description: 'Tag for ostree-compose image', name: 'OSTREE_COMPOSE_TAG'),
@@ -126,6 +128,13 @@ podTemplate(name: podName,
                         image: DOCKER_REPO_URL + '/' + OPENSHIFT_NAMESPACE + '/singlehost-test:' + SINGLEHOST_TEST_TAG,
                         ttyEnabled: true,
                         command: 'cat',
+                        privileged: true,
+                        workingDir: '/workDir'),
+                containerTemplate(name: 'ostree-boot-image',
+                        alwaysPullImage: true,
+                        image: DOCKER_REPO_URL + '/' + OPENSHIFT_NAMESPACE + '/ostree-boot-image:' + OSTREE_BOOT_IMAGE_TAG,
+                        ttyEnabled: true,
+                        command: '/usr/sbin/init',
                         privileged: true,
                         workingDir: '/workDir')
         ],
@@ -333,17 +342,18 @@ podTemplate(name: podName,
                             // Send message org.centos.prod.ci.pipeline.image.test.smoke.running on fedmsg
                             pipelineUtils.sendMessageWithAudit(messageFields['properties'], messageFields['content'], msgAuditFile, fedmsgRetryCount)
 
-                            // Provision resources
-                            pipelineUtils.provisionResources(currentStage)
+                            // Run ostree boot sanity
+                            env.rsync_paths = "images"
+                            env.rsync_from = "${env.RSYNC_USER}@${env.RSYNC_SERVER}::${env.RSYNC_DIR}/${env.branch}/"
+                            env.rsync_to = "/home/output/"
+                            env.RSYNC_PASSWORD = "${env.REAL_RSYNC_PASSWORD}"
+                            pipelineUtils.executeInContainer(currentStage + "-rsync-before", "rsync", "/tmp/rsync.sh")
 
-                            // Stage resources - ostree image boot sanity
-                            pipelineUtils.setupStage(currentStage, 'fedora-atomic-key')
+                            pipelineUtils.executeInContainer(currentStage, "ostree-boot-image", "/home/ostree-boot-image.sh")
 
-                            // Rsync Data
-                            pipelineUtils.rsyncData(currentStage)
-
-                            // Teardown resources
-                            pipelineUtils.teardownResources(currentStage)
+                            env.rsync_to = "${env.RSYNC_USER}@${env.RSYNC_SERVER}::${env.RSYNC_DIR}/${env.branch}/"
+                            env.rsync_from = "/home/output/"
+                            pipelineUtils.executeInContainer(currentStage + "-rsync-after", "rsync", "/tmp/rsync.sh")
 
                             // Set our message topic, properties, and content
                             messageFields = pipelineUtils.setMessageFields("image.test.smoke.complete")
@@ -361,17 +371,14 @@ podTemplate(name: podName,
                     stage(currentStage) {
                         pipelineUtils.setStageEnvVars(currentStage)
 
-                        // Provision resources
-                        pipelineUtils.provisionResources(currentStage)
+                        // Run ostree boot sanity
+                        env.rsync_paths = "images"
+                        env.rsync_from = "${env.RSYNC_USER}@${env.RSYNC_SERVER}::${env.RSYNC_DIR}/${env.branch}/"
+                        env.rsync_to = "/home/output/"
+                        env.RSYNC_PASSWORD = "${env.REAL_RSYNC_PASSWORD}"
+                        pipelineUtils.executeInContainer(currentStage + "-rsync-before", "rsync", "/tmp/rsync.sh")
 
-                        // Stage resources - ostree boot sanity
-                        pipelineUtils.setupStage(currentStage, 'fedora-atomic-key')
-
-                        // Rsync Data
-                        pipelineUtils.rsyncData(currentStage)
-
-                        // Teardown resources
-                        pipelineUtils.teardownResources(currentStage)
+                        pipelineUtils.executeInContainer(currentStage, "ostree-boot-image", "/home/ostree-boot-image.sh")
 
                         // Set our message topic, properties, and content
                         messageFields = pipelineUtils.setMessageFields("package.test.functional.queued")
