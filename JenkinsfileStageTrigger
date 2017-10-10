@@ -16,7 +16,7 @@ env.ghprbActualCommit = env.ghprbActualCommit ?: 'master'
 
 // If this PR does not include an image change, then use this tag
 STABLE_LABEL = "stable"
-def tagMap = [:]
+tagMap = [:]
 
 // Initialize
 tagMap['jenkins-continuous-infra-slave'] = STABLE_LABEL
@@ -25,9 +25,13 @@ tagMap['rsync'] = STABLE_LABEL
 tagMap['ostree-compose'] = STABLE_LABEL
 tagMap['package-test'] = STABLE_LABEL
 
-// CI_MESSAGE known to build successfully
-//def CANNED_CI_MESSAGE = '{"commit":{"username":"kdudka","stats":{"files":{"curl.spec":{"deletions":1,"additions":8,"lines":9},"0005-curl-7.53.1-CVE-2017-1000254.patch":{"deletions":0,"additions":136,"lines":136}},"total":{"deletions":1,"files":2,"additions":144,"lines":145}},"name":"Kamil Dudka","rev":"d1d232206aed8ef12596ec3939b72a6476845149","namespace":"rpms","agent":"kdudka","summary":"Resolves: CVE-2017-1000254 - fix out of bounds read in FTP PWD response parser","repo":"curl","branch":"f26","seen":false,"path":"/srv/git/repositories/rpms/curl.git","message":"Resolves: CVE-2017-1000254 - fix out of bounds read in FTP PWD response parser\n","email":"kdudka@redhat.com"},"topic":"org.fedoraproject.prod.git.receive"}'
-def CANNED_CI_MESSAGE = '{"commit":{"username":"zdohnal","stats":{"files":{"README.patches":{"deletions":0,"additions":30,"lines":30},"sources":{"deletions":1,"additions":1,"lines":2},"vim.spec":{"deletions":7,"additions":19,"lines":26},".gitignore":{"deletions":0,"additions":1,"lines":1},"vim-8.0-rhbz1365258.patch":{"deletions":0,"additions":12,"lines":12}},"total":{"deletions":8,"files":5,"additions":63,"lines":71}},"name":"Zdenek Dohnal","rev":"3ff427e02625f810a2cedb754342be44d6161b39","namespace":"rpms","agent":"zdohnal","summary":"Merge branch \'f25\' into f26","repo":"vim","branch":"f26","seen":false,"path":"/srv/git/repositories/rpms/vim.git","message":"Merge branch \'f25\' into f26\\n","email":"zdohnal@redhat.com"},"topic":"org.fedoraproject.prod.git.receive"}'
+// CI_MESSAGES known to build successfully
+CANNED_CI_MESSAGES = [:]
+CANNED_CI_MESSAGES['f26'] = '{"commit":{"username":"zdohnal","stats":{"files":{"README.patches":{"deletions":0,"additions":30,"lines":30},"sources":{"deletions":1,"additions":1,"lines":2},"vim.spec":{"deletions":7,"additions":19,"lines":26},".gitignore":{"deletions":0,"additions":1,"lines":1},"vim-8.0-rhbz1365258.patch":{"deletions":0,"additions":12,"lines":12}},"total":{"deletions":8,"files":5,"additions":63,"lines":71}},"name":"Zdenek Dohnal","rev":"3ff427e02625f810a2cedb754342be44d6161b39","namespace":"rpms","agent":"zdohnal","summary":"Merge branch f25 into f26","repo":"vim","branch":"f26","seen":false,"path":"/srv/git/repositories/rpms/vim.git","message":"Merge branch \'f25\' into f26\n","email":"zdohnal@redhat.com"},"topic":"org.fedoraproject.prod.git.receive"}'
+CANNED_CI_MESSAGES['f27'] = '{"commit":{"username":"adrian","stats":{"files":{"criu.spec":{"deletions":0,"additions":5,"lines":5}},"total":{"deletions":0,"files":1,"additions":5,"lines":5}},"name":"Adrian Reber","rev":"386bedee49cb887626140f2c60522751ec620f1d","namespace":"rpms","agent":"adrian","summary":"Adapt ExcludeArch depending on Fedora release","repo":"criu","branch":"f27","seen":false,"path":"/srv/git/repositories/rpms/criu.git","message":"Adapt ExcludeArch depending on Fedora release\\n","email":"adrian@lisas.de"},"topic":"org.fedoraproject.prod.git.receive"}'
+// Specific canned messages
+CANNED_CI_MESSAGE['f26-package-test'] = '{"commit":{"username":"kdudka","stats":{"files":{"curl.spec":{"deletions":1,"additions":8,"lines":9},"0005-curl-7.53.1-CVE-2017-1000254.patch":{"deletions":0,"additions":136,"lines":136}},"total":{"deletions":1,"files":2,"additions":144,"lines":145}},"name":"Kamil Dudka","rev":"d1d232206aed8ef12596ec3939b72a6476845149","namespace":"rpms","agent":"kdudka","summary":"Resolves: CVE-2017-1000254 - fix out of bounds read in FTP PWD response parser","repo":"curl","branch":"f26","seen":false,"path":"/srv/git/repositories/rpms/curl.git","message":"Resolves: CVE-2017-1000254 - fix out of bounds read in FTP PWD response parser\n","email":"kdudka@redhat.com"},"topic":"org.fedoraproject.prod.git.receive"}'
+CANNED_CI_MESSAGE['f27-package-test'] = '{"commit":{"username":"kdudka","stats":{"files":{"curl.spec":{"deletions":4,"additions":11,"lines":15},"0005-curl-7.55.1-CVE-2017-1000254.patch":{"deletions":0,"additions":136,"lines":136}},"total":{"deletions":4,"files":2,"additions":147,"lines":151}},"name":"Kamil Dudka","rev":"9765ef0484ffde44a0104d919799f461b3cb802d","namespace":"rpms","agent":"kdudka","summary":"Resolves: CVE-2017-1000254 - fix out of bounds read in FTP PWD response parser","repo":"curl","branch":"f27","seen":false,"path":"/srv/git/repositories/rpms/curl.git","message":"Resolves: CVE-2017-1000254 - fix out of bounds read in FTP PWD response parser\n","email":"kdudka@redhat.com"},"topic":"org.fedoraproject.prod.git.receive"}'
 
 library identifier: "ci-pipeline@${env.ghprbActualCommit}",
         retriever: modernSCM([$class: 'GitSCMSource',
@@ -117,31 +121,59 @@ pipeline {
             steps {
                 script {
                     tagMap['package-test'] = pipelineUtils.buildImage(openshiftProject, "package-test")
+                    // Map canned message to proper one for testing
+                    CANNED_CI_MESSAGE['f26'] = CANNED_CI_MESSAGE['f26-package-test']
+                    CANNED_CI_MESSAGE['f27'] = CANNED_CI_MESSAGE['f27-package-test']
                 }
             }
         }
-        stage("Run Stage Job") {
+        stage("Image Tag Report") {
             steps {
                 script {
                     // Use tags derived from above image builds
                     //
                     pipelineUtils.printLabelMap(tagMap)
-
-                    def build = build job: 'ci-stage-pipeline-f26',
-                            parameters: [
-                                    string(name: 'CI_MESSAGE', value: CANNED_CI_MESSAGE),
-                                    string(name: 'ghprbActualCommit', value: "${env.ghprbActualCommit}"),
-                                    string(name: 'ghprbGhRepository', value: "${env.ghprbGhRepository}"),
-                                    string(name: 'sha1', value: "${env.sha1}"),
-                                    string(name: 'ghprbPullId', value: "${env.ghprbPullId}"),
-                                    string(name: 'ghprbPullAuthorLogin', value: "${env.ghprbPullAuthorLogin}"),
-                                    string(name: 'SLAVE_TAG', value: tagMap['jenkins-continuous-infra-slave']),
-                                    string(name: 'RPMBUILD_TAG', value: tagMap['rpmbuild']),
-                                    string(name: 'RSYNC_TAG', value: tagMap['rsync']),
-                                    string(name: 'OSTREE_COMPOSE_TAG', value: tagMap['ostree-compose']),
-                                    string(name: 'PACKAGE_TEST_TAG', value: tagMap['package-test'])
-                            ]
-                    wait: true
+                }
+            }
+        }
+        stage("Run Stage Jobs") {
+            failFast true
+            parallel {
+                stage("f26 stage job") {
+                    steps {
+                        build job: 'ci-stage-pipeline-f26',
+                                parameters: [
+                                        string(name: 'CI_MESSAGE', value: CANNED_CI_MESSAGES['f26']),
+                                        string(name: 'ghprbActualCommit', value: "${env.ghprbActualCommit}"),
+                                        string(name: 'ghprbGhRepository', value: "${env.ghprbGhRepository}"),
+                                        string(name: 'TARGET_BRANCH', value: "f26"),
+                                        string(name: 'sha1', value: "${env.sha1}"),
+                                        string(name: 'ghprbPullId', value: "${env.ghprbPullId}"),
+                                        string(name: 'SLAVE_TAG', value: tagMap['jenkins-continuous-infra-slave']),
+                                        string(name: 'RPMBUILD_TAG', value: tagMap['rpmbuild']),
+                                        string(name: 'RSYNC_TAG', value: tagMap['rsync']),
+                                        string(name: 'OSTREE_COMPOSE_TAG', value: tagMap['ostree-compose'])
+                                ],
+                        wait: true
+                    }
+                }
+                stage("f27 stage job") {
+                    steps {
+                        build job: 'ci-stage-pipeline-f27',
+                                parameters: [
+                                        string(name: 'CI_MESSAGE', value: CANNED_CI_MESSAGES['f27']),
+                                        string(name: 'ghprbActualCommit', value: "${env.ghprbActualCommit}"),
+                                        string(name: 'ghprbGhRepository', value: "${env.ghprbGhRepository}"),
+                                        string(name: 'TARGET_BRANCH', value: "f27"),
+                                        string(name: 'sha1', value: "${env.sha1}"),
+                                        string(name: 'ghprbPullId', value: "${env.ghprbPullId}"),
+                                        string(name: 'SLAVE_TAG', value: tagMap['jenkins-continuous-infra-slave']),
+                                        string(name: 'RPMBUILD_TAG', value: tagMap['rpmbuild']),
+                                        string(name: 'RSYNC_TAG', value: tagMap['rsync']),
+                                        string(name: 'OSTREE_COMPOSE_TAG', value: tagMap['ostree-compose'])
+                                ],
+                        wait: true
+                    }
                 }
             }
         }

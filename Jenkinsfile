@@ -2,6 +2,8 @@ env.ghprbGhRepository = env.ghprbGhRepository ?: 'CentOS-PaaS-SIG/ci-pipeline'
 env.ghprbActualCommit = env.ghprbActualCommit ?: 'master'
 env.ghprbPullAuthorLogin = env.ghprbPullAuthorLogin ?: ''
 
+env.TARGET_BRANCH = env.TARGET_BRANCH ?: 'master'
+
 // Needed for podTemplate()
 env.SLAVE_TAG = env.SLAVE_TAG ?: 'stable'
 env.RPMBUILD_TAG = env.RPMBUILD_TAG ?: 'stable'
@@ -15,6 +17,9 @@ env.OPENSHIFT_SERVICE_ACCOUNT = env.OPENSHIFT_SERVICE_ACCOUNT ?: 'jenkins'
 
 // Audit file for all messages sent.
 msgAuditFile = "messages/message-audit.json"
+
+// Pod name to use
+podName = 'fedora-atomic-' + env.ghprbActualCommit + '-' + TARGET_BRANCH
 
 library identifier: "ci-pipeline@${env.ghprbActualCommit}",
         retriever: modernSCM([$class: 'GitSCMSource',
@@ -59,8 +64,8 @@ properties(
         ]
 )
 
-podTemplate(name: 'fedora-atomic-' + env.ghprbActualCommit,
-            label: 'fedora-atomic-' + env.ghprbActualCommit,
+podTemplate(name: podName,
+            label: podName,
             cloud: 'openshift',
             serviceAccount: OPENSHIFT_SERVICE_ACCOUNT,
             idleMinutes: 0,
@@ -109,7 +114,7 @@ podTemplate(name: 'fedora-atomic-' + env.ghprbActualCommit,
         ],
         volumes: [emptyDirVolume(memory: false, mountPath: '/home/output')])
 {
-    node('fedora-atomic-' + env.ghprbActualCommit) {
+    node(podName) {
 
         def currentStage = ""
 
