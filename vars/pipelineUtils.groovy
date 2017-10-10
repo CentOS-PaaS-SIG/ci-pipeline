@@ -82,8 +82,8 @@ class pipelineUtils implements Serializable {
      * @param stage Current stage
      * @return
      */
-    def setStageEnvVars(String stage) {
-        pipelineUtils.setStageEnvVars(stage)
+    def setStageEnvVars(String stage, Boolean returnEnvList) {
+        pipelineUtils.setStageEnvVars(stage, returnEnvList)
     }
 
     /**

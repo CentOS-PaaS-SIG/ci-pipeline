@@ -472,39 +472,39 @@ def setDefaultEnvVars(Map envMap=null){
  * @param stage - Current stage
  * @return
  */
-def setStageEnvVars(String stage){
+def setStageEnvVars(String stage, returnEnvList=false) {
     def stages =
             ["ci-pipeline-rpmbuild"                : [
-                    task                     : "./ci-pipeline/tasks/rpmbuild-test",
-                    playbook                 : "ci-pipeline/playbooks/setup-rpmbuild-system.yml",
-                    ref                      : "fedora/${env.branch}/${env.basearch}/atomic-host",
-                    repo                     : "${env.fed_repo}",
-                    rev                      : "${env.fed_rev}",
+                    task    : "./ci-pipeline/tasks/rpmbuild-test",
+                    playbook: "ci-pipeline/playbooks/setup-rpmbuild-system.yml",
+                    ref     : "fedora/${env.branch}/${env.basearch}/atomic-host",
+                    repo    : "${env.fed_repo}",
+                    rev     : "${env.fed_rev}",
             ],
              "ci-pipeline-ostree-compose"          : [
-                     task                     : "./ci-pipeline/tasks/ostree-compose",
-                     playbook                 : "ci-pipeline/playbooks/rdgo-setup.yml",
-                     ref                      : "fedora/${env.branch}/${env.basearch}/atomic-host",
-                     repo                     : "${env.fed_repo}",
-                     rev                      : "${env.fed_rev}",
-                     basearch                 : "x86_64",
+                     task    : "./ci-pipeline/tasks/ostree-compose",
+                     playbook: "ci-pipeline/playbooks/rdgo-setup.yml",
+                     ref     : "fedora/${env.branch}/${env.basearch}/atomic-host",
+                     repo    : "${env.fed_repo}",
+                     rev     : "${env.fed_rev}",
+                     basearch: "x86_64",
              ],
              "ci-pipeline-ostree-image-compose"    : [
-                     task                     : "./ci-pipeline/tasks/ostree-image-compose",
-                     playbook                 : "ci-pipeline/playbooks/rdgo-setup.yml",
+                     task    : "./ci-pipeline/tasks/ostree-image-compose",
+                     playbook: "ci-pipeline/playbooks/rdgo-setup.yml",
 
              ],
              "ci-pipeline-ostree-image-boot-sanity": [
-                     task                     : "./ci-pipeline/tasks/ostree-image-compose",
-                     playbook                 : "ci-pipeline/playbooks/system-setup.yml",
+                     task    : "./ci-pipeline/tasks/ostree-image-compose",
+                     playbook: "ci-pipeline/playbooks/system-setup.yml",
              ],
              "ci-pipeline-ostree-boot-sanity"      : [
                      task    : "./ci-pipeline/tasks/ostree-boot-image",
                      playbook: "ci-pipeline/playbooks/system-setup.yml",
                      DUFFY_OP: "--allocate"
              ],
-             "ci-pipeline-functional-tests"            : [
-                     package                  : "${env.fed_repo}"
+             "ci-pipeline-functional-tests"        : [
+                     package: "${env.fed_repo}"
              ],
              "ci-pipeline-atomic-host-tests"       : [
                      task    : "./ci-pipeline/tasks/atomic-host-tests",
@@ -512,9 +512,19 @@ def setStageEnvVars(String stage){
              ]
             ]
 
-    // Get the map of env var keys and values and write them to the env global variable
-    stages.get(stage).each { key, value ->
-        env."${key}" = value
+
+    if (returnEnvList == true){
+        // return a list of envVars which can be used with the withEnv DSL call
+        def envList = []
+        stages.get(stage).each { key, value ->
+            envList.add("${key}=${value}")
+        }
+        return envList
+    } else {
+        // Get the map of env var keys and values and write them to the env global variable
+        stages.get(stage).each { key, value ->
+            env."${key}" = value
+        }
     }
 }
 
@@ -580,12 +590,10 @@ def provisionResources(String stage){
             "ORIGIN_WORKSPACE=${env.ORIGIN_WORKSPACE}\r\n" +
             "ORIGIN_BUILD_TAG=${env.ORIGIN_BUILD_TAG}\r\n" +
             "ORIGIN_CLASS=${env.ORIGIN_CLASS}"
-
     job_props = "${env.ORIGIN_WORKSPACE}/job.props"
     job_props_groovy = "${env.ORIGIN_WORKSPACE}/job.groovy"
     utils.convertProps(job_props, job_props_groovy)
     load(job_props_groovy)
-
 }
 
 /**
