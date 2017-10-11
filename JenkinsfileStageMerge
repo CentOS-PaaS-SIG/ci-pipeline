@@ -8,7 +8,7 @@ env.ghprbGhRepository = env.ghprbGhRepository ?: 'CentOS-PaaS-SIG/ci-pipeline'
 env.ghprbActualCommit = env.ghprbActualCommit ?: 'master'
 
 // Add new images here
-imageList = ["jenkins-continuous-infra-slave", "rpmbuild", "ostree-compose", "ostree-image-compose", "rsync", "singlehost-test", "ostree-boot-image"]
+imageList = ["jenkins-continuous-infra-slave", "rpmbuild", "ostree-compose", "ostree-image-compose", "rsync", "singlehost-test", "ostree-boot-image", "linchpin-libvirt"]
 imageOperations = []
 
 library identifier: "ci-pipeline@${env.ghprbActualCommit}",

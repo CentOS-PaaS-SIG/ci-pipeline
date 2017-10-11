@@ -25,11 +25,8 @@ tagMap['rsync'] = STABLE_LABEL
 tagMap['ostree-compose'] = STABLE_LABEL
 tagMap['ostree-image-compose'] = STABLE_LABEL
 tagMap['singlehost-test'] = STABLE_LABEL
-<<<<<<< 37658b15289e634e776c55de4a4539756b7f64d0
 tagMap['ostree-boot-image'] = STABLE_LABEL
-=======
 tagMap['linchpin-libvirt'] = STABLE_LABEL
->>>>>>> Added linchpin-libvirt image to JenkinsfileStageTrigger
 
 // Fedora Fedmsg Message Provider for stage
 MSG_PROVIDER = "fedora-fedmsg-stage"
