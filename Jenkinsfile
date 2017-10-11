@@ -121,7 +121,7 @@ podTemplate(name: podName,
                         workingDir: '/workDir')
         ],
         volumes: [emptyDirVolume(memory: false, mountPath: '/home/output'),
-                  emptyDirVolume(memory: false, mountPath: '/sys/class/net'])
+                  emptyDirVolume(memory: false, mountPath: '/sys/class/net')])
 {
     node(podName) {
 
