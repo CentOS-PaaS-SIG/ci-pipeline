@@ -294,7 +294,7 @@ podTemplate(name: 'fedora-atomic-' + env.ghprbActualCommit,
                     }
 
                     parallel ostreeImageBootSanity: {
-                        withEnv(pipelineUtils.setStageEnvVars(currentStage, true)) {
+                        withEnv(pipelineUtils.setStageEnvVars("ci-pipeline-ostree-image-boot-sanity", true)) {
                             currentStage = "ci-pipeline-ostree-image-boot-sanity"
                             stage(currentStage) {
                                 if (fileExists("${env.WORKSPACE}/NeedNewImage.txt") || ("${env.GENERATE_IMAGE}" == "true")) {
@@ -330,7 +330,7 @@ podTemplate(name: 'fedora-atomic-' + env.ghprbActualCommit,
                             }
                         }
                     }, ostreeBootSanity: {
-                        withEnv(pipelineUtils.setStageEnvVars(currentStage, true)) {
+                        withEnv(pipelineUtils.setStageEnvVars("ci-pipeline-ostree-boot-sanity", true)) {
                             currentStage = "ci-pipeline-ostree-boot-sanity"
                             stage(currentStage) {
                                 pipelineUtils.setStageEnvVars(currentStage)
@@ -355,7 +355,7 @@ podTemplate(name: 'fedora-atomic-' + env.ghprbActualCommit,
                             }
                         }
                     }, functionalTests: {
-                        withEnv(pipelineUtils.setStageEnvVars(currentStage, true)) {
+                        withEnv(pipelineUtils.setStageEnvVars("ci-pipeline-functional-tests", true)) {
                             currentStage = "ci-pipeline-functional-tests"
                             stage(currentStage) {
                                 // Set stage specific vars
@@ -385,7 +385,7 @@ podTemplate(name: 'fedora-atomic-' + env.ghprbActualCommit,
                             }
                         }
                     }, atomicHostTests: {
-                        withEnv(pipelineUtils.setStageEnvVars(currentStage, true)) {
+                        withEnv(pipelineUtils.setStageEnvVars("ci-pipeline-atomic-host-tests", true)) {
                             currentStage = "ci-pipeline-atomic-host-tests"
                             stage(currentStage) {
                                 // Set stage specific vars
