@@ -25,7 +25,11 @@ tagMap['rsync'] = STABLE_LABEL
 tagMap['ostree-compose'] = STABLE_LABEL
 tagMap['ostree-image-compose'] = STABLE_LABEL
 tagMap['singlehost-test'] = STABLE_LABEL
+<<<<<<< 37658b15289e634e776c55de4a4539756b7f64d0
 tagMap['ostree-boot-image'] = STABLE_LABEL
+=======
+tagMap['linchpin-libvirt'] = STABLE_LABEL
+>>>>>>> Added linchpin-libvirt image to JenkinsfileStageTrigger
 
 // Fedora Fedmsg Message Provider for stage
 MSG_PROVIDER = "fedora-fedmsg-stage"
@@ -147,6 +151,7 @@ pipeline {
                 }
             }
         }
+<<<<<<< 37658b15289e634e776c55de4a4539756b7f64d0
         stage("ostree-boot-image image build") {
             when {
                 // Only build if we have related files in changeset
@@ -155,6 +160,16 @@ pipeline {
             steps {
                 script {
                     tagMap['ostree-boot-image'] = pipelineUtils.buildImage(openshiftProject, "ostree-boot-image")
+=======
+        stage("linchpin-libvirt image build") {
+            when {
+                // Only build if we have related files in changeset
+                changeset "config/Dockerfiles/linchpin-libvirt/**"
+            }
+            steps {
+                script {
+                    tagMap['linchpin-libvirt'] = pipelineUtils.buildImage(openshiftProject, "linchpin-libvirt")
+>>>>>>> Added linchpin-libvirt image to JenkinsfileStageTrigger
                 }
             }
         }
@@ -227,7 +242,8 @@ pipeline {
                                         string(name: 'OSTREE_COMPOSE_TAG', value: tagMap['ostree-compose']),
                                         string(name: 'OSTREE_IMAGE_COMPOSE_TAG', value: tagMap['ostree-image-compose']),
                                         string(name: 'SINGLEHOST_TEST_TAG', value: tagMap['singlehost-test']),
-                                        string(name: 'OSTREE_BOOT_IMAGE_TAG', value: tagMap['ostree-boot-image'])
+                                        string(name: 'OSTREE_BOOT_IMAGE_TAG', value: tagMap['ostree-boot-image']),
+                                        string(name: 'LINCHPIN_LIBVIRT_TAG', value: tagMap['linchpin-libvirt'])
                                 ],
                                 wait: true
                     }
