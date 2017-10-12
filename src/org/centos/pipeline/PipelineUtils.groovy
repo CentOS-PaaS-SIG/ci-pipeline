@@ -545,7 +545,8 @@ def rsyncData(String stage){
             "export OSTREE_BRANCH=\"${env.OSTREE_BRANCH}\"\n"
 
     if (stage in ['ci-pipeline-ostree-compose', 'ci-pipeline-ostree-image-compose',
-                         'ci-pipeline-ostree-image-boot-sanity', 'ci-pipeline-ostree-boot-sanity']) {
+                  'ci-pipeline-ostree-image-boot-sanity', 'ci-pipeline-ostree-boot-sanity',
+                  'ci-pipeline-atomic-host-tests']) {
         text = text +
                 "export HTTP_BASE=\"${env.HTTP_BASE}\"\n" +
                 "export PUSH_IMAGE=\"${env.PUSH_IMAGE}\"\n" +
