@@ -398,7 +398,7 @@ podTemplate(name: podName,
                         pipelineUtils.sendMessageWithAudit(messageFields['properties'], messageFields['content'], msgAuditFile)
 
                         // Run integration tests
-                        pipelineUtils.executeInContainer(currentStage, "package-test", "/tmp/integration-test.sh")
+                        //pipelineUtils.executeInContainer(currentStage, "package-test", "/tmp/integration-test.sh")
 
                         // Set our message topic, properties, and content
                         messageFields = pipelineUtils.setMessageFields("compose.test.integration.complete")
