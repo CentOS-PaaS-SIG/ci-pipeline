@@ -558,16 +558,19 @@ def rsyncData(String stage){
                 "export fed_branch=\"${env.fed_branch}\"\n" +
                 "export fed_rev=\"${env.fed_rev}\"\n"
 
-    } else if (stage == 'ci-pipeline-ostree-image-boot-sanity') {
+    }
+    if (stage == 'ci-pipeline-ostree-image-boot-sanity') {
         text = text +
                 "export ANSIBLE_HOST_KEY_CHECKING=\"False\"\n"
-    } else if (stage == 'ci-pipeline-ostree-boot-sanity') {
+    }
+    if (stage == 'ci-pipeline-ostree-boot-sanity') {
         text = text +
                 "export fed_repo=\"${env.fed_repo}\"\n" +
                 "export image2boot=\"${env.image2boot}\"\n" +
                 "export commit=\"${env.commit}\"\n" +
                 "export ANSIBLE_HOST_KEY_CHECKING=\"False\"\n"
-    } else if (stage == 'ci-pipeline-functional-tests') {
+    }
+    if (stage == 'ci-pipeline-functional-tests') {
         text = text +
                 "export package=\"${env.fed_repo}\"\n"
     }
