@@ -340,6 +340,7 @@ podTemplate(name: podName,
                             currentStage = "ci-pipeline-ostree-boot-sanity"
                             stage(currentStage) {
                                 pipelineUtils.setStageEnvVars(currentStage)
+                                env.RSYNC_PASSWORD = env.REAL_RSYNC_PASSWORD
 
                                 // Provision resources
                                 pipelineUtils.provisionResources(currentStage)
