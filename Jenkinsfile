@@ -7,7 +7,7 @@ env.SLAVE_TAG = env.SLAVE_TAG ?: 'stable'
 env.RPMBUILD_TAG = env.RPMBUILD_TAG ?: 'stable'
 env.RSYNC_TAG = env.RSYNC_TAG ?: 'stable'
 env.OSTREE_COMPOSE_TAG = env.OSTREE_COMPOSE_TAG ?: 'stable'
-env.PACKAGE_TEST_TAG = env.PACKAGE_TEST_TAG ?: 'stable'
+env.SINGLEHOST_TEST_TAG = env.SINGLEHOST_TEST_TAG ?: 'stable'
 
 env.DOCKER_REPO_URL = env.DOCKER_REPO_URL ?: '172.30.254.79:5000'
 env.OPENSHIFT_NAMESPACE = env.OPENSHIFT_NAMESPACE ?: 'continuous-infra'
@@ -55,7 +55,7 @@ properties(
                                 string(defaultValue: 'stable', description: 'Tag for rpmbuild image', name: 'RPMBUILD_TAG'),
                                 string(defaultValue: 'stable', description: 'Tag for rsync image', name: 'RSYNC_TAG'),
                                 string(defaultValue: 'stable', description: 'Tag for ostree-compose image', name: 'OSTREE_COMPOSE_TAG'),
-                                string(defaultValue: 'stable', description: 'Tag for package test image', name: 'PACKAGE_TEST_TAG'),
+                                string(defaultValue: 'stable', description: 'Tag for singlehost test image', name: 'SINGLEHOST_TEST_TAG'),
                                 string(defaultValue: '172.30.254.79:5000', description: 'Docker repo url for Openshift instance', name: 'DOCKER_REPO_URL'),
                                 string(defaultValue: 'continuous-infra', description: 'Project namespace for Openshift operations', name: 'OPENSHIFT_NAMESPACE'),
                                 string(defaultValue: 'jenkins', description: 'Service Account for Openshift operations', name: 'OPENSHIFT_SERVICE_ACCOUNT'),
@@ -105,9 +105,9 @@ podTemplate(name: podName,
                         privileged: true,
                         workingDir: '/workDir'),
                 // This adds the package test container to the pod.
-                containerTemplate(name: 'package-test',
+                containerTemplate(name: 'singlehost-test',
                         alwaysPullImage: true,
-                        image: DOCKER_REPO_URL + '/' + OPENSHIFT_NAMESPACE + '/package-test:' + PACKAGE_TEST_TAG,
+                        image: DOCKER_REPO_URL + '/' + OPENSHIFT_NAMESPACE + '/singlehost-test:' + SINGLEHOST_TEST_TAG,
                         ttyEnabled: true,
                         command: 'cat',
                         privileged: true,
@@ -370,7 +370,7 @@ podTemplate(name: podName,
                         pipelineUtils.sendMessage(messageFields['properties'], messageFields['content'])
 
                         // Run functional tests
-                        pipelineUtils.executeInContainer(currentStage, "package-test", "/tmp/package-test.sh")
+                        pipelineUtils.executeInContainer(currentStage, "singlehost-test", "/tmp/package-test.sh")
 
                         // Set our message topic, properties, and content
                         messageFields = pipelineUtils.setMessageFields("package.test.functional.complete")
@@ -398,7 +398,7 @@ podTemplate(name: podName,
                         pipelineUtils.sendMessageWithAudit(messageFields['properties'], messageFields['content'], msgAuditFile)
 
                         // Run integration tests
-                        pipelineUtils.executeInContainer(currentStage, "package-test", "/tmp/integration-test.sh")
+                        pipelineUtils.executeInContainer(currentStage, "singlehost-test", "/tmp/integration-test.sh")
 
                         // Set our message topic, properties, and content
                         messageFields = pipelineUtils.setMessageFields("compose.test.integration.complete")

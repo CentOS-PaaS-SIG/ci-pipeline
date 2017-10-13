@@ -6,7 +6,7 @@ oc create -f rpmbuild/rpmbuild-buildconfig-template.yaml
 oc create -f rpmbuild/rsync-buildconfig-template.yaml
 oc create -f ostree_compose/ostree_compose-buildconfig-template.yaml
 oc create -f ostree_compose/ostree_image_compose-buildconfig-template.yaml
-oc create -f package-test/package-test-buildconfig-template.yaml
+oc create -f singlehost-test/singlehost-test-buildconfig-template.yaml
 ##
 if [ -z "${REPO_URL}" ] ; then
   REPO_URL_PARAM=""
@@ -23,5 +23,5 @@ oc new-app rpmbuild-builder ${REPO_URL_PARAM} ${REPO_REF_PARAM}
 oc new-app rsync-builder ${REPO_URL_PARAM} ${REPO_REF_PARAM}
 oc new-app ostree-compose-builder ${REPO_URL_PARAM} ${REPO_REF_PARAM}
 oc new-app ostree-image-compose-builder ${REPO_URL_PARAM} ${REPO_REF_PARAM}
-oc new-app package-test-builder ${REPO_URL_PARAM} ${REPO_REF_PARAM}
+oc new-app singlehost-test-builder ${REPO_URL_PARAM} ${REPO_REF_PARAM}
 ##
