@@ -52,7 +52,7 @@ RC=0
 for test in $ENABLED_TESTS; do
 	ansible-playbook -v --inventory=$ANSIBLE_INVENTORY \
 		--extra-vars "subjects=$TEST_SUBJECTS" \
-		tests/${test}/main.yml > ${TEST_ARTIFACTS}/${test}.log
+		tests/${test}/main.yml |& tee -a ${TEST_ARTIFACTS}/${test}.log
         if [ $? -ne 0 ]; then
 		RC=1
 	fi
