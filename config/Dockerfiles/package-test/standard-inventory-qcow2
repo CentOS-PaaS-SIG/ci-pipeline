@@ -1,0 +1,246 @@
+#!/usr/bin/env python
+
+import argparse
+import errno
+import json
+import os
+import shutil
+import shlex
+import signal
+import socket
+import subprocess
+import sys
+import tempfile
+import time
+import traceback
+import distutils.util
+
+IDENTITY = """
+-----BEGIN RSA PRIVATE KEY-----
+MIIEpQIBAAKCAQEA1DrTSXQRF8isQQfPfK3U+eFC4zBrjur+Iy15kbHUYUeSHf5S
+jXPYbHYqD1lHj4GJajC9okle9rykKFYZMmJKXLI6987wZ8vfucXo9/kwS6BDAJto
+ZpZSj5sWCQ1PI0Ce8CbkazlTp5NIkjRfhXGP8mkNKMEhdNjaYceO49ilnNCIxhpb
+eH5dH5hybmQQNmnzf+CGCCLBFmc4g3sFbWhI1ldyJzES5ZX3ahjJZYRUfnndoUM/
+TzdkHGqZhL1EeFAsv5iV65HuYbchch4vBAn8jDMmHh8G1ixUCL3uAlosfarZLLyo
+3HrZ8U/llq7rXa93PXHyI/3NL/2YP3OMxE8baQIDAQABAoIBAQCxuOUwkKqzsQ9W
+kdTWArfj3RhnKigYEX9qM+2m7TT9lbKtvUiiPc2R3k4QdmIvsXlCXLigyzJkCsqp
+IJiPEbJV98bbuAan1Rlv92TFK36fBgC15G5D4kQXD/ce828/BSFT2C3WALamEPdn
+v8Xx+Ixjokcrxrdeoy4VTcjB0q21J4C2wKP1wEPeMJnuTcySiWQBdAECCbeZ4Vsj
+cmRdcvL6z8fedRPtDW7oec+IPkYoyXPktVt8WsQPYkwEVN4hZVBneJPCcuhikYkp
+T3WGmPV0MxhUvCZ6hSG8D2mscZXRq3itXVlKJsUWfIHaAIgGomWrPuqC23rOYCdT
+5oSZmTvFAoGBAPs1FbbxDDd1fx1hisfXHFasV/sycT6ggP/eUXpBYCqVdxPQvqcA
+ktplm5j04dnaQJdHZ8TPlwtL+xlWhmhFhlCFPtVpU1HzIBkp6DkSmmu0gvA/i07Z
+pzo5Z+HRZFzruTQx6NjDtvWwiXVLwmZn2oiLeM9xSqPu55OpITifEWNjAoGBANhH
+XwV6IvnbUWojs7uiSGsXuJOdB1YCJ+UF6xu8CqdbimaVakemVO02+cgbE6jzpUpo
+krbDKOle4fIbUYHPeyB0NMidpDxTAPCGmiJz7BCS1fCxkzRgC+TICjmk5zpaD2md
+HCrtzIeHNVpTE26BAjOIbo4QqOHBXk/WPen1iC3DAoGBALsD3DSj46puCMJA2ebI
+2EoWaDGUbgZny2GxiwrvHL7XIx1XbHg7zxhUSLBorrNW7nsxJ6m3ugUo/bjxV4LN
+L59Gc27ByMvbqmvRbRcAKIJCkrB1Pirnkr2f+xx8nLEotGqNNYIawlzKnqr6SbGf
+Y2wAGWKmPyEoPLMLWLYkhfdtAoGANsFa/Tf+wuMTqZuAVXCwhOxsfnKy+MNy9jiZ
+XVwuFlDGqVIKpjkmJyhT9KVmRM/qePwgqMSgBvVOnszrxcGRmpXRBzlh6yPYiQyK
+2U4f5dJG97j9W7U1TaaXcCCfqdZDMKnmB7hMn8NLbqK5uLBQrltMIgt1tjIOfofv
+BNx0raECgYEApAvjwDJ75otKz/mvL3rUf/SNpieODBOLHFQqJmF+4hrSOniHC5jf
+f5GS5IuYtBQ1gudBYlSs9fX6T39d2avPsZjfvvSbULXi3OlzWD8sbTtvQPuCaZGI
+Df9PUWMYZ3HRwwdsYovSOkT53fG6guy+vElUEDkrpZYczROZ6GUcx70=
+-----END RSA PRIVATE KEY-----
+"""
+
+USER_DATA = """#cloud-config
+users:
+  - default
+  - name: root
+    ssh_authorized_keys:
+      - ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQDUOtNJdBEXyKxBB898rdT54ULjMGuO6v4jLXmRsdRhR5Id/lKNc9hsdioPWUePgYlqML2iSV72vKQoVhkyYkpcsjr3zvBny9+5xej3+TBLoEMAm2hmllKPmxYJDU8jQJ7wJuRrOVOnk0iSNF+FcY/yaQ0owSF02Nphx47j2KWc0IjGGlt4fl0fmHJuZBA2afN/4IYIIsEWZziDewVtaEjWV3InMRLllfdqGMllhFR+ed2hQz9PN2QcapmEvUR4UCy/mJXrke5htyFyHi8ECfyMMyYeHwbWLFQIve4CWix9qtksvKjcetnxT+WWrutdr3c9cfIj/c0v/Zg/c4zETxtp standard-test-qcow2
+ssh_pwauth: True
+chpasswd:
+  list: |
+    root:foobar
+  expire: False
+"""
+
+def main(argv):
+    parser = argparse.ArgumentParser(description="Inventory for a QCow2 test image")
+    parser.add_argument("--list", action="store_true", help="Verbose output")
+    parser.add_argument('--host', help="Get host variables")
+    parser.add_argument("subjects", nargs="*", default=shlex.split(os.environ.get("TEST_SUBJECTS", "")))
+    opts = parser.parse_args()
+
+    try:
+        if opts.host:
+            data = host(opts.host)
+        else:
+            data = list(opts.subjects)
+        sys.stdout.write(json.dumps(data, indent=4, separators=(',', ': ')))
+    except RuntimeError, ex:
+        sys.stderr.write("{0}: {1}\n".format(os.path.basename(sys.argv[0]), str(ex)))
+        return 1
+
+    return 0
+
+def list(subjects):
+    hosts = [ ]
+    variables = { }
+    for subject in subjects:
+        if subject.endswith(".qcow2"):
+            sys.stderr.write("calling host\n")
+            vars = host(subject)
+            if vars:
+                hosts.append(subject)
+                variables[subject] = vars
+    return { "localhost": { "hosts": hosts, "vars": { } }, "subjects": { "hosts": hosts, "vars": { } }, "_meta": { "hostvars": variables } }
+
+def host(image):
+    null = open(os.devnull, 'w')
+
+    # No name specified, find a port to use
+    for port in range(2222, 5000):
+        sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+        try:
+            sock.bind(("127.0.0.3", port))
+        except IOError:
+            pass
+        else:
+            break
+        finally:
+            sock.close()
+    else:
+        raise RuntimeError("unable to find free local port to map SSH to")
+
+    try:
+        tty = os.open("/dev/tty", os.O_WRONLY)
+        os.dup2(tty, 2)
+    except OSError:
+        tty = None
+        pass
+
+    # A directory for temporary stuff
+    directory = tempfile.mkdtemp(prefix="inventory-cloud")
+    identity = os.path.join(directory, "identity")
+    with open(identity, 'w') as f:
+        f.write(IDENTITY)
+    os.chmod(identity, 0600)
+    metadata = os.path.join(directory, "meta-data")
+    with open(metadata, 'w') as f:
+        f.write("")
+    userdata = os.path.join(directory, "user-data")
+    with open(userdata, 'w') as f:
+        f.write(USER_DATA)
+
+    # Create our cloud init so we can log in
+    cloudinit = os.path.join(directory, "cloud-init.iso")
+    subprocess.check_call(["/usr/bin/genisoimage", "-input-charset", "utf-8",
+                           "-volid", "cidata", "-joliet", "-rock", "-quiet",
+                           "-output", cloudinit, userdata, metadata], stdout=null)
+
+    # Determine if virtual machine should be kept available for diagnosis after completion
+    try:
+        diagnose = distutils.util.strtobool(os.getenv("TEST_DEBUG", "0"))
+    except ValueError:
+        diagnose = 0
+
+    sys.stderr.write("Launching virtual machine for {0}\n".format(image))
+
+    # And launch the actual VM
+    artifacts = os.environ.get("TEST_ARTIFACTS", os.path.join(os.getcwd(), "artifacts"))
+    try:
+        os.makedirs(artifacts)
+    except OSError as exc:
+        if exc.errno != errno.EEXIST or not os.path.isdir(artifacts):
+            raise
+    log = os.path.join(artifacts, "{0}.log".format(os.path.basename(image)))
+    proc = subprocess.Popen(["/usr/bin/qemu-system-x86_64", "-m", "1024", image,
+        "-enable-kvm", "-snapshot", "-cdrom", cloudinit,
+	"-net", "nic,model=virtio", "-net", "user,hostfwd=tcp:127.0.0.3:{0}-:22".format(port),
+	"-device", "isa-serial,chardev=pts2", "-chardev", "file,id=pts2,path=" + log,
+    "-display", "none"], stdout=open(log, 'a'), stderr=subprocess.STDOUT)
+
+    # The variables
+    variables = {
+        "ansible_ssh_port": "{0}".format(port),
+        "ansible_ssh_host": "127.0.0.3",
+        "ansible_ssh_user": "root",
+        "ansible_ssh_pass": "foobar",
+        "ansible_ssh_private_key_file": identity,
+        "ansible_ssh_common_args": "-o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no"
+    }
+
+    # wait for ssh to come up
+    args = " ".join([ "{0}='{1}'".format(*item) for item in variables.items() ])
+    inventory = os.path.join(directory, "inventory")
+    with open(inventory, "w") as f:
+        f.write("{0} {1}\n".format(image, args))
+
+    ping = [
+        "/usr/bin/ansible",
+        "--inventory",
+        inventory,
+        image,
+        "--module-name",
+        "ping"
+    ]
+
+    for tries in range(0, 30):
+        try:
+            (pid, ret) = os.waitpid(proc.pid, os.WNOHANG)
+            if pid != 0:
+                raise RuntimeError("qemu failed to launch qcow2 image: {0}".format(image))
+            subprocess.check_call(ping, stdout=null, stderr=null)
+            break
+        except subprocess.CalledProcessError:
+            time.sleep(3)
+    else:
+        raise RuntimeError("could not access launched qcow2 image: {0}".format(image))
+
+    # Process of our parent
+    ppid = os.getppid()
+
+    child = os.fork()
+    if child:
+        return variables
+
+    # Daemonize and watch the processes
+    os.chdir("/")
+    os.setsid()
+    os.umask(0)
+
+    if tty is None:
+        tty = null.fileno()
+
+    # Duplicate standard input to standard output and standard error.
+    os.dup2(null.fileno(), 0)
+    os.dup2(tty, 1)
+    os.dup2(tty, 2)
+
+    # Now wait for the parent process to go away, then kill the VM
+    while True:
+        time.sleep(3)
+
+        try:
+            os.kill(ppid, 0)
+            os.kill(proc.pid, 0)
+        except OSError:
+            break # Either of the processes no longer exist
+
+    if diagnose:
+        sys.stderr.write("\n")
+        sys.stderr.write("DIAGNOSE: ssh -p {0} -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null root@{1} # password: {2}\n".format(port, "127.0.0.3", "foobar"))
+        sys.stderr.write("DIAGNOSE: kill {0} # when finished\n".format(os.getpid()))
+
+        def _signal_handler(*args):
+            sys.stderr.write("\nDIAGNOSE ending...\n")
+
+        signal.signal(signal.SIGTERM, _signal_handler)
+        signal.pause()
+
+    # Kill the qemu process
+    try:
+        os.kill(proc.pid, signal.SIGTERM)
+    except OSError:
+        pass
+
+    shutil.rmtree(directory)
+    sys.exit(0)
+
+if __name__ == '__main__':
+    sys.exit(main(sys.argv))
