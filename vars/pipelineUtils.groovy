@@ -54,10 +54,11 @@ class pipelineUtils implements Serializable {
      * @param msgProps The message properties in key=value form, one key/value per line ending in '\n'
      * @param msgContent Message content.
      * @param msgAuditFile - File containing all past messages. It will get appended to.
+     * @param fedmsgRetryCount number of times to keep trying.
      * @return
      */
-    def sendMessageWithAudit(String msgProps, String msgContent, String msgAuditFile) {
-        pipelineUtils.sendMessageWithAudit(msgProps, msgContent, msgAuditFile)
+    def sendMessageWithAudit(String msgProps, String msgContent, String msgAuditFile, fedmsgRetryCount) {
+        pipelineUtils.sendMessageWithAudit(msgProps, msgContent, msgAuditFile, fedmsgRetryCount)
     }
 
     /**
@@ -200,13 +201,14 @@ class pipelineUtils implements Serializable {
         pipelineUtils.updateBuildDisplayAndDescription()
     }
 
-    /**
-     * Check data grepper for presence of a message
-     * @param messageID message ID to track.
-     * @return
-     */
-    def trackMessage(String messageID) {
-        pipelineUtils.trackMessage(messageID)
+/**
+ * Check data grepper for presence of a message
+ * @param messageID message ID to track.
+ * @param retryCount number of times to keep trying.
+ * @return
+ */
+    def trackMessage(String messageID, int retryCount) {
+        pipelineUtils.trackMessage(messageID, retryCount)
     }
 
     /**

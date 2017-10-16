@@ -287,9 +287,10 @@ def sendMessage(String msgProps, String msgContent) {
  * @param msgProps - The message properties in key=value form, one key/value per line ending in '\n'
  * @param msgContent - Message content.
  * @param msgAuditFile - File containing all past messages. It will get appended to.
+ * @param fedmsgRetryCount number of times to keep trying.
  * @return
  */
-def sendMessageWithAudit(String msgProps, String msgContent, String msgAuditFile) {
+def sendMessageWithAudit(String msgProps, String msgContent, String msgAuditFile, fedmsgRetryCount) {
     // Get contents of auditFile
     auditContent = readJSON file: msgAuditFile
 
@@ -306,7 +307,7 @@ def sendMessageWithAudit(String msgProps, String msgContent, String msgAuditFile
 
     archiveArtifacts allowEmptyArchive: false, artifacts: msgAuditFile
 
-    trackMessage(id)
+    trackMessage(id, fedmsgRetryCount)
 }
 
 /**
@@ -325,10 +326,11 @@ def initializeAuditFile(String auditFile) {
 /**
  * Check data grepper for presence of a message
  * @param messageID message ID to track.
+ * @param retryCount number of times to keep trying.
  * @return
  */
-def trackMessage(String messageID) {
-    retry(10) {
+def trackMessage(String messageID, int retryCount) {
+    retry(retryCount) {
         echo "Checking datagrapper for presence of message..."
         sh "curl --silent --show-error --fail \'${env.dataGrepperUrl}/id?id=${messageID}&chrome=false&is_raw=false\'"
         echo "found!"
