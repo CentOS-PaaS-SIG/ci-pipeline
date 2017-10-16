@@ -43,8 +43,9 @@ fi
 # The specification requires us to invoke the tests in the checkout directory
 pushd ${package}
 
-# Check out the appropriate branch
+# Check out the appropriate branch and rev
 git checkout ${branch}
+git checkout ${rev}
 
 # Check if there is a tests dir from dist-git, if not, exit
 if [ -d tests ]; then
