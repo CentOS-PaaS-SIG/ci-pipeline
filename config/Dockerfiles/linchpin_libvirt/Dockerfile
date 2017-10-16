@@ -27,6 +27,7 @@ echo 'auth_tcp = "none"' >> /etc/libvirt/libvirtd.conf
 
 RUN echo 'LIBVIRTD_ARGS="--listen"' >> /etc/sysconfig/libvirtd
 RUN mkdir -p /var/lib/libvirt/images/
+RUN mkdir -p /var/lib/libvirt/images/linchpin/
 
 # Edit the service file which includes ExecStartPost to chmod /dev/kvm
 RUN sed -i "/Service/a ExecStartPost=\/bin\/chmod 666 /dev/kvm" /usr/lib/systemd/system/libvirtd.service
