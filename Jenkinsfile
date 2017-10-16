@@ -16,6 +16,10 @@ env.OPENSHIFT_SERVICE_ACCOUNT = env.OPENSHIFT_SERVICE_ACCOUNT ?: 'jenkins'
 // Audit file for all messages sent.
 msgAuditFile = "messages/message-audit.json"
 
+// Number of times to keep retrying to make sure message is ingested
+// by datagrepper
+fedmsgRetryCount = 120
+
 // Execution ID for this run of the pipeline
 executionID = UUID.randomUUID().toString()
 
@@ -184,7 +188,7 @@ podTemplate(name: podName,
                         messageFields = pipelineUtils.setMessageFields("package.running")
 
                         // Send message org.centos.prod.ci.pipeline.package.running on fedmsg
-                        pipelineUtils.sendMessageWithAudit(messageFields['properties'], messageFields['content'], msgAuditFile)
+                        pipelineUtils.sendMessageWithAudit(messageFields['properties'], messageFields['content'], msgAuditFile, fedmsgRetryCount)
 
                         // Execute rpmbuild-test script in rpmbuild container
                         pipelineUtils.executeInContainer(currentStage, "rpmbuild", "/tmp/rpmbuild-test.sh")
@@ -200,7 +204,7 @@ podTemplate(name: podName,
                         messageFields = pipelineUtils.setMessageFields("package.complete")
 
                         // Send message org.centos.prod.ci.pipeline.package.complete on fedmsg
-                        pipelineUtils.sendMessageWithAudit(messageFields['properties'], messageFields['content'], msgAuditFile)
+                        pipelineUtils.sendMessageWithAudit(messageFields['properties'], messageFields['content'], msgAuditFile, fedmsgRetryCount)
                     }
 
                     currentStage = "ci-pipeline-ostree-compose"
@@ -212,7 +216,7 @@ podTemplate(name: podName,
                         messageFields = pipelineUtils.setMessageFields("compose.running")
 
                         // Send message org.centos.prod.ci.pipeline.compose.running on fedmsg
-                        pipelineUtils.sendMessageWithAudit(messageFields['properties'], messageFields['content'], msgAuditFile)
+                        pipelineUtils.sendMessageWithAudit(messageFields['properties'], messageFields['content'], msgAuditFile, fedmsgRetryCount)
 
                         // Execute in containers
                         env.rsync_paths = "ostree"
@@ -241,7 +245,7 @@ podTemplate(name: podName,
                         messageFields = pipelineUtils.setMessageFields("compose.complete")
 
                         // Send message org.centos.prod.ci.pipeline.compose.complete on fedmsg
-                        pipelineUtils.sendMessageWithAudit(messageFields['properties'], messageFields['content'], msgAuditFile)
+                        pipelineUtils.sendMessageWithAudit(messageFields['properties'], messageFields['content'], msgAuditFile, fedmsgRetryCount)
 
                         pipelineUtils.checkLastImage(currentStage)
                     }
@@ -262,7 +266,7 @@ podTemplate(name: podName,
                             messageFields = pipelineUtils.setMessageFields("image.running")
 
                             // Send message org.centos.prod.ci.pipeline.image.running on fedmsg
-                            pipelineUtils.sendMessageWithAudit(messageFields['properties'], messageFields['content'], msgAuditFile)
+                            pipelineUtils.sendMessageWithAudit(messageFields['properties'], messageFields['content'], msgAuditFile, fedmsgRetryCount)
                         }
 
                         // Provision resources
@@ -292,7 +296,7 @@ podTemplate(name: podName,
                             messageFields = pipelineUtils.setMessageFields("image.complete")
 
                             // Send message org.centos.prod.ci.pipeline.image.complete on fedmsg
-                            pipelineUtils.sendMessageWithAudit(messageFields['properties'], messageFields['content'], msgAuditFile)
+                            pipelineUtils.sendMessageWithAudit(messageFields['properties'], messageFields['content'], msgAuditFile, fedmsgRetryCount)
 
                         } else {
                             echo "Not Pushing a New Image"
@@ -308,7 +312,7 @@ podTemplate(name: podName,
                             messageFields = pipelineUtils.setMessageFields("image.test.smoke.running")
 
                             // Send message org.centos.prod.ci.pipeline.image.test.smoke.running on fedmsg
-                            pipelineUtils.sendMessageWithAudit(messageFields['properties'], messageFields['content'], msgAuditFile)
+                            pipelineUtils.sendMessageWithAudit(messageFields['properties'], messageFields['content'], msgAuditFile, fedmsgRetryCount)
 
                             // Provision resources
                             pipelineUtils.provisionResources(currentStage)
@@ -326,7 +330,7 @@ podTemplate(name: podName,
                             messageFields = pipelineUtils.setMessageFields("image.test.smoke.complete")
 
                             // Send message org.centos.prod.ci.pipeline.image.test.smoke.complete on fedmsg
-                            pipelineUtils.sendMessageWithAudit(messageFields['properties'], messageFields['content'], msgAuditFile)
+                            pipelineUtils.sendMessageWithAudit(messageFields['properties'], messageFields['content'], msgAuditFile, fedmsgRetryCount)
 
                         } else {
                             echo "Not Running Image Boot Sanity on Image"
@@ -354,7 +358,7 @@ podTemplate(name: podName,
                         messageFields = pipelineUtils.setMessageFields("package.test.functional.queued")
 
                         // Send message org.centos.prod.ci.pipeline.package.test.functional.queued on fedmsg
-                        pipelineUtils.sendMessage(messageFields['properties'], messageFields['content'])
+                        pipelineUtils.sendMessageWithAudit(messageFields['properties'], messageFields['content'], msgAuditFile, fedmsgRetryCount)
                     }
 
                     currentStage = "ci-pipeline-functional-tests"
@@ -382,7 +386,7 @@ podTemplate(name: podName,
                         messageFields = pipelineUtils.setMessageFields("compose.test.integration.queued")
 
                         // Send message org.centos.prod.ci.pipeline.compose.test.integration.queued on fedmsg
-                        pipelineUtils.sendMessageWithAudit(messageFields['properties'], messageFields['content'], msgAuditFile)
+                        pipelineUtils.sendMessageWithAudit(messageFields['properties'], messageFields['content'], msgAuditFile, fedmsgRetryCount)
                     }
 
                     currentStage = "ci-pipeline-atomic-host-tests"
@@ -395,7 +399,7 @@ podTemplate(name: podName,
                         messageFields = pipelineUtils.setMessageFields("compose.test.integration.running")
 
                         // Send message org.centos.prod.ci.pipeline.compose.test.integration.running on fedmsg
-                        pipelineUtils.sendMessageWithAudit(messageFields['properties'], messageFields['content'], msgAuditFile)
+                        pipelineUtils.sendMessageWithAudit(messageFields['properties'], messageFields['content'], msgAuditFile, fedmsgRetryCount)
 
                         // Run integration tests
                         pipelineUtils.executeInContainer(currentStage, "singlehost-test", "/tmp/integration-test.sh")
@@ -404,7 +408,8 @@ podTemplate(name: podName,
                         messageFields = pipelineUtils.setMessageFields("compose.test.integration.complete")
 
                         // Send message org.centos.prod.ci.pipeline.compose.test.integration.complete on fedmsg
-                        pipelineUtils.sendMessageWithAudit(messageFields['properties'], messageFields['content'], msgAuditFile)
+                        pipelineUtils.sendMessageWithAudit(messageFields['properties'], messageFields['content'], msgAuditFile, fedmsgRetryCount)
+
                     }
 
                 } catch (e) {
@@ -432,7 +437,7 @@ podTemplate(name: podName,
                     messageFields = pipelineUtils.setMessageFields("complete")
 
                     // Send message org.centos.prod.ci.pipeline.complete on fedmsg
-                    pipelineUtils.sendMessageWithAudit(messageFields['properties'], messageFields['content'], msgAuditFile)
+                    pipelineUtils.sendMessageWithAudit(messageFields['properties'], messageFields['content'], msgAuditFile, fedmsgRetryCount)
 
                 }
             }
