@@ -20,8 +20,8 @@ RUN yum -y install dnsmasq libvirt-daemon-driver-* libvirt-daemon \
 
 RUN git clone https://github.com/CentOS-PaaS-SIG/ci-pipeline
 
-COPY ostree-image-compose.sh $HOME/ci-pipeline/
+COPY ostree-image-compose.sh /tmp/ostree-image-compose.sh
 
 VOLUME [ "/sys/fs/cgroup" ]
 
-ENTRYPOINT ["bash", "/root/ci-pipeline/ostree-image-compose.sh"]
+ENTRYPOINT ["bash", "/tmp/ostree-image-compose.sh"]

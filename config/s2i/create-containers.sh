@@ -3,9 +3,9 @@ set -x
 ##
 oc project continuous-infra
 oc create -f rpmbuild/rpmbuild-buildconfig-template.yaml
-oc create -f rpmbuild/rsync-buildconfig-template.yaml
+oc create -f rsync/rsync-buildconfig-template.yaml
 oc create -f ostree_compose/ostree_compose-buildconfig-template.yaml
-oc create -f ostree_compose/ostree_image_compose-buildconfig-template.yaml
+oc create -f ostree-image-compose/ostree-image-compose-buildconfig-template.yaml
 oc create -f singlehost-test/singlehost-test-buildconfig-template.yaml
 ##
 if [ -z "${REPO_URL}" ] ; then
