@@ -12,6 +12,7 @@ if [ ${CURRENTDIR} == "/" ] ; then
     cd /home
     CURRENTDIR=/home
 fi
+echo "config_opts['basedir'] = '${CURRENTDIR}/rpmbuild/'" >> /etc/mock/site-defaults.cfg
 RPMDIR=/${fed_repo}_repo
 RSYNC_BRANCH=${fed_branch}
 if [ "${fed_branch}" = "master" ]; then
