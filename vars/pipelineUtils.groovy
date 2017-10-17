@@ -126,6 +126,10 @@ class pipelineUtils implements Serializable {
     def executeInContainer(stageName, containerName, script) {
         pipelineUtils.executeInContainer(stageName, containerName, script)
     }
+    
+    def executeInContainerNoPrep(stageName, containerName, script) {
+        pipelineUtils.executeInContainerNoPrep(stageName, containerName, script)
+    }
 
     /**
      * Method to prepend 'env.' to the keys in source file and write them in a format of env.key=value in the destination file.

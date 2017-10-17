@@ -24,6 +24,7 @@ tagMap['rpmbuild'] = STABLE_LABEL
 tagMap['rsync'] = STABLE_LABEL
 tagMap['ostree-compose'] = STABLE_LABEL
 tagMap['singlehost-test'] = STABLE_LABEL
+tagMap['linchpin-libvirt'] = STABLE_LABEL
 
 // CI_MESSAGE known to build successfully
 //def CANNED_CI_MESSAGE = '{"commit":{"username":"kdudka","stats":{"files":{"curl.spec":{"deletions":1,"additions":8,"lines":9},"0005-curl-7.53.1-CVE-2017-1000254.patch":{"deletions":0,"additions":136,"lines":136}},"total":{"deletions":1,"files":2,"additions":144,"lines":145}},"name":"Kamil Dudka","rev":"d1d232206aed8ef12596ec3939b72a6476845149","namespace":"rpms","agent":"kdudka","summary":"Resolves: CVE-2017-1000254 - fix out of bounds read in FTP PWD response parser","repo":"curl","branch":"f26","seen":false,"path":"/srv/git/repositories/rpms/curl.git","message":"Resolves: CVE-2017-1000254 - fix out of bounds read in FTP PWD response parser\n","email":"kdudka@redhat.com"},"topic":"org.fedoraproject.prod.git.receive"}'
@@ -120,6 +121,17 @@ pipeline {
                 }
             }
         }
+        stage("linchpin-libvirt image build") {
+            when {
+                // Only build if we have related files in changeset
+                changeset "config/Dockerfiles/linchpin-libvirt/**"
+            }
+            steps {
+                script {
+                    tagMap['linchpin-libvirt'] = pipelineUtils.buildImage(openshiftProject, "linchpin-libvirt")
+                }
+            }
+        }
         stage("Run Stage Job") {
             steps {
                 script {
@@ -139,7 +151,8 @@ pipeline {
                                     string(name: 'RPMBUILD_TAG', value: tagMap['rpmbuild']),
                                     string(name: 'RSYNC_TAG', value: tagMap['rsync']),
                                     string(name: 'OSTREE_COMPOSE_TAG', value: tagMap['ostree-compose']),
-                                    string(name: 'SINGLEHOST_TEST_TAG', value: tagMap['singlehost-test'])
+                                    string(name: 'SINGLEHOST_TEST_TAG', value: tagMap['singlehost-test']),
+                                    string(name: 'LINCHPIN_LIBVIRT_TAG', value: tagMap['linchpin-libvirt'])
                             ]
                     wait: true
                 }

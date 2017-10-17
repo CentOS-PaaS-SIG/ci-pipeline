@@ -115,9 +115,17 @@ podTemplate(name: podName,
                         ttyEnabled: true,
                         command: 'cat',
                         privileged: true,
+                        workingDir: '/workDir'),
+                containerTemplate(name: 'linchpin-libvirt',
+                        alwaysPullImage: true,
+                        image: DOCKER_REPO_URL + '/' + OPENSHIFT_NAMESPACE + '/linchpin-libvirt:latest',
+                        ttyEnabled: false,
+                        command: '',
+                        privileged: true,
                         workingDir: '/workDir')
         ],
-        volumes: [emptyDirVolume(memory: false, mountPath: '/home/output')])
+        volumes: [emptyDirVolume(memory: false, mountPath: '/home/output'),
+                  emptyDirVolume(memory: false, mountPath: '/sys/class/net')])
 {
     node(podName) {
 
@@ -410,6 +418,12 @@ podTemplate(name: podName,
                         // Send message org.centos.prod.ci.pipeline.compose.test.integration.complete on fedmsg
                         pipelineUtils.sendMessageWithAudit(messageFields['properties'], messageFields['content'], msgAuditFile, fedmsgRetryCount)
 
+                    }
+                    currentStage = "openshift-e2e-tests"
+                    stage(currentStage) {
+                        // run linchpin up and other steps
+                        // note: need to be updated
+                        pipelineUtils.executeInContainerNoPrep(currentStage, "linchpin-libvirt", "/root/linchpin_workspace/run_e2e_tests.sh")
                     }
 
                 } catch (e) {
