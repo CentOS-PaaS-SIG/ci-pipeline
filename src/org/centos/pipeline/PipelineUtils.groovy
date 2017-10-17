@@ -303,7 +303,7 @@ def sendMessageWithAudit(String msgProps, String msgContent, String msgAuditFile
     auditContent[id] = msg
 
     // write to auditFile and archive
-    writeJSON file: msgAuditFile, json: auditContent
+    writeJSON pretty: 4, file: msgAuditFile, json: auditContent
 
     archiveArtifacts allowEmptyArchive: false, artifacts: msgAuditFile
 
@@ -340,10 +340,10 @@ def trackMessage(String messageID, int retryCount) {
  * Library to parse CI_MESSAGE and inject its key/value pairs as env variables.
  *
  */
-def injectFedmsgVars() {
+def injectFedmsgVars(String message) {
 
-    // Parse the CI_MESSAGE into a Map
-    def ci_data = new JsonSlurper().parseText(env.CI_MESSAGE)
+    // Parse the message into a Map
+    def ci_data = new JsonSlurper().parseText(message)
 
     // If we have a 'commit' key in the CI_MESSAGE, for each key under 'commit', we
     // * prepend the key name with fed_
@@ -641,14 +641,16 @@ def verifyPod(String openshiftProject, String nodeName) {
             timeout(60) {
                 echo "Ensuring all containers are running in pod: ${env.NODE_NAME}"
                 echo "Container names in pod ${env.NODE_NAME}: "
-                def names       = openshift.raw("get", "pod",  "${env.NODE_NAME}", '-o=jsonpath="{.status.containerStatuses[*].name}"')
-                echo names.out.trim()
+                names       = openshift.raw("get", "pod",  "${env.NODE_NAME}", '-o=jsonpath="{.status.containerStatuses[*].name}"')
+                containerNames = names.out.trim()
+                echo containerNames
 
                 waitUntil {
                     def readyStates = openshift.raw("get", "pod",  "${env.NODE_NAME}", '-o=jsonpath="{.status.containerStatuses[*].ready}"')
 
                     echo "Container statuses: "
-                    echo readyStates.out.trim()
+                    echo containerNames
+                    echo readyStates.out.trim().toUpperCase()
                     def anyNotReady = readyStates.out.trim().contains("false")
                     if (anyNotReady) {
                         echo "One or more containers not ready...see above message ^^"
@@ -662,6 +664,7 @@ def verifyPod(String openshiftProject, String nodeName) {
         }
     }
 }
+
 /**
  *
  * @param credentialsId Credential ID for Duffy Key
@@ -855,5 +858,62 @@ def updateBuildDisplayAndDescription() {
     currentBuild.displayName = "Build#: ${env.BUILD_NUMBER} - Branch: ${env.branch} - Package: ${env.fed_repo}"
     if (env.ghprbActualCommit != null && env.ghprbActualCommit != "master") {
         currentBuild.description = "<a href=\"https://github.com/${env.ghprbGhRepository}/pull/${env.ghprbPullId}\">PR #${env.ghprbPullId} (${env.ghprbPullAuthorLogin})</a>"
+    }
+}
+
+/**
+ * get Variables From Message
+ * @param message trigger message
+ * @return map of message vars
+ */
+@NonCPS
+def getVariablesFromMessage(String message) {
+
+    messageVars = [:]
+
+    // Parse the message into a Map
+    def ci_data = new JsonSlurper().parseText(message)
+    if (ci_data['commit']) {
+        ci_data.commit.each { key, value ->
+            String varKey = key.toString().replaceAll('-', '_')
+            String varValue = value.toString().split('\n')[0].replaceAll('"', '\'')
+            messageVars[varKey] = varValue
+        }
+        if (messageVars['branch'] == 'master') {
+            messageVars['branch'] = 'rawhide'
+        }
+    } else {
+        error "Incorrect dist-git message format: ${message}"
+    }
+    return messageVars
+}
+/**
+ * Watch for messages
+ * @param msg_provider jms-messaging message provider
+ * @param message trigger message
+ */
+def watchForMessages(String msg_provider, String message) {
+
+    def messageVars = getVariablesFromMessage(message)
+
+    topicsToWatchFor = ["org.centos.stage.ci.pipeline.package.running",
+                        "org.centos.stage.ci.pipeline.package.complete",
+                        "org.centos.stage.ci.pipeline.compose.running",
+                        "org.centos.stage.ci.pipeline.compose.complete",
+                        "org.centos.stage.ci.pipeline.compose.test.integration.queued",
+                        "org.centos.stage.ci.pipeline.compose.test.integration.running",
+                        "org.centos.stage.ci.pipeline.compose.test.integration.complete",
+                        "org.centos.stage.ci.pipeline.complete"]
+
+    topicsToWatchFor.each {
+        echo "Waiting for topic : " + it
+        msg = waitForCIMessage providerName: "${msg_provider}",
+                selector: "topic = \'${it}\'",
+                checks: [[expectedValue: "${messageVars['branch']}", field: '$.branch'],
+                         [expectedValue: "${messageVars['rev']}", field: '$.rev'],
+                         [expectedValue: "${messageVars['repo']}", field: '$.repo']
+                ],
+                overrides: [topic: 'org.centos.stage']
+        echo msg
     }
 }

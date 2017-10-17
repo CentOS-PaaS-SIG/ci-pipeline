@@ -1,6 +1,7 @@
 #!/bin/bash
 
 set +e
+set -x
 # Check to make sure we have all required vars
 if [ -z "${fed_repo}" ]; then echo "No fed_repo env var" ; exit 1 ; fi
 if [ -z "${fed_branch}" ]; then echo "No fed_branch env var" ; exit 1 ; fi
@@ -138,7 +139,7 @@ if [ -z "${RSYNC_PASSWORD}" ]; then echo "Told to rsync but no RSYNC_PASSWORD en
 # Create our ${RSYNC_BRANCH}/repo directory structure
 mkdir -p ${RSYNC_BRANCH}/repo
 # Rsync our ${RSYNC_BRANCH}/repo directory structure over first
-rsync -arv ${RSYNC_BRANCH} ${RSYNC_HOST}::${RSYNC_DIR}
+rsync -arv ${RSYNC_BRANCH} ${RSYNC_USER}@${RSYNC_SERVER}::${RSYNC_DIR}
 
 # Kill backgrounded jobs on exit
 function clean_up {

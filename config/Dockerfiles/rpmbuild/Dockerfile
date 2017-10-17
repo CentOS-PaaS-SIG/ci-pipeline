@@ -54,4 +54,4 @@ COPY rpmbuild-test.sh /tmp/rpmbuild-test.sh
 ENTRYPOINT ["bash", "/tmp/rpmbuild-test.sh"]
 #
 # Run the container as follows
-# docker run --privileged -v /log/parent/dir:/home -e fed_repo=${packagename} -e fed_branch=${fed_branch} -e fed_rev=${fed_rev} -e RSYNC_PASSWORD=${rsync_password} HTTP_BASE="${HTTP_BASE}" -e RSYNC_HOST="${RSYNC_USER}@${RSYNC_SERVER}" -e RSYNC_DIR="${RSYNC_DIR}" container_tag
+# docker run --privileged -v /log/parent/dir:/home -e fed_repo=${packagename} -e fed_branch=${fed_branch} -e fed_rev=${fed_rev} -e RSYNC_PASSWORD=${rsync_password} HTTP_BASE="${HTTP_BASE}" -e RSYNC_USER="${RSYNC_USER}" -e RSYNC_SERVER="${RSYNC_SERVER}" -e RSYNC_DIR="${RSYNC_DIR}" container_tag
