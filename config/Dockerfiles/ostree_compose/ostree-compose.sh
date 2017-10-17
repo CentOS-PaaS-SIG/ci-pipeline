@@ -61,9 +61,12 @@ gpgcheck=0
 skip_if_unavailable=False
 EOF
 
+# Get our latest fedora-atomic-testing.json file and write it to /home/output/logs/
+curl -o $base_dir/logs/fedora-atomic-host.json https://pagure.io/fedora-atomic/raw/${branch}/f/fedora-atomic-host.json
+
 cat << EOF > $base_dir/config/ostree/fedora-atomic-testing.json
 {
-    "include": "fedora-atomic-testing-docker-host.json",
+    "include": "${base_dir}/logs/fedora-atomic-host.json",
     "ref": "fedora/${branch}/\${basearch}/atomic-host",
     "repos": ["fedora-${VERSION}", $f_repos],
     "automatic_version_prefix": "${VERSION}",
