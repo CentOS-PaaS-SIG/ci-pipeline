@@ -148,7 +148,6 @@ pipeline {
                 }
             }
         }
-<<<<<<< 37658b15289e634e776c55de4a4539756b7f64d0
         stage("ostree-boot-image image build") {
             when {
                 // Only build if we have related files in changeset
@@ -157,7 +156,9 @@ pipeline {
             steps {
                 script {
                     tagMap['ostree-boot-image'] = pipelineUtils.buildImage(openshiftProject, "ostree-boot-image")
-=======
+                }
+            }
+        }
         stage("linchpin-libvirt image build") {
             when {
                 // Only build if we have related files in changeset
@@ -166,7 +167,6 @@ pipeline {
             steps {
                 script {
                     tagMap['linchpin-libvirt'] = pipelineUtils.buildImage(openshiftProject, "linchpin-libvirt")
->>>>>>> Added linchpin-libvirt image to JenkinsfileStageTrigger
                 }
             }
         }
