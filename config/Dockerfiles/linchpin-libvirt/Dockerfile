@@ -70,7 +70,7 @@ WORKDIR "/root/linchpin_workspace/hooks/ansible/"
 RUN git clone -b release-3.6 https://github.com/openshift/openshift-ansible 
 RUN git clone https://github.com/samvarankashyap/paas-sig-ci
 WORKDIR "/tmp/"
-RUN git clone -b libvirt_cloudconfig2 https://github.com/samvarankashyap/linchpin
+RUN git clone -b libvirt_cloudconfig3 https://github.com/samvarankashyap/linchpin
 WORKDIR "/tmp/linchpin"
 RUN "$PWD/install.sh"
 RUN cd /tmp/linchpin && python /tmp/linchpin/setup.py install
