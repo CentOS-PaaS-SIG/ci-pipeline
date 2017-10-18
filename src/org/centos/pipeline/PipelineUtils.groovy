@@ -497,7 +497,7 @@ def setStageEnvVars(String stage){
 
              ],
              "ci-pipeline-ostree-image-boot-sanity": [
-                     task                     : "./ci-pipeline/tasks/ostree-image-compose",
+                     task                     : "./ci-pipeline/tasks/ostree-boot-image",
                      playbook                 : "ci-pipeline/playbooks/system-setup.yml",
              ],
              "ci-pipeline-ostree-boot-sanity"      : [
