@@ -4,6 +4,7 @@ env.ghprbPullAuthorLogin = env.ghprbPullAuthorLogin ?: ''
 
 env.TARGET_BRANCH = env.TARGET_BRANCH ?: 'master'
 
+// TEST
 // Needed for podTemplate()
 env.SLAVE_TAG = env.SLAVE_TAG ?: 'stable'
 env.RPMBUILD_TAG = env.RPMBUILD_TAG ?: 'stable'
