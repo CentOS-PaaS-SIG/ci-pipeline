@@ -890,7 +890,7 @@ def getVariablesFromMessage(String message) {
     return messageVars
 }
 /**
- * Watch for messages
+ * Watch for messages and verify their contents
  * @param msg_provider jms-messaging message provider
  * @param message trigger message
  */
@@ -898,24 +898,67 @@ def watchForMessages(String msg_provider, String message) {
 
     def messageVars = getVariablesFromMessage(message)
 
-    topicsToWatchFor = ["org.centos.stage.ci.pipeline.package.running",
-                        "org.centos.stage.ci.pipeline.package.complete",
-                        "org.centos.stage.ci.pipeline.compose.running",
-                        "org.centos.stage.ci.pipeline.compose.complete",
-                        "org.centos.stage.ci.pipeline.compose.test.integration.queued",
-                        "org.centos.stage.ci.pipeline.compose.test.integration.running",
-                        "org.centos.stage.ci.pipeline.compose.test.integration.complete",
-                        "org.centos.stage.ci.pipeline.complete"]
+    // Common attributes that all messages should have
+    def commonAttributes = ["branch", "build_id", "build_url", "namespace",
+            "ref", "repo", "rev", "status", "topic",
+            "username"]
 
-    topicsToWatchFor.each {
-        echo "Waiting for topic : " + it
+    // "nvr", "original_spec_nvr" are not added as common since they only get
+    // getting resolved AFTER package.complete.
+    //
+    messageContentValidationMap = [:]
+    messageContentValidationMap['org.centos.stage.ci.pipeline.package.running'] =
+            []
+    messageContentValidationMap['org.centos.stage.ci.pipeline.package.complete'] =
+            ["nvr", "original_spec_nvr"]
+    messageContentValidationMap['org.centos.stage.ci.pipeline.compose.running'] =
+            ["nvr", "original_spec_nvr", "compose_url"]
+    messageContentValidationMap['org.centos.stage.ci.pipeline.compose.complete'] =
+            ["nvr", "original_spec_nvr", "compose_url"]
+    messageContentValidationMap['org.centos.stage.ci.pipeline.compose.test.integration.queued'] =
+            ["nvr", "original_spec_nvr", "compose_url"]
+    messageContentValidationMap['org.centos.stage.ci.pipeline.compose.test.integration.running'] =
+            ["nvr", "original_spec_nvr", "compose_url"]
+    messageContentValidationMap['org.centos.stage.ci.pipeline.compose.test.integration.complete'] =
+            ["nvr", "original_spec_nvr", "compose_url"]
+    messageContentValidationMap['org.centos.stage.ci.pipeline.complete'] =
+            []
+
+    messageContentValidationMap.each { k, v ->
+        echo "Waiting for topic : ${k}"
         msg = waitForCIMessage providerName: "${msg_provider}",
-                selector: "topic = \'${it}\'",
+                selector: "topic = \'${k}\'",
                 checks: [[expectedValue: "${messageVars['branch']}", field: '$.branch'],
                          [expectedValue: "${messageVars['rev']}", field: '$.rev'],
                          [expectedValue: "${messageVars['repo']}", field: '$.repo']
                 ],
                 overrides: [topic: 'org.centos.stage']
         echo msg
+        def msg_data = new JsonSlurper().parseText(msg)
+        allFound = true
+
+        def errorMsg = ""
+        v.addAll(commonAttributes)
+        v.each {
+            if (!msg_data.containsKey(it)) {
+                String err = "Error: Did not find message property: ${it}"
+                errorMsg = "${errorMsg}\n${err}"
+                echo "${err}"
+                allFound = false
+            } else {
+                if (!msg_data[it]) {
+                    allFound = false
+                    String err = "Error: Found message property: ${it} - but it was empty!"
+                    echo "${err}"
+                    errorMsg = "${errorMsg}\n${err}"
+                } else {
+                    echo "Found message property: ${it} = ${msg_data[it]}"
+                }
+            }
+        }
+        if (!allFound) {
+            errorMsg = "Message did not contain all expected message properties:\n\n${errorMsg}"
+            error errorMsg
+        }
     }
 }

@@ -154,10 +154,6 @@ pipeline {
         stage("Run Stage Jobs") {
             failFast true
             parallel {
-                /**
-                 * TODO until jms-messaging plugin can sustain an interrupt
-                 * TODO in this context, we will disable these steps.
-                 *
                 stage("f26 message watcher") {
                     steps {
                         script {
@@ -172,7 +168,6 @@ pipeline {
                         }
                     }
                 }
-                 **/
                 stage("f26 stage job") {
                     steps {
                         sleep 30
