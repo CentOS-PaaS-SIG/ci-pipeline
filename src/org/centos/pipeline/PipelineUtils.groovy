@@ -550,6 +550,8 @@ def rsyncData(String stage){
 
     } else if (stage == 'ci-pipeline-ostree-image-boot-sanity') {
         text = text +
+                "export image2boot=\"${env.image2boot}\"\n" +
+                "export commit=\"${env.commit}\"\n" +
                 "export ANSIBLE_HOST_KEY_CHECKING=\"False\"\n"
     } else if (stage == 'ci-pipeline-ostree-boot-sanity') {
         text = text +
