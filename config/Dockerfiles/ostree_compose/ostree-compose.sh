@@ -50,6 +50,7 @@ if [ "$VERSION" = "rawhide" ]; then
 else
     fedora_repo="fedora-$VERSION"
 fi
+
 cat << EOF > $base_dir/config/ostree/fedora-${VERSION}.repo
 [fedora-${VERSION}]
 name=Fedora ${branch}
@@ -61,9 +62,28 @@ gpgcheck=0
 skip_if_unavailable=False
 EOF
 
+
+if [ "$branch" != "rawhide" ]; then
+    fedora_updates_repo="updates-released-${branch}"
+
+cat << EOF > $base_dir/config/ostree/fedora-${VERSION}-updates.repo
+[fedora-${VERSION}-updates]
+name=Fedora ${VERSION} Updates
+failovermethod=priority
+metalink=https://mirrors.fedoraproject.org/metalink?repo=${fedora_updates_repo}&arch=x86_64
+enabled=1
+metadata_expire=7d
+gpgcheck=0
+skip_if_unavailable=False
+EOF
+fi
+
+# Get our latest fedora-atomic-testing.json file and write it to $base_dir/logs/
+curl -o $base_dir/logs/fedora-atomic-host.json https://pagure.io/fedora-atomic/raw/${branch}/f/fedora-atomic-host.json
+
 cat << EOF > $base_dir/config/ostree/fedora-atomic-testing.json
 {
-    "include": "fedora-atomic-testing-docker-host.json",
+    "include": "${base_dir}/logs/fedora-atomic-host.json",
     "ref": "fedora/${branch}/\${basearch}/atomic-host",
     "repos": ["fedora-${VERSION}", $f_repos],
     "automatic_version_prefix": "${VERSION}",
