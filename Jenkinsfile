@@ -306,7 +306,7 @@ podTemplate(name: podName,
 
                             // These variables will mess with boot sanity jobs
                             // later if they are injected from a non pushed img
-                            def ostree_props = "${env.WORKSPACE}/ci-pipeline/" + currentStage + "/logs/ostree.props"
+                            def ostree_props = "/home/output/logs/ostree.props"
                             def ostree_props_groovy = "${env.WORKSPACE}/ostree.props.groovy"
                             pipelineUtils.convertProps(ostree_props, ostree_props_groovy)
                             load(ostree_props_groovy)
