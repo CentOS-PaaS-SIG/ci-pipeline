@@ -1,7 +1,0 @@
-[Service]
-EnvironmentFile=/etc/sysconfig/socat-http-proxy
-ExecStart=/usr/bin/socat -s TCP-LISTEN:80,fork TCP:${OSTREE_REPO_SERVER}:80
-Restart=always
-
-[Install]
-WantedBy=multi-user.target

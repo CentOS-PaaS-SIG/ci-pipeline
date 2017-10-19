@@ -41,6 +41,8 @@ git-server:1.7
 greenballs:1.15
 handlebars:1.1.1
 icon-shim:2.0.3
+instant-messaging:1.35
+ircbot:2.30
 jackson2-api:2.7.3
 javadoc:1.4
 jms-messaging:1.0.20

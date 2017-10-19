@@ -25,6 +25,7 @@ tagMap['rsync'] = STABLE_LABEL
 tagMap['ostree-compose'] = STABLE_LABEL
 tagMap['ostree-image-compose'] = STABLE_LABEL
 tagMap['singlehost-test'] = STABLE_LABEL
+tagMap['ostree-boot-image'] = STABLE_LABEL
 
 // Fedora Fedmsg Message Provider for stage
 MSG_PROVIDER = "fedora-fedmsg-stage"
@@ -142,6 +143,17 @@ pipeline {
                 }
             }
         }
+        stage("ostree-boot-image image build") {
+            when {
+                // Only build if we have related files in changeset
+                changeset "config/Dockerfiles/ostree-boot-image/**"
+            }
+            steps {
+                script {
+                    tagMap['ostree-boot-image'] = pipelineUtils.buildImage(openshiftProject, "ostree-boot-image")
+                }
+            }
+        }
         stage("Image Tag Report") {
             steps {
                 script {
@@ -185,12 +197,14 @@ pipeline {
                                         string(name: 'TARGET_BRANCH', value: "f26"),
                                         string(name: 'sha1', value: "${env.sha1}"),
                                         string(name: 'ghprbPullId', value: "${env.ghprbPullId}"),
+                                        string(name: 'GENERATE_IMAGE', value: "true"),
                                         string(name: 'SLAVE_TAG', value: tagMap['jenkins-continuous-infra-slave']),
                                         string(name: 'RPMBUILD_TAG', value: tagMap['rpmbuild']),
                                         string(name: 'RSYNC_TAG', value: tagMap['rsync']),
                                         string(name: 'OSTREE_COMPOSE_TAG', value: tagMap['ostree-compose']),
                                         string(name: 'OSTREE_IMAGE_COMPOSE_TAG', value: tagMap['ostree-image-compose']),
-                                        string(name: 'SINGLEHOST_TEST_TAG', value: tagMap['singlehost-test'])
+                                        string(name: 'SINGLEHOST_TEST_TAG', value: tagMap['singlehost-test']),
+                                        string(name: 'OSTREE_BOOT_IMAGE_TAG', value: tagMap['ostree-boot-image'])
                                 ],
                         wait: true
                     }
@@ -207,12 +221,14 @@ pipeline {
                                         string(name: 'TARGET_BRANCH', value: "f27"),
                                         string(name: 'sha1', value: "${env.sha1}"),
                                         string(name: 'ghprbPullId', value: "${env.ghprbPullId}"),
+                                        string(name: 'GENERATE_IMAGE', value: "true"),
                                         string(name: 'SLAVE_TAG', value: tagMap['jenkins-continuous-infra-slave']),
                                         string(name: 'RPMBUILD_TAG', value: tagMap['rpmbuild']),
                                         string(name: 'RSYNC_TAG', value: tagMap['rsync']),
                                         string(name: 'OSTREE_COMPOSE_TAG', value: tagMap['ostree-compose']),
                                         string(name: 'OSTREE_IMAGE_COMPOSE_TAG', value: tagMap['ostree-image-compose']),
-                                        string(name: 'SINGLEHOST_TEST_TAG', value: tagMap['singlehost-test'])
+                                        string(name: 'SINGLEHOST_TEST_TAG', value: tagMap['singlehost-test']),
+                                        string(name: 'OSTREE_BOOT_IMAGE_TAG', value: tagMap['ostree-boot-image'])
                                 ],
                         wait: true
                     }
