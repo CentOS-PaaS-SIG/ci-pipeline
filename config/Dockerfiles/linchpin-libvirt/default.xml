@@ -1,6 +1,6 @@
 <network>
   <name>default</name>
-  <bridge name="linchpin-libvirt"/>
+  <bridge name="virbr3"/>
   <forward/>
   <ip address="192.168.122.1" netmask="255.255.255.0">
     <dhcp>
