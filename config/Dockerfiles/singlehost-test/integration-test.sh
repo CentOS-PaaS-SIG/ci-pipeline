@@ -23,10 +23,6 @@ elif ! file ${TEST_SUBJECTS:-}; then
 	export TEST_SUBJECTS=${PWD}/testimage.qcow2
 fi
 
-# The inventory must be from the test if present (file or directory) or defaults
-ANSIBLE_INVENTORY=$(test -e inventory && echo inventory || echo /usr/share/ansible/inventory)
-export ANSIBLE_INVENTORY
-
 # This will introduce a problem with concurrency as it has no locks
 function clean_up {
 if [[ -z "${RSYNC_USER}" || -z "${RSYNC_SERVER}" || -z "${RSYNC_DIR}" || -z "${RSYNC_PASSWORD}" ]]; then echo "Told to rsync but missing rsync env var(s)" ; exit 1 ; fi

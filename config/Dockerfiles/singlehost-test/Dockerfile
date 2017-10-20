@@ -35,6 +35,7 @@ COPY package-test.sh /tmp/package-test.sh
 COPY integration-test.sh /tmp/integration-test.sh
 
 COPY standard-inventory-qcow2 /usr/share/ansible/inventory/standard-inventory-qcow2
+ENV ANSIBLE_INVENTORY=/usr/share/ansible/inventory/standard-inventory-qcow2
 
 # Run the build script
 ENTRYPOINT ["bash", "/tmp/package-test.sh"]
