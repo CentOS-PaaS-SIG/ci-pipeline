@@ -18,7 +18,6 @@ RUN yum -y install dnsmasq libvirt-daemon-driver-* libvirt-daemon \
                    imagefactory imagefactory-plugins imagefactory-plugins-TinMan \
                    libvirt-daemon-config-network PyYAML wget && yum clean all
 
-RUN git clone https://github.com/CentOS-PaaS-SIG/ci-pipeline
 COPY default.xml /usr/share/libvirt/networks/
 
 COPY ostree-image-compose.sh /tmp/ostree-image-compose.sh
