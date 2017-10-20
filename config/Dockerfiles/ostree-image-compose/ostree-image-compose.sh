@@ -72,7 +72,7 @@ popd
 curl -o ${output_dir}/logs/fedora-atomic.ks https://pagure.io/fedora-kickstarts/raw/${branch}/f/fedora-atomic.ks
 
 # Put new url into the kickstart file
-sed -i "s|^ostreesetup.*|ostreesetup --nogpg --osname=fedora-atomic --remote=fedora-atomic --url=http://192.168.122.1:8000/ --ref=$REF|" ${output_dir}/logs/fedora-atomic.ks
+sed -i "s|^ostreesetup.*|ostreesetup --nogpg --osname=fedora-atomic --remote=fedora-atomic --url=http://192.168.124.1:8000/ --ref=$REF|" ${output_dir}/logs/fedora-atomic.ks
 
 # point to upstream
 sed -i "s|\(%end.*$\)|ostree remote delete fedora-atomic\nostree remote add --set=gpg-verify=false fedora-atomic ${HTTP_BASE}/${branch}/ostree\n\1|" ${output_dir}/logs/fedora-atomic.ks

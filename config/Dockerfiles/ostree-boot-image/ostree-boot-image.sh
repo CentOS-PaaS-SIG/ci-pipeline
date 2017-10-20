@@ -2,6 +2,8 @@
 
 set -xeuo pipefail
 
+brctl show
+
 base_dir="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 
 function clean_up {
@@ -48,8 +50,8 @@ pubkey=$(cat ~/.ssh/id_rsa.pub)
 mkdir -p host_vars
 cat << 'EOF' > host_vars/localhost.yml
 qemu_img_path: /var/lib/libvirt/images
-bridge: virbr0
-gateway: 192.168.122.1
+bridge: virbr1
+gateway: 192.168.123.1
 domain: local
 libvirt_systems:
  atomic-host-fedoraah:

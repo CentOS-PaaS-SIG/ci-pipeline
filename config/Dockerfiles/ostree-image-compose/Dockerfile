@@ -16,9 +16,9 @@ RUN yum -y install dnsmasq libvirt-daemon-driver-* libvirt-daemon \
                    libvirt-daemon-kvm qemu-kvm libguestfs libguestfs-tools-c \
                    libvirt-daemon-qemu git ostree rpm-ostree libvirt-cliet \
                    imagefactory imagefactory-plugins imagefactory-plugins-TinMan \
-                   libvirt-daemon-config-network PyYAML wget && yum clean all
+                   PyYAML wget && yum clean all
 
-COPY default.xml /usr/share/libvirt/networks/
+COPY default.xml /etc/libvirt/qemu/networks/
 
 COPY ostree-image-compose.sh /tmp/ostree-image-compose.sh
 
