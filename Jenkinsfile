@@ -177,7 +177,6 @@ podTemplate(name: podName,
                         pipelineUtils.initializeAuditFile(msgAuditFile)
                     }
 
-
                     // Set our current stage value
                     currentStage = "ci-pipeline-rpmbuild"
                     stage(currentStage) {
@@ -196,12 +195,6 @@ podTemplate(name: podName,
                                       ]
                             ])
                         }
-                        dir('cciskel') {
-                            git 'https://github.com/cgwalters/centos-ci-skeleton'
-                        }
-                        dir('sig-atomic-buildscripts') {
-                            git 'https://github.com/CentOS/sig-atomic-buildscripts'
-                        }
 
                         // Set stage specific vars
                         pipelineUtils.setStageEnvVars(currentStage)
@@ -219,8 +212,6 @@ podTemplate(name: podName,
                         def package_props_groovy = "${env.WORKSPACE}/package_props.groovy"
                         pipelineUtils.convertProps(package_props, package_props_groovy)
                         load(package_props_groovy)
-                        // Save RSYNC_PASSWORD for post duffy stages
-                        env.REAL_RSYNC_PASSWORD = "${env.RSYNC_PASSWORD}"
 
                         // Set our message topic, properties, and content
                         messageFields = pipelineUtils.setMessageFields("package.complete")
@@ -256,7 +247,6 @@ podTemplate(name: podName,
 
                             pipelineUtils.executeInContainer(currentStage + "-rsync-after", "rsync", "/tmp/rsync.sh")
                         }
-
 
                         def ostree_props = "${env.WORKSPACE}/ci-pipeline/" + currentStage + "/logs/ostree.props"
                         def ostree_props_groovy = "${env.WORKSPACE}/ostree.props.groovy"
@@ -346,7 +336,6 @@ podTemplate(name: podName,
                             env.rsync_paths = "images"
                             env.rsync_from = "${env.RSYNC_USER}@${env.RSYNC_SERVER}::${env.RSYNC_DIR}/${env.branch}/"
                             env.rsync_to = "/home/output/"
-                            env.RSYNC_PASSWORD = "${env.REAL_RSYNC_PASSWORD}"
                             pipelineUtils.executeInContainer(currentStage + "-rsync-before", "rsync", "/tmp/rsync.sh")
 
                             pipelineUtils.executeInContainer(currentStage, "ostree-boot-image", "/home/ostree-boot-image.sh")
@@ -375,7 +364,6 @@ podTemplate(name: podName,
                         env.rsync_paths = "images"
                         env.rsync_from = "${env.RSYNC_USER}@${env.RSYNC_SERVER}::${env.RSYNC_DIR}/${env.branch}/"
                         env.rsync_to = "/home/output/"
-                        env.RSYNC_PASSWORD = "${env.REAL_RSYNC_PASSWORD}"
                         pipelineUtils.executeInContainer(currentStage + "-rsync-before", "rsync", "/tmp/rsync.sh")
 
                         pipelineUtils.executeInContainer(currentStage, "ostree-boot-image", "/home/ostree-boot-image.sh")
@@ -391,7 +379,6 @@ podTemplate(name: podName,
                     stage(currentStage) {
                         // Set stage specific vars
                         pipelineUtils.setStageEnvVars(currentStage)
-                        env.RSYNC_PASSWORD = "${env.REAL_RSYNC_PASSWORD}"
 
                         //Set our message topic, properties, and content
                         messageFields = pipelineUtils.setMessageFields("package.test.functional.running")
@@ -419,7 +406,6 @@ podTemplate(name: podName,
                     stage(currentStage) {
                         // Set stage specific vars
                         pipelineUtils.setStageEnvVars(currentStage)
-                        env.RSYNC_PASSWORD = "${env.REAL_RSYNC_PASSWORD}"
 
                         // Set our message topic, properties, and content
                         messageFields = pipelineUtils.setMessageFields("compose.test.integration.running")
@@ -445,9 +431,6 @@ podTemplate(name: podName,
                     // Report the exception
                     echo "Error: Exception from " + currentStage + ":"
                     echo e.getMessage()
-
-                    // Teardown resources
-                    pipelineUtils.teardownResources(currentStage)
 
                     // Throw the error
                     throw e
