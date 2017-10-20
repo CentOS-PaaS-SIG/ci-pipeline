@@ -18,8 +18,6 @@ RUN yum -y localinstall https://kojipkgs.fedoraproject.org//packages/python-dist
 RUN yum -y localinstall https://kojipkgs.fedoraproject.org/packages/bodhi/2.10.1/2.el7/noarch/bodhi-client-2.10.1-2.el7.noarch.rpm https://kojipkgs.fedoraproject.org/packages/bodhi/2.10.1/2.el7/noarch/python2-bodhi-2.10.1-2.el7.noarch.rpm
 RUN yum -y install --disablerepo=epel-testing rsync mock libsolv glib2 ostree rpm-ostree rpm-ostree-toolbox fedpkg PyYAML rpmdistro-gitoverlay libgsystem genisoimage ansible
 
-RUN git clone https://github.com/CentOS-PaaS-SIG/ci-pipeline
-
 # Copy the build script to the container
 COPY ostree-compose.sh /tmp/ostree-compose.sh
 

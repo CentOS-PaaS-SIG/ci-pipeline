@@ -70,7 +70,6 @@ popd
 
 # Grab the kickstart file from fedora upstream
 curl -o ${output_dir}/logs/fedora-atomic.ks https://pagure.io/fedora-kickstarts/raw/${branch}/f/fedora-atomic.ks
-#cp $output_dir/config/ostree/fedora-atomic-${branch}.ks /home/output/logs/fedora-atomic.ks
 
 # Put new url into the kickstart file
 sed -i "s|^ostreesetup.*|ostreesetup --nogpg --osname=fedora-atomic --remote=fedora-atomic --url=http://192.168.122.1:8000/ --ref=$REF|" ${output_dir}/logs/fedora-atomic.ks
