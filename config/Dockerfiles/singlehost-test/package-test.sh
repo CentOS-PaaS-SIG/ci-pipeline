@@ -71,8 +71,10 @@ if [[ -z "${RSYNC_USER}" || -z "${RSYNC_SERVER}" || -z "${RSYNC_DIR}" || -z "${R
 trap clean_up EXIT SIGHUP SIGINT SIGTERM
 
 # The inventory must be from the test if present (file or directory) or defaults
-ANSIBLE_INVENTORY=$(test -e inventory && echo inventory || echo /usr/share/ansible/inventory)
-export ANSIBLE_INVENTORY
+if [ -e inventory ] ; then
+    ANSIBLE_INVENTORY=$(pwd)/inventory
+    export ANSIBLE_INVENTORY
+fi
 
 # Invoke each playbook according to the specification
 for playbook in tests*.yml; do
