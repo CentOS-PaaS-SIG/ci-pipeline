@@ -29,6 +29,8 @@ RUN echo 'LIBVIRTD_ARGS="--listen"' >> /etc/sysconfig/libvirtd
 RUN mkdir -p /var/lib/libvirt/images/
 RUN mkdir -p /var/lib/libvirt/images/linchpin/
 
+COPY default.xml /usr/share/libvirt/networks/
+
 # Edit the service file which includes ExecStartPost to chmod /dev/kvm
 RUN sed -i "/Service/a ExecStartPost=\/bin\/chmod 666 /dev/kvm" /usr/lib/systemd/system/libvirtd.service
 RUN sed -i "/Unit/a Requires=socat-ssh-guest" /usr/lib/systemd/system/libvirtd.service

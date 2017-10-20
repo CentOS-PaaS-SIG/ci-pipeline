@@ -5,7 +5,6 @@ resource_groups:
     resource_group_name: "ex"
     res_group_type: "libvirt"
     res_defs:
-
       - res_name: "fedoraati"
         res_type: "libvirt_node"
         uri: "qemu:///system"
