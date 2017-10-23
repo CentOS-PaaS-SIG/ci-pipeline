@@ -197,7 +197,7 @@ def checkImageLastModifiedTime(String stage, String imageFilePath='images/latest
  * Library to check branch to rsync to as rawhide should map to a release number
  * @return
  */
-def getRsyncBranch(){
+def getRsyncBranch() {
     echo "Currently in getRsyncBranch for ${branch}"
 
     def branch = sh (returnStdout: true, script: '''
