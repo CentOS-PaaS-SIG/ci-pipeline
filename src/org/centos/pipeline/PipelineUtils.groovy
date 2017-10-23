@@ -215,7 +215,6 @@ def getRsyncBranch(){
     return branch
 }
 
-
 /**
  * Library to set message fields to be published
  * @param messageType: ${MAIN_TOPIC}.ci.pipeline.<defined-in-README>
@@ -447,7 +446,6 @@ def setDefaultEnvVars(Map envMap=null){
     // Set our base RSYNC_SERVER value
     env.RSYNC_SERVER = env.RSYNC_SERVER ?: 'artifacts.ci.centos.org'
     env.RSYNC_USER = env.RSYNC_USER ?: 'fedora-atomic'
-    env.RSYNC_BRANCH = env.RSYNC_BRANCH ?: getRsyncBranch()
 
     // Check if we're working with a staging or production instance by
     // evaluating if env.ghprbActual is null, and if it's not, whether
