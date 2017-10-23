@@ -215,7 +215,8 @@ pipeline {
                                         string(name: 'OSTREE_COMPOSE_TAG', value: tagMap['ostree-compose']),
                                         string(name: 'OSTREE_IMAGE_COMPOSE_TAG', value: tagMap['ostree-image-compose']),
                                         string(name: 'SINGLEHOST_TEST_TAG', value: tagMap['singlehost-test']),
-                                        string(name: 'OSTREE_BOOT_IMAGE_TAG', value: tagMap['ostree-boot-image'])
+                                        string(name: 'OSTREE_BOOT_IMAGE_TAG', value: tagMap['ostree-boot-image']),
+                                        string(name: 'LINCHPIN_LIBVIRT_TAG', value: tagMap['linchpin-libvirt'])
                                 ],
                                 wait: true
                     }
