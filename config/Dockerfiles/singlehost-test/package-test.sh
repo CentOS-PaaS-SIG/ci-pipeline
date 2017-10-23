@@ -57,11 +57,7 @@ fi
 
 # This will introduce a problem with concurrency as it has no locks
 function clean_up {
-if [[ -z "${RSYNC_USER}" || -z "${RSYNC_SERVER}" || -z "${RSYNC_DIR}" || -z "${RSYNC_PASSWORD}" ]]; then echo "Told to rsync but missing rsync env var(s)" ; exit 1 ; fi
-     RSYNC_BRANCH=${branch}
-     if [ "${branch}" = "master" ]; then
-         RSYNC_BRANCH=rawhide
-     fi
+if [[ -z "${RSYNC_USER}" || -z "${RSYNC_SERVER}" || -z "${RSYNC_DIR}" || -z "${RSYNC_PASSWORD}"  || -z "${RSYNC_BRANCH}" ]]; then echo "Told to rsync but missing rsync env var(s)" ; exit 1 ; fi
      RSYNC_LOCATION="${RSYNC_USER}@${RSYNC_SERVER}::${RSYNC_DIR}/${RSYNC_BRANCH}"
      rm -rf tests/package
      mkdir -p tests/package

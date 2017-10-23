@@ -7,18 +7,17 @@ if [ -z "${fed_repo}" ]; then echo "No fed_repo env var" ; exit 1 ; fi
 if [ -z "${fed_branch}" ]; then echo "No fed_branch env var" ; exit 1 ; fi
 if [ -z "${fed_rev}" ]; then echo "No fed_rev env var" ; exit 1 ; fi
 if [ -z "${FEDORA_PRINCIPAL}" ]; then echo "No FEDORA_PRINCIPAL env var"; exit 1; fi
+if [ -z "${RSYNC_BRANCH}" ]; then echo "No RSYNC_BRANCH env var"; exit 1; fi
 
 CURRENTDIR=$(pwd)
 if [ ${CURRENTDIR} == "/" ] ; then
     cd /home
     CURRENTDIR=/home
 fi
+# Add the c to branch for libabigail
+ABIGAIL_BRANCH=$(echo ${RSYNC_BRANCH} | sed 's/./&c/1')
 echo "config_opts['basedir'] = '${CURRENTDIR}/rpmbuild/'" >> /etc/mock/site-defaults.cfg
 RPMDIR=/${fed_repo}_repo
-RSYNC_BRANCH=${fed_branch}
-if [ "${fed_branch}" = "master" ]; then
-    RSYNC_BRANCH=rawhide
-fi
 mkdir -p ~/rpmbuild/{BUILD,RPMS,SOURCES,SPECS,SRPMS}
 
 # Create one dir to store logs in that will be mounted
@@ -41,10 +40,6 @@ git checkout ${fed_rev}
 # Create new branch because fedpkg wont build with detached head
 git checkout -b test_branch
 # Get current NVR
-ABIGAIL_BRANCH=$(echo ${fed_branch} | sed 's/./&c/1')
-if [ "${fed_branch}" = "master" ]; then
-    ABIGAIL_BRANCH=$(curl -s https://src.fedoraproject.org/rpms/fedora-release/raw/master/f/fedora-release.spec | awk '/%define dist_version/ {print $3}')
-fi
 truenvr=$(rpm -q --define "dist .$ABIGAIL_BRANCH" --queryformat '%{name}-%{version}-%{release}\n' --specfile ${fed_repo}.spec | head -n 1)
 echo "original_spec_nvr=${truenvr}" >> ${LOGDIR}/package_props.txt
 # Find number of git commits in log to append to RELEASE before %{?dist}
@@ -129,7 +124,7 @@ else
      libabigail/tools/fedabipkgdiff --from ${ABIGAIL_BRANCH} ${RPM_TO_CHECK} &> ${LOGDIR}/fedabipkgdiff_out.txt
 fi
 RPM_NAME=$(basename $RPM_TO_CHECK)
-echo "package_url=${HTTP_BASE}/${fed_branch}/repo/${fed_repo}_repo/$RPM_NAME" >> ${LOGDIR}/package_props.txt
+echo "package_url=${HTTP_BASE}/${RSYNC_BRANCH}/repo/${fed_repo}_repo/$RPM_NAME" >> ${LOGDIR}/package_props.txt
 RPM_NAME=$(echo $RPM_NAME | rev | cut -d '.' -f 2- | rev)
 echo "nvr=${RPM_NAME}" >> ${LOGDIR}/package_props.txt
 RSYNC_LOCATION="${RSYNC_USER}@${RSYNC_SERVER}::${RSYNC_DIR}/${RSYNC_BRANCH}"

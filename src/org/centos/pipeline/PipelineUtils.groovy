@@ -194,6 +194,29 @@ def checkImageLastModifiedTime(String stage, String imageFilePath='images/latest
 
 
 /**
+ * Library to check branch to rsync to as rawhide should map to a release number
+ * @return
+ */
+def getRsyncBranch(){
+    echo "Currently in getRsyncBranch for ${branch}"
+
+    def branch = sh (returnStdout: true, script: '''
+        if [ ${branch} == "rawhide" ]; then
+            echo $(curl -s https://src.fedoraproject.org/rpms/fedora-release/raw/master/f/fedora-release.spec | awk '/%define dist_version/ {print $3}')
+        else
+            echo ${branch}
+        fi
+    ''').trim()
+    if (!branch.startsWith('f')){
+        echo "There was a fatal error finding the proper mapping for ${branch}"
+        echo "We will not continue without a proper RSYNC_BRANCH value. Throwing exception..."
+        throw new Exception('Rsync branch identifier failed!')
+    }
+    return branch
+}
+
+
+/**
  * Library to set message fields to be published
  * @param messageType: ${MAIN_TOPIC}.ci.pipeline.<defined-in-README>
  * @return
@@ -424,6 +447,7 @@ def setDefaultEnvVars(Map envMap=null){
     // Set our base RSYNC_SERVER value
     env.RSYNC_SERVER = env.RSYNC_SERVER ?: 'artifacts.ci.centos.org'
     env.RSYNC_USER = env.RSYNC_USER ?: 'fedora-atomic'
+    env.RSYNC_BRANCH = env.RSYNC_BRANCH ?: getRsyncBranch()
 
     // Check if we're working with a staging or production instance by
     // evaluating if env.ghprbActual is null, and if it's not, whether
