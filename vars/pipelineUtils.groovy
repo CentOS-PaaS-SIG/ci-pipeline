@@ -31,6 +31,14 @@ class pipelineUtils implements Serializable {
     }
 
     /**
+     * Method to to find RSYNC_BRANCH to use on artifacts server
+     * @return
+     */
+    def getRsyncBranch() {
+        pipelineUtils.getRsyncBranch()
+    }
+
+    /**
      * Method to set message fields to be published
      * @param messageType ${MAIN_TOPIC}.ci.pipeline.<defined-in-README>
      * @return

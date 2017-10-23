@@ -200,19 +200,21 @@ def checkImageLastModifiedTime(String stage, String imageFilePath='images/latest
 def getRsyncBranch() {
     echo "Currently in getRsyncBranch for ${branch}"
 
-    def branch = sh (returnStdout: true, script: '''
+    def rsync_branch = sh (returnStdout: true, script: '''
         if [ ${branch} == "rawhide" ]; then
             echo $(curl -s https://src.fedoraproject.org/rpms/fedora-release/raw/master/f/fedora-release.spec | awk '/%define dist_version/ {print $3}')
         else
             echo ${branch}
         fi
     ''').trim()
-    if (!branch.startsWith('f')){
+    assert rsync_branch.isNumber()
+    catch (AssertionError e) {
         echo "There was a fatal error finding the proper mapping for ${branch}"
         echo "We will not continue without a proper RSYNC_BRANCH value. Throwing exception..."
         throw new Exception('Rsync branch identifier failed!')
     }
-    return branch
+    rsync_branch = 'f' + rsync_branch
+    return rsync_branch
 }
 
 /**
