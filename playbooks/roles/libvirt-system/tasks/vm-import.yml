@@ -86,7 +86,7 @@
 
 ### Install the VM using the image we downloaded
 - name: Install VM
-  command: virt-install --import --name {{ item.key }} --autostart --network bridge={{ bridge }},model=virtio --ram {{ item.value.memory }} {{ disk }} {{ disk_cdrom }} --os-type=linux --nographics
+  command: virt-install --import --name {{ item.key }} --autostart --network bridge={{ bridge }},model=virtio --ram {{ item.value.memory }} {{ disk }} {{ disk_cdrom }} --os-type=linux
 
 - name: Remove cloud-init cdrom
   command: virsh change-media {{ item.key }} hda --eject --config
@@ -100,8 +100,7 @@
   when: item.value.virt_customize is not defined
 
 - name: Give host time to boot
-  pause: seconds=20
-  when: item.value.virt_customize is defined
+  pause: seconds=10
 
 - name: Register hosts ip address
   shell: arp -na | grep $(virsh dumpxml {{ item.key }} | xmllint --xpath 'string(//mac/@address)' -) | awk '{ print $2}' | sed 's/[\(\)]//g'

@@ -2,14 +2,14 @@
 
 set -xeuo pipefail
 
-brctl show
-
-base_dir="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+#base_dir="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+base_dir="$( pwd )"
 
 function clean_up {
     set +e
     ara generate junit - > /home/output/logs/ansible_xunit.xml
     if [ -e "$base_dir/hosts" ]; then
+        virsh screenshot --file ${base_dir}/logs/atomic-host.ppm atomic-host-fedoraah
         ansible-playbook -i hosts ci-pipeline/playbooks/setup-libvirt-image.yml -e state=absent -e skip_init=true
     fi
 }
@@ -73,12 +73,6 @@ export ANSIBLE_HOST_KEY_CHECKING=False
 # Start test VM
 ansible-playbook -i hosts ci-pipeline/playbooks/setup-libvirt-image.yml -e state=present -e skip_init=true
 
-PROVISION_STATUS=$?
-if [ "$PROVISION_STATUS" != 0 ]; then
-    echo "ERROR: Provisioning\nSTATUS: $PROVISION_STATUS"
-    exit 1
-fi
-
 ipaddress=$(cat libvirt-hosts | awk -F= '/ansible_ssh_host=/ { print $2 }')
 cat << EOF > inventory
 [ostree_compose_slave]
@@ -86,12 +80,6 @@ $ipaddress ansible_user=admin ansible_ssh_pass=admin ansible_become=true ansible
 EOF
 
 ansible-playbook -i inventory ci-pipeline/playbooks/ostree-boot-verify.yml -l ostree_compose_slave -e "commit=$commit"
-
-BOOT_STATUS=$?
-if [ "$BOOT_STATUS" != 0 ]; then
-    echo "ERROR: Provisioning\nSTATUS: $BOOT_STATUS"
-    exit 1
-fi
 
 # If image2boot is defined then symlink it as latest
 if [ "${image2boot:-unset}" != "unset" ]; then
