@@ -26,7 +26,7 @@ ostree --repo=$output_dir/ostree prune \
     --keep-younger-than='1 week ago' --refs-only
 
 # get list of repos
-repos=$(curl ${HTTP_BASE}/${branch}/repo/manifest.txt | cut -d' ' -f1)
+repos=$(curl ${HTTP_BASE}/${RSYNC_BRANCH}/repo/manifest.txt | cut -d' ' -f1)
 
 f_repos=""
 for repo in $repos; do
@@ -38,7 +38,7 @@ for repo in $repos; do
     cat << EOF > $base_dir/config/ostree/${repo}.repo
 [${repo}]
 name=Testing ${repo}
-baseurl=${HTTP_BASE}/${branch}/repo/${repo}
+baseurl=${HTTP_BASE}/${RSYNC_BRANCH}/repo/${repo}
 enabled=1
 gpgcheck=0
 skip_if_unavailable=False

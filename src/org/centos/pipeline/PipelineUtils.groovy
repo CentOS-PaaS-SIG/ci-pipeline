@@ -194,6 +194,32 @@ def checkImageLastModifiedTime(String stage, String imageFilePath='images/latest
 
 
 /**
+ * Library to check branch to rsync to as rawhide should map to a release number
+ * @return
+ */
+def getRsyncBranch() {
+    echo "Currently in getRsyncBranch for ${branch}"
+
+    if ( branch != 'rawhide' ) {
+        return branch
+    } else {
+        def rsync_branch = sh (returnStdout: true, script: '''
+            echo $(curl -s https://src.fedoraproject.org/rpms/fedora-release/raw/master/f/fedora-release.spec | awk '/%define dist_version/ {print $3}')
+        ''').trim()
+        try {
+            assert rsync_branch.isNumber()
+        }
+        catch (AssertionError e) {
+            echo "There was a fatal error finding the proper mapping for ${branch}"
+            echo "We will not continue without a proper RSYNC_BRANCH value. Throwing exception..."
+            throw new Exception('Rsync branch identifier failed!')
+        }
+        rsync_branch = 'f' + rsync_branch
+        return rsync_branch
+    }
+}
+
+/**
  * Library to set message fields to be published
  * @param messageType: ${MAIN_TOPIC}.ci.pipeline.<defined-in-README>
  * @return
