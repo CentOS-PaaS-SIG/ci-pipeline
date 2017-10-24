@@ -200,7 +200,7 @@ def checkImageLastModifiedTime(String stage, String imageFilePath='images/latest
 def getRsyncBranch() {
     echo "Currently in getRsyncBranch for ${branch}"
 
-    if ( branch != 'master' ) {
+    if ( branch != 'rawhide' ) {
         return branch
     } else {
         def rsync_branch = sh (returnStdout: true, script: '''
