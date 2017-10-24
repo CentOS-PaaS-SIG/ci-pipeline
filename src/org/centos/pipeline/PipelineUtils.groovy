@@ -200,8 +200,8 @@ def checkImageLastModifiedTime(String stage, String imageFilePath='images/latest
 def getRsyncBranch() {
     echo "Currently in getRsyncBranch for ${branch}"
 
-    if (${branch} != 'master') {
-        return ${branch}
+    if ( branch != 'master' ) {
+        return branch
     } else {
         def rsync_branch = sh (returnStdout: true, script: '''
             echo $(curl -s https://src.fedoraproject.org/rpms/fedora-release/raw/master/f/fedora-release.spec | awk '/%define dist_version/ {print $3}')
