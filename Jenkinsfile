@@ -122,7 +122,7 @@ podTemplate(name: podName,
                         command: 'cat',
                         privileged: true,
                         workingDir: '/workDir'),
-                // This adds the package test container to the pod.
+                // This adds the singlehost test container to the pod.
                 containerTemplate(name: 'singlehost-test',
                         alwaysPullImage: true,
                         image: DOCKER_REPO_URL + '/' + OPENSHIFT_NAMESPACE + '/singlehost-test:' + SINGLEHOST_TEST_TAG,
@@ -130,6 +130,7 @@ podTemplate(name: podName,
                         command: 'cat',
                         privileged: true,
                         workingDir: '/workDir'),
+                // This adds the ostree boot image container to the pod.
                 containerTemplate(name: 'ostree-boot-image',
                         alwaysPullImage: true,
                         image: DOCKER_REPO_URL + '/' + OPENSHIFT_NAMESPACE + '/ostree-boot-image:' + OSTREE_BOOT_IMAGE_TAG,
