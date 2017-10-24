@@ -662,9 +662,12 @@ def verifyPod(String openshiftProject, String nodeName) {
         openshift.withProject(openshiftProject) {
             def describeStr = openshift.selector("pods", nodeName).describe()
             out = describeStr.out.trim()
-            writeFile file: 'node-pod-description-' + nodeName + '.txt',
-                    text: out
-            archiveArtifacts 'node-pod-description-' + nodeName + '.txt'
+
+            sh 'mkdir -p podInfo'
+
+            writeFile file: 'podInfo/node-pod-description-' + nodeName + '.txt',
+                        text: out
+            archiveArtifacts 'podInfo/node-pod-description-' + nodeName + '.txt'
 
             timeout(60) {
                 echo "Ensuring all containers are running in pod: ${env.NODE_NAME}"
@@ -689,6 +692,35 @@ def verifyPod(String openshiftProject, String nodeName) {
                     }
                 }
             }
+        }
+    }
+}
+
+/**
+ *
+ * @param openshiftProject name of openshift namespace/project.
+ * @param nodeName podName we are going to get container logs from.
+ * @return
+ */
+def getContainerLogsFromPod(String openshiftProject, String nodeName) {
+    openshift.withCluster() {
+        openshift.withProject(openshiftProject) {
+            def describeStr = openshift.selector("pods", nodeName).describe()
+            out = describeStr.out.trim()
+
+            echo "Container names in pod ${env.NODE_NAME}: "
+            names       = openshift.raw("get", "pod",  "${env.NODE_NAME}", '-o=jsonpath="{.status.containerStatuses[*].name}"')
+            containerNames = names.out.trim()
+            echo containerNames
+
+            sh 'mkdir -p podInfo'
+
+            containerNames.split().each {
+                String log = containerLog name: it, returnLog: true
+                writeFile file: "podInfo/containerLog-${it}-${nodeName}.txt",
+                            text: log
+            }
+            archiveArtifacts "podInfo/containerLog-*.txt"
         }
     }
 }
