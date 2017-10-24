@@ -22,7 +22,7 @@ RUN yum -y install libguestfs libguestfs-tools-c \
 
 RUN yum -y update && yum clean all
 RUN yum -y install systemd 
-RUN yum -y install libvirt-daemon-driver-* libvirt-daemon libvirt-daemon-kvm qemu-kvm socat && yum clean all; \
+RUN yum -y install libvirt-daemon-driver-* libvirt-daemon libvirt-daemon-kvm qemu-kvm libvirt-daemon-config-network && yum clean all; \
 (cd /lib/systemd/system/sysinit.target.wants/; for i in *; do [ $i == systemd-tmpfiles-setup.service ] || rm -f $i; done); \
 rm -f /lib/systemd/system/multi-user.target.wants/*;\
 rm -f /etc/systemd/system/*.wants/*;\
@@ -37,7 +37,7 @@ systemctl enable virtlockd
 RUN pip install ara
 
 COPY ostree-boot-image.sh $HOME/
-COPY default.xml /usr/share/libvirt/networks/
+COPY default.xml /etc/libvirt/qemu/networks/
 
 EXPOSE 16509
 

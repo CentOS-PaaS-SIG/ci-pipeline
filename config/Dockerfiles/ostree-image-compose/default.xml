@@ -1,10 +1,11 @@
 <network>
   <name>default</name>
-  <bridge name="image-compose"/>
+  <uuid>f487971c-469a-4752-ba15-ff85024834a7</uuid>
+  <bridge name="virbr2"/>
   <forward/>
-  <ip address="192.168.122.1" netmask="255.255.255.0">
+  <ip address="192.168.124.1" netmask="255.255.255.0">
     <dhcp>
-      <range start="192.168.122.2" end="192.168.122.254"/>
+      <range start="192.168.124.2" end="192.168.124.254"/>
     </dhcp>
   </ip>
 </network>
