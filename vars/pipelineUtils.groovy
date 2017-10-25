@@ -247,4 +247,17 @@ class pipelineUtils implements Serializable {
     def watchForMessages(String msg_provider, String message) {
         pipelineUtils.watchForMessages(msg_provider, message)
     }
+
+/**
+ *
+ * @param nick nickname to connect to IRC with
+ * @param channel channel to connect to
+ * @param message message to send
+ * @param ircServer optional IRC server defaults to irc.freenode.net:6697
+ * @return
+ */
+    def sendIRCNotification(String nick, String channel, String message, String ircServer="irc.freenode.net:6697") {
+        pipelineUtils.sendIRCNotification(nick, channel, message, ircServer)
+    }
+
 }

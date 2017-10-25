@@ -727,6 +727,28 @@ def getContainerLogsFromPod(String openshiftProject, String nodeName) {
 
 /**
  *
+ * @param nick nickname to connect to IRC with
+ * @param channel channel to connect to
+ * @param message message to send
+ * @param ircServer optional IRC server defaults to irc.freenode.net:6697
+ * @return
+ */
+def sendIRCNotification(String nick, String channel, String message, String ircServer="irc.freenode.net:6697") {
+    sh """
+        (
+        echo NICK ${nick}
+        echo USER ${nick} 8 * : ${nick}
+        sleep 5
+        echo "JOIN ${channel}"
+        sleep 10
+        echo "NOTICE ${channel} :${message}"
+        echo QUIT
+        ) | openssl s_client -connect ${ircServer}
+    """
+}
+
+/**
+ *
  * @param credentialsId Credential ID for Duffy Key
  * @return password
  */
