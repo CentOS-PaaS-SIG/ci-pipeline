@@ -124,6 +124,16 @@ class pipelineUtils implements Serializable {
         pipelineUtils.teardownResources(stage)
     }
 
+    /**
+     *
+     * @param openshiftProject name of openshift namespace/project.
+     * @param nodeName podName we are going to get container logs from.
+     * @return
+     */
+    def getContainerLogsFromPod(String openshiftProject, String nodeName) {
+        pipelineUtils.getContainerLogsFromPod(openshiftProject, nodeName)
+    }
+
     def verifyPod(openshiftProject, nodeName) {
         pipelineUtils.verifyPod(openshiftProject, nodeName)
     }

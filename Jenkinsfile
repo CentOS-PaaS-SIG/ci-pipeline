@@ -442,6 +442,8 @@ podTemplate(name: podName,
                     // Set the build display name and description
                     pipelineUtils.setBuildDisplayAndDescription()
 
+                    pipelineUtils.getContainerLogsFromPod(OPENSHIFT_NAMESPACE, env.NODE_NAME)
+
                     // Archive our artifacts
                     step([$class: 'ArtifactArchiver', allowEmptyArchive: true, artifacts: '**/logs/**,*.txt,*.groovy,**/job.*,**/*.groovy,**/inventory.*', excludes: '**/job.props,**/job.props.groovy,**/*.example', fingerprint: true])
 
