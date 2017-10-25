@@ -442,6 +442,15 @@ podTemplate(name: podName,
                     // Set the build display name and description
                     pipelineUtils.setBuildDisplayAndDescription()
 
+                    // only post to IRC on a failure
+                    if (currentBuild.result == 'FAILURE') {
+                        // only if this is a production build
+                        if (env.ghprbActualCommit == null || env.ghprbActualCommit == "master") {
+                            def message = "${JOB_NAME} build #${BUILD_NUMBER}: ${currentBuild.currentResult}: ${BUILD_URL}"
+                            pipelineUtils.sendIRCNotification("${IRC_NICK}-${UUID.randomUUID()}", IRC_CHANNEL, message)
+                        }
+                    }
+
                     pipelineUtils.getContainerLogsFromPod(OPENSHIFT_NAMESPACE, env.NODE_NAME)
 
                     // Archive our artifacts
