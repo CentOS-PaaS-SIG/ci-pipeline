@@ -16,6 +16,7 @@ resource_groups:
         vcpus: 1
         arch: x86_64
         copy_ssh_keys: true
+        network_bridge: "virbr3"
         additional_storage: 15G
         cloud_config:
           users:
