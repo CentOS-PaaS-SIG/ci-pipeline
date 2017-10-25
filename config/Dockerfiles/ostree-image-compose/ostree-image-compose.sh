@@ -11,7 +11,9 @@ set -xeuo pipefail
 # problems with converted images - just force it
 # TODO: Point the working directories at the bind mounted location?
 
-output_dir="/home/output"
+base_dir="$(pwd)"
+output_dir="/home/output/"
+pwd
 
 # Start libvirtd
 ls /var/run/libvirt
@@ -24,10 +26,12 @@ chmod 666 /dev/kvm
 
 function clean_up {
   set +e
-  cp -f $(ls -tr ${output_dir}/images/fedora-atomic-*.qcow2 | tail -n 1) ${output_dir}/logs/untested-atomic.qcow2
+  pushd ${output_dir}/images
+  ln -sf $(ls -tr fedora-atomic-*.qcow2 | tail -n 1) untested-atomic.qcow2
+  popd
   kill $(jobs -p)
   for screenshot in /var/lib/oz/screenshots/*.ppm; do
-      [ -e "$screenshot" ] && cp $screenshot ${output_dir}/logs
+      [ -e "$screenshot" ] && cp $screenshot ${base_dir}/logs
   done
 }
 trap clean_up EXIT SIGHUP SIGINT SIGTERM
@@ -41,8 +45,8 @@ fi
 
 REF="fedora/${branch}/x86_64/atomic-host"
 
-mkdir -p ${output_dir}/logs
-touch ${output_dir}/logs/ostree.props
+mkdir -p ${base_dir}/logs
+touch ${base_dir}/logs/ostree.props
 
 imgdir=/var/lib/imagefactory/storage/
 
@@ -56,7 +60,7 @@ if [ -d "${output_dir}/images" ]; then
             prev_img=$(ls -tr ${output_dir}/images/fedora-atomic-*.qcow2 | tail -n 1)
             prev_rel=$(echo $prev_img | sed -e 's/.*-\([^-]*\).qcow2/\1/')
             # Don't fail if the previous build has been pruned
-            (rpm-ostree db --repo=${output_dir}/ostree diff $prev_rel $release || echo "Previous build has been pruned") | tee ${output_dir}/logs/packages.txt
+            (rpm-ostree db --repo=${output_dir}/ostree diff $prev_rel $release || echo "Previous build has been pruned") | tee ${base_dir}/logs/packages.txt
         fi
         break
     done
@@ -69,17 +73,17 @@ python -m SimpleHTTPServer &
 popd
 
 # Grab the kickstart file from fedora upstream
-curl -o ${output_dir}/logs/fedora-atomic.ks https://pagure.io/fedora-kickstarts/raw/${branch}/f/fedora-atomic.ks
+curl -o ${base_dir}/logs/fedora-atomic.ks https://pagure.io/fedora-kickstarts/raw/${branch}/f/fedora-atomic.ks
 
 # Put new url into the kickstart file
-sed -i "s|^ostreesetup.*|ostreesetup --nogpg --osname=fedora-atomic --remote=fedora-atomic --url=http://192.168.124.1:8000/ --ref=$REF|" ${output_dir}/logs/fedora-atomic.ks
+sed -i "s|^ostreesetup.*|ostreesetup --nogpg --osname=fedora-atomic --remote=fedora-atomic --url=http://192.168.124.1:8000/ --ref=$REF|" ${base_dir}/logs/fedora-atomic.ks
 
 # point to upstream
-sed -i "s|\(%end.*$\)|ostree remote delete fedora-atomic\nostree remote add --set=gpg-verify=false fedora-atomic ${HTTP_BASE}/${branch}/ostree\n\1|" ${output_dir}/logs/fedora-atomic.ks
+sed -i "s|\(%end.*$\)|ostree remote delete fedora-atomic\nostree remote add --set=gpg-verify=false fedora-atomic ${HTTP_BASE}/${branch}/ostree\n\1|" ${base_dir}/logs/fedora-atomic.ks
 
 # Remove ostree refs create form upstream kickstart
-sed -i "s|^ostree refs.*||" ${output_dir}/logs/fedora-atomic.ks
-sed -i "s|^ostree admin set-origin.*||" ${output_dir}/logs/fedora-atomic.ks
+sed -i "s|^ostree refs.*||" ${base_dir}/logs/fedora-atomic.ks
+sed -i "s|^ostree admin set-origin.*||" ${base_dir}/logs/fedora-atomic.ks
 
 # Pull down Fedora net install image if needed
 if [ ! -e "${output_dir}/netinst" ]; then
@@ -102,7 +106,7 @@ popd
 #       <install type='url'>
 #           <url>http://download.fedoraproject.org/pub/fedora/linux/releases/25/Everything/x86_64/os/</url>
 #       </install>
-cat <<EOF >${output_dir}/logs/fedora-${branch}.tdl
+cat <<EOF >${base_dir}/logs/fedora-${branch}.tdl
 <template>
     <name>${branch}</name>
     <os>
@@ -120,7 +124,7 @@ EOF
 
 #export LIBGUESTFS_BACKEND=direct
 
-imagefactory --debug --imgdir $imgdir --timeout 3000 base_image ${output_dir}/logs/fedora-${branch}.tdl --parameter offline_icicle true --file-parameter install_script ${output_dir}/logs/fedora-atomic.ks
+imagefactory --debug --imgdir $imgdir --timeout 3000 base_image ${base_dir}/logs/fedora-${branch}.tdl --parameter offline_icicle true --file-parameter install_script ${base_dir}/logs/fedora-atomic.ks
 
 # convert to qcow
 imgname="fedora-atomic-$version-$release"
@@ -128,7 +132,7 @@ qemu-img convert -c -p -O qcow2 $imgdir/*body ${output_dir}/images/$imgname.qcow
 
 # Record the commit so we can test it later
 commit=$(ostree --repo=${output_dir}/ostree rev-parse ${REF})
-cat << EOF > ${output_dir}/logs/ostree.props
+cat << EOF > ${base_dir}/logs/ostree.props
 builtcommit=$commit
 image2boot=${HTTP_BASE}/${branch}/images/$imgname.qcow2
 image_name=$imgname.qcow2

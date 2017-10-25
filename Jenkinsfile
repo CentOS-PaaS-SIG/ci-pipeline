@@ -299,8 +299,8 @@ podTemplate(name: podName,
                         env.rsync_to = "${env.RSYNC_USER}@${env.RSYNC_SERVER}::${env.RSYNC_DIR}/${env.RSYNC_BRANCH}/"
                         pipelineUtils.executeInContainer(currentStage + "-rsync-after-netinst", "rsync", "/tmp/rsync.sh")
 
-                        String untested_img_loc = "/home/output/logs/untested-atomic.qcow2"
-                        sh "mv -f ${untested_img_loc} ${env.WORKSPACE}/"
+                        String untested_img_loc = "/home/output/images/untested-atomic.qcow2"
+                        sh "cp -f ${untested_img_loc} ${env.WORKSPACE}/"
                         if (fileExists("${env.WORKSPACE}/NeedNewImage.txt") || ("${env.GENERATE_IMAGE}" == "true")) {
                             // Rsync push images
                             env.rsync_paths = "images"
@@ -308,7 +308,7 @@ podTemplate(name: podName,
 
                             // These variables will mess with boot sanity jobs
                             // later if they are injected from a non pushed img
-                            def ostree_props = "/home/output/logs/ostree.props"
+                            def ostree_props = "${env.WORKSPACE}/" + currentStage + "/logs/ostree.props"
                             def ostree_props_groovy = "${env.WORKSPACE}/ostree.props.groovy"
                             pipelineUtils.convertProps(ostree_props, ostree_props_groovy)
                             load(ostree_props_groovy)
