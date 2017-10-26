@@ -5,6 +5,21 @@
     - name: "Install openshift"
       shell: ansible-playbook -i /tmp/singlenode.inv --private-key /root/.ssh/ex /root/linchpin_workspace/hooks/ansible/openshift-ansible/playbooks/byo/config.yml -e'openshift_disable_check=disk_availability,docker_storage,memory_availability' -e 'ansible_python_interpreter=/usr/bin/python3'
       register: openshift_out
+      ignore_errors: yes
+    - name: "os_install_fail"
+      set_fact:
+        os_install_fail: "{{ openshift_out['failed'] | default(false) }}"
+    - name: "Run restart if fail"
+      shell: "ansible all -i /tmp/singlenode.inv -m shell -a 'systemctl restart origin-master' --become"
+      when: os_install_fail == true
+      ignore_errors: yes
+    - name: "Install openshift again"
+      shell: ansible-playbook -i /tmp/singlenode.inv --private-key /root/.ssh/ex /root/linchpin_workspace/hooks/ansible/
+openshift-ansible/playbooks/byo/config.yml -e'openshift_disable_check=disk_availability,docker_storage,memory_availabili
+ty' -e 'ansible_python_interpreter=/usr/bin/python3'
+      register: openshift_out
+      ignore_errors: yes
+      when: os_install_fail == true
     - name: "Copy contents to openshift log"
       copy:
         content: "{{ openshift_out }}"
