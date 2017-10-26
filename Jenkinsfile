@@ -438,6 +438,11 @@ podTemplate(name: podName,
                     stage(currentStage) {
                         // run linchpin up and other steps
                         // note: need to be updated
+
+                        // Set stage specific vars
+                        pipelineUtils.setStageEnvVars(currentStage)
+
+                        // run linchpin workspace for e2e tests
                         pipelineUtils.executeInContainerNoPrep(currentStage, "linchpin-libvirt", "/root/linchpin_workspace/run_e2e_tests.sh")
                     }
 
