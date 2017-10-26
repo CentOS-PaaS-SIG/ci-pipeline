@@ -75,7 +75,7 @@ cp -rp ../${fed_repo}/** ~/rpmbuild/SOURCES
 rpmbuild -bs --define "dist .$fed_branch" ${fed_repo}.spec
 ls
 # Set up koji creds
-kinit -k -t /home/fedora.keytab $FEDORA_PRINCIPAL
+kinit -k -t "${CURRENTDIR}/fedora.keytab" $FEDORA_PRINCIPAL
 
 # Want to archive build logs if mock build exits uncleanly
 function archive_logs {

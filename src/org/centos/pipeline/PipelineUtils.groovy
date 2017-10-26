@@ -632,22 +632,17 @@ def executeInContainer(String stageName, String containerName, String script) {
     // env vars from host. We force them in.
     //
     containerEnv = env.getEnvironment().collect { key, value -> return key+'='+value }
-    sh "mkdir -p " + stageName
+    sh "mkdir -p ${stageName}"
     try {
         withEnv(containerEnv) {
             container(containerName) {
-                sh 'pwd'
-                sh 'ls -l /tmp'
-                sh "cp -fv ${WORKSPACE}/fedora.keytab /home/fedora.keytab"
-                sh 'env'
                 sh script
-                sh "ls -lR logs || true"
             }
         }
-        sh "mv -vf logs " + stageName + "/logs || true"
     } catch (err) {
-        sh "mv -vf logs " + stageName + "/logs"
         throw err
+    } finally {
+        sh "mv -vf logs ${stageName}/logs || true"
     }
 }
 
