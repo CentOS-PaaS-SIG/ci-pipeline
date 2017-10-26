@@ -107,7 +107,7 @@ def checkLastImage(String stage) {
     sh '''
         set +e
                 
-        header=$(curl -sI "${HTTP_BASE}/${branch}/images/latest-atomic.qcow2"|grep -i '^Last-Modified:')
+        header=$(curl -sI "${HTTP_BASE}/${RSYNC_BRANCH}/images/latest-atomic.qcow2"|grep -i '^Last-Modified:')
         curl_rc=$?
         if [ ${curl_rc} -eq 0 ]; then
             l_modified=$(echo ${header}|sed s'/Last-Modified: //')
@@ -143,7 +143,7 @@ def checkLastImage(String stage) {
  */
 def checkImageLastModifiedTime(String stage, String imageFilePath='images/latest-atomic.qcow2'){
 
-    def url = new URL("${HTTP_BASE}/${branch}/${imageFilePath}")
+    def url = new URL("${HTTP_BASE}/${RSYNC_BRANCH}/${imageFilePath}")
     def fileName = imageFilePath.split('/')[-1]
     def filePath = imageFilePath.split('/')[0..-2].join('/').replaceAll("^/", "")
 
@@ -192,6 +192,65 @@ def checkImageLastModifiedTime(String stage, String imageFilePath='images/latest
     }
 }
 
+/**
+ * Library to find which image dir to push to
+ * @param num - Max number of image dirs
+ * @return
+ */
+def getDailyImageDir(Integer num) {
+    def calendar = Calender.getInstance()
+    def currentTime = calendar.getTimeInMillis()
+    def divisor = 24 * 60 * 60 // hours * minutes * seconds
+    def daySinceEpoch = currentTime / divisor
+    def modulo = daySinceEpoch % num
+    // Go from 1-num instead of 0-(num-1)
+    return modulo + 1
+}
+
+/**
+ * Library to check if we should wipe the daily image dir
+ * @param num - Max number of image dirs
+ * @return
+ */
+def checkDailyImageDir(Integer num) {
+    def dailyNum = getDailyImageDir(num)
+    def url = new URL("${HTTP_BASE}/${RSYNC_BRANCH}/images/tempImages_${dailyNum}")
+    def connection = (HttpURLConnection)url.openConnection()
+    connection.setRequestMethod("HEAD")
+
+    try {
+        connection.connect()
+        def reponseCode = connection.getResponseCode()
+
+        if (reponseCode == 200) {
+            // Get our last modified date for the dir in milliseconds
+            def lastModifiedDate = connection.getLastModified()
+
+            // Create a calendar instance for right now and subtract 24 hours,
+            // then get that time in milliseconds
+            def calendar = Calendar.getInstance()
+            calendar.add(Calendar.HOUR_OF_DAY, -24) // 24 hours ago
+            def comparisonDate = calendar.getTimeInMillis()
+
+            // Determine if our last modified date is greater than or equal to 24 hours ago.
+            if ( lastModifiedDate <= comparisonDate ) {
+                echo "Wiping temp image dir. Last modified time of dir >= 24 hours ago."
+                return true
+            } else {
+                echo "Not wiping image dir ${dailyNum}. Last modified time of dir is < 24 hours ago."
+            }
+        } else if (reponseCode == 404) {
+            echo "Not wiping image dir. Unable to locate existing dir."
+        } else {
+            echo "Error: ${connection.responseCode}: ${connection.getResponseMessage()}"
+            echo "Not wiping image dir due to some error when getting last modified time of directory"
+        }
+        return false
+    } catch (err) {
+        echo "There was a fatal error checking if temp image dir ${dailyNum} was empty: ${err}, unable to determine if we should wipe it"
+        return false
+    }
+}
 
 /**
  * Library to check branch to rsync to as rawhide should map to a release number

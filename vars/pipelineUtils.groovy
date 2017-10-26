@@ -31,6 +31,24 @@ class pipelineUtils implements Serializable {
     }
 
     /**
+     * Method to get integer value of daily image directory
+     * @param num Max number of image dirs
+     * @return
+     */
+    def getDailyImageDir(Integer num) {
+        pipelineUtils.getDailyImageDir(num)
+    }
+
+    /**
+     * Method to check if we should wipe the daily image directory
+     * @param num Max number of image dirs
+     * @return
+     */
+    def checkDailyImageDir(Integer num) {
+        pipelineUtils.checkDailyImageDir(num)
+    }
+
+    /**
      * Method to to find RSYNC_BRANCH to use on artifacts server
      * @return
      */
