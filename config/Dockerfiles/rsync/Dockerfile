@@ -12,6 +12,7 @@ RUN yum -y install rsync
 
 # Copy the build script to the container
 COPY rsync.sh /tmp/rsync.sh
+COPY wipe.sh /tmp/wipe.sh
 
 # Run the build script
 ENTRYPOINT ["bash", "/tmp/rsync.sh"]
