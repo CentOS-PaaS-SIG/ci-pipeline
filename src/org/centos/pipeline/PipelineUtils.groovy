@@ -201,7 +201,7 @@ def getDailyImageDir(Integer num) {
     def calendar = Calendar.getInstance()
     def currentTime = calendar.getTimeInMillis()
     def divisor = 24 * 60 * 60 // hours * minutes * seconds
-    def daySinceEpoch = currentTime / divisor
+    def daySinceEpoch = (int) (currentTime / divisor)
     def modulo = daySinceEpoch % num
     // Go from 1-num instead of 0-(num-1)
     return modulo + 1
