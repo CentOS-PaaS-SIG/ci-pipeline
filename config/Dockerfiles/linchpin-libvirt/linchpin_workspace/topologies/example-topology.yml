@@ -13,8 +13,8 @@ resource_groups:
         driver: qemu
         #image_src: 'https://pubmirror2.math.uh.edu/fedora-buffet/alt/atomic/stable/Fedora-Atomic-25-20170705.0/CloudImages/x86_64/images/Fedora-Atomic-25-20170705.0.x86_64.qcow2'
         image_src: "file:///home/output/images/untested-atomic.qcow2"
-        memory: 2048 
-        vcpus: 1
+        memory: 6144 
+        vcpus: 3
         arch: x86_64
         copy_ssh_keys: true
         network_bridge: "virbr3"
