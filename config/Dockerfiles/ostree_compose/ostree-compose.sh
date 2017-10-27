@@ -78,8 +78,9 @@ skip_if_unavailable=False
 EOF
 fi
 
-# Get our latest fedora-atomic-testing.json file and write it to $base_dir/logs/
+# Get our latest fedora-atomic-testing.json and fedora-atomic-host-base file and write it to $base_dir/logs/
 curl -o $base_dir/logs/fedora-atomic-host.json https://pagure.io/fedora-atomic/raw/${branch}/f/fedora-atomic-host.json
+curl -o $base_dir/logs/fedora-atomic-host-base.json https://pagure.io/fedora-atomic/raw/${branch}/f/fedora-atomic-host-base.json
 
 cat << EOF > $base_dir/config/ostree/fedora-atomic-testing.json
 {
