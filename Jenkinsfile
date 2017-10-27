@@ -280,7 +280,7 @@ podTemplate(name: podName,
                         // We always run, but don't always push to artifacts
                         env.PUSH_IMAGE = "false"
                         // Check if we should wipe daily image dir
-                        Integer env.numImageDirs = 3
+                        int numImageDirs = 3
                         env.dailyImageDir = pipelineUtils.getDailyImageDir(numImageDirs)
                         env.wipeBool = pipelineUtils.checkDailyImageDir(numImageDirs)
                         if (env.wipeBool) {
