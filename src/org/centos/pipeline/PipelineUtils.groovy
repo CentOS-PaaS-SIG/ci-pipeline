@@ -198,7 +198,7 @@ def checkImageLastModifiedTime(String stage, String imageFilePath='images/latest
  * @return
  */
 def getDailyImageDir(Integer num) {
-    def calendar = Calender.getInstance()
+    def calendar = Calendar.getInstance()
     def currentTime = calendar.getTimeInMillis()
     def divisor = 24 * 60 * 60 // hours * minutes * seconds
     def daySinceEpoch = currentTime / divisor
