@@ -39,15 +39,6 @@ RUN pip install ara
 COPY ostree-boot-image.sh $HOME/
 COPY default.xml /etc/libvirt/qemu/networks/
 
-EXPOSE 16509
-
-RUN echo "listen_tls = 0" >> /etc/libvirt/libvirtd.conf; \
-echo 'listen_tcp = 1' >> /etc/libvirt/libvirtd.conf; \
-echo 'tls_port = "16514"' >> /etc/libvirt/libvirtd.conf; \ 
-echo 'tcp_port = "16509"' >> /etc/libvirt/libvirtd.conf; \
-echo 'auth_tcp = "none"' >> /etc/libvirt/libvirtd.conf
-
-RUN echo 'LIBVIRTD_ARGS="--listen"' >> /etc/sysconfig/libvirtd
 RUN mkdir -p /var/lib/libvirt/images/
 
 # Edit the service file which includes ExecStartPost to chmod /dev/kvm

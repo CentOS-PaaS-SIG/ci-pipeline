@@ -1,0 +1,10 @@
+---
+- hosts: localhost
+  connection: local
+  tasks:
+    - name: "run e2e tests"
+      shell: ansible-playbook -i /tmp/singlenode.inv --private-key /root/.ssh/ex /root/linchpin_workspace/hooks/ansible/paas-sig-ci/playbooks/openshift/run_e2e_tests.yml -e 'containerrun=true'
+      register: e2e_out
+    - name: "debug"
+      debug:
+        msg: "{{ e2e_out }}"
