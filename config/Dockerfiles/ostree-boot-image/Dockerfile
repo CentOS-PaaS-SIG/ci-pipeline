@@ -21,7 +21,7 @@ RUN yum -y install libguestfs libguestfs-tools-c \
                    openssh-clients sshpass && yum clean all
 
 RUN yum -y update && yum clean all
-RUN yum -y install systemd 
+RUN yum -y install systemd
 RUN yum -y install libvirt-daemon-driver-* libvirt-daemon libvirt-daemon-kvm qemu-kvm libvirt-daemon-config-network && yum clean all; \
 (cd /lib/systemd/system/sysinit.target.wants/; for i in *; do [ $i == systemd-tmpfiles-setup.service ] || rm -f $i; done); \
 rm -f /lib/systemd/system/multi-user.target.wants/*;\
@@ -32,7 +32,7 @@ rm -f /lib/systemd/system/sockets.target.wants/*initctl*; \
 rm -f /lib/systemd/system/basic.target.wants/*;\
 rm -f /lib/systemd/system/anaconda.target.wants/*; \
 systemctl enable libvirtd; \
-systemctl enable virtlockd 
+systemctl enable virtlockd
 
 RUN pip install ara
 
