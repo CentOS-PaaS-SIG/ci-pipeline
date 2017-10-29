@@ -63,6 +63,7 @@ systemctl enable virtlockd
 COPY default.xml /etc/libvirt/qemu/networks/
 RUN mkdir -p /var/lib/libvirt/images/
 RUN mkdir -p /var/lib/libvirt/images/linchpin/
+
 # Edit the service file which includes ExecStartPost to chmod /dev/kvm
 RUN sed -i "/Service/a ExecStartPost=\/bin\/chmod 666 /dev/kvm" /usr/lib/systemd/system/libvirtd.service
 VOLUME [ "/sys/fs/cgroup"]
