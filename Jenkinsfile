@@ -21,6 +21,10 @@ env.OPENSHIFT_SERVICE_ACCOUNT = env.OPENSHIFT_SERVICE_ACCOUNT ?: 'jenkins'
 // Audit file for all messages sent.
 msgAuditFile = "messages/message-audit.json"
 
+// IRC properties
+IRC_NICK = "contra-bot"
+IRC_CHANNEL = "#contra-ci-cd"
+
 // Number of times to keep retrying to make sure message is ingested
 // by datagrepper
 fedmsgRetryCount = 120
