@@ -2,24 +2,18 @@
 
 set -xeuo pipefail
 
-# A simple shell script to automate v2c converstion
-# using Image Factory in a container
-
-# argument 1: Path to file containing the image to be converted
-
-# Factory defaults to wanting a root PW in the TDL - this causes
-# problems with converted images - just force it
-# TODO: Point the working directories at the bind mounted location?
-
 base_dir="$(pwd)"
-pwd
+mkdir -p $base_dir/logs
 
 # Start libvirtd
-ls /var/run/libvirt
 mkdir -p /var/run/libvirt
 libvirtd &
 sleep 5
 virtlogd &
+
+pushd ${base_dir}/ostree
+python -m SimpleHTTPServer &
+popd
 
 chmod 666 /dev/kvm
 
@@ -35,6 +29,17 @@ function clean_up {
 }
 trap clean_up EXIT SIGHUP SIGINT SIGTERM
 
+{ #group for tee
+
+# A simple shell script to automate v2c converstion
+# using Image Factory in a container
+
+# argument 1: Path to file containing the image to be converted
+
+# Factory defaults to wanting a root PW in the TDL - this causes
+# problems with converted images - just force it
+# TODO: Point the working directories at the bind mounted location?
+
 # Do our thing
 if [ "${branch}" = "rawhide" ]; then
     VERSION="rawhide"
@@ -44,7 +49,6 @@ fi
 
 REF="fedora/${branch}/x86_64/atomic-host"
 
-mkdir -p ${base_dir}/logs
 touch ${base_dir}/logs/ostree.props
 
 imgdir=/var/lib/imagefactory/storage/
@@ -66,10 +70,6 @@ if [ -d "${base_dir}/images" ]; then
 else
     mkdir ${base_dir}/images
 fi
-
-pushd ${base_dir}/ostree
-python -m SimpleHTTPServer &
-popd
 
 # Grab the kickstart file from fedora upstream
 curl -o ${base_dir}/logs/fedora-atomic.ks https://pagure.io/fedora-kickstarts/raw/${branch}/f/fedora-atomic.ks
@@ -142,8 +142,13 @@ pushd ${base_dir}/images || exit 1
 latest=""
 if [ -e "latest-atomic.qcow2" ]; then
     latest=$(readlink latest-atomic.qcow2)
+    latest_logdir=$(echo $latest | sed -e 's/.qcow2$//')
 fi
 
-# delete images over 3 days old but don't delete what our latest link points to
+# delete images and logs over 3 days old 
+# but don't delete what our latest link points to
 find . -type f -mtime +3 ! -name "$latest" -exec rm -v {} \;
+find . -type d -mtime +3 ! -name "$latest_logdir" -exec rm -rv {} \;
 popd
+
+} 2>&1 | tee ${base_dir}/logs/console.log #group for tee
