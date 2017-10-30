@@ -108,7 +108,7 @@ We are dependent on the following tools:
 
 ##### Openshift
  
-The CI-Pipeline is defined using Jenkins 2.0 pipeline (Jenkinsfile) + shared libraries.  Jenkins 2.0 Pipeline that is already integrated into Openshift [(Openshift Pipelines Deep Dive)](https://blog.openshift.com/openshift-3-3-pipelines-deep-dive/).
+The CI-Pipeline is defined using Jenkins 2.0 pipeline (Jenkinsfile) + shared libraries.  Jenkins 2.0 Pipeline is already integrated into Openshift [(Openshift Pipelines Deep Dive)](https://blog.openshift.com/openshift-3-3-pipelines-deep-dive/).
 All our pipeline components, containers, etc. are running inside the CentOS Openshift instance.
 
 ##### Jenkins 2.0 Pipeline 
@@ -116,7 +116,7 @@ Our Jenkins master that runs inside Openshift is [Jenkins Master](https://jenkin
 
 ###### Jenkins Masters and Slaves
 
-The Jenkins Master are created from Openshift's s2i (source-to-image) feature.  This means we can create our infrastructure for our pipeline right from source.
+The Jenkins Master is created from Openshift's s2i (source-to-image) feature.  This means we can create our infrastructure for our pipeline right from source.
 The Jenkins Master is backed by a persistent volume to maintain historical data.<br>
 
 Slave images are created from Dockerfiles.   
@@ -177,7 +177,7 @@ Since we can easily integrate into github then we can use our own pipeline to va
 
 ### Pipeline References
 
-Currently documentation, Jenkins master/slave containers, container definitions - s2i/docker, pipeline shared libraries, tools, etc. are located [here](https://github.com/CentOS-PaaS-SIG/ci-pipeline).
+Currently documentation, Jenkins master/slave containers, container definitions - s2i/docker, pipeline shared libraries, tools, etc. are located [here in this repo](https://github.com/CentOS-PaaS-SIG/ci-pipeline).
 
 ## Example Project - Fedora Atomic Host
 
