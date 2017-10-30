@@ -320,8 +320,8 @@ podTemplate(name: podName,
                         sh "cp -f ${untested_img_loc} ${env.WORKSPACE}/"
 
                         // rsync all images
-                        env.rsync_from = "/home/output/images/*.qcow2"
-                        env.rsync_to = "${env.RSYNC_USER}@${env.RSYNC_SERVER}::${env.RSYNC_DIR}/${env.RSYNC_BRANCH}/images/tempImages_${env.dailyImageDir}/"
+                        env.rsync_from = untested_img_loc
+                        env.rsync_to = "${env.RSYNC_USER}@${env.RSYNC_SERVER}::${env.RSYNC_DIR}/${env.RSYNC_BRANCH}/images/tempImages_${env.dailyImageDir}/${env.fed_rev}.qcow2"
                         pipelineUtils.executeInContainer(currentStage + "-rsync-after-always", "rsync", "/tmp/rsync_no_path.sh")
 
                         if (fileExists("${env.WORKSPACE}/NeedNewImage.txt") || ("${env.GENERATE_IMAGE}" == "true")) {
