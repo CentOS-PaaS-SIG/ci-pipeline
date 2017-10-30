@@ -61,17 +61,17 @@
 ## What Does CI/CD Mean in the Context of the CI-Pipeline Project?
 
 True CI starts at gating developers before code is integrated into the general code base to find bugs sooner. 
-It is lest costly for the developer that changed the code to fix their own issues before the code is merged into the repo.
+It is less costly for the developer that changed the code to fix their own issues before the code is merged into the repo.
 Obviously there is a certain balance of what testing/validation is run and time to get feedback to the developer and this may vary among projects.
 
 ## CI-Pipeline Overview
 
 CI in general is the continuous integration of components/projects/products and validating these work together and then providing feedback to developers.
-Continuous delivery is the act of taking these integrated components that have been validated and are stable and deliverying them on with consistency over and over efficiently.
-Continuous deployment allows us to take the deliverable and deploy it on some set of infrastructure to be used in a developement, stage, and/or production environments. <br><br>
+Continuous delivery is the act of taking these integrated components that have been validated and are stable and deliverying them with consistency over and over efficiently.
+Continuous deployment allows us to take the deliverable and deploy it on some set of infrastructure to be used in a development, stage, and/or production environments. <br><br>
 
 The way continuous integration works is that robots test every change. They can then tell you which change caused the integrated result to break. We can then “gate” that change and ask a human to fix it.
-When those changes are small and regular, the robots can gate it, and it’s trivial for a packager or developer to quickly see why and how the change broke the operating system.
+When those changes are small and regular, the robots can gate it, and it’s trivial for a developer to quickly see why and how the change broke the code.
 On the other hand, if the changes that flow into continuous integration are massive bundles of changes, with months between them, with myriad test failures, then it becomes a tedious never-ending process to dissect them and figure out what went wrong. The effect of continuous integration evaporates.
 Hence we arrive at the following truth: <br>
  
@@ -166,10 +166,10 @@ The libraries in this repo/project follows the [Jenkins community shared library
 ### CI the CI-Pipeline - Inception
 
 Since we can easily integrate into github then we can use our own pipeline to validate our stage containers, pipeline code, and shared libraries.  
- 1. We inspect the change.log in the pipeline using the [Jenkins declaritive pipeline DSL](https://github.com/CentOS-PaaS-SIG/ci-pipeline/blob/master/JenkinsfileStageTrigger).
- 2. If stage containers are touched then they are built in Openshift and validate
+ 1. We inspect the changelog in the pipeline using the [Jenkins declaritive pipeline DSL](https://github.com/CentOS-PaaS-SIG/ci-pipeline/blob/master/JenkinsfileStageTrigger).
+ 2. If stage containers are touched then they are built in Openshift and validated
  3. If the stage container passes validation it is tagged stable and promoted to production in the pipeline
- 4. If a container and/or pipeline code and/or shared libraries are changed the change is run through th pipeline for validation
+ 4. If a container and/or pipeline code and/or shared libraries are changed the change is run through the pipeline for validation
 
 #### Example of CI the CI-Pipeline
 
@@ -211,13 +211,13 @@ CI Pipeline messages sent via fedmsg for this stage are captured by the topics o
 
 Once the pipeline is triggered as part of the build process if unit tests exist they will be executed.
 
-The end result is package will be produced to then be used for further testing.  Success or failure will result with a fedmsg back to the Fedora reviewer/maintainer.
+The end result is package will be produced to then be used for further testing.  Success or failure will result with a fedmsg back to the Fedora package maintainer.
 
 CI Pipeline messages sent via fedmsg for this stage are captured by the topics org.centos.prod.ci.pipeline.package.[running,complete].
 
 #### Functional Tests on Packages
 
-Functional tests will be executed on the produced package from the previous stage of the pipeline if they exist.  This will help identify issues isolated to the package themselves.  Success or failure will result with a fedmsg back to the Fedora reviewer/maintainer.
+Functional tests will be executed on the produced package from the previous stage of the pipeline if they exist.  This will help identify issues isolated to the package themselves.  Success or failure will result with a fedmsg back to the Fedora package maintainer.
 
 CI Pipeline messages sent via fedmsg for this stage are captured by the topics org.centos.prod.ci.pipeline.package.test.functional.[queued,running,complete].
 
@@ -229,24 +229,23 @@ CI Pipeline messages sent via fedmsg for this stage are captured by the topics o
 
 #### Integration Tests on OStree Composes and Images
 
-Integration tests are run on the OStree compose.  Success or failure will result with a fedmsg back to the Fedora reviewer/maintainer.  Also, this can trigger the Red Hat continuous delivery process to run more comprehensive testing if desired.
+Integration tests are run on the OStree compose.  Success or failure will result with a fedmsg back to the Fedora package maintainer.
 
 CI Pipeline messages sent via fedmsg for this stage are captured by the topics org.centos.prod.ci.pipeline.compose.test.integration[queued,running,complete].
 
 #### Image Generated From Successful Integration Tests On OStree
 
-An image will be initially generated at a certain interval when there has been successful integration test execution on an OStree compose. Success or failure will result with a fedmsg back to the Fedora reviewer/maintainer.  Also, this can trigger the Red Hat continuous delivery process to run more comprehensive testing if desired.
+An image will be initially generated at a certain interval when there has been successful integration test execution on an OStree compose. Success or failure will result with a fedmsg back to the Fedora package maintainer.
 
 CI Pipeline messages sent via fedmsg for this stage are captured by the topics org.centos.prod.ci.pipeline.image.[running,complete].
 
 #### Openshift Cluster and e2e Conformance tests on top of Fedora Atomic Host
 
-If integration tests of the images are successful an openshift cluster will be configured using the Atomic Openshift Installer with the new Fedora Atomic Host image as the base system.  Once the cluster is configured Kubernetes conformance tests will run. Success or failure will result with a fedmsg back to the Fedora reviewer/maintainer.  Also, this can trigger the Red Hat continuous delivery process to run more comprehensive testing if desired.
-
+If integration tests of the images are successful an openshift cluster will be configured using the Atomic Openshift Installer with the new Fedora Atomic Host image as the base system.  Once the cluster is configured Kubernetes conformance tests will run. Success or failure will result with a fedmsg back to the Fedora package maintainer.
 
 #### Image Smoke Test Validation
 
-The validation left is to make sure the image can boot and more smoke tests may follow if required.  Success or failure will result with a fedmsg back to the Fedora reviewer/maintainer.  Also, this can trigger the Red Hat continuous delivery process to run more comprehensive testing.
+The validation left is to make sure the image can boot and more smoke tests may follow if required.  Success or failure will result with a fedmsg sent back to the Fedora package maintainer.  Also, this can trigger the Red Hat continuous delivery process to run more comprehensive testing.
 
 CI Pipeline messages sent via fedmsg for this stage are captured by the topics org.centos.prod.ci.pipeline.image.test.smoke.[running,complete].
 
