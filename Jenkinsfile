@@ -320,15 +320,15 @@ podTemplate(name: podName,
                         sh "cp -f ${untested_img_loc} ${env.WORKSPACE}/"
 
                         // rsync all images
-                        env.rsync_paths = "*.qcow2"
                         env.rsync_from = "/home/output/images/"
                         env.rsync_to = "${env.RSYNC_USER}@${env.RSYNC_SERVER}::${env.RSYNC_DIR}/${env.RSYNC_BRANCH}/images/tempImages_${env.dailyImageDir}/"
-                        pipelineUtils.executeInContainer(currentStage + "-rsync-after-always", "rsync", "/tmp/rsync.sh")
+                        pipelineUtils.executeInContainer(currentStage + "-rsync-after-always", "rsync", "/tmp/rsync_no_path.sh")
 
                         if (fileExists("${env.WORKSPACE}/NeedNewImage.txt") || ("${env.GENERATE_IMAGE}" == "true")) {
                             // Rsync push images
                             env.rsync_to = "${env.RSYNC_USER}@${env.RSYNC_SERVER}::${env.RSYNC_DIR}/${env.RSYNC_BRANCH}/"
                             env.rsync_from = "/home/output/"
+                            env.rsync_paths = "images"
                             pipelineUtils.executeInContainer(currentStage + "-rsync-after", "rsync", "/tmp/rsync.sh")
 
                             // These variables will mess with boot sanity jobs
