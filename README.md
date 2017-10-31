@@ -3,22 +3,36 @@
 **Table of Contents**
 
 - [CI-Pipeline Architecture and Design](#ci-pipeline-architecture-and-design)
-  - [Overview](#overview)
+  - [What Does CI/CD Mean in the Context of the CI-Pipeline Project?](#what-does-cicd-mean-in-the-context-of-the-ci-pipeline-project)
+  - [CI-Pipeline Overview](#ci-pipeline-overview)
   - [Dependencies and Assumptions](#dependencies-and-assumptions)
-  - [Infrastructure and Tools](#infrastructure-and-tools)
-  - [CI-Pipeline Complete View](#ci-pipeline-complete-view)
-  - [Pipeline Stages](#pipeline-stages)
-    - [Trigger](#trigger)
-    - [Build Package](#build-package)
-    - [Functional Tests on Package](#functional-tests-on-package)
-    - [Compose OStree](#compose-ostree)
-    - [Integration Tests on OStree](#integration-tests-on-ostree)
-    - [e2e Conformance Tests on Openshift Clusters](#e2e-conformance-tests-on-openshift-clusters)
-    - [Image Generated From Successful Integration Tests On OStree](#image-generated-from-successful-integration-tests-on-ostree)
-    - [Image Smoke Test Validation](#image-smoke-test-validation)
-  - [Message Bus](#message-bus)
-    - [Message Types](#message-types)
-      - [Message Legend](#message-legend)
+    - [Automation Frameworks and Tests](#automation-frameworks-and-tests)
+    - [Triggering the Pipeline](#triggering-the-pipeline)
+    - [CI/CD Toolset and Infrastructure](#cicd-toolset-and-infrastructure)
+      - [Openshift, Jenkins 2.0 pipeline, Pipeline Shared Libraries](#openshift-jenkins-20-pipeline-pipeline-shared-libraries)
+        - [Jenkins 2.0 Pipeline](#jenkins-20-pipeline)
+          - [Jenkins Masters and Slaves](#jenkins-masters-and-slaves)
+        - [Pipeline Shared Libraries](#pipeline-shared-libraries)
+    - [CI the CI-Pipeline - Inception](#ci-the-ci-pipeline---inception)
+      - [Example of CI the CI-Pipeline](#example-of-ci-the-ci-pipeline)
+    - [Pipeline References](#pipeline-references)
+  - [Example Project - Fedora Atomic Host](#example-project---fedora-atomic-host)
+    - [Fedora Atomic Host Complete View](#fedora-atomic-host-complete-view)
+      - [Automation Frameworks and Testing in Fedora](#automation-frameworks-and-testing-in-fedora)
+      - [Design Diagrams](#design-diagrams)
+      - [CI-Pipeline in Action](#ci-pipeline-in-action)
+    - [Fedora Atomic Host Pipeline Stages](#fedora-atomic-host-pipeline-stages)
+      - [Trigger](#trigger)
+      - [Build Package](#build-package)
+      - [Functional Tests on Packages](#functional-tests-on-packages)
+      - [Compose an OStree](#compose-an-ostree)
+      - [Integration Tests on OStree Composes and Images](#integration-tests-on-ostree-composes-and-images)
+      - [Image Generated From Successful Integration Tests On OStree](#image-generated-from-successful-integration-tests-on-ostree)
+      - [Openshift Cluster and e2e Conformance tests on top of Fedora Atomic Host](#openshift-cluster-and-e2e-conformance-tests-on-top-of-fedora-atomic-host)
+      - [Image Smoke Test Validation](#image-smoke-test-validation)
+    - [fedmsg Bus](#fedmsg-bus)
+      - [fedmsg - Message Types](#fedmsg---message-types)
+        - [fedmsg - Message Legend](#fedmsg---message-legend)
       - [Trigger - org.fedoraproject.prod.git.receive](#trigger---orgfedoraprojectprodgitreceive)
       - [Dist-git message example](#dist-git-message-example)
       - [org.centos.prod.ci.pipeline.package.ignore](#orgcentosprodcipipelinepackageignore)
@@ -38,105 +52,211 @@
       - [org.centos.prod.ci.pipeline.compose.test.integration.running](#orgcentosprodcipipelinecomposetestintegrationrunning)
       - [org.centos.prod.ci.pipeline.compose.test.integration.complete](#orgcentosprodcipipelinecomposetestintegrationcomplete)
       - [org.centos.prod.ci.pipeline.complete](#orgcentosprodcipipelinecomplete)
-    - [Reporting Results](#reporting-results)
 
 <!-- END doctoc generated TOC please keep comment here to allow auto update -->
 
 # CI-Pipeline Architecture and Design
+![CI-Pipeline](continuous-infra-logo.png)
 
-## Overview
+## What Does CI/CD Mean in the Context of the CI-Pipeline Project?
 
-The CI-Pipeline is designed to take the Fedora dist-git repos that make up the Fedora Atomic Host and build the RPMs and create the OStree composes and images.  Tests will run at different pipeline stages of the pipeline.  Unit tests will run during the building of the RPMs.  Once RPMs are built successfully functional tests will run against these packages.  Once the compose of the OStree and images is complete integration of the entire host image will be executed.  The final piece is to configure an Origin Openshift cluster using the Atomic Openshift Installer on top of the Fedora Atomic Host images and executing the e2e conformance tests.  Once the OStree and images are validated a message will be published on the fedmsg bus under the CentOS CI topic.
+True CI starts at gating developers before code is integrated into the general code base to find bugs sooner. 
+It is less costly for the developer that changed the code to fix their own issues before the code is merged into the repo.
+Obviously there is a certain balance of what testing/validation is run and time to get feedback to the developer and this may vary among projects.
 
-The backbone of communication is fedmsg.  Success and failures of the different pipeline stages will be communicated to reviewers/maintainers in Fedora as well as in the CentOS CI-Pipeline.  The reviewers/maintainers can initially choose to &quot;opt-in&quot; and ultimately be a gating requirement.  When a new OStree and image is available and has passed an acceptable level of testing messages will be published and then Red Hat continuous delivery phase will consume these OStrees and images.
+## CI-Pipeline Overview
+
+CI in general is the continuous integration of components/projects/products and validating these work together and then providing feedback to developers.
+Continuous delivery is the act of taking these integrated components that have been validated and are stable and deliverying them with consistency over and over efficiently.
+Continuous deployment allows us to take the deliverable and deploy it on some set of infrastructure to be used in a development, stage, and/or production environments. <br><br>
+
+The way continuous integration works is that robots test every change. They can then tell you which change caused the integrated result to break. We can then “gate” that change and ask a human to fix it.
+When those changes are small and regular, the robots can gate it, and it’s trivial for a developer to quickly see why and how the change broke the code.
+On the other hand, if the changes that flow into continuous integration are massive bundles of changes, with months between them, with myriad test failures, then it becomes a tedious never-ending process to dissect them and figure out what went wrong. The effect of continuous integration evaporates.
+Hence we arrive at the following truth: <br>
+ 
+<b>The closer to the source of change the continuous integration acts, the more effective it is.<br></b>
+
+This CI/CD toolset is designed to provide a flexible solution to that problem.  The pipeline is fully containerized and built using upstream projects Openshift, Jenkins, and Ansible.
+This makes the pipeline extremely portable and can run in any Openshift instance and adapted to any project/product.
 
 ## Dependencies and Assumptions
 
-The CI-Pipeline is not an automation framework or automated tests.  CI in general is the continuous integration of components and validating these work together.  In this case being Fedora Atomic Host. The CI-Pipeline accommodates any automation framework and tests.  Unit tests can easily be defined as make targets and can run as part of the build and need minimal resources.  Functional and integration testing may require more robust test beds to execute scenarios.
+### Automation Frameworks and Tests
 
-Setup and invoking of tests will be done using ansible as outlined in [Invoking Tests Using Ansible](https://fedoraproject.org/wiki/Changes/InvokingTestsAnsible)
+The CI-Pipeline is NOT an automation framework or set of automated tests.  There are plenty of those that exist and this project's goal is to be flexible to accommodate execution of any automation framework, tests and tools, especially if they are already integrated in a container.  
+Unit tests can easily be defined as make targets and can run as part of the build and need minimal resources.  Functional and integration testing may require more robust test beds to execute scenarios.  
+In most cases these more complex tests can still be verified inside containers or VMs running inside containers.  This is both more efficient and provides a quicker feedback loop for developers.
 
-Setup and invoking of tests will be done using ansible as outlined in Invoking Tests Using Ansible
+### Triggering the Pipeline
 
-We assume that there will be tests available to execute otherwise there is nothing besides building, composing, and configuring an Openshift cluster to validate the OStrees and images.  There is currently tests available for many of the Atomic components as well as the Kubernetes e2e conformance tests.
+Since Jenkins is integrated with many trigger options we can easily trigger the pipeline based on cron, github, gerrit, gitlab, and fedmsg thanks to the [Jenkins JMS plugin](https://wiki.jenkins-ci.org/display/JENKINS/JMS+Messaging+Plugin)
 
-The CI-Pipeline can be defined using Jenkins Job Builder short-term and Jenkins Pipeline (Jenkinsfile) long-term.  This will be the Jenkins 2.0 Pipeline that is already integrated in Openshift [(Openshift Pipelines Deep Dive)](https://blog.openshift.com/openshift-3-3-pipelines-deep-dive/).
+### CI/CD Toolset and Infrastructure
 
-We are dependent on the CentOS CI infrastructure for Openshift, Jenkins resources, test resources (bare metal machines, VMs, containers), datahub, and the fedmsg hub.
+We are dependent on the following tools:
+ * Openshift
+   * Containers
+ * Jenkins 2.0
+   * Plugins
+   * Pipeline
+   * Shared libraries
+ * Ansible
 
-## Infrastructure and Tools
-
-The CI-Pipeline will use CentOS CI for Jenkins master and slave resources.  We plan to move these into an Openshift environment and back our Jenkins with persistent volumes.  Initially all jobs will be defined using [Jenkins Job Builder](https://docs.openstack.org/infra/jenkins-job-builder/), but the team plans in the long-term to move these to a [Jenkins Pipeline](https://jenkins.io/doc/book/pipeline/) using the Jenkinsfile declarative format.  We will be using the [Jenkins JMS plugin](https://wiki.jenkins-ci.org/display/JENKINS/JMS+Messaging+Plugin) to listen and publish messages on fedmsg.  There will be other plugins used such as the email ext and groovy, but most will be part of the core of Jenkins 2.0
-
-The pipeline will use [Linch-pin](https://github.com/CentOS-PaaS-SIG/linch-pin) for the provisioning of resources.  Linch-pin allows us to provision bare metal and VMs in many infrastructures such as AWS, Openstack, GCE, Duffy, libvirt,  and Beaker.
-
-CentOS CI will have its own fedmsg topic and a hub to route messages that are published.  We also need a Datahub in CentOS CI for persistent results data.
-
-Currently documentation, jobs, tools, etc. are stored at [CentOS CI-Pipeline](https://github.com/CentOS-PaaS-SIG/ci-pipeline).
+#### Openshift, Jenkins 2.0 pipeline, Pipeline Shared Libraries
 
 
-## CI-Pipeline Complete View
+##### Openshift
+ 
+The CI-Pipeline is defined using Jenkins 2.0 pipeline (Jenkinsfile) + shared libraries.  Jenkins 2.0 Pipeline is already integrated into Openshift [(Openshift Pipelines Deep Dive)](https://blog.openshift.com/openshift-3-3-pipelines-deep-dive/).
+All our pipeline components, containers, etc. are running inside the CentOS Openshift instance.
+
+##### Jenkins 2.0 Pipeline 
+Our Jenkins master that runs inside Openshift is [Jenkins Master](https://jenkins-continuous-infra.apps.ci.centos.org/)
+
+###### Jenkins Masters and Slaves
+
+The Jenkins Master is created from Openshift's s2i (source-to-image) feature.  This means we can create our infrastructure for our pipeline right from source.
+The Jenkins Master is backed by a persistent volume to maintain historical data.<br>
+
+Slave images are created from Dockerfiles.   
+
+````
+├── config
+│   └── s2i
+│       ├── create-containers.sh
+│       ├── jenkins
+│       │   ├── continuous-infra-create-openshift-project
+│       │   ├── continuous-infra-jenkins-master-s2i-template.yaml
+│       │   ├── continuous-infra-slave-template.yaml
+│       │   ├── master
+│       │   │   ├── configuration
+│       │   │   │   ├── hudson.plugins.ircbot.IrcPublisher.xml
+│       │   │   │   ├── hudson.tasks.Maven.xml
+│       │   │   │   ├── init.groovy
+│       │   │   │   └── jobs
+│       │   │   │       ├── fedmsg-test
+│       │   │   │       │   └── config.xml
+│       │   │   │       └── maven-test
+│       │   │   │           └── config.xml
+│       │   │   └── plugins.txt
+│       │   └── slave
+│       │       └── Dockerfile
+
+````
+
+##### Pipeline Shared Libraries
+
+We have shared libraries that are used in this repo/project and we also use other shared libraries that we contribute to along with the CentOS Community<br>
+[cico-pipeline-library](https://github.com/CentOS/cico-pipeline-library)
+<br>
+
+The libraries in this repo/project follows the [Jenkins community shared library structure](https://jenkins.io/doc/book/pipeline/shared-libraries/):
+
+````
+├── src
+│   └── org
+│       └── centos
+│           └── pipeline
+│               └── PipelineUtils.groovy
+└── vars
+    └── pipelineUtils.groovy
+````
+
+### CI the CI-Pipeline - Inception
+
+Since we can easily integrate into github then we can use our own pipeline to validate our stage containers, pipeline code, and shared libraries.  
+ 1. We inspect the changelog in the pipeline using the [Jenkins declaritive pipeline DSL](https://github.com/CentOS-PaaS-SIG/ci-pipeline/blob/master/JenkinsfileStageTrigger).
+ 2. If stage containers are touched then they are built in Openshift and validated
+ 3. If the stage container passes validation it is tagged stable and promoted to production in the pipeline
+ 4. If a container and/or pipeline code and/or shared libraries are changed the change is run through the pipeline for validation
+
+#### Example of CI the CI-Pipeline
+
+![ci-the-ci-pipeline](stage-pipeline-trigger.gif) 
+
+### Pipeline References
+
+Currently documentation, Jenkins master/slave containers, container definitions - s2i/docker, pipeline shared libraries, tools, etc. are located [here in this repo](https://github.com/CentOS-PaaS-SIG/ci-pipeline).
+
+## Example Project - Fedora Atomic Host
+
+In leveraging the CI-Pipeline this project was able to deliver a stable Fedora Atomic host and gate packagers in Fedora.  We were able to integrate with fedmsg as our trigger and publishing communication backbone.
+This allowed us to gate packagers in the Fedora infrastructure. 
+
+
+### Fedora Atomic Host Complete View
+
+#### Automation Frameworks and Testing in Fedora
+
+Setup and invoking of tests is being done using ansible as outlined in [Invoking Tests Using Ansible](https://fedoraproject.org/wiki/Changes/InvokingTestsAnsible)
+
+#### Design Diagrams
 ![ci-pipeline-complete-view](ci-pipeline-complete-view.png)
 ![ci-pipeline-detail](ci-pipeline-detail.png) 
 
-## Pipeline Stages
+#### CI-Pipeline in Action
+![Fedora Atomic f26 example](ci-pipelinef26.gif)
 
-### Trigger
+### Fedora Atomic Host Pipeline Stages
 
-Once packages are pushed to Fedora dist-git this will trigger a message.  The pipeline will be triggered via the   [Jenkins JMS plugin](https://wiki.jenkins-ci.org/display/JENKINS/JMS+Messaging+Plugin) for dist-git messages on fedmsg.  This could also be manually triggered by a reviewer/maintainer as well.  Only Fedora Atomic Host packages will be monitored for changes currently.  This may broaden in the long-term.
+#### Trigger
+
+Once packages are pushed to Fedora dist-git this will trigger a message.  The pipeline will be triggered via the [Jenkins JMS plugin](https://wiki.jenkins-ci.org/display/JENKINS/JMS+Messaging+Plugin) for dist-git messages on fedmsg.  
+Only Fedora Atomic Host packages are monitored for changes currently.  This can easliy be broadened to all of Fedora packages.
 
 CI Pipeline messages sent via fedmsg for this stage are captured by the topics org.centos.prod.ci.pipeline.package.[queued,ignored].
 
-### Build Package
+#### Build Package
 
 Once the pipeline is triggered as part of the build process if unit tests exist they will be executed.
 
-The end result is package will be produced to then be used for further testing.  Success or failure will result with a fedmsg back to the Fedora reviewer/maintainer.
+The end result is package will be produced to then be used for further testing.  Success or failure will result with a fedmsg back to the Fedora package maintainer.
 
 CI Pipeline messages sent via fedmsg for this stage are captured by the topics org.centos.prod.ci.pipeline.package.[running,complete].
 
-### Functional Tests on Package
+#### Functional Tests on Packages
 
-Functional tests will be executed on the produced package from the previous stage of the pipeline if they exist.  This will help identify issues isolated to the package themselves.  Success or failure will result with a fedmsg back to the Fedora reviewer/maintainer.
+Functional tests will be executed on the produced package from the previous stage of the pipeline if they exist.  This will help identify issues isolated to the package themselves.  Success or failure will result with a fedmsg back to the Fedora package maintainer.
 
 CI Pipeline messages sent via fedmsg for this stage are captured by the topics org.centos.prod.ci.pipeline.package.test.functional.[queued,running,complete].
 
-### Compose OStree
+#### Compose an OStree
 
 If functional tests are successful in the previous stage of the pipeline then an OStree compose is generated.
 
 CI Pipeline messages sent via fedmsg for this stage are captured by the topics org.centos.prod.ci.pipeline.compose.[running,complete].
 
-### Integration Tests on OStree
+#### Integration Tests on OStree Composes and Images
 
-Integration tests are run on the OStree compose.  Success or failure will result with a fedmsg back to the Fedora reviewer/maintainer.  Also, this can trigger the Red Hat continuous delivery process to run more comprehensive testing if desired.
+Integration tests are run on the OStree compose.  Success or failure will result with a fedmsg back to the Fedora package maintainer.
 
 CI Pipeline messages sent via fedmsg for this stage are captured by the topics org.centos.prod.ci.pipeline.compose.test.integration[queued,running,complete].
 
-### e2e Conformance Tests on Openshift Clusters
+#### Image Generated From Successful Integration Tests On OStree
 
-If integration tests of the images are successful an openshift cluster will be configured using the Atomic Openshift Installer with the new Fedora Atomic Host image as the base system.  Once the cluster is configured Kubernetes conformance tests will run. Success or failure will result with a fedmsg back to the Fedora reviewer/maintainer.  Also, this can trigger the Red Hat continuous delivery process to run more comprehensive testing if desired.
-
-### Image Generated From Successful Integration Tests On OStree
-
-An image will be initially generated at a certain interval when there has been successful integration test execution on an OStree compose. Success or failure will result with a fedmsg back to the Fedora reviewer/maintainer.  Also, this can trigger the Red Hat continuous delivery process to run more comprehensive testing if desired.
+An image will be initially generated at a certain interval when there has been successful integration test execution on an OStree compose. Success or failure will result with a fedmsg back to the Fedora package maintainer.
 
 CI Pipeline messages sent via fedmsg for this stage are captured by the topics org.centos.prod.ci.pipeline.image.[running,complete].
 
-### Image Smoke Test Validation
+#### Openshift Cluster and e2e Conformance tests on top of Fedora Atomic Host
 
-The validation left is to make sure the image can boot and more smoke tests may follow if required.  Success or failure will result with a fedmsg back to the Fedora reviewer/maintainer.  Also, this can trigger the Red Hat continuous delivery process to run more comprehensive testing.
+If integration tests of the images are successful an openshift cluster will be configured using the Atomic Openshift Installer with the new Fedora Atomic Host image as the base system.  Once the cluster is configured Kubernetes conformance tests will run. Success or failure will result with a fedmsg back to the Fedora package maintainer.
+
+#### Image Smoke Test Validation
+
+The validation left is to make sure the image can boot and more smoke tests may follow if required.  Success or failure will result with a fedmsg sent back to the Fedora package maintainer.  Also, this can trigger the Red Hat continuous delivery process to run more comprehensive testing.
 
 CI Pipeline messages sent via fedmsg for this stage are captured by the topics org.centos.prod.ci.pipeline.image.test.smoke.[running,complete].
 
-## Message Bus
+### fedmsg Bus
 
 Communication between Fedora, CentOS, and Red Hat infrastructures will be done via fedmsg.  Messages will be received of updates to dist-git repos that we are concerned about for Fedora Atomic host.  Triggering will happen from Fedora dist-git. The CI-Pipeline in CentOS infrastructure will build and functional test packages, compose and integration test ostrees, generate and smoke test (boot) images.  We are dependant on CentOS Infrastructure for allowing us a hub for publishing messages to fedmsg.
 
-### Message Types
+#### fedmsg - Message Types
 Below are the different message types that we listen and publish.  There will be different subtopics so we can keep things organized under the org.centos.prod.ci.pipeline.* umbrella. The fact that ‘org.centos’ is contained in the messages is a side effect of the way fedmsg enforces message naming.
 
-#### Message Legend
+##### fedmsg - Message Legend
 
 * CI_TYPE - Type of message we are sending (default value = custom)
   - ex. custom
@@ -857,7 +977,3 @@ ne.complete\",\"username\":\"fedora-atomic\"}",
   }
 }
 ````
-
-### Reporting Results
-
-Results will be made available in the CentOS CI Datahub.  The Datahub will monitor CI-Pipeline jobs.  The results stored in the CentOS CI Datahub will be pushed to the Red Hat internal Datahub.  Please refer to documentation about the datahub for detail information.
