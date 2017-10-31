@@ -214,7 +214,7 @@ def getDailyImageDir(Integer num) {
  */
 def checkDailyImageDir(Integer num) {
     def dailyNum = getDailyImageDir(num)
-    def url = new URL("${HTTP_BASE}/${RSYNC_BRANCH}/images/tempImages_${dailyNum}")
+    def url = new URL("${HTTP_BASE}/${RSYNC_BRANCH}/tempImages_${dailyNum}")
     def connection = (HttpURLConnection)url.openConnection()
     connection.setRequestMethod("HEAD")
 
