@@ -151,8 +151,7 @@ podTemplate(name: podName,
                         privileged: true,
                         workingDir: '/workDir')
         ],
-        volumes: [emptyDirVolume(memory: false, mountPath: '/home/output'),
-                  emptyDirVolume(memory: false, mountPath: '/sys/class/net')])
+        volumes: [emptyDirVolume(memory: false, mountPath: '/sys/class/net')])
 {
     node(podName) {
 
@@ -246,24 +245,22 @@ podTemplate(name: podName,
                         // Send message org.centos.prod.ci.pipeline.compose.running on fedmsg
                         pipelineUtils.sendMessageWithAudit(messageFields['properties'], messageFields['content'], msgAuditFile, fedmsgRetryCount)
 
-                        // Execute in containers
+                        // Get previous ostree artifacts
                         env.rsync_paths = "ostree"
+                        env.rsync_from = "${env.RSYNC_USER}@${env.RSYNC_SERVER}::${env.RSYNC_DIR}/${env.RSYNC_BRANCH}/"
+                        env.rsync_to = "${env.WORKSPACE}/"
+                        pipelineUtils.executeInContainer(currentStage + "-rsync-before", "rsync", "/tmp/rsync.sh")
 
-                        dir('ci-pipeline') {
-                            env.rsync_from = "${env.RSYNC_USER}@${env.RSYNC_SERVER}::${env.RSYNC_DIR}/${env.RSYNC_BRANCH}/"
-                            env.rsync_to = "/home/output/"
+                        // Compose new ostree
+                        pipelineUtils.executeInContainer(currentStage, "ostree-compose", "/tmp/ostree-compose.sh")
 
-                            pipelineUtils.executeInContainer(currentStage + "-rsync-before", "rsync", "/tmp/rsync.sh")
+                        // Push new ostree compose to artifacts server
+                        env.rsync_to = "${env.RSYNC_USER}@${env.RSYNC_SERVER}::${env.RSYNC_DIR}/${env.RSYNC_BRANCH}/"
+                        env.rsync_from = "${env.WORKSPACE}/"
+                        pipelineUtils.executeInContainer(currentStage + "-rsync-after", "rsync", "/tmp/rsync.sh")
 
-                            pipelineUtils.executeInContainer(currentStage, "ostree-compose", "/tmp/ostree-compose.sh")
-
-                            env.rsync_to = "${env.RSYNC_USER}@${env.RSYNC_SERVER}::${env.RSYNC_DIR}/${env.RSYNC_BRANCH}/"
-                            env.rsync_from = "/home/output/"
-
-                            pipelineUtils.executeInContainer(currentStage + "-rsync-after", "rsync", "/tmp/rsync.sh")
-                        }
-
-                        def ostree_props = "${env.WORKSPACE}/ci-pipeline/" + currentStage + "/logs/ostree.props"
+                        // Load ostree properties as variables
+                        def ostree_props = "${env.WORKSPACE}/" + currentStage + "/logs/ostree.props"
                         def ostree_props_groovy = "${env.WORKSPACE}/ostree.props.groovy"
                         pipelineUtils.convertProps(ostree_props, ostree_props_groovy)
                         load(ostree_props_groovy)
@@ -299,7 +296,7 @@ podTemplate(name: podName,
                         // Rsync pull from artifacts
                         env.rsync_paths = "netinst ostree images"
                         env.rsync_from = "${env.RSYNC_USER}@${env.RSYNC_SERVER}::${env.RSYNC_DIR}/${env.RSYNC_BRANCH}/"
-                        env.rsync_to = "/home/output/"
+                        env.rsync_to = "${env.WORKSPACE}/"
                         pipelineUtils.executeInContainer(currentStage + "-rsync-before", "rsync", "/tmp/rsync.sh")
 
                         // Compose image
@@ -307,11 +304,11 @@ podTemplate(name: podName,
 
                         // Rsync push netinst
                         env.rsync_paths = "netinst"
-                        env.rsync_from = "/home/output/"
+                        env.rsync_from = "${env.WORKSPACE}/"
                         env.rsync_to = "${env.RSYNC_USER}@${env.RSYNC_SERVER}::${env.RSYNC_DIR}/${env.RSYNC_BRANCH}/"
-                        pipelineUtils.executeInContainer(currentStage + "-rsync-after-netinst", "rsync", "/tmp/rsync.sh")
+                        pipelineUtils.executeInContainer(currentStage + "-rsync-push-netinst", "rsync", "/tmp/rsync.sh")
 
-                        String untested_img_loc = "/home/output/images/untested-atomic.qcow2"
+                        String untested_img_loc = "${env.WORKSPACE}/images/untested-atomic.qcow2"
                         sh "cp -f ${untested_img_loc} ${env.WORKSPACE}/"
                         if (fileExists("${env.WORKSPACE}/NeedNewImage.txt") || ("${env.GENERATE_IMAGE}" == "true")) {
                             // Rsync push images
@@ -347,16 +344,18 @@ podTemplate(name: podName,
                             // Send message org.centos.prod.ci.pipeline.image.test.smoke.running on fedmsg
                             pipelineUtils.sendMessageWithAudit(messageFields['properties'], messageFields['content'], msgAuditFile, fedmsgRetryCount)
 
-                            // Run ostree boot sanity
+                            // Rsync pull images dir from artifacts
                             env.rsync_paths = "images"
                             env.rsync_from = "${env.RSYNC_USER}@${env.RSYNC_SERVER}::${env.RSYNC_DIR}/${env.RSYNC_BRANCH}/"
-                            env.rsync_to = "/home/output/"
+                            env.rsync_to = "${env.WORKSPACE}/"
                             pipelineUtils.executeInContainer(currentStage + "-rsync-before", "rsync", "/tmp/rsync.sh")
 
+                            // Run boot sanity on image
                             pipelineUtils.executeInContainer(currentStage, "ostree-boot-image", "/home/ostree-boot-image.sh")
 
+                            // If boot sanity passes, we update images dir on artifacts
                             env.rsync_to = "${env.RSYNC_USER}@${env.RSYNC_SERVER}::${env.RSYNC_DIR}/${env.RSYNC_BRANCH}/"
-                            env.rsync_from = "/home/output/"
+                            env.rsync_from = "${env.WORKSPACE}/"
                             pipelineUtils.executeInContainer(currentStage + "-rsync-after", "rsync", "/tmp/rsync.sh")
 
                             // Set our message topic, properties, and content
@@ -376,11 +375,6 @@ podTemplate(name: podName,
                         pipelineUtils.setStageEnvVars(currentStage)
 
                         // Run ostree boot sanity
-                        env.rsync_paths = "images"
-                        env.rsync_from = "${env.RSYNC_USER}@${env.RSYNC_SERVER}::${env.RSYNC_DIR}/${env.RSYNC_BRANCH}/"
-                        env.rsync_to = "/home/output/"
-                        pipelineUtils.executeInContainer(currentStage + "-rsync-before", "rsync", "/tmp/rsync.sh")
-
                         pipelineUtils.executeInContainer(currentStage, "ostree-boot-image", "/home/ostree-boot-image.sh")
 
                         // Set our message topic, properties, and content

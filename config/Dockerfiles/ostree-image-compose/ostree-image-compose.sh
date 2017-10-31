@@ -12,7 +12,6 @@ set -xeuo pipefail
 # TODO: Point the working directories at the bind mounted location?
 
 base_dir="$(pwd)"
-output_dir="/home/output/"
 pwd
 
 # Start libvirtd
@@ -26,7 +25,7 @@ chmod 666 /dev/kvm
 
 function clean_up {
   set +e
-  pushd ${output_dir}/images
+  pushd ${base_dir}/images
   ln -sf $(ls -tr fedora-atomic-*.qcow2 | tail -n 1) untested-atomic.qcow2
   popd
   kill $(jobs -p)
@@ -50,25 +49,25 @@ touch ${base_dir}/logs/ostree.props
 
 imgdir=/var/lib/imagefactory/storage/
 
-version=$(ostree --repo=${output_dir}/ostree show --print-metadata-key=version $REF| sed -e "s/'//g")
-release=$(ostree --repo=${output_dir}/ostree rev-parse $REF| cut -c -15)
+version=$(ostree --repo=${base_dir}/ostree show --print-metadata-key=version $REF| sed -e "s/'//g")
+release=$(ostree --repo=${base_dir}/ostree rev-parse $REF| cut -c -15)
 
-if [ -d "${output_dir}/images" ]; then
-    for image in ${output_dir}/images/fedora-atomic-*.qcow2; do
+if [ -d "${base_dir}/images" ]; then
+    for image in ${base_dir}/images/fedora-atomic-*.qcow2; do
         if [ -e "$image" ]; then
             # Find the last image we pushed
-            prev_img=$(ls -tr ${output_dir}/images/fedora-atomic-*.qcow2 | tail -n 1)
+            prev_img=$(ls -tr ${base_dir}/images/fedora-atomic-*.qcow2 | tail -n 1)
             prev_rel=$(echo $prev_img | sed -e 's/.*-\([^-]*\).qcow2/\1/')
             # Don't fail if the previous build has been pruned
-            (rpm-ostree db --repo=${output_dir}/ostree diff $prev_rel $release || echo "Previous build has been pruned") | tee ${base_dir}/logs/packages.txt
+            (rpm-ostree db --repo=${base_dir}/ostree diff $prev_rel $release || echo "Previous build has been pruned") | tee ${base_dir}/logs/packages.txt
         fi
         break
     done
 else
-    mkdir ${output_dir}/images
+    mkdir ${base_dir}/images
 fi
 
-pushd ${output_dir}/ostree
+pushd ${base_dir}/ostree
 python -m SimpleHTTPServer &
 popd
 
@@ -86,11 +85,11 @@ sed -i "s|^ostree refs.*||" ${base_dir}/logs/fedora-atomic.ks
 sed -i "s|^ostree admin set-origin.*||" ${base_dir}/logs/fedora-atomic.ks
 
 # Pull down Fedora net install image if needed
-if [ ! -e "${output_dir}/netinst" ]; then
-    mkdir -p ${output_dir}/netinst
+if [ ! -e "${base_dir}/netinst" ]; then
+    mkdir -p ${base_dir}/netinst
 fi
 
-pushd ${output_dir}/netinst
+pushd ${base_dir}/netinst
 # First try and download iso from development
 wget -c -r -nd -A iso --accept-regex "Fedora-Everything-netinst-.*\.iso" "http://dl.fedoraproject.org/pub/fedora/linux/development/${VERSION}/Everything/x86_64/iso/" || true
 # If unable to download from development then try downloading from releases
@@ -114,7 +113,7 @@ cat <<EOF >${base_dir}/logs/fedora-${branch}.tdl
         <version>${VERSION}</version>
         <arch>x86_64</arch>
         <install type='iso'>
-            <iso>file://${output_dir}/netinst/Fedora-Everything-netinst-x86_64.iso</iso>
+            <iso>file://${base_dir}/netinst/Fedora-Everything-netinst-x86_64.iso</iso>
         </install>
         <rootpw>password</rootpw>
         <kernelparam>console=ttyS0</kernelparam>
@@ -128,10 +127,10 @@ imagefactory --debug --imgdir $imgdir --timeout 3000 base_image ${base_dir}/logs
 
 # convert to qcow
 imgname="fedora-atomic-$version-$release"
-qemu-img convert -c -p -O qcow2 $imgdir/*body ${output_dir}/images/$imgname.qcow2
+qemu-img convert -c -p -O qcow2 $imgdir/*body ${base_dir}/images/$imgname.qcow2
 
 # Record the commit so we can test it later
-commit=$(ostree --repo=${output_dir}/ostree rev-parse ${REF})
+commit=$(ostree --repo=${base_dir}/ostree rev-parse ${REF})
 cat << EOF > ${base_dir}/logs/ostree.props
 builtcommit=$commit
 image2boot=${HTTP_BASE}/${branch}/images/$imgname.qcow2
@@ -139,7 +138,7 @@ image_name=$imgname.qcow2
 EOF
 
 # Cleanup older qcow2 images
-pushd ${output_dir}/images || exit 1
+pushd ${base_dir}/images || exit 1
 latest=""
 if [ -e "latest-atomic.qcow2" ]; then
     latest=$(readlink latest-atomic.qcow2)

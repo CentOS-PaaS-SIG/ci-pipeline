@@ -7,10 +7,10 @@ base_dir="$( pwd )"
 
 function clean_up {
     set +e
-    ara generate junit - > /home/output/logs/ansible_xunit.xml
+    ara generate junit - > ${base_dir}/logs/ansible_xunit.xml
     if [ -e "$base_dir/hosts" ]; then
         virsh screenshot --file ${base_dir}/logs/atomic-host.ppm atomic-host-fedoraah
-        ansible-playbook -i hosts ci-pipeline/playbooks/setup-libvirt-image.yml -e state=absent -e skip_init=true
+        ansible-playbook -i hosts ${base_dir}/ci-pipeline/playbooks/setup-libvirt-image.yml -e state=absent -e skip_init=true
     fi
 }
 trap clean_up EXIT SIGHUP SIGINT SIGTERM
@@ -20,17 +20,17 @@ export ANSIBLE_CALLBACK_PLUGINS=$ara_location/plugins/callbacks
 export ANSIBLE_ACTION_PLUGINS=$ara_location/plugins/actions
 export ANSIBLE_LIBRARY=$ara_location/plugins/modules
 
-mkdir -p /home/output/logs
+mkdir -p ${base_dir}/logs
 
-if [ -d "/home/output/images" ]; then
-    pushd /home/output
+if [ -d "${base_dir}/images" ]; then
+    pushd ${base_dir}
     if [ -d "images/latest-atomic.qcow2" ]; then
         # Use symlink if it exists
-        IMG_URL="/home/output/images/latest-atomic.qcow2"
+        IMG_URL="${base_dir}/images/latest-atomic.qcow2"
     else
         # Find the last image we pushed
         prev_img=$(ls -tr images/*.qcow2 | tail -n 1)
-        IMG_URL="/home/output/$prev_img"
+        IMG_URL="${base_dir}/$prev_img"
     fi
     popd
 fi
@@ -71,7 +71,7 @@ EOF
 export ANSIBLE_HOST_KEY_CHECKING=False
 
 # Start test VM
-ansible-playbook -i hosts ci-pipeline/playbooks/setup-libvirt-image.yml -e state=present -e skip_init=true
+ansible-playbook -i hosts ${base_dir}/ci-pipeline/playbooks/setup-libvirt-image.yml -e state=present -e skip_init=true
 
 ipaddress=$(cat libvirt-hosts | awk -F= '/ansible_ssh_host=/ { print $2 }')
 cat << EOF > inventory
@@ -79,11 +79,11 @@ cat << EOF > inventory
 $ipaddress ansible_user=admin ansible_ssh_pass=admin ansible_become=true ansible_become_pass=admin
 EOF
 
-ansible-playbook -i inventory ci-pipeline/playbooks/ostree-boot-verify.yml -l ostree_compose_slave -e "commit=$commit"
+ansible-playbook -i inventory ${base_dir}/ci-pipeline/playbooks/ostree-boot-verify.yml -l ostree_compose_slave -e "commit=$commit"
 
 # If image2boot is defined then symlink it as latest
 if [ "${image2boot:-unset}" != "unset" ]; then
-    pushd /home/output/images
+    pushd ${base_dir}/images
     ln -sf $(basename $image2boot) latest-atomic.qcow2
     popd
 fi
