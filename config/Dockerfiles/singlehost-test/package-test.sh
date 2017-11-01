@@ -44,8 +44,10 @@ fi
 pushd ${package}
 
 # Check out the appropriate branch and rev
-git checkout ${branch}
-git checkout ${rev}
+#git checkout ${branch}
+#git checkout ${rev}
+# For now, run all master tests as that is the only spot with tests in most packages
+git checkout master
 
 # Check if there is a tests dir from dist-git, if not, exit
 if [ -d tests ]; then
