@@ -3,7 +3,6 @@
 set -x
 
 base_dir="$(pwd)"
-output_dir="/home/output/"
 pwd
 
 if [ "${branch}" = "rawhide" ]; then
@@ -17,12 +16,12 @@ REF="fedora/${branch}/x86_64/atomic-host"
 mkdir -p $base_dir/logs
 touch $base_dir/logs/ostree.props
 
-if [[ ! -e $output_dir/ostree ]]; then
-    mkdir $output_dir/ostree
-    ostree --repo=$output_dir/ostree init --mode=archive-z2
+if [[ ! -e $base_dir/ostree ]]; then
+    mkdir $base_dir/ostree
+    ostree --repo=$base_dir/ostree init --mode=archive-z2
 fi
 
-ostree --repo=$output_dir/ostree prune \
+ostree --repo=$base_dir/ostree prune \
     --keep-younger-than='1 week ago' --refs-only
 
 # get list of repos
@@ -35,7 +34,7 @@ for repo in $repos; do
     else
         f_repos="$f_repos, \"${repo}\""
     fi
-    cat << EOF > $base_dir/config/ostree/${repo}.repo
+    cat << EOF > $base_dir/ci-pipeline/config/ostree/${repo}.repo
 [${repo}]
 name=Testing ${repo}
 baseurl=${HTTP_BASE}/${RSYNC_BRANCH}/repo/${repo}
@@ -51,7 +50,7 @@ else
     fedora_repo="fedora-$VERSION"
 fi
 
-cat << EOF > $base_dir/config/ostree/fedora-${VERSION}.repo
+cat << EOF > $base_dir/ci-pipeline/config/ostree/fedora-${VERSION}.repo
 [fedora-${VERSION}]
 name=Fedora ${branch}
 failovermethod=priority
@@ -66,7 +65,7 @@ EOF
 if [ "$branch" != "rawhide" ]; then
     fedora_updates_repo="updates-released-${branch}"
 
-cat << EOF > $base_dir/config/ostree/fedora-${VERSION}-updates.repo
+cat << EOF > $base_dir/ci-pipeline/config/ostree/fedora-${VERSION}-updates.repo
 [fedora-${VERSION}-updates]
 name=Fedora ${VERSION} Updates
 failovermethod=priority
@@ -82,7 +81,7 @@ fi
 curl -o $base_dir/logs/fedora-atomic-host.json https://pagure.io/fedora-atomic/raw/${branch}/f/fedora-atomic-host.json
 curl -o $base_dir/logs/fedora-atomic-host-base.json https://pagure.io/fedora-atomic/raw/${branch}/f/fedora-atomic-host-base.json
 
-cat << EOF > $base_dir/config/ostree/fedora-atomic-testing.json
+cat << EOF > $base_dir/ci-pipeline/config/ostree/fedora-atomic-testing.json
 {
     "include": "${base_dir}/logs/fedora-atomic-host.json",
     "ref": "fedora/${branch}/\${basearch}/atomic-host",
@@ -92,16 +91,16 @@ cat << EOF > $base_dir/config/ostree/fedora-atomic-testing.json
 }
 EOF
 
-rpm-ostree compose tree --repo=$output_dir/ostree $base_dir/config/ostree/fedora-atomic-testing.json || exit 1
+rpm-ostree compose tree --repo=$base_dir/ostree $base_dir/ci-pipeline/config/ostree/fedora-atomic-testing.json || exit 1
 
-ostree --repo=$output_dir/ostree summary -u
+ostree --repo=$base_dir/ostree summary -u
 
-if ostree --repo=$output_dir/ostree rev-parse ${REF}^ >/dev/null 2>&1; then
-    rpm-ostree db --repo=$output_dir/ostree diff ${REF}{^,} | tee $base_dir/logs/packages.txt
+if ostree --repo=$base_dir/ostree rev-parse ${REF}^ >/dev/null 2>&1; then
+    rpm-ostree db --repo=$base_dir/ostree diff ${REF}{^,} | tee $base_dir/logs/packages.txt
 fi
 
 # Record the commit so we can test it later
-commit=$(ostree --repo=$output_dir/ostree rev-parse ${REF})
+commit=$(ostree --repo=$base_dir/ostree rev-parse ${REF})
 cat << EOF > $base_dir/logs/ostree.props
 commit=$commit
 EOF
