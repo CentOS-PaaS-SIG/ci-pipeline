@@ -189,7 +189,7 @@ This allowed us to gate packagers in the Fedora infrastructure.
 
 #### Automation Frameworks and Testing in Fedora
 
-Setup and invoking of tests is being done using ansible as outlined in [Invoking Tests Using Ansible](https://fedoraproject.org/wiki/Changes/InvokingTestsAnsible)
+Setup and invoking of tests is being done using ansible as outlined in [Invoking CI Tests](https://fedoraproject.org/wiki/CI/Tests)
 
 #### Design Diagrams
 ![ci-pipeline-complete-view](ci-pipeline-complete-view.png)
