@@ -6,8 +6,8 @@ them to artifacts.ci.centos.org."
 USER root
 
 # Install all package requirements
-RUN for i in {1..5} ; do dnf -y update && dnf clean all && break || sleep 10 ; done
-RUN for i in {1..5} ; do dnf -y install ansible \
+RUN dnf -y update && dnf clean all
+RUN dnf -y install ansible \
         @buildsys-build \
         createrepo \
         docker \
@@ -33,7 +33,6 @@ RUN for i in {1..5} ; do dnf -y install ansible \
         virt-install \
         which \
         && dnf clean all \
-        && break || sleep 10 ; done
 
 # Change some mock settings
 RUN echo "config_opts['package_manager'] = 'dnf'" >> /etc/mock/site-defaults.cfg
