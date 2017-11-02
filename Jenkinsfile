@@ -265,6 +265,12 @@ podTemplate(name: podName,
                         pipelineUtils.convertProps(ostree_props, ostree_props_groovy)
                         load(ostree_props_groovy)
 
+                        // Rsync push logs
+                        env.rsync_paths = "."
+                        env.rsync_from = "${env.WORKSPACE}/" + currentStage + "/logs/"
+                        env.rsync_to = "${env.RSYNC_USER}@${env.RSYNC_SERVER}::${env.RSYNC_DIR}/${env.RSYNC_BRANCH}/images/${env.imgname}/" + currentStage + "/"
+                        pipelineUtils.executeInContainer(currentStage + "-rsync-logs", "rsync", "/tmp/rsync.sh")
+
                         // Set our message topic, properties, and content
                         messageFields = pipelineUtils.setMessageFields("compose.complete")
 
@@ -331,6 +337,11 @@ podTemplate(name: podName,
                         } else {
                             echo "Not Pushing a New Image"
                         }
+                        // Rsync push logs
+                        env.rsync_paths = "."
+                        env.rsync_from = "${env.WORKSPACE}/" + currentStage + "/logs/"
+                        env.rsync_to = "${env.RSYNC_USER}@${env.RSYNC_SERVER}::${env.RSYNC_DIR}/${env.RSYNC_BRANCH}/images/${env.imgname}/" + currentStage + "/"
+                        pipelineUtils.executeInContainer(currentStage + "-rsync-logs", "rsync", "/tmp/rsync.sh")
                     }
 
                     currentStage = "ci-pipeline-ostree-image-boot-sanity"
