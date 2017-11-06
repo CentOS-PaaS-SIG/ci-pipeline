@@ -14,7 +14,7 @@ COPY walters-buildtools.repo /etc/yum.repos.d
 
 RUN yum -y install dnsmasq libvirt-daemon-driver-* libvirt-daemon \
                    libvirt-daemon-kvm qemu-kvm libguestfs libguestfs-tools-c \
-                   libvirt-daemon-qemu git ostree rpm-ostree libvirt-cliet \
+                   libvirt-daemon-qemu git ostree rpm-ostree libvirt-client \
                    imagefactory imagefactory-plugins imagefactory-plugins-TinMan \
                    PyYAML wget && yum clean all
 
