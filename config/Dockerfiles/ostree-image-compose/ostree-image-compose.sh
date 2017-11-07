@@ -147,8 +147,8 @@ fi
 
 # delete images and logs over 3 days old 
 # but don't delete what our latest link points to
-find . -type f -mtime +3 ! -name "$latest" -exec rm -v {} \;
-find . -type d -mtime +3 ! -name "$latest_logdir" -exec rm -rv {} \;
+find . -maxdepth 1 -type f -mtime +3 ! -name "$latest" -exec rm -v {} \;
+find . -maxdepth 1 -type d -mtime +3 ! -name "$latest_logdir" -exec rm -rv {} \;
 popd
 
 } 2>&1 | tee ${base_dir}/logs/console.log #group for tee
