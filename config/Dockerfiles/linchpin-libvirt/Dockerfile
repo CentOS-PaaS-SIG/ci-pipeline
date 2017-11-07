@@ -40,7 +40,7 @@ RUN printf "Host *\n    StrictHostKeyChecking no" > /root/.ssh/config
 ADD linchpin_workspace /root/linchpin_workspace
 WORKDIR "/root/linchpin_workspace/hooks/ansible/"
 RUN git clone -b release-3.6 https://github.com/openshift/openshift-ansible
-RUN git clone https://github.com/samvarankashyap/paas-sig-ci
+RUN git clone -b v1.1 https://github.com/samvarankashyap/paas-sig-ci
 WORKDIR "/tmp/"
 RUN git clone -b libvirt_cloudconfig7 https://github.com/samvarankashyap/linchpin
 WORKDIR "/tmp/linchpin"
