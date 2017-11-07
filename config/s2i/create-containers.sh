@@ -27,6 +27,5 @@ oc new-app ostree-compose-builder ${REPO_URL_PARAM} ${REPO_REF_PARAM}
 oc new-app ostree-image-compose-builder ${REPO_URL_PARAM} ${REPO_REF_PARAM}
 oc new-app ostree-boot-image-builder ${REPO_URL_PARAM} ${REPO_REF_PARAM}
 oc new-app singlehost-test-builder ${REPO_URL_PARAM} ${REPO_REF_PARAM}
-oc new-app package-test-builder ${REPO_URL_PARAM} ${REPO_REF_PARAM}
 oc new-app linchpin-libvirt-builder ${REPO_URL_PARAM} ${REPO_REF_PARAM}
 ##
