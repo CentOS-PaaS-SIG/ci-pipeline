@@ -6,7 +6,7 @@ if [ ${CURRENTDIR} == "/" ] ; then
     cd /home
     CURRENTDIR=/home
 fi
-export TEST_SUBJECTS=${CURRENTDIR}/untested-atomic.qcow2
+export TEST_SUBJECTS=$(find /workDir/workspace -name ${image_name} | tail -n 1)
 export TEST_ARTIFACTS=${CURRENTDIR}/logs
 # The test artifacts must be an empty directory
 rm -rf ${TEST_ARTIFACTS}

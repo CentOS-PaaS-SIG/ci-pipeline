@@ -19,9 +19,6 @@ chmod 666 /dev/kvm
 
 function clean_up {
   set +e
-  pushd ${base_dir}/images
-  ln -sf $(ls -tr fedora-atomic-*.qcow2 | tail -n 1) untested-atomic.qcow2
-  popd
   kill $(jobs -p)
   for screenshot in /var/lib/oz/screenshots/*.ppm; do
       [ -e "$screenshot" ] && cp $screenshot ${base_dir}/logs
@@ -54,10 +51,10 @@ touch ${base_dir}/logs/ostree.props
 imgdir=/var/lib/imagefactory/storage/
 
 if [ -d "${base_dir}/images" ]; then
-    for image in ${base_dir}/images/fedora-atomic-*.qcow2; do
+    for image in ${base_dir}/images/fedora-atomic-*/fedora-atomic-*.qcow2; do
         if [ -e "$image" ]; then
             # Find the last image we pushed
-            prev_img=$(ls -tr ${base_dir}/images/fedora-atomic-*.qcow2 | tail -n 1)
+            prev_img=$(ls -tr ${base_dir}/images/fedora-atomic-*/fedora-atomic-*.qcow2 | tail -n 1)
             prev_rel=$(echo $prev_img | sed -e 's/.*-\([^-]*\).qcow2/\1/')
             # Don't fail if the previous build has been pruned
             (rpm-ostree db --repo=${base_dir}/ostree diff $prev_rel $ostree_shortsha || echo "Previous build has been pruned") | tee ${base_dir}/logs/packages.txt
@@ -123,13 +120,13 @@ EOF
 imagefactory --debug --imgdir $imgdir --timeout 3000 base_image ${base_dir}/logs/fedora-${branch}.tdl --parameter offline_icicle true --file-parameter install_script ${base_dir}/logs/fedora-atomic.ks
 
 # convert to qcow
-qemu-img convert -c -p -O qcow2 $imgdir/*body ${base_dir}/images/$imgname.qcow2
+qemu-img convert -c -p -O qcow2 $imgdir/*body ${base_dir}/logs/$imgname.qcow2
 
 # Record the commit so we can test it later
 commit=$(ostree --repo=${base_dir}/ostree rev-parse ${REF})
 cat << EOF > ${base_dir}/logs/ostree.props
 builtcommit=$commit
-image2boot=${HTTP_BASE}/${branch}/images/$imgname.qcow2
+image2boot=${HTTP_BASE}/${branch}/images/$imgname/$imgname.qcow2
 image_name=$imgname.qcow2
 EOF
 
