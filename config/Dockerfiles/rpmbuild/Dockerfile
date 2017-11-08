@@ -32,7 +32,7 @@ RUN dnf -y install ansible \
         sudo \
         virt-install \
         which \
-        && dnf clean all \
+        && dnf clean all
 
 # Change some mock settings
 RUN echo "config_opts['package_manager'] = 'dnf'" >> /etc/mock/site-defaults.cfg
