@@ -53,9 +53,6 @@ touch ${base_dir}/logs/ostree.props
 
 imgdir=/var/lib/imagefactory/storage/
 
-version=$(ostree --repo=${base_dir}/ostree show --print-metadata-key=version $REF| sed -e "s/'//g")
-release=$(ostree --repo=${base_dir}/ostree rev-parse $REF| cut -c -15)
-
 if [ -d "${base_dir}/images" ]; then
     for image in ${base_dir}/images/fedora-atomic-*.qcow2; do
         if [ -e "$image" ]; then
@@ -63,7 +60,7 @@ if [ -d "${base_dir}/images" ]; then
             prev_img=$(ls -tr ${base_dir}/images/fedora-atomic-*.qcow2 | tail -n 1)
             prev_rel=$(echo $prev_img | sed -e 's/.*-\([^-]*\).qcow2/\1/')
             # Don't fail if the previous build has been pruned
-            (rpm-ostree db --repo=${base_dir}/ostree diff $prev_rel $release || echo "Previous build has been pruned") | tee ${base_dir}/logs/packages.txt
+            (rpm-ostree db --repo=${base_dir}/ostree diff $prev_rel $ostree_shortsha || echo "Previous build has been pruned") | tee ${base_dir}/logs/packages.txt
         fi
         break
     done
@@ -126,7 +123,6 @@ EOF
 imagefactory --debug --imgdir $imgdir --timeout 3000 base_image ${base_dir}/logs/fedora-${branch}.tdl --parameter offline_icicle true --file-parameter install_script ${base_dir}/logs/fedora-atomic.ks
 
 # convert to qcow
-imgname="fedora-atomic-$version-$release"
 qemu-img convert -c -p -O qcow2 $imgdir/*body ${base_dir}/images/$imgname.qcow2
 
 # Record the commit so we can test it later
