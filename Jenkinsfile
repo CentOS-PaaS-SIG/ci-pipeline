@@ -286,6 +286,15 @@ podTemplate(name: podName,
                         pipelineUtils.setStageEnvVars(currentStage)
                         // We always run, but don't always push to artifacts
                         env.PUSH_IMAGE = "false"
+                        // Check if we should wipe daily image dir
+                        int numImageDirs = 3
+                        env.dailyImageDir = pipelineUtils.getDailyImageDir(numImageDirs)
+                        env.wipeBool = pipelineUtils.checkDailyImageDir(numImageDirs)
+                        if (env.wipeBool) {
+                            // Wipe image dir
+                            env.rsync_to = "${env.RSYNC_USER}@${env.RSYNC_SERVER}::${env.RSYNC_DIR}/${env.RSYNC_BRANCH}/tempImages_${env.dailyImageDir}"
+                            pipelineUtils.executeInContainer(currentStage + "-wipe", "rsync", "/tmp/wipe.sh")
+                        }
 
                         // Check if a new ostree image compose is needed
                         if (fileExists("${env.WORKSPACE}/NeedNewImage.txt") || ("${env.GENERATE_IMAGE}" == "true")) {
@@ -316,10 +325,18 @@ podTemplate(name: podName,
 
                         String untested_img_loc = "${env.WORKSPACE}/images/untested-atomic.qcow2"
                         sh "cp -f ${untested_img_loc} ${env.WORKSPACE}/"
+
+                        // rsync all images
+                        env.rsync_from = untested_img_loc
+                        env.rsync_to = "${env.RSYNC_USER}@${env.RSYNC_SERVER}::${env.RSYNC_DIR}/${env.RSYNC_BRANCH}/tempImages_${env.dailyImageDir}/${rev}.qcow2"
+                        pipelineUtils.executeInContainer(currentStage + "-rsync-after-always", "rsync", "/tmp/rsync_no_path.sh")
+
                         if (fileExists("${env.WORKSPACE}/NeedNewImage.txt") || ("${env.GENERATE_IMAGE}" == "true")) {
                             // Rsync push images
+                            env.rsync_to = "${env.RSYNC_USER}@${env.RSYNC_SERVER}::${env.RSYNC_DIR}/${env.RSYNC_BRANCH}/"
+                            env.rsync_from = "/home/output/"
                             env.rsync_paths = "images"
-                            pipelineUtils.executeInContainer(currentStage + "-rsync-after-netinst", "rsync", "/tmp/rsync.sh")
+                            pipelineUtils.executeInContainer(currentStage + "-rsync-after", "rsync", "/tmp/rsync.sh")
 
                             // These variables will mess with boot sanity jobs
                             // later if they are injected from a non pushed img
