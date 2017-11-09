@@ -29,10 +29,10 @@ objects:
         name: jenkins-continuous-infra-slave:latest
     resources: {}
     source:
-      contextDir: ${SLAVE_REPO_CONTEXTDIR}
+      contextDir: ${CONTEXTDIR}
       git:
-        ref: ${SLAVE_REPO_REF}
-        uri: ${SLAVE_REPO_URL}
+        ref: ${REPO_REF}
+        uri: ${REPO_URL}
       type: Git
     strategy:
       dockerStrategy:
@@ -42,13 +42,13 @@ objects:
 parameters:
 - description: Git repository with Dockerfile and slave entrypoint.
   displayName: Repository URL
-  name: SLAVE_REPO_URL
+  name: REPO_URL
   value: https://github.com/CentOS-PaaS-SIG/ci-pipeline.git
 - description: The sub-directory inside the repository.
   displayName: Context Directory
-  name: SLAVE_REPO_CONTEXTDIR
+  name: CONTEXTDIR
   value: config/s2i/jenkins/slave
 - description: The git ref or tag to use for customization.
   displayName: Git Reference
-  name: SLAVE_REPO_REF
+  name: REPO_REF
   value: master
