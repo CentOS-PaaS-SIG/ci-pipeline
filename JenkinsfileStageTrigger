@@ -79,6 +79,13 @@ pipeline {
                 }
             }
         }
+        stage("Setup Container Templates") {
+            steps {
+                script {
+                    pipelineUtils.setupContainerTemplates(openshiftProject)
+                }
+            }
+        }
         stage("jenkins-continuous-infra-slave image build") {
             when {
                 // Only build if we have related files in changeset
