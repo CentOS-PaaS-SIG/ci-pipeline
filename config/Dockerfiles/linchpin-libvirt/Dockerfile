@@ -9,6 +9,7 @@ RUN yum -y install $HOME/epel-release-7-2.noarch.rpm
 
 COPY atomic7-testing.repo /etc/yum.repos.d
 COPY walters-buildtools.repo /etc/yum.repos.d
+COPY paas7-openshift-origin36-testing.repo /etc/yum.repos.d
 
 RUN yum -y install libguestfs libguestfs-tools-c \
                    git ostree rpm-ostree libvirt-client \
@@ -47,7 +48,13 @@ WORKDIR "/tmp/linchpin"
 RUN "$PWD/install.sh"
 RUN cd /tmp/linchpin && python /tmp/linchpin/setup.py install
 WORKDIR "/root/linchpin_workspace/"
-#END: Linchpin sepecific workspace installations
+
+#END: Linchpin specific workspace installations
+
+#START: Install origin-tests rpms
+# installs latest origin-tests rpm
+RUN yum install -y origin-tests
+#END: Linchpin specific workspace installations
 
 RUN yum -y install libvirt-daemon-driver-* libvirt-daemon libvirt-daemon-kvm qemu-kvm socat && yum clean all; \
 (cd /lib/systemd/system/sysinit.target.wants/; for i in *; do [ $i == systemd-tmpfiles-setup.service ] || rm -f $i; done); \
