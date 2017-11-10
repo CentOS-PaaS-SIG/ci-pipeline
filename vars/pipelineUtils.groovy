@@ -174,6 +174,15 @@ class pipelineUtils implements Serializable {
     }
 
     /**
+     * Setup container templates in openshift
+     * @param openshiftProject Openshift Project
+     * @return
+     */
+    def setupContainerTemplates(String openshiftProject) {
+        return pipelineUtils.setupContainerTemplates(openshiftProject)
+    }
+
+    /**
      * Build image in openshift
      * @param openshiftProject Openshift Project
      * @param buildConfig

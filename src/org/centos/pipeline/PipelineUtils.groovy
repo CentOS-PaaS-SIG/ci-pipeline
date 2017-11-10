@@ -804,6 +804,21 @@ def printLabelMap(map) {
 }
 
 /**
+ * Setup container templates in openshift
+ * @param openshiftProject Openshift Project
+ * @return
+ */
+def setupContainerTemplates(String openshiftProject) {
+    openshift.withCluster() {
+        openshift.withProject(openshiftProject) {
+            dir('config/s2i') {
+                sh './create-containers.sh'
+            }
+        }
+    }
+}
+
+/**
  * Build image in openshift
  * @param openshiftProject Openshift Project
  * @param buildConfig
