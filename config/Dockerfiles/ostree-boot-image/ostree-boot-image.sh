@@ -84,6 +84,6 @@ ansible-playbook -i inventory ${base_dir}/ci-pipeline/playbooks/ostree-boot-veri
 # If image2boot is defined then symlink it as latest
 if [ "${image2boot:-unset}" != "unset" ]; then
     pushd ${base_dir}/images
-    ln -sf $(basename $image2boot) latest-atomic.qcow2
+    ln -sf ${imgname}/$(basename $image2boot) latest-atomic.qcow2
     popd
 fi

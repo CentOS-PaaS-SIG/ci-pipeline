@@ -284,14 +284,9 @@ podTemplate(name: podName,
                     stage(currentStage) {
                         // Set stage specific vars
                         pipelineUtils.setStageEnvVars(currentStage)
-                        // We always run, but don't always push to artifacts
-                        env.PUSH_IMAGE = "false"
 
                         // Check if a new ostree image compose is needed
                         if (fileExists("${env.WORKSPACE}/NeedNewImage.txt") || ("${env.GENERATE_IMAGE}" == "true")) {
-                            // We will push a new qcow2 to artifacts
-                            env.PUSH_IMAGE = "true"
-
                             // Set our message topic, properties, and content
                             messageFields = pipelineUtils.setMessageFields("image.running")
 
@@ -314,20 +309,19 @@ podTemplate(name: podName,
                         env.rsync_to = "${env.RSYNC_USER}@${env.RSYNC_SERVER}::${env.RSYNC_DIR}/${env.RSYNC_BRANCH}/"
                         pipelineUtils.executeInContainer(currentStage + "-rsync-push-netinst", "rsync", "/tmp/rsync.sh")
 
-                        String untested_img_loc = "${env.WORKSPACE}/images/untested-atomic.qcow2"
-                        sh "cp -f ${untested_img_loc} ${env.WORKSPACE}/"
+                        // Rsync push logs and image
+                        env.rsync_paths = "."
+                        env.rsync_from = "${env.WORKSPACE}/" + currentStage + "/logs/"
+                        env.rsync_to = "${env.RSYNC_USER}@${env.RSYNC_SERVER}::${env.RSYNC_DIR}/${env.RSYNC_BRANCH}/images/${env.imgname}/" + currentStage + "/"
+                        pipelineUtils.executeInContainer(currentStage + "-rsync-after", "rsync", "/tmp/rsync.sh")
+
+                        // Inject ostree-image-compose property variables
+                        def ostree_props = "${env.WORKSPACE}/" + currentStage + "/logs/ostree.props"
+                        def ostree_props_groovy = "${env.WORKSPACE}/ostree.props.groovy"
+                        pipelineUtils.convertProps(ostree_props, ostree_props_groovy)
+                        load(ostree_props_groovy)
+
                         if (fileExists("${env.WORKSPACE}/NeedNewImage.txt") || ("${env.GENERATE_IMAGE}" == "true")) {
-                            // Rsync push images
-                            env.rsync_paths = "images"
-                            pipelineUtils.executeInContainer(currentStage + "-rsync-after-netinst", "rsync", "/tmp/rsync.sh")
-
-                            // These variables will mess with boot sanity jobs
-                            // later if they are injected from a non pushed img
-                            def ostree_props = "${env.WORKSPACE}/" + currentStage + "/logs/ostree.props"
-                            def ostree_props_groovy = "${env.WORKSPACE}/ostree.props.groovy"
-                            pipelineUtils.convertProps(ostree_props, ostree_props_groovy)
-                            load(ostree_props_groovy)
-
                             // Set our message topic, properties, and content
                             messageFields = pipelineUtils.setMessageFields("image.complete")
 
@@ -335,13 +329,8 @@ podTemplate(name: podName,
                             pipelineUtils.sendMessageWithAudit(messageFields['properties'], messageFields['content'], msgAuditFile, fedmsgRetryCount)
 
                         } else {
-                            echo "Not Pushing a New Image"
+                            echo "Not Publicizing New Image"
                         }
-                        // Rsync push logs
-                        env.rsync_paths = "."
-                        env.rsync_from = "${env.WORKSPACE}/" + currentStage + "/logs/"
-                        env.rsync_to = "${env.RSYNC_USER}@${env.RSYNC_SERVER}::${env.RSYNC_DIR}/${env.RSYNC_BRANCH}/images/${env.imgname}/" + currentStage + "/"
-                        pipelineUtils.executeInContainer(currentStage + "-rsync-logs", "rsync", "/tmp/rsync.sh")
                     }
 
                     currentStage = "ci-pipeline-ostree-image-boot-sanity"
@@ -482,7 +471,7 @@ podTemplate(name: podName,
                     pipelineUtils.getContainerLogsFromPod(OPENSHIFT_NAMESPACE, env.NODE_NAME)
 
                     // Archive our artifacts
-                    step([$class: 'ArtifactArchiver', allowEmptyArchive: true, artifacts: '**/logs/**,*.txt,*.groovy,**/job.*,**/*.groovy,**/inventory.*', excludes: '**/job.props,**/job.props.groovy,**/*.example', fingerprint: true])
+                    step([$class: 'ArtifactArchiver', allowEmptyArchive: true, artifacts: '**/logs/**,*.txt,*.groovy,**/job.*,**/*.groovy,**/inventory.*', excludes: '**/job.props,**/job.props.groovy,**/*.example,**/*.qcow2', fingerprint: true])
 
                     // Set our message topic, properties, and content
                     messageFields = pipelineUtils.setMessageFields("complete")
