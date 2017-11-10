@@ -1,0 +1,5 @@
+[paas7-openshift-testing]
+name=paas7-openshift-origin36-testing
+baseurl=http://cbs.centos.org/repos/paas7-openshift-origin36-testing/x86_64/os/
+gpgcheck=0
+enabled=1
