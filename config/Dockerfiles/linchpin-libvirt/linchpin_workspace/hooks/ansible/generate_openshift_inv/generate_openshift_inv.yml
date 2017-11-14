@@ -6,7 +6,7 @@
   tasks:
     - name: "Pause for a while for dhcp to catch up"
       pause: 
-        minutes: 2
+        minutes: 10
     - name: "cat inventory out generated inventory"
       shell: "cat /root/linchpin_workspace/inventories/libvirt.inventory"
       register: inventory_output
@@ -16,14 +16,20 @@
     - name: "Set fact for ip_address"
       set_fact:
         ipaddr: "{{ inventory_output.stdout | get_first_ip  }}"
+    - name: "Generate single node deployment inventory"
+      template:
+        src: singlenode.j2
+        dest: /tmp/singlenode.inv
     - name: "enable the network service"
       shell: "ansible -i /root/linchpin_workspace/inventories/libvirt.inventory all -u admin --become --private-key ~/.ssh/ex -a\"systemctl enable network\""
       environment:
         ANSIBLE_HOST_KEY_CHECKING: False
+      ignore_errors: yes
     - name: "Start the network service"
       shell: "ansible -i /root/linchpin_workspace/inventories/libvirt.inventory all -u admin --become --private-key ~/.ssh/ex -a\"systemctl start network\""
       environment:
         ANSIBLE_HOST_KEY_CHECKING: False
+      ignore_errors: yes
     #- name: "Add ip to /etc/hosts file "
     #  shell: ansible -i localhost  localhost -m lineinfile  -a"line='{{ ipaddr }} atomic01 atomic01.example.com' destfile='/etc/hosts' state='present'"
     #  environment:
@@ -39,7 +45,7 @@
         destfile: "/tmp/hosts"
         state: "present"
     - name: "Copy hosts file to /etc/"
-      shell: "cat /tmp/hosts > /etc/hosts"                                                                                                                                                                                               
+      shell: "cat /tmp/hosts > /etc/hosts"                                                                  
     - name: "Add ip to /etc/hosts file"
       shell: ansible -i /root/linchpin_workspace/inventories/libvirt.inventory all -u admin --become --private-key ~/.ssh/ex -m lineinfile -a"line='{{ ipaddr }} atomic01 atomic01.example.com' destfile='/etc/hosts' state='present'"
       environment:
@@ -48,7 +54,3 @@
       shell: "ansible -i /root/linchpin_workspace/inventories/libvirt.inventory all -u admin --become --private-key ~/.ssh/ex -a \"hostnamectl set-hostname atomic01.example.com\""
       environment:
         ANSIBLE_HOST_KEY_CHECKING: False
-    - name: "Generate single node deployment inventory"
-      template:
-        src: singlenode.j2
-        dest: /tmp/singlenode.inv
