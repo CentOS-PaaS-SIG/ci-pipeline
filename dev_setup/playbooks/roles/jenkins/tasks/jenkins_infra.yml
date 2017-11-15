@@ -1,0 +1,8 @@
+---
+# install Jenkins master and slave images
+# In the future everthing in the continuous-infra-create-openshift-project sh will move into this role
+# hopefully using the oc module in Ansible 2.4
+- name: Setup jenkins master and slaves in the opesnhift environment
+  shell: ./continuous-infra-create-openshift-project
+  args:
+      chdir: "{{ pipeline_dir }}/config/s2i/jenkins"

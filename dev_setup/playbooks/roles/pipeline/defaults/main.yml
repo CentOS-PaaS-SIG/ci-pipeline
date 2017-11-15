@@ -1,0 +1,14 @@
+---
+# defaults file for pipeline
+
+# repo to clone
+pipeline_repo: https://github.com/CentOS-PaaS-SIG/ci-pipeline
+
+# repo directory
+pipeline_dir: "{{ ansible_env.HOME }}/minishift/ci-pipeline"
+
+# cluster username
+username: developer
+
+# cluster password
+password: developer

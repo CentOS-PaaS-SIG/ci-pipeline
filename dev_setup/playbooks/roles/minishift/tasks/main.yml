@@ -1,0 +1,9 @@
+---
+# setup minishift
+
+# install minishift
+- include: install_minishift.yml
+
+# initialize minishift
+- include: init_minishift.yml
+
