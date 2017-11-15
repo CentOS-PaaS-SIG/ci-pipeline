@@ -1,0 +1,11 @@
+---
+# defaults file for containers
+
+# modify tags on images
+modify_tags: true
+
+# tag to use
+tag: stable
+
+# modify security context contraints (SCC) to run privileged containers
+modify_scc: true

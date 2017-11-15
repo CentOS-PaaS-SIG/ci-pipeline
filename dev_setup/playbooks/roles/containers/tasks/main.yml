@@ -1,0 +1,23 @@
+---
+# tasks file for containers
+
+# include jq
+- include: roles/prereqs/tasks/install_virtual_reqs.yml
+
+# In the future everthing in the create-containers.sh will move into this role
+# hopefully using the oc module in Ansible 2.4
+- name: Setup containers
+  shell: sh ./create-containers.sh
+  args:
+      chdir: "{{ pipeline_dir }}/config/s2i/"
+
+- name: Wait for containers to be built and marked with latest tag
+  pause:
+    minutes: 3
+  when: 'modify_tags|bool == true'
+
+- name: Modify tags on images
+  shell: "oc get is | awk '{print $2}' | grep -v DOCKER | sed 's/.*5000\\///g' | xargs -i oc tag {}:latest {}:{{ tag }}"
+  args:
+    chdir:
+  when: 'modify_tags|bool == true'

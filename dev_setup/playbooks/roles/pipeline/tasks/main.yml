@@ -1,0 +1,29 @@
+---
+# tasks file for pipeline
+# startup the minishift cluster
+- include: start_mcluster.yml
+
+# clone the pipeline repo
+- include: clone_pipeline.yml
+
+# create jenkins master and slaves
+- include_role:
+    name: jenkins
+  when: setup_jenkins|bool == true
+
+# create/update and security for containers
+- include_role:
+    name: containers
+  when: setup_containers|bool == true
+
+# create sample pipeline
+
+# TODO: beyond the sample as we analyze teams we will start to accumlate patterns for pipeline examples
+# ex. platform-pipeline
+# ex. container-pipeline
+# ex. rhv-pipeline
+# ex. storage-pipeline
+#    |
+#    --> gluster-pipeline
+#    |
+#    --> ceph-pipeline

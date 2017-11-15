@@ -1,0 +1,51 @@
+---
+# Install minishift
+
+- name: Query for minishift compressed binary
+  shell: curl -s https://github.com/minishift/minishift/releases/ | grep 'minishift.*-linux-amd64.*' | head -1 | sed 's/.*<a href="\(.*\)" .*/https:\/\/github.com\1/'
+  register: release
+
+- name: "Pull down and extract minishift binary to {{ ansible_env.HOME }}"
+  unarchive:
+    src: "{{ release.stdout }}"
+    dest: "{{ ansible_env.HOME }}"
+    remote_src: yes
+
+- name: Set minishift_src_dir fact
+  set_fact:
+    minishift_src_dir: "{{ release.stdout | basename | regex_search(regexp,'\\1') | join(' ') }}"
+  vars:
+    regexp: '(minishift.*amd64).tgz'
+
+- name: "Create a new {{ minishift_dest_dir }} if it doesn't exist"
+  file:
+    path: "{{ minishift_dest_dir }}"
+    state: directory
+
+- name: "Copy minishift version files to {{ ansible_env.HOME }}/minishift/"
+  shell: cp {{ ansible_env.HOME }}/{{ minishift_src_dir }}/* {{ minishift_dest_dir }}/
+
+- name: "Delete {{ ansible_env.HOME }}/{{ minishift_src_dir }}"
+  file:
+    path: "{{ ansible_env.HOME }}/{{ minishift_src_dir }}"
+    state: absent
+
+- name: "Set path for minishift in {{ ansible_env.HOME }}/.bashrc"
+  lineinfile:
+    path: "{{ ansible_env.HOME }}/.bashrc"
+    regexp: '^export PATH'
+    line: 'export PATH=$PATH:{{ minishift_dest_dir }}'
+
+- name: "Source {{ ansible_env.HOME }}/.bashrc"
+  shell: source {{ ansible_env.HOME }}/.bashrc
+
+- name: "Set minishift disk-size {{ disk_size }}"
+  shell: minishift config set disk-size {{ disk_size }}
+
+- name: "Set minishift disk-size {{ memory }}"
+  shell: minishift config set memory {{ memory }}
+
+- name: Pull down the minishift iso
+  get_url:
+    url: "{{ minishift_iso }}"
+    dest: "{{ minishift_dest_dir }}/minishift.iso"

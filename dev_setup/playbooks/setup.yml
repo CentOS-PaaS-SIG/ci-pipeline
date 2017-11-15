@@ -1,0 +1,11 @@
+---
+- hosts: '{{ hosts | default("all") }}'
+  become: '{{ become | default("no") }}'
+  become_user: '{{ become_user | default("root") }}'
+  remote_user: '{{ remote_user | default("root") }}'
+  roles:
+    - { role: prereqs, when: skip_prereqs|bool == false }
+    - { role: minishift, when: setup_minishift|bool == true }
+    - { role: pipeline, when: setup_pipeline|bool == true }
+    - { role: jenkins, when: (setup_jenkins|bool == true and setup_pipeline|bool == false) }
+    - { role: containers, when: (setup_containers|bool == true and setup_pipeline|bool == false) }
