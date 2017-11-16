@@ -1,5 +1,5 @@
 #!/bin/bash
-set -eu
+set -e
 
 CURRENTDIR=$(pwd)
 if [ ${CURRENTDIR} == "/" ] ; then
@@ -74,10 +74,16 @@ if [ -e inventory ] ; then
     export ANSIBLE_INVENTORY
 fi
 
+PYTHON_INTERPRETER=""
+
+if [[ ! -z "${python3}" && "${python3}" == "yes" ]] ; then
+    PYTHON_INTERPRETER='--extra-vars "ansible_python_interpreter=/usr/bin/python3"'
+fi
+
 # Invoke each playbook according to the specification
 for playbook in tests*.yml; do
 	if [ -f ${playbook} ]; then
-		ansible-playbook --inventory=$ANSIBLE_INVENTORY \
+		ansible-playbook --inventory=$ANSIBLE_INVENTORY $PYTHON_INTERPRETER \
 			--extra-vars "subjects=$TEST_SUBJECTS" \
 			--extra-vars "artifacts=$TEST_ARTIFACTS" \
 			--tags atomic ${playbook}
