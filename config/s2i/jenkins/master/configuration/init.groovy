@@ -16,8 +16,12 @@ FedMsgMessagingProvider fedmsg = new FedMsgMessagingProvider("fedora-fedmsg", "t
 GlobalCIConfiguration.get().addMessageProvider(fedmsg)
 
 logger.info("Setup fedora-fedmsg-stage Messaging Provider")
-FedMsgMessagingProvider fedmsgState = new FedMsgMessagingProvider("fedora-fedmsg-stage", "tcp://stg.fedoraproject.org:9940", "tcp://172.19.4.36:9941", "org.fedoraproject");
-GlobalCIConfiguration.get().addMessageProvider(fedmsgState)
+FedMsgMessagingProvider fedmsgStage = new FedMsgMessagingProvider("fedora-fedmsg-stage", "tcp://stg.fedoraproject.org:9940", "tcp://172.19.4.36:9941", "org.fedoraproject");
+GlobalCIConfiguration.get().addMessageProvider(fedmsgStage)
+
+logger.info("Setup fedora-fedmsg-devel Messaging Provider")
+FedMsgMessagingProvider fedmsgDevel = new FedMsgMessagingProvider("fedora-fedmsg-devel", "tcp://fedmsg-relay.continuous-infra.svc:4001", "tcp://fedmsg-relay.continuous-infra.svc:2003", "org.fedoraproject");
+GlobalCIConfiguration.get().addMessageProvider(fedmsgDevel)
 
 logger.info("Setting Time Zone to be EST")
 System.setProperty('org.apache.commons.jelly.tags.fmt.timeZone', 'America/New_York')
