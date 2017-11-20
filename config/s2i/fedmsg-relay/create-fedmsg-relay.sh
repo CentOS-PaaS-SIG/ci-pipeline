@@ -12,5 +12,5 @@ else
   REPO_REF_PARAM="-p REPO_REF=${REPO_REF}"
 fi
 
-oc create -f fedmsg-relay-template.yaml
+oc create -f fedmsg-relay-buildconfig-template.yaml
 oc new-app fedmsg-relay ${REPO_URL_PARAM} ${REPO_REF_PARAM}

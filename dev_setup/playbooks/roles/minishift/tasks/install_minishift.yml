@@ -30,14 +30,7 @@
     path: "{{ ansible_env.HOME }}/{{ minishift_src_dir }}"
     state: absent
 
-- name: "Set path for minishift in {{ ansible_env.HOME }}/.bashrc"
-  lineinfile:
-    path: "{{ ansible_env.HOME }}/.bashrc"
-    regexp: '^export PATH'
-    line: 'export PATH=$PATH:{{ minishift_dest_dir }}'
-
-- name: "Source {{ ansible_env.HOME }}/.bashrc"
-  shell: source {{ ansible_env.HOME }}/.bashrc
+- include: set_minishift_path.yml
 
 - name: "Set minishift disk-size {{ disk_size }}"
   shell: minishift config set disk-size {{ disk_size }}
