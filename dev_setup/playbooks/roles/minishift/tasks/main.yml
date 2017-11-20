@@ -5,17 +5,13 @@
 - name: "Is minishift binary present in {{ minishift_dest_dir }}"
   stat:
     path: "{{ minishift_dest_dir }}/minishift"
-  register: minishift
+  register: minishift_bin
 
 # install minishift
 - include: install_minishift.yml
-  when: (minishift.stat.exists == false or force_minishift_install|bool == true)
 
 # initialize minishift
 - include: init_minishift.yml
-  when: (minishift.stat.exists == false or force_minishift_install|bool == true)
+  when: (minishift_bin.stat.exists == false or force_minishift_install|bool == true)
 
-# set minishift path
-- include: set_minishift_path.yml
-  when: (minishift.stat.exists == true and force_minishift_install|bool == false)
 
