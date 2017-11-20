@@ -1,0 +1,25 @@
+---
+# create/update and add security for containers
+
+- name: "Set the container_config_name to Pipeline containers"
+  set_fact:
+    container_config_name: "Pipeline containers"
+
+#- include: query_setup_cluster.yml template_name={{ item }}
+#  with_items: "{{ pipeline_bc_templates }}"
+#  when: pipeline_bc_templates != ""
+
+#- name: Wait for containers to be built and marked with latest tag
+#  pause:
+#    minutes: 7
+
+#- name: Modify tags on images
+#  shell: "oc get is | awk '{print $2}' | grep -v DOCKER | sed 's/.*5000\\///g' | xargs -i oc tag {}:latest {}:{{ tag }}"
+#  args:
+#    chdir:
+#  when: 'modify_tags|bool == true'
+
+# add security context constraints
+- include: add_scc.yml
+  when: modify_scc|bool == true
+

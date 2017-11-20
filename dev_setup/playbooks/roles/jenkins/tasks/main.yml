@@ -1,6 +1,0 @@
----
-# tasks file for jenkins
-
-# create jenkins master and slaves
-- include: jenkins_infra.yml
-

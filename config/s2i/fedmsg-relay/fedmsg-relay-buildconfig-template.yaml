@@ -133,3 +133,5 @@ parameters:
   displayName: Git Reference
   name: REPO_REF
   value: master
+labels:
+  template: fedmsg-relay

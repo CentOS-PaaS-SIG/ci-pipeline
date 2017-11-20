@@ -6,3 +6,5 @@
   git:
     repo: "{{ pipeline_repo }}"
     dest: "{{ pipeline_dir }}"
+    refspec: "{{ pipeline_refspec }}"
+    force: yes

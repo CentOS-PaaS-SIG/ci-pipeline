@@ -10,9 +10,6 @@
 - name: Stop the cluster
   shell: minishift stop --profile {{ profile }}
 
-- name: "Set oc to use based on the profile {{ profile }}"
-  shell: minishift oc-env --profile {{ profile }}
-
 - name: Update the VM config
   lineinfile:
     path: "/etc/libvirt/qemu/{{ profile }}.xml"

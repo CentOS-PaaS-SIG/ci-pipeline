@@ -13,7 +13,7 @@ ostree_compose/ostree_compose-buildconfig-template.yaml \
 ostree-image-compose/ostree-image-compose-buildconfig-template.yaml \
 ostree-boot-image/ostree-boot-image-buildconfig-template.yaml \
 singlehost-test/singlehost-test-buildconfig-template.yaml \
-linchpin_libvirt/linchpin_libvirt-buildconfig-template.yml"
+linchpin_libvirt/linchpin_libvirt-buildconfig-template.yaml"
 
 function logerror {
   echo "Error: $1"
