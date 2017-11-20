@@ -18,6 +18,7 @@
 - name: Check if EPEL is installed for non Fedora distros
   shell: rpm -qa | grep epel-release
   register: epel_rpm
+  ignore_errors: yes
   when: ansible_distribution == 'RedHat' or ansible_distribution == 'CentOS'
   become: true
 
