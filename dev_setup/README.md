@@ -148,7 +148,7 @@ _______
     ansible-playbook -vv -i "myserver.mydomain," --private-key=/home/cloud-user/my-key \
     ~/CentOS-PaaS-SIG/ci-pipeline/dev_setup/playbooks/setup.yml \
     -e remote_user=cloud-user -e skip_prereqs=false -e setup_minishift=false \
-    -e setup_pipeline=true -e setup_jenkins=true -e setup_containers=true \
+    -e setup_jenkins=true -e setup_containers=true \
     -e setup_fedmsg=true -e modify_tags=false -e force_clone=false
 ```
 
@@ -159,7 +159,7 @@ _______
     ansible-playbook -vv -i "localhost," -c local \
     ~/CentOS-PaaS-SIG/ci-pipeline/dev_setup/playbooks/setup.yml \
     -e remote_user=cloud-user -e skip_prereqs=true -e setup_minishift=true \
-    -e setup_pipeline=true -e setup_jenkins=true -e setup_containers=true \
+    -e setup_jenkins=true -e setup_containers=true \
     -e setup_fedmsg=true -e modify_tags=false -e force_clone=false
 
 ```
