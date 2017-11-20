@@ -144,6 +144,13 @@ _______
 
 ###### Example 1:
 
+ 1 - Install on a remote server as user cloud-user.
+ 2 - Don't setup pre-reqs (kvm driver and nested virtualization)
+ 2 - Don't setup a minishift cluster.
+ 3 - Setup jenkins infra, fedmsg relay, and pipeline containers.
+ 4 - Don't modify my container tags and 
+ 5 - Don't clone the pipeline repo if it exists.
+
 ```
     ansible-playbook -vv -i "myserver.mydomain," --private-key=/home/cloud-user/my-key \
     ~/CentOS-PaaS-SIG/ci-pipeline/dev_setup/playbooks/setup.yml \
@@ -155,12 +162,19 @@ _______
 
 ###### Example 2:
 
+ 1 - Install on a remote server as user cloud-user.
+ 2 - Don't setup pre-reqs (kvm driver and nested virtualization)
+ 2 - Setup a minishift cluster.
+ 3 - Setup jenkins infra and pipeline containers.
+ 4 - Don't setup fedmsg relay.
+ 5 - Modify my container tags with the default tag. tag=stable 
+
 ```
     ansible-playbook -vv -i "localhost," -c local \
     ~/CentOS-PaaS-SIG/ci-pipeline/dev_setup/playbooks/setup.yml \
     -e remote_user=cloud-user -e skip_prereqs=true -e setup_minishift=true \
     -e setup_jenkins=true -e setup_containers=true \
-    -e setup_fedmsg=true -e modify_tags=false -e force_clone=false
+    -e setup_fedmsg=false -e modify_tags=true
 
 ```
 

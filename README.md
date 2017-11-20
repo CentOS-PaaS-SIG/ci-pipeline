@@ -67,7 +67,7 @@ Obviously there is a certain balance of what testing/validation is run and time 
 ## CI-Pipeline Overview
 
 CI in general is the continuous integration of components/projects/products and validating these work together and then providing feedback to developers.
-Continuous delivery is the act of taking these integrated components that have been validated and are stable and deliverying them with consistency over and over efficiently.
+Continuous delivery is the act of taking these integrated components that have been validated and are stable and delivering them with consistency over and over efficiently.
 Continuous deployment allows us to take the deliverable and deploy it on some set of infrastructure to be used in a development, stage, and/or production environments. <br><br>
 
 The way continuous integration works is that robots test every change. They can then tell you which change caused the integrated result to break. We can then “gate” that change and ask a human to fix it.
