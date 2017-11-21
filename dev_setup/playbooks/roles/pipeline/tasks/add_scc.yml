@@ -13,11 +13,11 @@
   shell: oc get scc | grep '{{ scc_file.stdout }}' | awk '{print $1}'
   register: scc_name_file
 
-- name: "Create the {{ scc_file_name.stdout }} security context constraints"
+- name: "Create the {{ scc_name_file.stdout }} security context constraints"
   shell: oc create -f "{{ pipeline_dir }}/dev_setup/playbooks/roles/pipeline/files/pipeline-scc.yaml"
   when: scc_name_file.stdout == ""
 
-- name: "Update the {{ scc_file_name.stdout }} security context constraints"
+- name: "Update the {{ scc_name_file.stdout }} security context constraints"
   shell: oc replace -f "{{ pipeline_dir }}/dev_setup/playbooks/roles/pipeline/files/pipeline-scc.yaml"
   when: scc_name_file.stdout != ""
 
