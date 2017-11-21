@@ -23,9 +23,9 @@
     url: "{{ minishift_iso }}"
     dest: "{{ minishift_dest_dir }}/minishift.iso"
 
-# check if minishift is already up and running
+# check if the minishift profile exists
 - name: "Check if the minishift profile exists"
-  shell: minishift exist --profile {{ profile }} | head -1 | grep -i 'does not exist'
+  shell: "minishift status --profile {{ profile }} | head -1 | grep -i 'does not exist'"
   register: minishift_exist
   ignore_errors: yes
 
