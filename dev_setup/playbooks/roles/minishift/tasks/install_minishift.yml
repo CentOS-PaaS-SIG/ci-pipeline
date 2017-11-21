@@ -37,13 +37,3 @@
 
 - include: set_minishift_path.yml
 
-- name: "Set minishift disk-size {{ disk_size }}"
-  shell: minishift config set disk-size {{ disk_size }}
-
-- name: "Set minishift disk-size {{ memory }}"
-  shell: minishift config set memory {{ memory }}
-
-- name: Pull down the minishift iso
-  get_url:
-    url: "{{ minishift_iso }}"
-    dest: "{{ minishift_dest_dir }}/minishift.iso"

@@ -5,7 +5,7 @@
 
 - name: Wait for the cluster to come up completely
   pause:
-    minutes: 2
+    minutes: 3
 
 - name: Stop the cluster
   shell: minishift stop --profile {{ profile }}
