@@ -9,7 +9,7 @@
   shell: cat {{ pipeline_dir }}/dev_setup/playbooks/roles/pipeline/files/pipeline-scc.yaml | grep name | awk '{print $NF}'
   register: scc_file
 
-- name: "Check {{ scc_file_name.stdout }} name exists from querying the cluster"
+- name: "Check {{ scc_file.stdout }} name exists from querying the cluster"
   shell: oc get scc | grep '{{ scc_file.stdout }}' | awk '{print $1}'
   register: scc_name_file
 

@@ -5,9 +5,9 @@
   set_fact:
     container_config_name: "Pipeline containers"
 
-#- include: query_setup_cluster.yml template_name={{ item }}
-#  with_items: "{{ pipeline_bc_templates }}"
-#  when: pipeline_bc_templates != ""
+- include: query_setup_cluster.yml template_name={{ item }}
+  with_items: "{{ pipeline_bc_templates }}"
+  when: pipeline_bc_templates != ""
 
 #- name: Wait for containers to be built and marked with latest tag
 #  pause:
