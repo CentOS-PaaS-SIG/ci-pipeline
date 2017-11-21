@@ -25,7 +25,7 @@
 
 # check if minishift is already up and running
 - name: "Check if the minishift profile exists"
-  shell: "minishift exist --profile {{ profile }} | head -1 | grep -i 'does not exist'"
+  shell: minishift exist --profile {{ profile }} | head -1 | grep -i 'does not exist'
   register: minishift_exist
   ignore_errors: yes
 
