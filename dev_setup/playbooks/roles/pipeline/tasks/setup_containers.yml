@@ -13,10 +13,12 @@
 #  pause:
 #    minutes: 7
 
+# query the containers running
+#- name: "Query image streams to see if they are built"
+#  shell: "oc get is | egrep -v 'NAME|latest|stable'"
+
 #- name: Modify tags on images
 #  shell: "oc get is | awk '{print $2}' | grep -v DOCKER | sed 's/.*5000\\///g' | xargs -i oc tag {}:latest {}:{{ tag }}"
-#  args:
-#    chdir:
 #  when: 'modify_tags|bool == true'
 
 # add security context constraints
