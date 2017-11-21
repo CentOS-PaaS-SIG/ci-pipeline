@@ -1,14 +1,10 @@
 ---
-- name: "Wait build to initiate for {{ container_config_name }} "
-  pause:
-    minutes: 5
-
 # Wait for all containers in the pipeline to be finished building
-- name: "Wait for {{ container_config_name }} to be built and marked with latest tag"
+- name: "{{ container_config_name }} :: Wait for {{ container_config_name }} to be built and marked with latest tag"
   shell: "oc get builds"
   register: oc_build_result
   until: oc_build_result.stdout.find(" Running ") == -1
-  retries: 500
+  retries: 100
   delay: 10
   failed_when: oc_build_result.stdout.find(" Failed ") != -1
 
