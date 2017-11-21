@@ -22,6 +22,7 @@
   get_url:
     url: "{{ minishift_iso }}"
     dest: "{{ minishift_dest_dir }}/minishift.iso"
+    timeout: 120
 
 # check if the minishift profile exists
 - name: "Check if the minishift profile exists"

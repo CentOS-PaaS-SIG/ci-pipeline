@@ -36,15 +36,28 @@
   include: setup_jenkins_infra.yml
   when: setup_jenkins|bool == true
 
+- include: check_builds.yml
+  when: setup_jenkins|bool == true
+
 # setup_fedmsg_relay.yml
 - name: "Setup Fedmsg relay"
   include: setup_fedmsg_relay.yml
+  when: setup_fedmsg|bool == true
+
+- include: check_builds.yml
   when: setup_fedmsg|bool == true
 
 # setup_containers.yml
 - name: "Setup Pipeline containers"
   include: setup_containers.yml
   when: setup_containers|bool == true
+
+- include: check_builds.yml
+  when: setup_containers|bool == true
+
+# add security context constraints
+- include: add_scc.yml
+  when: modify_scc|bool == true
 
 # create sample pipeline
 
