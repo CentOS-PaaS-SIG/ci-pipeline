@@ -8,10 +8,28 @@
   register: minishift_bin
 
 # install minishift
-- include: install_minishift.yml
+- include: install_minishift_bin.yml
+  when: (minishift_bin.stat.exists == false or force_minishift_install|bool == true)
+
+# set disk size and memory
+- name: "Set minishift disk-size {{ disk_size }}"
+  shell: minishift config set disk-size {{ disk_size }}
+
+- name: "Set minishift disk-size {{ memory }}"
+  shell: minishift config set memory {{ memory }}
+
+- name: Pull down the minishift iso
+  get_url:
+    url: "{{ minishift_iso }}"
+    dest: "{{ minishift_dest_dir }}/minishift.iso"
+
+# check if minishift is already up and running
+- name: "Check if the minishift profile exists"
+  shell: "minishift exist --profile {{ profile }} | head -1 | grep -i 'does not exist'"
+  register: minishift_exist
 
 # initialize minishift
 - include: init_minishift.yml
-  when: (minishift_bin.stat.exists == false or force_minishift_install|bool == true)
+  when: minishift_exist.stdout != ""
 
 
