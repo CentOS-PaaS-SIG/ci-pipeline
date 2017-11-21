@@ -28,6 +28,9 @@ pipeline_dir: "{{ ansible_env.HOME }}/minishift/ci-pipeline"
 # repo refspec
 pipeline_refspec: '+refs/pull/*:refs/heads/*'
 
+# repo branch or sha
+pipeline_branch: 'master'
+
 # cluster username
 username: developer
 
