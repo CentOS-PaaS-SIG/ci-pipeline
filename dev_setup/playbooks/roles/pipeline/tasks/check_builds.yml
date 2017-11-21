@@ -7,10 +7,7 @@
   until: oc_build_result.stdout.find(" Running ") == -1
   retries: 500
   delay: 10
-
-- name: "Check if {{ container_config_name }} failed to build"
-  shell: echo "Failure when building... {{ oc_build_result.stdout }}"
-  when: oc_build_result.stdout.find(" Failure ") != -1
+  failed_when: oc_build_result.stdout.find(" Failure ") != -1
 
 - name: Modify tags on images
   shell: "oc get is | awk '{print $2}' | grep -v DOCKER | sed 's/.*5000\\///g' | xargs -i oc tag {}:latest {}:{{ tag }}"
