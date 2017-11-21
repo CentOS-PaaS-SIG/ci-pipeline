@@ -1,10 +1,17 @@
 ---
 topology_name: "libvirt"
 resource_groups:
+  
   -
     resource_group_name: "ex"
     res_group_type: "libvirt"
     res_defs:
+      - res_name: "linchpin-centos71"
+        res_type: "libvirt_network"
+        ip: 192.168.71.100                                                                                              
+        dhcp_start: 192.168.71.101                                                                                      
+        dhcp_end: 192.168.71.112
+        bridge: "virbr4"
       - res_name: "fedoraati"
         res_type: "libvirt_node"
         uri: "qemu:///system"
@@ -17,7 +24,7 @@ resource_groups:
         vcpus: 3
         arch: x86_64
         copy_ssh_keys: true
-        network_bridge: "virbr3"
+        network_bridge: "virbr4"
         additional_storage: 15G
         cloud_config:
           users:
@@ -28,4 +35,4 @@ resource_groups:
               ssh-import-id: None
               lock_passwd: true
         networks:
-          - name: default
+          - name: "linchpin-centos71"
