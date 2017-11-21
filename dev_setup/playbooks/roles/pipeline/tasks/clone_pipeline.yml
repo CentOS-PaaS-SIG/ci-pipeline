@@ -7,4 +7,5 @@
     repo: "{{ pipeline_repo }}"
     dest: "{{ pipeline_dir }}"
     refspec: "{{ pipeline_refspec }}"
+    version: "{{ pipeline_branch }}"
     force: yes
