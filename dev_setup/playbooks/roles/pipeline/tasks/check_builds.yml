@@ -1,4 +1,7 @@
 ---
+- name: "Wait build to initiate for {{ container_config_name }} "
+  pause:
+    minutes: 5
 
 # Wait for all containers in the pipeline to be finished building
 - name: "Wait for {{ container_config_name }} to be built and marked with latest tag"
