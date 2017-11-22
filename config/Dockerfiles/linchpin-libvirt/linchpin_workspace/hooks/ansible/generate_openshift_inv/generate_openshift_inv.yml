@@ -6,7 +6,7 @@
   tasks:
     - name: "Pause for a while for dhcp to catch up"
       pause: 
-        minutes: 10
+        minutes: 5
     - name: "cat inventory out generated inventory"
       shell: "cat {{ inventory_file }}"
       register: inventory_output
