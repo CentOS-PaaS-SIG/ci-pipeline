@@ -133,7 +133,7 @@ _______
 | pipeline_dir            |     Directory to clone repo to                                  | pipeline_dir=/path_to_pipeline            |   "{{ ansible_env.HOME }}/minishift/cip"  | No       |
 | pipeline_refspec        |     Repo refpec to checkout                                     | pipeline_refspec=refs/heads/*             |  "+refs/pull/*:refs/heads/*"              | No       |
 | pipeline_branch         |     Branch or SHA to checkout                                   | pipeline_branch=[SHA]                     |  "+master"                                | No       |
-| pipeline_branch        |     Branch or SHA to checkout                                   | pipeline_branch=<SHA>                     |  "+master"                                | No       |
+| pipeline_branch         |     Branch or SHA to checkout                                   | pipeline_branch=<SHA>                     |  "+master"                                | No       |
 | username                |     Cluster username                                            | username=me                               |   "developer"                             | No       |
 | password                |     Cluster password                                            | password=password                         |   "developer"                             | No       |  
 | admin_username          |     Admin cluster username                                      | username=me                               |   "system"                                | No       |
