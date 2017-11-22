@@ -126,11 +126,13 @@ _______
 | profile                 |     Minishift cluster profile name                              | profile=contra-cp                         |   "minishift"                             | No       |
 | disk_size               |     Disk size for minishift                                     | disk_size=25gb                            |   "40gb"                                  | No       |
 | memory                  |     Memory for minishift                                        | memory=4000mb                             |   "6400mb"                                | No       |
+| minishift_iso           |     Minishift ISO url location                                  | minishift_iso=[url]                       |   "[ci-pipeline-minishift-iso-url]"       | No       |
 | minishift_iso           |     Minishift ISO url location                                  | minishift_iso=<url>                       |   "<ci-pipeline-minishift-iso-url>"       | No       |
 | force_repo_clone        |     Force the clone of the pipeline git repo                    | force_repo_clone=true                     |   true                                    | No       |
 | pipeline_repo           |     Repo to clone for the pipeline                              | pipeline_repo=https://github.com/cip      |   This repo ci-pipeline                   | No       |
 | pipeline_dir            |     Directory to clone repo to                                  | pipeline_dir=/path_to_pipeline            |   "{{ ansible_env.HOME }}/minishift/cip"  | No       |
 | pipeline_refspec        |     Repo refpec to checkout                                     | pipeline_refspec=refs/heads/*             |  "+refs/pull/*:refs/heads/*"              | No       |
+| pipeline_branch         |     Branch or SHA to checkout                                   | pipeline_branch=[SHA]                     |  "+master"                                | No       |
 | pipeline_branch        |     Branch or SHA to checkout                                   | pipeline_branch=<SHA>                     |  "+master"                                | No       |
 | username                |     Cluster username                                            | username=me                               |   "developer"                             | No       |
 | password                |     Cluster password                                            | password=password                         |   "developer"                             | No       |  
@@ -145,6 +147,12 @@ _______
 
 ###### Example 1:
 
+ 1. Install on a remote server as user cloud-user.
+ 2. Don't setup pre-reqs (kvm driver and nested virtualization)
+ 3. Don't setup a minishift cluster.
+ 4. Setup jenkins infra, fedmsg relay, and pipeline containers.
+ 5. Don't modify my container tags and 
+ 6. Don't clone the pipeline repo if it exists.
  1 - Install on a remote server as user cloud-user.
  2 - Don't setup pre-reqs (kvm driver and nested virtualization)
  2 - Don't setup a minishift cluster.
@@ -163,6 +171,12 @@ _______
 
 ###### Example 2:
 
+ 1. Install on a remote server as user cloud-user.
+ 2. Don't setup pre-reqs (kvm driver and nested virtualization)
+ 3. Setup a minishift cluster.
+ 4. Setup jenkins infra and pipeline containers.
+ 5. Don't setup fedmsg relay.
+ 6. Modify my container tags with the default tag. tag=stable 
  1 - Install on a remote server as user cloud-user.
  2 - Don't setup pre-reqs (kvm driver and nested virtualization)
  2 - Setup a minishift cluster.
