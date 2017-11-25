@@ -1,7 +1,7 @@
 <network>
   <name>default</name>
   <uuid>f487971c-469a-4752-ba15-ff85024834a7</uuid>
-  <bridge name="virbr3"/>
+  <bridge name="virbr0"/>
   <forward/>
   <ip address="192.168.125.1" netmask="255.255.255.0">
     <dhcp>
