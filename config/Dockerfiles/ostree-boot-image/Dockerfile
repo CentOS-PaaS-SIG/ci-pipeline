@@ -8,8 +8,7 @@ ENV HOME=/home
 
 WORKDIR $HOME
 
-COPY epel-release-7-2.noarch.rpm $HOME/
-RUN yum -y install $HOME/epel-release-7-2.noarch.rpm
+RUN yum -y install epel-release
 
 COPY atomic7-testing.repo /etc/yum.repos.d
 COPY walters-buildtools.repo /etc/yum.repos.d

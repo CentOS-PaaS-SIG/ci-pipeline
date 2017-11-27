@@ -3,12 +3,7 @@ LABEL maintainer "https://github.com/CentOS-PaaS-SIG/ci-pipeline"
 LABEL description="This container is meant to generate a rawhide image \
 with a custom rpm, specified with $package, located at $rpm_repo."
 
-ENV HOME=/root
-
-WORKDIR $HOME
-
-COPY epel-release-7-11.noarch.rpm $HOME/
-RUN yum -y install $HOME/epel-release-7-11.noarch.rpm
+RUN yum -y install epel-release
 
 COPY atomic7-testing.repo /etc/yum.repos.d
 COPY walters-buildtools.repo /etc/yum.repos.d
