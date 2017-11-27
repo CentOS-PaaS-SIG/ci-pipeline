@@ -126,6 +126,7 @@ _______
 | profile                 |     Minishift cluster profile name                              | profile=contra-cp                         |   "minishift"                             | No       |
 | disk_size               |     Disk size for minishift                                     | disk_size=25gb                            |   "40gb"                                  | No       |
 | memory                  |     Memory for minishift                                        | memory=4000mb                             |   "6400mb"                                | No       |
+| basedevice_size         |     Base device size for pods in minishift                      | basedevice_size=30G                       |   "20G"                                   | No       |
 | minishift_iso           |     Minishift ISO url location                                  | minishift_iso=[url]                       |   "[ci-pipeline-minishift-iso-url]"       | No       |
 | force_repo_clone        |     Force the clone of the pipeline git repo                    | force_repo_clone=true                     |   true                                    | No       |
 | pipeline_repo           |     Repo to clone for the pipeline                              | pipeline_repo=https://github.com/cip      |   This repo ci-pipeline                   | No       |
