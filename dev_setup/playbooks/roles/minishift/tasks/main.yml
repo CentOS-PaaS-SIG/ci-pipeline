@@ -18,6 +18,10 @@
 - name: "Set minishift disk-size {{ memory }}"
   shell: minishift config set memory {{ memory }}
 
+# set base device size
+- name: "Set minishift base device size to {{basedevice_size}}"
+  shell: minishift config set docker-opt "storage-opt=dm.basesize={{basedevice_size}}"
+
 - name: Pull down the minishift iso
   get_url:
     url: "{{ minishift_iso }}"
