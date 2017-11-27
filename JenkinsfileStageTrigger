@@ -189,23 +189,8 @@ pipeline {
         stage("Run Stage Jobs") {
             failFast true
             parallel {
-                stage("f26 message watcher") {
-                    steps {
-                        script {
-                            pipelineUtils.watchForMessages(MSG_PROVIDER, CANNED_CI_MESSAGES['f26'])
-                        }
-                    }
-                }
-                stage("f27 message watcher") {
-                    steps {
-                        script {
-                            pipelineUtils.watchForMessages(MSG_PROVIDER, CANNED_CI_MESSAGES['f27'])
-                        }
-                    }
-                }
                 stage("f26 stage job") {
                     steps {
-                        sleep 30
                         build job: 'ci-stage-pipeline-f26',
                                 parameters: [
                                         string(name: 'CI_MESSAGE', value: CANNED_CI_MESSAGES['f26']),
@@ -230,7 +215,6 @@ pipeline {
                 }
                 stage("f27 stage job") {
                     steps {
-                        sleep 30
                         build job: 'ci-stage-pipeline-f27',
                                 parameters: [
                                         string(name: 'CI_MESSAGE', value: CANNED_CI_MESSAGES['f27']),
