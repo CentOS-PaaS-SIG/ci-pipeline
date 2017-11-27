@@ -277,7 +277,7 @@ podTemplate(name: podName,
                         // Send message org.centos.prod.ci.pipeline.compose.complete on fedmsg
                         pipelineUtils.sendMessageWithAudit(messageFields['properties'], messageFields['content'], msgAuditFile, fedmsgRetryCount)
 
-				pipelineUtils.checkLastImage(currentStage)
+                        pipelineUtils.checkLastImage(currentStage)
                     }
 
                     currentStage = "ci-pipeline-ostree-image-compose"
@@ -453,7 +453,6 @@ podTemplate(name: podName,
 
                         // run linchpin workspace for e2e tests
                         //pipelineUtils.executeInContainer(currentStage, "linchpin-libvirt", "/root/linchpin_workspace/run_e2e_tests.sh")
-                        pipelineUtils.executeInContainer(currentStage, "linchpin-libvirt", "date")
                     }
 
                 } catch (e) {
