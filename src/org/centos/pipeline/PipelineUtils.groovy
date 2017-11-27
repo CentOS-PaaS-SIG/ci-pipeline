@@ -703,18 +703,13 @@ def verifyPod(String openshiftProject, String nodeName) {
  * @param nodeName podName we are going to get container logs from.
  * @return
  */
+@NonCPS
 def getContainerLogsFromPod(String openshiftProject, String nodeName) {
+    sh 'mkdir -p podInfo'
     openshift.withCluster() {
         openshift.withProject(openshiftProject) {
-            def describeStr = openshift.selector("pods", nodeName).describe()
-            out = describeStr.out.trim()
-
-            echo "Container names in pod ${env.NODE_NAME}: "
             names       = openshift.raw("get", "pod",  "${env.NODE_NAME}", '-o=jsonpath="{.status.containerStatuses[*].name}"')
-            containerNames = names.out.trim()
-            echo containerNames
-
-            sh 'mkdir -p podInfo'
+            String containerNames = names.out.trim()
 
             containerNames.split().each {
                 String log = containerLog name: it, returnLog: true

@@ -67,8 +67,8 @@ objects:
     source:
       contextDir: ${CONTEXT_DIR}
       git:
-        uri: ${SOURCE_REPOSITORY_URL}
-        ref: ${SOURCE_REPOSITORY_REF}
+        uri: ${REPO_URL}
+        ref: ${REPO_REF}
       secrets: []
       type: Git
     strategy:
@@ -229,11 +229,11 @@ objects:
     sessionAffinity: None
 parameters:
 - description: Git source URI for Jenkins S2I
-  name: SOURCE_REPOSITORY_URL
+  name: REPO_URL
   required: true
   value: https://github.com/CentOS-PaaS-SIG/ci-pipeline.git
 - description: Git branch/tag reference
-  name: SOURCE_REPOSITORY_REF
+  name: REPO_REF
   value: master
 - description: Path within Git project to build; empty for root project directory.
   name: CONTEXT_DIR
@@ -269,5 +269,5 @@ parameters:
   description: Name of the ImageStreamTag to be used for the Jenkins image.
   value: jenkins:latest
 labels:
-  template: jenkins-persistent-template
+  template: jenkins-persistent
 
