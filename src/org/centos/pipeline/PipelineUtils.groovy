@@ -541,8 +541,10 @@ def setStageEnvVars(String stage){
             ]
 
     // Get the map of env var keys and values and write them to the env global variable
-    stages.get(stage).each { key, value ->
-        env."${key}" = value
+    if(stages.containsKey(stage)) {
+        stages.get(stage).each { key, value ->
+            env."${key}" = value
+        }
     }
 }
 
