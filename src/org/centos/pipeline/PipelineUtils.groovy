@@ -541,8 +541,10 @@ def setStageEnvVars(String stage){
             ]
 
     // Get the map of env var keys and values and write them to the env global variable
-    stages.get(stage).each { key, value ->
-        env."${key}" = value
+    if(stages.containsKey(stage)) {
+        stages.get(stage).each { key, value ->
+            env."${key}" = value
+        }
     }
 }
 
@@ -702,14 +704,20 @@ def getContainerLogsFromPod(String openshiftProject, String nodeName) {
     sh 'mkdir -p podInfo'
     openshift.withCluster() {
         openshift.withProject(openshiftProject) {
+            echo "here1"
             names       = openshift.raw("get", "pod",  "${env.NODE_NAME}", '-o=jsonpath="{.status.containerStatuses[*].name}"')
+            echo "here2"
             String containerNames = names.out.trim()
 
+            echo "here3"
             containerNames.split().each {
+                echo "here-${it}"
                 String log = containerLog name: it, returnLog: true
+                echo "here-${it}-2"
                 writeFile file: "podInfo/containerLog-${it}-${nodeName}.txt",
                             text: log
             }
+            echo "here-4"
             archiveArtifacts "podInfo/containerLog-*.txt"
         }
     }
