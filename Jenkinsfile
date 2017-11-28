@@ -419,7 +419,7 @@ podTemplate(name: podName,
                     }
 
                     withEnv(["currentStage=ci-pipeline-functional-tests"]){
-                        Stage(env.currentStage){
+                        stage(env.currentStage){
                             withEnv(pipelineUtils.setStageEnvVars(env.currentStage)){
                                 messageFields = pipelineUtils.setMessageFields("package.test.functional.running")
 
