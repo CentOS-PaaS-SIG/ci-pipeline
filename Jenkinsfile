@@ -477,8 +477,7 @@ podTemplate(name: podName,
                                 pipelineUtils.executeInContainer(currentStage, "linchpin-libvirt", "date")
                             }
                         }
-
-                            }
+                    }
 
                 } catch (e) {
                     // Set build result

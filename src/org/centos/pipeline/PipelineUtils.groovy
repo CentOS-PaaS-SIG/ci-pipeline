@@ -6,7 +6,7 @@ import org.centos.*
 import groovy.json.JsonSlurper
 
 /**
- * Method to setup and configure the host the way ci-pipeline requires
+ * Library to setup and configure the host the way ci-pipeline requires
  * @param stage
  * @param sshKey
  * @return
@@ -44,7 +44,7 @@ def setupStage(String stage, String sshKey) {
 }
 
 /**
- * Method to execute a task and rsync the logs back to artifacts.ci.centos.org
+ * Library to execute a task and rsync the logs back to artifacts.ci.centos.org
  * @param stage
  * @param duffyKey
  * @return
@@ -97,7 +97,7 @@ def runTaskAndReturnLogs(String stage, String duffyKey) {
 }
 
 /**
- * Method to check last image
+ * Library to check last image
  * @param stage
  * @return
  */
@@ -136,7 +136,7 @@ def checkLastImage(String stage) {
  *  imageFilePath - path to the file to examine last modified time for. Defaults to 'images/latest-atomic.qcow2'
  */
 /**
- * Method to check last modified date for a given image file.
+ * Library to check last modified date for a given image file.
  * @param stage
  * @param imageFilePath
  * @return
@@ -194,7 +194,7 @@ def checkImageLastModifiedTime(String stage, String imageFilePath='images/latest
 
 
 /**
- * Method to check branch to rsync to as rawhide should map to a release number
+ * Library to check branch to rsync to as rawhide should map to a release number
  * @return
  */
 def getRsyncBranch() {
@@ -220,7 +220,7 @@ def getRsyncBranch() {
 }
 
 /**
- * Method to set message fields to be published
+ * Library to set message fields to be published
  * @param messageType: ${MAIN_TOPIC}.ci.pipeline.<defined-in-README>
  * @return
  */
@@ -291,7 +291,7 @@ def setMessageFields(String messageType) {
 }
 
 /**
- * Method to send message
+ * Library to send message
  * @param msgProps - The message properties in key=value form, one key/value per line ending in '\n'
  * @param msgContent - Message content.
  * @return
@@ -309,7 +309,7 @@ def sendMessage(String msgProps, String msgContent) {
 }
 
 /**
- * Method to send message
+ * Library to send message
  * @param msgProps - The message properties in key=value form, one key/value per line ending in '\n'
  * @param msgContent - Message content.
  * @param msgAuditFile - File containing all past messages. It will get appended to.
@@ -363,7 +363,7 @@ def trackMessage(String messageID, int retryCount) {
     }
 }
 /**
- * Method to parse CI_MESSAGE and inject its key/value pairs as env variables.
+ * Library to parse CI_MESSAGE and inject its key/value pairs as env variables.
  *
  */
 def injectFedmsgVars(String message) {
@@ -391,7 +391,7 @@ def injectFedmsgVars(String message) {
 }
 
 /**
- * Method to prepare credentials
+ * Library to prepare credentials
  * @return
  */
 def prepareCredentials() {
@@ -415,7 +415,7 @@ def prepareCredentials() {
     env.RSYNC_PASSWORD = getPasswordFromDuffyKey('duffy-key')
 }
 /**
- * Method to set default environmental variables. Performed once at start of Jenkinsfile
+ * Library to set default environmental variables. Performed once at start of Jenkinsfile
  * @param envMap: Key/value pairs which will be set as environmental variables.
  * @return
  */
@@ -496,9 +496,9 @@ def setDefaultEnvVars(Map envMap=null){
 }
 
 /**
- * Method to set stage specific environmental variables.
+ * Library to set stage specific environmental variables.
  * @param stage - Current stage
- * @return ArrayList<String>
+ * @return
  */
 def setStageEnvVars(String stage){
     def stages =
@@ -540,14 +540,16 @@ def setStageEnvVars(String stage){
              ]
             ]
 
-    // Return an array of "k=v", suitable for use with a withEnv() call.
-    // return stages[stage].collect { key, value -> return "\"${key}=${value}\"" }
-    ArrayList<String> stageVars = stages[stage].collect { key, value -> return "${key}=${value}"}
-    return stageVars
+    // Get the map of env var keys and values and write them to the env global variable
+    if(stages.containsKey(stage)) {
+        stages.get(stage).each { key, value ->
+            env."${key}" = value
+        }
+    }
 }
 
 /**
- * Method to create a text string which is written to the file 'task.env' in the {env.ORIGIN_WORKSPACE} and call
+ * Library to create a text string which is written to the file 'task.env' in the {env.ORIGIN_WORKSPACE} and call
  * runTaskAndReturnLogs()
  * @param stage - Current stage
  * @return
@@ -597,7 +599,7 @@ def rsyncData(String stage){
 }
 
 /**
- * Method to provision resources used in the stage
+ * Library to provision resources used in the stage
  * @param stage - Current stage
  * @return
  */
@@ -619,25 +621,19 @@ def provisionResources(String stage){
 }
 
 /**
- * Function to execute script in container
+ * Library to execute script in container
  * Container must have been defined in a podTemplate
  *
  * @param containerName Name of the container for script execution
  * @param script Complete path to the script to execute
  * @return
  */
-def executeInContainer(String stageName, String containerName, String script, ArrayList<String> vars=null) {
+def executeInContainer(String stageName, String containerName, String script) {
     //
     // Kubernetes plugin does not let containers inherit
     // env vars from host. We force them in.
     //
-    def containerEnv = env.getEnvironment().collect { key, value -> return "${key}=${value}" }
-    if (vars){
-        vars.each {x->
-            containerEnv.add(x)
-        }
-    }
-
+    containerEnv = env.getEnvironment().collect { key, value -> return key+'='+value }
     sh "mkdir -p ${stageName}"
     try {
         withEnv(containerEnv) {
@@ -756,7 +752,7 @@ def getPasswordFromDuffyKey(String credentialsId) {
 }
 
 /**
- * Method to teardown resources used in the current stage
+ * Library to teardown resources used in the current stage
  *
  * variables
  *   currentStage - current stage running
