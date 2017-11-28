@@ -542,8 +542,12 @@ def setStageEnvVars(String stage){
 
     // Return an array of "k=v", suitable for use with a withEnv() call.
     // return stages[stage].collect { key, value -> return "\"${key}=${value}\"" }
-    ArrayList<String> stageVars = stages[stage].collect { key, value -> return "${key}=${value}"}
-    return stageVars
+    if (stages.containsKey(stage)) {
+        ArrayList<String> stageVars = stages[stage].collect { key, value -> return "${key}=${value}"}
+        return stageVars
+    } else {
+        return []
+    }
 }
 
 /**
