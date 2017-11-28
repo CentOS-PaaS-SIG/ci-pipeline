@@ -537,6 +537,7 @@ def setStageEnvVars(String stage){
              "ci-pipeline-atomic-host-tests"       : [
                      task    : "./ci-pipeline/tasks/atomic-host-tests",
                      playbook: "ci-pipeline/playbooks/system-setup.yml",
+                     package                  : "${env.fed_repo}"
              ]
             ]
 
