@@ -361,10 +361,10 @@ podTemplate(name: podName,
                         }
                     }
 
-                    // Be13gin parallel stages
-                    parallel ostreeImageBootSanity: {
-                        withEnv(["currentStage=ci-pipeline-ostree-image-boot-sanity"]) {
-                            stage(env.currentStage) {
+                    // Begin parallel validations
+                    stage('Validations') {
+                        parallel ostreeImageBootSanity: {
+                            withEnv(["currentStage=ci-pipeline-ostree-image-boot-sanity"]) {
                                 if (fileExists("${env.WORKSPACE}/NeedNewImage.txt") || ("${env.GENERATE_IMAGE}" == "true")) {
                                     withEnv(pipelineUtils.setStageEnvVars(env.currentStage)) {
 
@@ -402,11 +402,10 @@ podTemplate(name: podName,
                                 } else {
                                     echo "Not Running Image Boot Sanity on Image"
                                 }
+
                             }
-                        }
-                    }, ostreeBootSanity: {
-                        withEnv(["currentStage=ci-pipeline-ostree-boot-sanity"]) {
-                            stage(env.currentStage) {
+                        }, ostreeBootSanity: {
+                            withEnv(["currentStage=ci-pipeline-ostree-boot-sanity"]) {
                                 withEnv(pipelineUtils.setStageEnvVars(env.currentStage)) {
                                     // Run ostree boot sanity
                                     pipelineUtils.executeInContainer(env.currentStage, "ostree-boot-image", "/home/ostree-boot-image.sh")
@@ -418,10 +417,8 @@ podTemplate(name: podName,
                                     pipelineUtils.sendMessageWithAudit(messageFields['properties'], messageFields['content'], msgAuditFile, fedmsgRetryCount)
                                 }
                             }
-                        }
-                    }, functionalTests: {
-                        withEnv(["currentStage=ci-pipeline-functional-tests"]) {
-                            stage(env.currentStage) {
+                        }, functionalTests: {
+                            withEnv(["currentStage=ci-pipeline-functional-tests"]) {
                                 withEnv(pipelineUtils.setStageEnvVars(env.currentStage)) {
                                     messageFields = pipelineUtils.setMessageFields("package.test.functional.running")
 
@@ -444,10 +441,8 @@ podTemplate(name: podName,
                                     pipelineUtils.sendMessageWithAudit(messageFields['properties'], messageFields['content'], msgAuditFile, fedmsgRetryCount)
                                 }
                             }
-                        }
-                    }, atomicHostTests: {
-                        withEnv(["currentStage=ci-pipeline-atomic-host-tests"]) {
-                            stage(env.currentStage) {
+                        }, atomicHostTests: {
+                            withEnv(["currentStage=ci-pipeline-atomic-host-tests"]) {
                                 withEnv(pipelineUtils.setStageEnvVars(env.currentStage)) {
                                     // Set our message topic, properties, and content
                                     messageFields = pipelineUtils.setMessageFields("compose.test.integration.running")
@@ -465,11 +460,8 @@ podTemplate(name: podName,
                                     pipelineUtils.sendMessageWithAudit(messageFields['properties'], messageFields['content'], msgAuditFile, fedmsgRetryCount)
                                 }
                             }
-
-                        }
-                    }, openshiftE2ETests: {
-                        withEnv(["currentStage=openshift-e2e-tests"]) {
-                            stage(env.currentStage) {
+                        }, openshiftE2ETests: {
+                            withEnv(["currentStage=openshift-e2e-tests"]) {
                                 withEnv(pipelineUtils.setStageEnvVars(env.currentStage)) {
                                     // run linchpin up and other steps
                                     // note: need to be updated
@@ -479,9 +471,10 @@ podTemplate(name: podName,
                                     pipelineUtils.executeInContainer(currentStage, "linchpin-libvirt", "date")
                                 }
                             }
-                        }
-                    },
-                    failFast: true
+                        },
+                        failFast: true
+                    }
+
                 } catch (e) {
                     // Set build result
                     currentBuild.result = 'FAILURE'
