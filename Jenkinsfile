@@ -404,74 +404,75 @@ podTemplate(name: podName,
                                 }
 
                             }
-                        }, ostreeBootSanity: {
-                            withEnv(["currentStage=ci-pipeline-ostree-boot-sanity"]) {
-                                withEnv(pipelineUtils.setStageEnvVars(env.currentStage)) {
-                                    // Run ostree boot sanity
-                                    pipelineUtils.executeInContainer(env.currentStage, "ostree-boot-image", "/home/ostree-boot-image.sh")
-
-                                    // Set our message topic, properties, and content
-                                    messageFields = pipelineUtils.setMessageFields("package.test.functional.queued")
-
-                                    // Send message org.centos.prod.ci.pipeline.package.test.functional.queued on fedmsg
-                                    pipelineUtils.sendMessageWithAudit(messageFields['properties'], messageFields['content'], msgAuditFile, fedmsgRetryCount)
-                                }
-                            }
-                        }, functionalTests: {
-                            withEnv(["currentStage=ci-pipeline-functional-tests"]) {
-                                withEnv(pipelineUtils.setStageEnvVars(env.currentStage)) {
-                                    messageFields = pipelineUtils.setMessageFields("package.test.functional.running")
-
-                                    // Send message org.centos.prod.ci.pipeline.package.test.functional.running on fedmsg
-                                    pipelineUtils.sendMessage(messageFields['properties'], messageFields['content'])
-
-                                    // Run functional tests
-                                    pipelineUtils.executeInContainer(env.currentStage, "singlehost-test", "/tmp/package-test.sh")
-
-                                    // Set our message topic, properties, and content
-                                    messageFields = pipelineUtils.setMessageFields("package.test.functional.complete")
-
-                                    // Send message org.centos.prod.ci.pipeline.package.test.functional.complete on fedmsg
-                                    pipelineUtils.sendMessage(messageFields['properties'], messageFields['content'])
-
-                                    // Set our message topic, properties, and content
-                                    messageFields = pipelineUtils.setMessageFields("compose.test.integration.queued")
-
-                                    // Send message org.centos.prod.ci.pipeline.compose.test.integration.queued on fedmsg
-                                    pipelineUtils.sendMessageWithAudit(messageFields['properties'], messageFields['content'], msgAuditFile, fedmsgRetryCount)
-                                }
-                            }
-                        }, atomicHostTests: {
-                            withEnv(["currentStage=ci-pipeline-atomic-host-tests"]) {
-                                withEnv(pipelineUtils.setStageEnvVars(env.currentStage)) {
-                                    // Set our message topic, properties, and content
-                                    messageFields = pipelineUtils.setMessageFields("compose.test.integration.running")
-
-                                    // Send message org.centos.prod.ci.pipeline.compose.test.integration.running on fedmsg
-                                    pipelineUtils.sendMessageWithAudit(messageFields['properties'], messageFields['content'], msgAuditFile, fedmsgRetryCount)
-
-                                    // Run integration tests
-                                    pipelineUtils.executeInContainer(env.currentStage, "singlehost-test", "/tmp/integration-test.sh")
-
-                                    // Set our message topic, properties, and content
-                                    messageFields = pipelineUtils.setMessageFields("compose.test.integration.complete")
-
-                                    // Send message org.centos.prod.ci.pipeline.compose.test.integration.complete on fedmsg
-                                    pipelineUtils.sendMessageWithAudit(messageFields['properties'], messageFields['content'], msgAuditFile, fedmsgRetryCount)
-                                }
-                            }
-                        }, openshiftE2ETests: {
-                            withEnv(["currentStage=openshift-e2e-tests"]) {
-                                withEnv(pipelineUtils.setStageEnvVars(env.currentStage)) {
-                                    // run linchpin up and other steps
-                                    // note: need to be updated
-
-                                    // run linchpin workspace for e2e tests
-                                    // pipelineUtils.executeInContainer(env.currentStage, "linchpin-libvirt", "/root/linchpin_workspace/run_e2e_tests.sh")
-                                    pipelineUtils.executeInContainer(currentStage, "linchpin-libvirt", "date")
-                                }
-                            }
                         },
+//                        }, ostreeBootSanity: {
+//                            withEnv(["currentStage=ci-pipeline-ostree-boot-sanity"]) {
+//                                withEnv(pipelineUtils.setStageEnvVars(env.currentStage)) {
+//                                    // Run ostree boot sanity
+//                                    pipelineUtils.executeInContainer(env.currentStage, "ostree-boot-image", "/home/ostree-boot-image.sh")
+//
+//                                    // Set our message topic, properties, and content
+//                                    messageFields = pipelineUtils.setMessageFields("package.test.functional.queued")
+//
+//                                    // Send message org.centos.prod.ci.pipeline.package.test.functional.queued on fedmsg
+//                                    pipelineUtils.sendMessageWithAudit(messageFields['properties'], messageFields['content'], msgAuditFile, fedmsgRetryCount)
+//                                }
+//                            }
+//                        }, functionalTests: {
+//                            withEnv(["currentStage=ci-pipeline-functional-tests"]) {
+//                                withEnv(pipelineUtils.setStageEnvVars(env.currentStage)) {
+//                                    messageFields = pipelineUtils.setMessageFields("package.test.functional.running")
+//
+//                                    // Send message org.centos.prod.ci.pipeline.package.test.functional.running on fedmsg
+//                                    pipelineUtils.sendMessage(messageFields['properties'], messageFields['content'])
+//
+//                                    // Run functional tests
+//                                    pipelineUtils.executeInContainer(env.currentStage, "singlehost-test", "/tmp/package-test.sh")
+//
+//                                    // Set our message topic, properties, and content
+//                                    messageFields = pipelineUtils.setMessageFields("package.test.functional.complete")
+//
+//                                    // Send message org.centos.prod.ci.pipeline.package.test.functional.complete on fedmsg
+//                                    pipelineUtils.sendMessage(messageFields['properties'], messageFields['content'])
+//
+//                                    // Set our message topic, properties, and content
+//                                    messageFields = pipelineUtils.setMessageFields("compose.test.integration.queued")
+//
+//                                    // Send message org.centos.prod.ci.pipeline.compose.test.integration.queued on fedmsg
+//                                    pipelineUtils.sendMessageWithAudit(messageFields['properties'], messageFields['content'], msgAuditFile, fedmsgRetryCount)
+//                                }
+//                            }
+//                        }, atomicHostTests: {
+//                            withEnv(["currentStage=ci-pipeline-atomic-host-tests"]) {
+//                                withEnv(pipelineUtils.setStageEnvVars(env.currentStage)) {
+//                                    // Set our message topic, properties, and content
+//                                    messageFields = pipelineUtils.setMessageFields("compose.test.integration.running")
+//
+//                                    // Send message org.centos.prod.ci.pipeline.compose.test.integration.running on fedmsg
+//                                    pipelineUtils.sendMessageWithAudit(messageFields['properties'], messageFields['content'], msgAuditFile, fedmsgRetryCount)
+//
+//                                    // Run integration tests
+//                                    pipelineUtils.executeInContainer(env.currentStage, "singlehost-test", "/tmp/integration-test.sh")
+//
+//                                    // Set our message topic, properties, and content
+//                                    messageFields = pipelineUtils.setMessageFields("compose.test.integration.complete")
+//
+//                                    // Send message org.centos.prod.ci.pipeline.compose.test.integration.complete on fedmsg
+//                                    pipelineUtils.sendMessageWithAudit(messageFields['properties'], messageFields['content'], msgAuditFile, fedmsgRetryCount)
+//                                }
+//                            }
+//                        }, openshiftE2ETests: {
+//                            withEnv(["currentStage=openshift-e2e-tests"]) {
+//                                withEnv(pipelineUtils.setStageEnvVars(env.currentStage)) {
+//                                    // run linchpin up and other steps
+//                                    // note: need to be updated
+//
+//                                    // run linchpin workspace for e2e tests
+//                                    // pipelineUtils.executeInContainer(env.currentStage, "linchpin-libvirt", "/root/linchpin_workspace/run_e2e_tests.sh")
+//                                    pipelineUtils.executeInContainer(currentStage, "linchpin-libvirt", "date")
+//                                }
+//                            }
+//                        },
                         failFast: true
                     }
 
