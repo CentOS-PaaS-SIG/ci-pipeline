@@ -343,11 +343,11 @@ def sendMessageWithAudit(String msgProps, String msgContent, String msgAuditFile
  */
 def initializeAuditFile(String auditFile) {
     // Ensure auditFile is available
-    sh "rm -f " + auditFile
-    String msgAuditFileDir = sh(script: 'dirname ' + auditFile, returnStdout: true).trim()
-    sh 'mkdir -p ' + msgAuditFileDir
-    sh 'touch ' + auditFile
-    sh 'echo "{}" >> ' + auditFile
+    sh "rm -f ${auditFile}"
+    String msgAuditFileDir = sh(script: "dirname ${auditFile}", returnStdout: true).trim()
+    sh "mkdir -p ${msgAuditFileDir}"
+    sh "touch ${auditFile}"
+    sh "echo '{}' >> ${auditFile}"
 }
 /**
  * Check data grepper for presence of a message
@@ -358,8 +358,19 @@ def initializeAuditFile(String auditFile) {
 def trackMessage(String messageID, int retryCount) {
     retry(retryCount) {
         echo "Checking datagrapper for presence of message..."
-        sh "curl --silent --show-error --fail \'${env.dataGrepperUrl}/id?id=${messageID}&chrome=false&is_raw=false\'"
-        echo "found!"
+        def STATUSCODE = sh (returnStdout: true, script: """
+            curl --silent --output /dev/null --write-out "%{http_code}" \'${env.dataGrepperUrl}/id?id=${messageID}&chrome=false&is_raw=false\'
+        """).trim()
+        // We only want to wait if there are 404 errors
+        echo "${STATUSCODE}"
+        if (STATUSCODE.equals("404")) {
+            error("message not found on datagrepper...")
+        }
+        if (STATUSCODE.startsWith("5")) {
+            echo("WARNING: internal datagrepper server error...")
+        } else {
+            echo "found!"
+        }
     }
 }
 /**
