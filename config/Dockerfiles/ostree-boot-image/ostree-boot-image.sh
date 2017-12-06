@@ -79,7 +79,15 @@ cat << EOF > inventory
 $ipaddress ansible_user=admin ansible_ssh_pass=admin ansible_become=true ansible_become_pass=admin
 EOF
 
-ansible-playbook -i inventory ${base_dir}/ci-pipeline/playbooks/ostree-boot-verify.yml -l ostree_compose_slave -e "commit=$commit"
+# Only verify commit if $commit is defined
+if [ ! -z "${commit:-}" ]; then
+    ansible-playbook -i inventory ${base_dir}/ci-pipeline/playbooks/ostree-boot-verify.yml -l ostree_compose_slave -e "commit=$commit"
+fi
+
+# If package and expected are defined, check that the proper rpm is running in the image
+if [ ! -z "${package:-}" ] && [ ! -z "${expected:-}" ]; then
+    ansible-playbook -i inventory ${base_dir}/ci-pipeline/playbooks/rpm-verify.yml -l ostree_compose_slave -e "package=$package" -e "expected=${expected}.x86_64" -e "ansible_python_interpreter=/usr/bin/python3"
+fi
 
 # If image2boot is defined then symlink it as latest
 if [ "${image2boot:-unset}" != "unset" ]; then

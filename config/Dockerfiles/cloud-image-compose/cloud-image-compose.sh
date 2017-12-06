@@ -32,8 +32,13 @@ virtlogd &
 
 chmod 666 /dev/kvm
 
+imgname="fedora-cloud-rawhide-$package"
+
 function clean_up {
   set +e
+  pushd ${base_dir}/images
+  ln -sf $imgname.qcow2 untested-cloud.qcow2
+  popd
   kill $(jobs -p)
   for screenshot in /var/lib/oz/screenshots/*.ppm; do
       [ -e "$screenshot" ] && cp $screenshot ${base_dir}/logs
@@ -95,7 +100,6 @@ export LIBGUESTFS_DEBUG=1 LIBGUESTFS_TRACE=1
 imagefactory --debug --imgdir $imgdir --timeout 3000 base_image ${base_dir}/logs/fedora-${branch}.tdl --parameter offline_icicle true --file-parameter install_script ${base_dir}/logs/fedora-cloud-base-flat.ks
 
 # convert to qcow
-imgname="fedora-cloud-rawhide-$package"
 qemu-img convert -c -p -O qcow2 $imgdir/*body ${base_dir}/images/$imgname.qcow2
 
 } 2>&1 | tee ${base_dir}/logs/console.log #group for tee
