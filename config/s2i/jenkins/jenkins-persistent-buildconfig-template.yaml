@@ -143,8 +143,6 @@ objects:
             value: "${JENKINS_SERVICE_NAME}"
           - name: JNLP_SERVICE_NAME
             value: "${JNLP_SERVICE_NAME}"
-          - name: JENKINS_OPTS
-            value: --logfile=/var/log/jenkins/jenkins.log
           - name: JAVA_OPTS
             value: >-
                 -Dhudson.model.ParametersAction.keepUndefinedParameters=true
