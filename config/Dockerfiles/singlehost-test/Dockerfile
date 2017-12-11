@@ -18,6 +18,8 @@ RUN for i in {1..5} ; do dnf -y install ansible \
         file \
         findutils \
         git \
+        libselinux-python \
+        python2-dnf \
         restraint-rhts \
         rsync \
         standard-test-roles \
