@@ -12,3 +12,8 @@ while [[ "$i" -lt "$timeout" && $(curl -sI $remote_file | grep HTTP) != *"200"* 
     i=$((i+interval))
     sleep $interval
 done
+
+# Exit nonzero if we hit timeout
+if [ "$i" -ge "$timeout" ]; then
+    exit 1
+fi
