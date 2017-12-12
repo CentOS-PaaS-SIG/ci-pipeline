@@ -1,0 +1,14 @@
+---
+- hosts: '{{ hosts | default("all") }}'
+  become: '{{ become | default("no") }}'
+  become_user: '{{ become_user | default("root") }}'
+  remote_user: '{{ remote_user | default("root") }}'
+  tasks:
+    - name: Get nvr of running rpm
+      command: "rpm -q {{ package }}"
+      register: running
+
+    - name: Fail if nvr's do not match
+      fail:
+        msg: "{{ running.stdout }} is running and does not match {{ expected }}"
+      when: running.stdout != expected

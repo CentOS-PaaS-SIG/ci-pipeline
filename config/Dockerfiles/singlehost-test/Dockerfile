@@ -18,6 +18,8 @@ RUN for i in {1..5} ; do dnf -y install ansible \
         file \
         findutils \
         git \
+        libselinux-python \
+        python2-dnf \
         restraint-rhts \
         rsync \
         standard-test-roles \
@@ -33,6 +35,8 @@ RUN for i in {1..5} ; do dnf -y install ansible \
 # Copy the build script to the container
 COPY package-test.sh /tmp/package-test.sh
 COPY integration-test.sh /tmp/integration-test.sh
+COPY upstreamfirst-test.sh /tmp/upstreamfirst-test.sh
+COPY main.yml /tmp/beakerlib-role-main.yml
 
 COPY standard-inventory-qcow2 /usr/share/ansible/inventory/standard-inventory-qcow2
 ENV ANSIBLE_INVENTORY=/usr/share/ansible/inventory/standard-inventory-qcow2
