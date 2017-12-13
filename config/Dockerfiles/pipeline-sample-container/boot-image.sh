@@ -79,8 +79,8 @@ $ipaddress ansible_user=admin ansible_ssh_pass=admin ansible_become=true ansible
 EOF
 
 #ansible-playbook -i inventory ${base_dir}/ci-pipeline/playbooks/ostree-boot-verify.yml -l pipeline_sample_container_ -e "commit=$commit"
-echo "THIS IS A TEST OF THE PIPELINE SAMPLE" > /tmp/test.txt
-cat /tmp/test.txt
+#echo "THIS IS A TEST OF THE PIPELINE SAMPLE" > /tmp/test.txt
+#cat /tmp/test.txt
 
 # If image2boot is defined then symlink it as latest
 if [ "${image2boot:-unset}" != "unset" ]; then
