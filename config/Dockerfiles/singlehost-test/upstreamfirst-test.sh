@@ -59,6 +59,13 @@ if [ -e inventory ] ; then
     export ANSIBLE_INVENTORY
 fi
 
+# Link test doesn't work on rawhide https://bugzilla.redhat.com/show_bug.cgi?id=1526615
+# Loginctl test doesn't work on rawhide https://bugzilla.redhat.com/show_bug.cgi?id=1526621
+if [ "$package" == "systemd" ]; then
+    sed -i '/link/c\' tests.yml
+    sed -i '/loginctl/c\' tests.yml
+fi
+
 # Invoke each playbook according to the specification
 for playbook in tests*.yml; do
 	if [ -f ${playbook} ]; then
