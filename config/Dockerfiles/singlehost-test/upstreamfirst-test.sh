@@ -77,4 +77,3 @@ for playbook in tests*.yml; do
 	fi
 done
 popd
-popd
