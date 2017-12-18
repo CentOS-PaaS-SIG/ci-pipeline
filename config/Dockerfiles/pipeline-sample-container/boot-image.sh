@@ -12,7 +12,7 @@ function clean_up {
         ansible-playbook -i hosts ${base_dir}/ci-pipeline/playbooks/setup-libvirt-image.yml -e state=absent -e skip_init=true
     fi
 }
-trap clean_up EXIT SIGHUP SIGINT SIGTERM
+#trap clean_up EXIT SIGHUP SIGINT SIGTERM
 
 export ara_location=$(python -c "import os,ara; print(os.path.dirname(ara.__file__))")
 export ANSIBLE_CALLBACK_PLUGINS=$ara_location/plugins/callbacks
