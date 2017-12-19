@@ -37,7 +37,7 @@ COPY default.xml /etc/libvirt/qemu/networks/
 
 RUN mkdir -p /var/lib/libvirt/images/
 RUN mkdir -p $HOME/images/
-CMD sh -c 'if [ ! -f $HOME/images/latest-atomic.qcow2 ]; then curl -o $HOME/images/latest-atomic.qcow2 http://artifacts.ci.centos.org/artifacts/fedora-atomic/f26/images/latest-atomic.qcow2; fi'
+RUN if [ ! -f $HOME/images/latest-atomic.qcow2 ]; then curl -o $HOME/images/latest-atomic.qcow2 http://artifacts.ci.centos.org/artifacts/fedora-atomic/f26/images/latest-atomic.qcow2; fi
 
 
 # Edit the service file which includes ExecStartPost to chmod /dev/kvm
