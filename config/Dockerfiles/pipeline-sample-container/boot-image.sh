@@ -15,11 +15,11 @@ function clean_up {
 trap clean_up EXIT SIGHUP SIGINT SIGTERM
 
 
-if [ -f /var/lib/libvirt/images/latest-atomic.qcow2 ]; then
-    curl -o /var/lib/libvirt/images/latest-atomic.qcow2 ${IMG_URL}
-    mkdir ${base_dir}/images
-    ln -fs /var/lib/libvirt/images/latest-atomic.qcow2 ${base_dir}/images/latest-atomic.qcow2
-fi
+#if [ -f /var/lib/libvirt/images/latest-atomic.qcow2 ]; then
+#    curl -o /var/lib/libvirt/images/latest-atomic.qcow2 ${IMG_URL}
+#    mkdir -p ${base_dir}/images
+#    ln -fs /var/lib/libvirt/images/latest-atomic.qcow2 ${base_dir}/images/latest-atomic.qcow2
+#fi
 
 export ara_location=$(python -c "import os,ara; print(os.path.dirname(ara.__file__))")
 export ANSIBLE_CALLBACK_PLUGINS=$ara_location/plugins/callbacks

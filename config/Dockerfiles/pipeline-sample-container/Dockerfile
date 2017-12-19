@@ -36,6 +36,9 @@ COPY boot-image.sh $HOME/
 COPY default.xml /etc/libvirt/qemu/networks/
 
 RUN mkdir -p /var/lib/libvirt/images/
+RUN mkdir -p $HOME/images/
+CMD sh -c 'if [ ! -f $HOME/images/latest-atomic.qcow2 ]; then curl -o $HOME/images/latest-atomic.qcow2 http://artifacts.ci.centos.org/artifacts/fedora-atomic/f26/images/latest-atomic.qcow2; fi'
+
 
 # Edit the service file which includes ExecStartPost to chmod /dev/kvm
 RUN sed -i "/Service/a ExecStartPost=\/bin\/chmod 666 /dev/kvm" /usr/lib/systemd/system/libvirtd.service
