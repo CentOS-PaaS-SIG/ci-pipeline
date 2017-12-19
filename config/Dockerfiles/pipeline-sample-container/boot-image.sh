@@ -16,7 +16,7 @@ trap clean_up EXIT SIGHUP SIGINT SIGTERM
 
 
 curl -o /var/lib/libvirt/images/latest-atomic.qcow2 -z /var/lib/libvirt/images/latest-atomic.qcow2 ${IMG_URL}
-if [ -f ]; then
+if [ -f /var/lib/libvirt/images/latest-atomic.qcow2 ]; then
     mkdir ${base_dir}/images
     ln -fs /var/lib/libvirt/images/latest-atomic.qcow2 ${base_dir}/images/latest-atomic.qcow2
 fi
