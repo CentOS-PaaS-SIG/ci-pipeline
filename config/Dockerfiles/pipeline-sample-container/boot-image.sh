@@ -28,18 +28,18 @@ export ANSIBLE_LIBRARY=$ara_location/plugins/modules
 
 mkdir -p ${base_dir}/logs
 
-#if [ -d "${base_dir}/images" ]; then
-#    pushd ${base_dir}
-#    if [ -d "images/latest-atomic.qcow2" ]; then
-#        # Use symlink if it exists
-#        IMG_URL="${base_dir}/images/latest-atomic.qcow2"
-#    else
-#        # Find the last image we pushed
-#        prev_img=$(ls -tr images/*.qcow2 | tail -n 1)
-#        IMG_URL="${base_dir}/$prev_img"
-#    fi
-#    popd
-#fi
+if [ -d "${base_dir}/images" ]; then
+    pushd ${base_dir}
+    if [ -d "images/latest-atomic.qcow2" ]; then
+        # Use symlink if it exists
+        IMG_URL="${base_dir}/images/latest-atomic.qcow2"
+    else
+        # Find the last image we pushed
+        prev_img=$(ls -tr images/*.qcow2 | tail -n 1)
+        IMG_URL="${base_dir}/$prev_img"
+    fi
+    popd
+fi
 
 # If image2boot is defined use that image, but if not fall back to the
 # previous image built
