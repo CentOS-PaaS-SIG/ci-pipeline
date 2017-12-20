@@ -9,7 +9,7 @@ function clean_up {
     ara generate junit - > ${base_dir}/logs/ansible_xunit.xml
     if [ -e "$base_dir/hosts" ]; then
         virsh screenshot --file ${base_dir}/logs/atomic-host.ppm atomic-host-fedoraah
-        ansible-playbook -i hosts ${base_dir}/ci-pipeline/playbooks/setup-libvirt-image.yml -e state=absent -e skip_init=true
+        ansible-playbook -vvv -i hosts ${base_dir}/ci-pipeline/playbooks/setup-libvirt-image.yml -e state=absent -e skip_init=true
     fi
 }
 trap clean_up EXIT SIGHUP SIGINT SIGTERM
@@ -77,7 +77,7 @@ EOF
 export ANSIBLE_HOST_KEY_CHECKING=False
 
 # Start test VM
-ansible-playbook -i hosts ${base_dir}/ci-pipeline/playbooks/setup-libvirt-image.yml -e state=present -e skip_init=true
+ansible-playbook -vvv -i hosts ${base_dir}/ci-pipeline/playbooks/setup-libvirt-image.yml -e state=present -e skip_init=true
 
 ipaddress=$(cat libvirt-hosts | awk -F= '/ansible_ssh_host=/ { print $2 }')
 cat << EOF > inventory
