@@ -41,7 +41,7 @@ RUN if [ ! -f $HOME/images/latest-atomic.qcow2 ]; then curl -o $HOME/images/late
 
 
 # Edit the service file which includes ExecStartPost to chmod /dev/kvm
-#RUN sed -i "/Service/a ExecStartPost=\/bin\/chmod 666 /dev/kvm" /usr/lib/systemd/system/libvirtd.service
+RUN sed -i "/Service/a ExecStartPost=\/bin\/chmod 666 /dev/kvm" /usr/lib/systemd/system/libvirtd.service
 
 VOLUME [ "/sys/fs/cgroup"]
 CMD ["/usr/sbin/init"]
