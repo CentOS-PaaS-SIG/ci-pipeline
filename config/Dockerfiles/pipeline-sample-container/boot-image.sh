@@ -86,5 +86,5 @@ $ipaddress ansible_user=admin ansible_ssh_pass=admin ansible_become=true ansible
 EOF
 
 #ansible-playbook -i inventory ${base_dir}/ci-pipeline/playbooks/pipeline-sample.yml -l pipeline_sample_container_ -e "commit=$commit"
-ansible-playbook -i inventory ${base_dir}/ci-pipeline/playbooks/pipeline-sample.yml -l pipeline_sample_container
+#ansible-playbook -i inventory ${base_dir}/ci-pipeline/playbooks/pipeline-sample.yml -l pipeline_sample_container
 
