@@ -37,8 +37,7 @@ COPY default.xml /etc/libvirt/qemu/networks/
 
 RUN mkdir -p /var/lib/libvirt/images/
 RUN mkdir -p $HOME/images/
-RUN if [ ! -f $HOME/images/latest-atomic.qcow2 ]; then curl -o $HOME/images/latest-atomic.qcow2 http://artifacts.ci.centos.org/artifacts/fedora-atomic/f26/images/latest-atomic.qcow2; fi
-
+RUN if [ "${ENABLE_VM}" == "true" ]; then echo "ENABLE_VM: true"; curl -o $HOME/images/latest-atomic.qcow2 ${VM_IMAGE_URL}; else echo "ENABLE_VM: false"; echo "NOT Pulling VM cloud image"; fi
 
 # Edit the service file which includes ExecStartPost to chmod /dev/kvm
 RUN sed -i "/Service/a ExecStartPost=\/bin\/chmod 666 /dev/kvm" /usr/lib/systemd/system/libvirtd.service
