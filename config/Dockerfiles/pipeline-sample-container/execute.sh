@@ -26,24 +26,9 @@ export ANSIBLE_CALLBACK_PLUGINS=$ara_location/plugins/callbacks
 export ANSIBLE_ACTION_PLUGINS=$ara_location/plugins/actions
 export ANSIBLE_LIBRARY=$ara_location/plugins/modules
 
-#mkdir -p ${base_dir}/logs
-#
-#if [ -d "${base_dir}/images" ]; then
-#    pushd ${base_dir}
-#    if [ -d "images/latest-atomic.qcow2" ]; then
-#        # Use symlink if it exists
-#        IMG_URL="${base_dir}/images/latest-atomic.qcow2"
-#    else
-#        # Find the last image we pushed
-#        prev_img=$(ls -tr images/*.qcow2 | tail -n 1)
-#        IMG_URL="${base_dir}/$prev_img"
-#    fi
-#    popd
-#fi
+mkdir -p ${base_dir}/logs
 
-# If image2boot is defined use that image, but if not fall back to the
-# previous image built
-bootimage=${image2boot:-$IMG_URL}
+bootimage=${IMG_URL}
 
 if ! [ -f ~/.ssh/id_rsa ]; then
     mkdir -p ~/.ssh
@@ -55,7 +40,8 @@ pubkey=$(cat ~/.ssh/id_rsa.pub)
 
 mkdir -p host_vars
 cat << 'EOF' > host_vars/localhost.yml
-qemu_img_path: /var/lib/libvirt/images
+qemu_img_path: /home/images
+#qemu_img_path: /var/lib/libvirt/images
 bridge: virbr1
 gateway: 192.168.123.1
 domain: local
@@ -66,7 +52,7 @@ libvirt_systems:
    disk: 10G
 EOF
 cat << EOF >> host_vars/localhost.yml
-   img_url: $bootimage
+   img_url: ${IMG_URL}
    admin_ssh_rsa: $pubkey
 EOF
 cat << EOF > hosts
@@ -85,6 +71,6 @@ cat << EOF > inventory
 $ipaddress ansible_user=admin ansible_ssh_pass=admin ansible_become=true ansible_become_pass=admin
 EOF
 
-#ansible-playbook -i inventory ${base_dir}/ci-pipeline/playbooks/pipeline-sample.yml -l pipeline_sample_container_ -e "commit=$commit"
-#ansible-playbook -i inventory ${base_dir}/ci-pipeline/playbooks/pipeline-sample.yml -l pipeline_sample_container
+#ansible-playbook -i inventory ${base_dir}/ci-pipeline/playbooks/pipeline-sample.yml -l pipeline_sample_container_"
+
 
