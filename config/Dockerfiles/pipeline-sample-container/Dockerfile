@@ -35,7 +35,6 @@ RUN pip install ara
 COPY execute.sh $HOME/
 COPY default.xml /etc/libvirt/qemu/networks/
 
-#RUN mkdir -p /var/lib/libvirt/images/
 RUN mkdir -p $HOME/images/
 RUN if [ "${ENABLE_VM}" == "true" ]; then echo "ENABLE_VM: true"; curl -o $HOME/images/latest-atomic.qcow2 ${VM_IMAGE_URL}; else echo "ENABLE_VM: false"; echo "NOT Pulling VM cloud image"; fi
 
