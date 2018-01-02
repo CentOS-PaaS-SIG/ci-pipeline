@@ -57,7 +57,7 @@ if [ "${ENABLE_VM}" == "true" ]; then
        disk: 10G
 EOF
     cat << EOF >> host_vars/localhost.yml
-       img_url: $bootimage
+       img_url: $IMG_URL
        admin_ssh_rsa: $pubkey
 EOF
 
