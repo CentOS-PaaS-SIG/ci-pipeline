@@ -11,9 +11,9 @@ export ENABLE_VM=${ENABLE_VM:=false}
 function clean_up {
     set +e
     ara generate junit - > ${base_dir}/logs/ansible_xunit.xml
-    if [ -e "$base_dir/hosts" ]; then
+    if [ -e "$base_dir/inventory" ]; then
         virsh screenshot --file ${base_dir}/logs/atomic-host.ppm atomic-host-fedoraah
-        ansible-playbook -vvv -i hosts ${base_dir}/ci-pipeline/playbooks/setup-libvirt-image.yml -e state=absent -e skip_init=true
+        ansible-playbook -vv -i hosts ${base_dir}/ci-pipeline/playbooks/setup-libvirt-image.yml -e state=absent -e skip_init=true
     fi
 }
 trap clean_up EXIT SIGHUP SIGINT SIGTERM
