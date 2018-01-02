@@ -71,7 +71,7 @@ EOF
     $ipaddress ansible_user=admin ansible_ssh_pass=admin ansible_become=true ansible_become_pass=admin
 EOF
     echo "Running example playbook on a cloud VM image inside the sample pipeline container"
-    ansible-playbook -vv i inventory ${base_dir}/ci-pipeline/playbooks/pipeline-sample-boot-verify.yml -l pipeline_sample_container_slave
+    ansible-playbook -vv -i inventory ${base_dir}/ci-pipeline/playbooks/pipeline-sample-boot-verify.yml -l pipeline_sample_container_slave
 else
     echo "Running example playbook on the sample pipeline container"
     ansible-playbook -vv -i hosts ${base_dir}/ci-pipeline/playbooks/pipeline-sample.yml
