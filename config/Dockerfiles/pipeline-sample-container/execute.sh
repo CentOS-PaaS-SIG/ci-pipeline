@@ -46,7 +46,7 @@ if [ "${ENABLE_VM}" == "true" ]; then
 
     mkdir -p host_vars
     printf "qemu_img_path: /home/images\nbridge: virbr1\ngateway: 192.168.123.1\ndomain: local\nlibvirt_systems:\n atomic-host-fedoraah:\n" > host_vars/localhost.yml
-    printf "  admin_passwd: $5$uX5x24soDWv3G2TH$BYxhEq4HmxjKmyChV0.VTpqxfhqMaRk8LCr34KOg2C7\n   memory: 3072\n   disk: 10G\n" >> host_vars/localhost.yml
+    printf "  admin_passwd: \$5$uX5x24soDWv3G2TH$BYxhEq4HmxjKmyChV0.VTpqxfhqMaRk8LCr34KOg2C7\n   memory: 3072\n   disk: 10G\n" >> host_vars/localhost.yml
     printf "   img_url: ${IMG_URL}\n   admin_ssh_rsa: $pubkey\n" >> host_vars/localhost.yml
 
     # Start test VM
