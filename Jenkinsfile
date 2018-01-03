@@ -42,6 +42,14 @@ library identifier: "ci-pipeline@${env.ghprbActualCommit}",
                                        [$class: 'RefSpecsSCMSourceTrait',
                                         templates: [[value: '+refs/heads/*:refs/remotes/@{remote}/*'],
                                                     [value: '+refs/pull/*:refs/remotes/origin/pr/*']]]]])
+library changelog: false,
+        identifier: 'multiarch-ci-libraries@dev',
+        retriever: legacySCM([$class: 'GitSCM', branches: [[name: '*/dev']],
+                              doGenerateSubmoduleConfigurations: false,
+                              extensions: [], submoduleCfg: [],
+                              userRemoteConfigs:
+                                      [[url: 'https://github.com/scoheb/multiarch-ci-libraries']]])
+
 properties(
         [
                 buildDiscarder(logRotator(artifactDaysToKeepStr: '30', artifactNumToKeepStr: '', daysToKeepStr: '90', numToKeepStr: '')),
@@ -75,6 +83,21 @@ properties(
                                 string(defaultValue: 'continuous-infra', description: 'Project namespace for Openshift operations', name: 'OPENSHIFT_NAMESPACE'),
                                 string(defaultValue: 'jenkins', description: 'Service Account for Openshift operations', name: 'OPENSHIFT_SERVICE_ACCOUNT'),
                                 booleanParam(defaultValue: false, description: 'Force generation of the image', name: 'GENERATE_IMAGE'),
+                                string(
+                                        defaultValue: 'SSHPRIVKEY',
+                                        description: 'SSH private key Jenkins credential ID for Beaker/SSH operations',
+                                        name: 'SSHPRIVKEYCREDENTIALID'
+                                ),
+                                string(
+                                        defaultValue: 'SSHPUBKEY',
+                                        description: 'SSH public key Jenkins credential ID for Beaker/SSH operations',
+                                        name: 'SSHPUBKEYCREDENTIALID'
+                                ),
+                                string(
+                                        defaultValue: 'KEYTAB',
+                                        description: 'Kerberos keytab Jenkins credential ID for Beaker/SSH operations',
+                                        name: 'KEYTABID'
+                                ),
                         ]
                 ),
         ]
@@ -220,15 +243,58 @@ podTemplate(name: podName,
                         pipelineUtils.sendMessageWithAudit(messageFields['properties'], messageFields['content'], msgAuditFile, fedmsgRetryCount)
 
                         // Execute rpmbuild-test script in rpmbuild container
-                        pipelineUtils.executeInContainer(currentStage, "rpmbuild", "/tmp/rpmbuild-test.sh")
+                        //pipelineUtils.executeInContainer(currentStage, "rpmbuild", "/tmp/rpmbuild-test.sh")
 
-                        def package_props = "${env.WORKSPACE}/" + currentStage + "/logs/package_props.txt"
-                        def package_props_groovy = "${env.WORKSPACE}/package_props.groovy"
-                        pipelineUtils.convertProps(package_props, package_props_groovy)
-                        load(package_props_groovy)
+                        //def package_props = "${env.WORKSPACE}/" + currentStage + "/logs/package_props.txt"
+                        //def package_props_groovy = "${env.WORKSPACE}/package_props.groovy"
+                        //pipelineUtils.convertProps(package_props, package_props_groovy)
+                        //load(package_props_groovy)
 
                         // Set our message topic, properties, and content
                         messageFields = pipelineUtils.setMessageFields("package.complete")
+
+                        // Send message org.centos.prod.ci.pipeline.package.complete on fedmsg
+                        pipelineUtils.sendMessageWithAudit(messageFields['properties'], messageFields['content'], msgAuditFile, fedmsgRetryCount)
+                    }
+
+                    // Set our current stage value
+                    currentStage = "ci-pipeline-multiarch-test"
+                    stage(currentStage) {
+
+                        // Set stage specific vars
+                        pipelineUtils.setStageEnvVars(currentStage)
+
+                        // Return a map (messageFields) of our message topic, properties, and content
+                        messageFields = pipelineUtils.setMessageFields("multiarch-test.running")
+
+                        // Send message org.centos.prod.ci.pipeline.package.running on fedmsg
+                        pipelineUtils.sendMessageWithAudit(messageFields['properties'], messageFields['content'], msgAuditFile, fedmsgRetryCount)
+
+                        // Populate the Provisioning Config
+                        def config = provisioningConfig.create()
+                        config.jobgroup = "ci-ops-central"
+                        config.provisioningRepoUrl = "https://github.com/scoheb/multiarch-ci-provisioner"
+                        config.provisioningRepoRef = "dev"
+                        config.krbPrincipal = "jenkins/ci-ops-jenkins.rhev-ci-vms.eng.rdu2.redhat.com@REDHAT.COM"
+                        config.KEYTABCREDENTIALID = params.KEYTABID
+                        config.runOnSlave = false
+                        config.installAnsible= false
+
+                        slave = provision("x86_64", config)
+
+                        // Property validity check
+                        if (!slave.name || !slave.arch) {
+                            throw new Exception("Invalid provisioned slave: ${slave}")
+                        }
+
+                        // If the provision failed, there will be an error
+                        if (slave.error) {
+                            error slave.error
+                        }
+                        echo slave.inventory
+
+                        // Set our message topic, properties, and content
+                        messageFields = pipelineUtils.setMessageFields("multiarch-test.complete")
 
                         // Send message org.centos.prod.ci.pipeline.package.complete on fedmsg
                         pipelineUtils.sendMessageWithAudit(messageFields['properties'], messageFields['content'], msgAuditFile, fedmsgRetryCount)
