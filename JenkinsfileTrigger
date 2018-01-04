@@ -106,7 +106,7 @@ node('master') {
                                 # If $? -eq 0, we care about package
                                 if [ $CHKR_RC -eq 0 ]; then
                                     valid=1
-                                # If $? -eq 2, upstream package list didnt exist so use legacy method to check
+                                # If $? -eq 2, upstream package list didn't exist so use legacy method to check
                                 elif [ $CHKR_RC -eq 2 ]; then
                                     for package in $(cat ${PROJECT_REPO}/config/package_list); do
                                         if [ "${package}" = "${fed_repo}" ]; then
