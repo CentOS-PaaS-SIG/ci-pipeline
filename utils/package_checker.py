@@ -6,7 +6,7 @@ import os.path
 # Exit 2 if upstream package list doesnt exist
 # Exit 1 if file exists, but package isnt in the list
 
-jsonpath = 'TODO/fedora-atomic-host-base.json'
+jsonpath = 'fedora-atomic/fedora-atomic-host-base.json'
 
 # Make sure json file exists
 if not os.path.isfile(jsonpath):
