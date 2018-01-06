@@ -1,22 +1,22 @@
-env.ghprbGhRepository = env.ghprbGhRepository ?: 'CentOS-PaaS-SIG/ci-pipeline'
-env.ghprbActualCommit = env.ghprbActualCommit ?: 'master'
-env.ghprbPullAuthorLogin = env.ghprbPullAuthorLogin ?: ''
+ghprbGhRepository = env.ghprbGhRepository ?: 'CentOS-PaaS-SIG/ci-pipeline'
+ghprbActualCommit = env.ghprbActualCommit ?: 'master'
+ghprbPullAuthorLogin = env.ghprbPullAuthorLogin ?: ''
 
-env.TARGET_BRANCH = env.TARGET_BRANCH ?: 'master'
+TARGET_BRANCH = env.TARGET_BRANCH ?: 'master'
 
 // Needed for podTemplate()
-env.SLAVE_TAG = env.SLAVE_TAG ?: 'stable'
-env.RPMBUILD_TAG = env.RPMBUILD_TAG ?: 'stable'
-env.RSYNC_TAG = env.RSYNC_TAG ?: 'stable'
-env.OSTREE_COMPOSE_TAG = env.OSTREE_COMPOSE_TAG ?: 'stable'
-env.OSTREE_IMAGE_COMPOSE_TAG = env.OSTREE_IMAGE_COMPOSE_TAG ?: 'stable'
-env.SINGLEHOST_TEST_TAG = env.SINGLEHOST_TEST_TAG ?: 'stable'
-env.OSTREE_BOOT_IMAGE_TAG = env.OSTREE_BOOT_IMAGE_TAG ?: 'stable'
-env.LINCHPIN_LIBVIRT_TAG = env.LINCHPIN_LIBVIRT_TAG ?: 'stable'
+SLAVE_TAG = env.SLAVE_TAG ?: 'stable'
+RPMBUILD_TAG = env.RPMBUILD_TAG ?: 'stable'
+RSYNC_TAG = env.RSYNC_TAG ?: 'stable'
+OSTREE_COMPOSE_TAG = env.OSTREE_COMPOSE_TAG ?: 'stable'
+OSTREE_IMAGE_COMPOSE_TAG = env.OSTREE_IMAGE_COMPOSE_TAG ?: 'stable'
+SINGLEHOST_TEST_TAG = env.SINGLEHOST_TEST_TAG ?: 'stable'
+OSTREE_BOOT_IMAGE_TAG = env.OSTREE_BOOT_IMAGE_TAG ?: 'stable'
+LINCHPIN_LIBVIRT_TAG = env.LINCHPIN_LIBVIRT_TAG ?: 'stable'
 
-env.DOCKER_REPO_URL = env.DOCKER_REPO_URL ?: '172.30.254.79:5000'
-env.OPENSHIFT_NAMESPACE = env.OPENSHIFT_NAMESPACE ?: 'continuous-infra'
-env.OPENSHIFT_SERVICE_ACCOUNT = env.OPENSHIFT_SERVICE_ACCOUNT ?: 'jenkins'
+DOCKER_REPO_URL = env.DOCKER_REPO_URL ?: '172.30.254.79:5000'
+OPENSHIFT_NAMESPACE = env.OPENSHIFT_NAMESPACE ?: 'continuous-infra'
+OPENSHIFT_SERVICE_ACCOUNT = env.OPENSHIFT_SERVICE_ACCOUNT ?: 'jenkins'
 
 // Audit file for all messages sent.
 msgAuditFile = "messages/message-audit.json"
@@ -33,11 +33,11 @@ fedmsgRetryCount = 120
 executionID = UUID.randomUUID().toString()
 
 // Pod name to use
-podName = 'fedora-atomic-' + executionID + '-' + TARGET_BRANCH
+podName = "fedora-atomic-${executionID}-${TARGET_BRANCH}"
 
-library identifier: "ci-pipeline@${env.ghprbActualCommit}",
+library identifier: "ci-pipeline@${ghprbActualCommit}",
         retriever: modernSCM([$class: 'GitSCMSource',
-                              remote: "https://github.com/${env.ghprbGhRepository}",
+                              remote: "https://github.com/${ghprbGhRepository}",
                               traits: [[$class: 'jenkins.plugins.git.traits.BranchDiscoveryTrait'],
                                        [$class: 'RefSpecsSCMSourceTrait',
                                         templates: [[value: '+refs/heads/*:refs/remotes/@{remote}/*'],
@@ -90,7 +90,7 @@ podTemplate(name: podName,
         containers: [
                 // This adds the custom slave container to the pod. Must be first with name 'jnlp'
                 containerTemplate(name: 'jnlp',
-                        image: DOCKER_REPO_URL + '/' + OPENSHIFT_NAMESPACE + '/jenkins-continuous-infra-slave:' + SLAVE_TAG,
+                        image: "${DOCKER_REPO_URL}/${OPENSHIFT_NAMESPACE}/jenkins-continuous-infra-slave:${SLAVE_TAG}",
                         ttyEnabled: false,
                         args: '${computer.jnlpmac} ${computer.name}',
                         command: '',
@@ -98,7 +98,7 @@ podTemplate(name: podName,
                 // This adds the rpmbuild test container to the pod.
                 containerTemplate(name: 'rpmbuild',
                         alwaysPullImage: true,
-                        image: DOCKER_REPO_URL + '/' + OPENSHIFT_NAMESPACE + '/rpmbuild:' + RPMBUILD_TAG,
+                        image: "${DOCKER_REPO_URL}/${OPENSHIFT_NAMESPACE}/rpmbuild:${RPMBUILD_TAG}",
                         ttyEnabled: true,
                         command: 'cat',
                         privileged: true,
@@ -106,7 +106,7 @@ podTemplate(name: podName,
                 // This adds the rsync test container to the pod.
                 containerTemplate(name: 'rsync',
                         alwaysPullImage: true,
-                        image: DOCKER_REPO_URL + '/' + OPENSHIFT_NAMESPACE + '/rsync:' + RSYNC_TAG,
+                        image: "${DOCKER_REPO_URL}/${OPENSHIFT_NAMESPACE}/rsync:${RSYNC_TAG}",
                         ttyEnabled: true,
                         command: 'cat',
                         privileged: true,
@@ -114,7 +114,7 @@ podTemplate(name: podName,
                 // This adds the ostree-compose test container to the pod.
                 containerTemplate(name: 'ostree-compose',
                         alwaysPullImage: true,
-                        image: DOCKER_REPO_URL + '/' + OPENSHIFT_NAMESPACE + '/ostree-compose:' + OSTREE_COMPOSE_TAG,
+                        image: "${DOCKER_REPO_URL}/${OPENSHIFT_NAMESPACE}/ostree-compose:${OSTREE_COMPOSE_TAG}",
                         ttyEnabled: true,
                         command: 'cat',
                         privileged: true,
@@ -122,7 +122,7 @@ podTemplate(name: podName,
                 // This adds the ostree-image-compose test container to the pod.
                 containerTemplate(name: 'ostree-image-compose',
                         alwaysPullImage: true,
-                        image: DOCKER_REPO_URL + '/' + OPENSHIFT_NAMESPACE + '/ostree-image-compose:' + OSTREE_IMAGE_COMPOSE_TAG,
+                        image: "${DOCKER_REPO_URL}/${OPENSHIFT_NAMESPACE}/ostree-image-compose:${OSTREE_IMAGE_COMPOSE_TAG}",
                         ttyEnabled: true,
                         command: 'cat',
                         privileged: true,
@@ -130,7 +130,7 @@ podTemplate(name: podName,
                 // This adds the singlehost test container to the pod.
                 containerTemplate(name: 'singlehost-test',
                         alwaysPullImage: true,
-                        image: DOCKER_REPO_URL + '/' + OPENSHIFT_NAMESPACE + '/singlehost-test:' + SINGLEHOST_TEST_TAG,
+                        image: "${DOCKER_REPO_URL}/${OPENSHIFT_NAMESPACE}/singlehost-test:${SINGLEHOST_TEST_TAG}",
                         ttyEnabled: true,
                         command: 'cat',
                         privileged: true,
@@ -138,14 +138,14 @@ podTemplate(name: podName,
                 // This adds the ostree boot image container to the pod.
                 containerTemplate(name: 'ostree-boot-image',
                         alwaysPullImage: true,
-                        image: DOCKER_REPO_URL + '/' + OPENSHIFT_NAMESPACE + '/ostree-boot-image:' + OSTREE_BOOT_IMAGE_TAG,
+                        image: "${DOCKER_REPO_URL}/${OPENSHIFT_NAMESPACE}/ostree-boot-image:${OSTREE_BOOT_IMAGE_TAG}",
                         ttyEnabled: true,
                         command: '/usr/sbin/init',
                         privileged: true,
                         workingDir: '/workDir'),
                 containerTemplate(name: 'linchpin-libvirt',
                         alwaysPullImage: true,
-                        image: DOCKER_REPO_URL + '/' + OPENSHIFT_NAMESPACE + '/linchpin-libvirt:' + LINCHPIN_LIBVIRT_TAG,
+                        image: "${DOCKER_REPO_URL}/${OPENSHIFT_NAMESPACE}/linchpin-libvirt:${LINCHPIN_LIBVIRT_TAG}",
                         ttyEnabled: true,
                         command: '/usr/sbin/init',
                         privileged: true,
@@ -191,268 +191,289 @@ podTemplate(name: podName,
                         pipelineUtils.initializeAuditFile(msgAuditFile)
                     }
 
-                    // Set our current stage value
-                    currentStage = "ci-pipeline-rpmbuild"
-                    stage(currentStage) {
+                    withEnv(["currentStage=ci-pipeline-rpmbuild"]) {
+                        stage(env.currentStage) {
+                            withEnv(pipelineUtils.setStageEnvVars(env.currentStage)) {
+                                // stage code here
+                                // SCM
+                                dir('ci-pipeline') {
+                                    // Checkout our ci-pipeline repo based on the value of env.ghprbActualCommit
+                                    checkout([$class                           : 'GitSCM', branches: [[name: ghprbActualCommit]],
+                                              doGenerateSubmoduleConfigurations: false,
+                                              extensions                       : [],
+                                              submoduleCfg                     : [],
+                                              userRemoteConfigs                : [
+                                                      [refspec:
+                                                               '+refs/heads/*:refs/remotes/origin/*  +refs/pull/*:refs/remotes/origin/pr/* ',
+                                                       url    : "https://github.com/${env.ghprbGhRepository}"]
+                                              ]
+                                    ])
+                                }
 
-                        // SCM
-                        dir('ci-pipeline') {
-                            // Checkout our ci-pipeline repo based on the value of env.ghprbActualCommit
-                            checkout([$class: 'GitSCM', branches: [[name: env.ghprbActualCommit]],
-                                      doGenerateSubmoduleConfigurations: false,
-                                      extensions                       : [],
-                                      submoduleCfg                     : [],
-                                      userRemoteConfigs                : [
-                                              [refspec:
-                                                       '+refs/heads/*:refs/remotes/origin/*  +refs/pull/*:refs/remotes/origin/pr/* ',
-                                               url: "https://github.com/${env.ghprbGhRepository}"]
-                                      ]
-                            ])
+                                // Return a map (messageFields) of our message topic, properties, and content
+                                messageFields = pipelineUtils.setMessageFields("package.running")
+
+                                // Send message org.centos.prod.ci.pipeline.package.running on fedmsg
+                                pipelineUtils.sendMessageWithAudit(messageFields['properties'], messageFields['content'], msgAuditFile, fedmsgRetryCount)
+
+                                // Execute rpmbuild-test script in rpmbuild container
+                                pipelineUtils.executeInContainer(env.currentStage, "rpmbuild", "/tmp/rpmbuild-test.sh")
+
+                                def package_props = "${env.WORKSPACE}/${env.currentStage}/logs/package_props.txt"
+                                def package_props_groovy = "${env.WORKSPACE}/package_props.groovy"
+                                pipelineUtils.convertProps(package_props, package_props_groovy)
+                                load(package_props_groovy)
+
+                                // Set our message topic, properties, and content
+                                messageFields = pipelineUtils.setMessageFields("package.complete")
+
+                                // Send message org.centos.prod.ci.pipeline.package.complete on fedmsg
+                                pipelineUtils.sendMessageWithAudit(messageFields['properties'], messageFields['content'], msgAuditFile, fedmsgRetryCount)
+                            }
                         }
-
-                        // Set stage specific vars
-                        pipelineUtils.setStageEnvVars(currentStage)
-
-                        // Return a map (messageFields) of our message topic, properties, and content
-                        messageFields = pipelineUtils.setMessageFields("package.running")
-
-                        // Send message org.centos.prod.ci.pipeline.package.running on fedmsg
-                        pipelineUtils.sendMessageWithAudit(messageFields['properties'], messageFields['content'], msgAuditFile, fedmsgRetryCount)
-
-                        // Execute rpmbuild-test script in rpmbuild container
-                        pipelineUtils.executeInContainer(currentStage, "rpmbuild", "/tmp/rpmbuild-test.sh")
-
-                        def package_props = "${env.WORKSPACE}/" + currentStage + "/logs/package_props.txt"
-                        def package_props_groovy = "${env.WORKSPACE}/package_props.groovy"
-                        pipelineUtils.convertProps(package_props, package_props_groovy)
-                        load(package_props_groovy)
-
-                        // Set our message topic, properties, and content
-                        messageFields = pipelineUtils.setMessageFields("package.complete")
-
-                        // Send message org.centos.prod.ci.pipeline.package.complete on fedmsg
-                        pipelineUtils.sendMessageWithAudit(messageFields['properties'], messageFields['content'], msgAuditFile, fedmsgRetryCount)
                     }
 
-                    currentStage = "ci-pipeline-ostree-compose"
-                    stage(currentStage) {
-                        // Set stage specific vars
-                        pipelineUtils.setStageEnvVars(currentStage)
+                    withEnv(["currentStage=ci-pipeline-ostree-compose"]) {
+                        stage(env.currentStage) {
+                            withEnv(pipelineUtils.setStageEnvVars(env.currentStage)) {
+                                //Set our message topic, properties, and content
+                                messageFields = pipelineUtils.setMessageFields("compose.running")
 
-                        //Set our message topic, properties, and content
-                        messageFields = pipelineUtils.setMessageFields("compose.running")
+                                // Send message org.centos.prod.ci.pipeline.compose.running on fedmsg
+                                pipelineUtils.sendMessageWithAudit(messageFields['properties'], messageFields['content'], msgAuditFile, fedmsgRetryCount)
 
-                        // Send message org.centos.prod.ci.pipeline.compose.running on fedmsg
-                        pipelineUtils.sendMessageWithAudit(messageFields['properties'], messageFields['content'], msgAuditFile, fedmsgRetryCount)
+                                // Get previous ostree artifacts
+                                String rsync_paths = "ostree"
+                                String rsync_from = "${env.RSYNC_USER}@${env.RSYNC_SERVER}::${env.RSYNC_DIR}/${env.RSYNC_BRANCH}/"
+                                String rsync_to = "${env.WORKSPACE}/"
 
-                        // Get previous ostree artifacts
-                        env.rsync_paths = "ostree"
-                        env.rsync_from = "${env.RSYNC_USER}@${env.RSYNC_SERVER}::${env.RSYNC_DIR}/${env.RSYNC_BRANCH}/"
-                        env.rsync_to = "${env.WORKSPACE}/"
-                        pipelineUtils.executeInContainer(currentStage + "-rsync-before", "rsync", "/tmp/rsync.sh")
+                                ArrayList rsync_vars = ["rsync_paths=${rsync_paths}", "rsync_from=${rsync_from}", "rsync_to=${rsync_to}"]
 
-                        // Compose new ostree
-                        pipelineUtils.executeInContainer(currentStage, "ostree-compose", "/tmp/ostree-compose.sh")
+                                pipelineUtils.executeInContainer("${env.currentStage}-rsync-before", "rsync", "/tmp/rsync.sh", rsync_vars)
 
-                        // Push new ostree compose to artifacts server
-                        env.rsync_to = "${env.RSYNC_USER}@${env.RSYNC_SERVER}::${env.RSYNC_DIR}/${env.RSYNC_BRANCH}/"
-                        env.rsync_from = "${env.WORKSPACE}/"
-                        pipelineUtils.executeInContainer(currentStage + "-rsync-after", "rsync", "/tmp/rsync.sh")
+                                pipelineUtils.executeInContainer(env.currentStage, "ostree-compose", "/tmp/ostree-compose.sh")
 
-                        // Load ostree properties as variables
-                        def ostree_props = "${env.WORKSPACE}/" + currentStage + "/logs/ostree.props"
-                        def ostree_props_groovy = "${env.WORKSPACE}/ostree.props.groovy"
-                        pipelineUtils.convertProps(ostree_props, ostree_props_groovy)
-                        load(ostree_props_groovy)
+                                // Push new ostree compose to artifacts server
+                                rsync_to = "${env.RSYNC_USER}@${env.RSYNC_SERVER}::${env.RSYNC_DIR}/${env.RSYNC_BRANCH}/"
+                                rsync_from = "${env.WORKSPACE}/"
 
-                        // Rsync push logs
-                        env.rsync_paths = "."
-                        env.rsync_from = "${env.WORKSPACE}/" + currentStage + "/logs/"
-                        env.rsync_to = "${env.RSYNC_USER}@${env.RSYNC_SERVER}::${env.RSYNC_DIR}/${env.RSYNC_BRANCH}/images/${env.imgname}/" + currentStage + "/"
-                        pipelineUtils.executeInContainer(currentStage + "-rsync-logs", "rsync", "/tmp/rsync.sh")
+                                rsync_vars = ["rsync_paths=${rsync_paths}", "rsync_from=${rsync_from}", "rsync_to=${rsync_to}"]
 
-                        // Set our message topic, properties, and content
-                        messageFields = pipelineUtils.setMessageFields("compose.complete")
+                                pipelineUtils.executeInContainer("${env.currentStage}-rsync-after", "rsync", "/tmp/rsync.sh", rsync_vars)
 
-                        // Send message org.centos.prod.ci.pipeline.compose.complete on fedmsg
-                        pipelineUtils.sendMessageWithAudit(messageFields['properties'], messageFields['content'], msgAuditFile, fedmsgRetryCount)
+                                // Load ostree properties as variables
+                                def ostree_props = "${env.WORKSPACE}/${env.currentStage}/logs/ostree.props"
+                                def ostree_props_groovy = "${env.WORKSPACE}/ostree.props.groovy"
+                                pipelineUtils.convertProps(ostree_props, ostree_props_groovy)
+                                load(ostree_props_groovy)
 
-                        pipelineUtils.checkLastImage(currentStage)
-                    }
+                                // Rsync push logs
+                                rsync_paths = "."
+                                rsync_from = "${env.WORKSPACE}/${env.currentStage}/logs/"
+                                rsync_to = "${env.RSYNC_USER}@${env.RSYNC_SERVER}::${env.RSYNC_DIR}/${env.RSYNC_BRANCH}/images/${env.imgname}/${env.currentStage}/"
 
-                    currentStage = "ci-pipeline-ostree-image-compose"
-                    stage(currentStage) {
-                        // Set stage specific vars
-                        pipelineUtils.setStageEnvVars(currentStage)
-                        // We always run, but don't always push to artifacts
-                        env.PUSH_IMAGE = "false"
+                                rsync_vars = ["rsync_paths=${rsync_paths}", "rsync_from=${rsync_from}", "rsync_to=${rsync_to}"]
 
-                        // Check if a new ostree image compose is needed
-                        if (fileExists("${env.WORKSPACE}/NeedNewImage.txt") || ("${env.GENERATE_IMAGE}" == "true")) {
-                            // We will push a new qcow2 to artifacts
-                            env.PUSH_IMAGE = "true"
+                                pipelineUtils.executeInContainer("${env.currentStage}-rsync-logs", "rsync", "/tmp/rsync.sh", rsync_vars)
 
-                            // Set our message topic, properties, and content
-                            messageFields = pipelineUtils.setMessageFields("image.running")
+                                // Set our message topic, properties, and content
+                                messageFields = pipelineUtils.setMessageFields("compose.complete")
 
-                            // Send message org.centos.prod.ci.pipeline.image.running on fedmsg
-                            pipelineUtils.sendMessageWithAudit(messageFields['properties'], messageFields['content'], msgAuditFile, fedmsgRetryCount)
+                                // Send message org.centos.prod.ci.pipeline.compose.complete on fedmsg
+                                pipelineUtils.sendMessageWithAudit(messageFields['properties'], messageFields['content'], msgAuditFile, fedmsgRetryCount)
+
+                                pipelineUtils.checkLastImage(env.currentStage)
+
+                            }
                         }
+                    }
 
-                        // Rsync pull from artifacts
-                        env.rsync_paths = "netinst ostree images"
-                        env.rsync_from = "${env.RSYNC_USER}@${env.RSYNC_SERVER}::${env.RSYNC_DIR}/${env.RSYNC_BRANCH}/"
-                        env.rsync_to = "${env.WORKSPACE}/"
-                        pipelineUtils.executeInContainer(currentStage + "-rsync-before", "rsync", "/tmp/rsync.sh")
+                    withEnv(["currentStage=ci-pipeline-ostree-image-compose"]) {
+                        stage(env.currentStage) {
+                            withEnv(pipelineUtils.setStageEnvVars(env.currentStage)) {
+                                // We always run, but don't always push to artifacts
+                                env.PUSH_IMAGE = "false"
 
-                        // Compose image
-                        pipelineUtils.executeInContainer(currentStage, "ostree-image-compose", "/tmp/ostree-image-compose.sh")
+                                // Check if a new ostree image compose is needed
+                                if (fileExists("${env.WORKSPACE}/NeedNewImage.txt") || ("${env.GENERATE_IMAGE}" == "true")) {
+                                    // We will push a new qcow2 to artifacts
+                                    env.PUSH_IMAGE = "true"
 
-                        // Rsync push netinst
-                        env.rsync_paths = "netinst"
-                        env.rsync_from = "${env.WORKSPACE}/"
-                        env.rsync_to = "${env.RSYNC_USER}@${env.RSYNC_SERVER}::${env.RSYNC_DIR}/${env.RSYNC_BRANCH}/"
-                        pipelineUtils.executeInContainer(currentStage + "-rsync-push-netinst", "rsync", "/tmp/rsync.sh")
+                                    // Set our message topic, properties, and content
+                                    messageFields = pipelineUtils.setMessageFields("image.running")
 
-                        String untested_img_loc = "${env.WORKSPACE}/images/untested-atomic.qcow2"
-                        sh "cp -f ${untested_img_loc} ${env.WORKSPACE}/"
-                        if (fileExists("${env.WORKSPACE}/NeedNewImage.txt") || ("${env.GENERATE_IMAGE}" == "true")) {
-                            // Rsync push images
-                            env.rsync_paths = "images"
-                            pipelineUtils.executeInContainer(currentStage + "-rsync-after-netinst", "rsync", "/tmp/rsync.sh")
+                                    // Send message org.centos.prod.ci.pipeline.image.running on fedmsg
+                                    pipelineUtils.sendMessageWithAudit(messageFields['properties'], messageFields['content'], msgAuditFile, fedmsgRetryCount)
+                                }
 
-                            // These variables will mess with boot sanity jobs
-                            // later if they are injected from a non pushed img
-                            def ostree_props = "${env.WORKSPACE}/" + currentStage + "/logs/ostree.props"
-                            def ostree_props_groovy = "${env.WORKSPACE}/ostree.props.groovy"
-                            pipelineUtils.convertProps(ostree_props, ostree_props_groovy)
-                            load(ostree_props_groovy)
+                                // Rsync pull from artifacts
+                                rsync_paths = "netinst ostree images"
+                                rsync_from = "${env.RSYNC_USER}@${env.RSYNC_SERVER}::${env.RSYNC_DIR}/${env.RSYNC_BRANCH}/"
+                                rsync_to = "${env.WORKSPACE}/"
+                                ArrayList rsync_vars = ["rsync_paths=${rsync_paths}", "rsync_from=${rsync_from}", "rsync_to=${rsync_to}"]
 
-                            // Set our message topic, properties, and content
-                            messageFields = pipelineUtils.setMessageFields("image.complete")
+                                pipelineUtils.executeInContainer("${env.currentStage}-rsync-before", "rsync", "/tmp/rsync.sh", rsync_vars)
 
-                            // Send message org.centos.prod.ci.pipeline.image.complete on fedmsg
-                            pipelineUtils.sendMessageWithAudit(messageFields['properties'], messageFields['content'], msgAuditFile, fedmsgRetryCount)
+                                // Compose image
+                                pipelineUtils.executeInContainer(env.currentStage, "ostree-image-compose", "/tmp/ostree-image-compose.sh")
 
-                        } else {
-                            echo "Not Pushing a New Image"
+                                // Rsync push netinst
+                                rsync_paths = "netinst"
+                                rsync_from = "${env.WORKSPACE}/"
+                                rsync_to = "${env.RSYNC_USER}@${env.RSYNC_SERVER}::${env.RSYNC_DIR}/${env.RSYNC_BRANCH}/"
+                                rsync_vars = ["rsync_paths=${rsync_paths}", "rsync_from=${rsync_from}", "rsync_to=${rsync_to}"]
+
+                                pipelineUtils.executeInContainer("${env.currentStage}-rsync-push-netinst", "rsync", "/tmp/rsync.sh", rsync_vars)
+
+                                String untested_img_loc = "${env.WORKSPACE}/images/untested-atomic.qcow2"
+                                sh "cp -f ${untested_img_loc} ${env.WORKSPACE}/"
+                                if (fileExists("${env.WORKSPACE}/NeedNewImage.txt") || ("${env.GENERATE_IMAGE}" == "true")) {
+                                    // Rsync push images
+                                    rsync_paths = "images"
+                                    rsync_vars = ["rsync_paths=${rsync_paths}", "rsync_from=${rsync_from}", "rsync_to=${rsync_to}"]
+
+                                    pipelineUtils.executeInContainer("${env.currentStage}-rsync-after-netinst", "rsync", "/tmp/rsync.sh", rsync_vars)
+
+                                    // These variables will mess with boot sanity jobs
+                                    // later if they are injected from a non pushed img
+                                    def ostree_props = "${env.WORKSPACE}/${env.currentStage}/logs/ostree.props"
+                                    def ostree_props_groovy = "${env.WORKSPACE}/ostree.props.groovy"
+                                    pipelineUtils.convertProps(ostree_props, ostree_props_groovy)
+                                    load(ostree_props_groovy)
+
+                                    // Set our message topic, properties, and content
+                                    messageFields = pipelineUtils.setMessageFields("image.complete")
+
+                                    // Send message org.centos.prod.ci.pipeline.image.complete on fedmsg
+                                    pipelineUtils.sendMessageWithAudit(messageFields['properties'], messageFields['content'], msgAuditFile, fedmsgRetryCount)
+
+                                } else {
+                                    echo "Not Pushing a New Image"
+                                }
+                                // Rsync push logs
+                                rsync_paths = "."
+                                rsync_from = "${env.WORKSPACE}/${env.currentStage}/logs/"
+                                rsync_to = "${env.RSYNC_USER}@${env.RSYNC_SERVER}::${env.RSYNC_DIR}/${env.RSYNC_BRANCH}/images/${env.imgname}/${env.currentStage}/"
+                                rsync_vars = ["rsync_paths=${rsync_paths}", "rsync_from=${rsync_from}", "rsync_to=${rsync_to}"]
+
+                                pipelineUtils.executeInContainer("${env.currentStage}-rsync-logs", "rsync", "/tmp/rsync.sh", rsync_vars)
+                            }
                         }
-                        // Rsync push logs
-                        env.rsync_paths = "."
-                        env.rsync_from = "${env.WORKSPACE}/" + currentStage + "/logs/"
-                        env.rsync_to = "${env.RSYNC_USER}@${env.RSYNC_SERVER}::${env.RSYNC_DIR}/${env.RSYNC_BRANCH}/images/${env.imgname}/" + currentStage + "/"
-                        pipelineUtils.executeInContainer(currentStage + "-rsync-logs", "rsync", "/tmp/rsync.sh")
                     }
 
-                    currentStage = "ci-pipeline-ostree-image-boot-sanity"
-                    stage(currentStage) {
-                        if (fileExists("${env.WORKSPACE}/NeedNewImage.txt") || ("${env.GENERATE_IMAGE}" == "true")) {
-                            pipelineUtils.setStageEnvVars(currentStage)
+                    // Begin parallel validations
+                    stage('Validations') {
+                        parallel ostreeImageBootSanity: {
+                            withEnv(["currentStage=ci-pipeline-ostree-image-boot-sanity"]) {
+                                if (fileExists("${env.WORKSPACE}/NeedNewImage.txt") || ("${env.GENERATE_IMAGE}" == "true")) {
+                                    withEnv(pipelineUtils.setStageEnvVars(env.currentStage)) {
 
-                            // Set our message topic, properties, and content
-                            messageFields = pipelineUtils.setMessageFields("image.test.smoke.running")
+                                        // Set our message topic, properties, and content
+                                        messageFields = pipelineUtils.setMessageFields("image.test.smoke.running")
 
-                            // Send message org.centos.prod.ci.pipeline.image.test.smoke.running on fedmsg
-                            pipelineUtils.sendMessageWithAudit(messageFields['properties'], messageFields['content'], msgAuditFile, fedmsgRetryCount)
+                                        // Send message org.centos.prod.ci.pipeline.image.test.smoke.running on fedmsg
+                                        pipelineUtils.sendMessageWithAudit(messageFields['properties'], messageFields['content'], msgAuditFile, fedmsgRetryCount)
 
-                            // Rsync pull images dir from artifacts
-                            env.rsync_paths = "images"
-                            env.rsync_from = "${env.RSYNC_USER}@${env.RSYNC_SERVER}::${env.RSYNC_DIR}/${env.RSYNC_BRANCH}/"
-                            env.rsync_to = "${env.WORKSPACE}/"
-                            pipelineUtils.executeInContainer(currentStage + "-rsync-before", "rsync", "/tmp/rsync.sh")
+                                        // Rsync pull images dir from artifacts
+                                        rsync_paths = "images"
+                                        rsync_from = "${env.RSYNC_USER}@${env.RSYNC_SERVER}::${env.RSYNC_DIR}/${env.RSYNC_BRANCH}/"
+                                        rsync_to = "${env.WORKSPACE}/"
+                                        ArrayList rsync_vars = ["rsync_paths=${rsync_paths}", "rsync_from=${rsync_from}", "rsync_to=${rsync_to}"]
 
-                            // Run boot sanity on image
-                            pipelineUtils.executeInContainer(currentStage, "ostree-boot-image", "/home/ostree-boot-image.sh")
+                                        pipelineUtils.executeInContainer("${env.currentStage}-rsync-before", "rsync", "/tmp/rsync.sh", rsync_vars)
 
-                            // If boot sanity passes, we update images dir on artifacts
-                            env.rsync_to = "${env.RSYNC_USER}@${env.RSYNC_SERVER}::${env.RSYNC_DIR}/${env.RSYNC_BRANCH}/"
-                            env.rsync_from = "${env.WORKSPACE}/"
-                            pipelineUtils.executeInContainer(currentStage + "-rsync-after", "rsync", "/tmp/rsync.sh")
+                                        // Run boot sanity on image
+                                        pipelineUtils.executeInContainer(env.currentStage, "ostree-boot-image", "/home/ostree-boot-image.sh")
 
-                            // Set our message topic, properties, and content
-                            messageFields = pipelineUtils.setMessageFields("image.test.smoke.complete")
+                                        // If boot sanity passes, we update images dir on artifacts
+                                        rsync_to = "${env.RSYNC_USER}@${env.RSYNC_SERVER}::${env.RSYNC_DIR}/${env.RSYNC_BRANCH}/"
+                                        rsync_from = "${env.WORKSPACE}/"
+                                        rsync_vars = ["rsync_paths=${rsync_paths}", "rsync_from=${rsync_from}", "rsync_to=${rsync_to}"]
 
-                            // Send message org.centos.prod.ci.pipeline.image.test.smoke.complete on fedmsg
-                            pipelineUtils.sendMessageWithAudit(messageFields['properties'], messageFields['content'], msgAuditFile, fedmsgRetryCount)
+                                        pipelineUtils.executeInContainer("${env.currentStage}-rsync-after", "rsync", "/tmp/rsync.sh", rsync_vars)
 
-                        } else {
-                            echo "Not Running Image Boot Sanity on Image"
-                        }
+                                        // Set our message topic, properties, and content
+                                        messageFields = pipelineUtils.setMessageFields("image.test.smoke.complete")
 
-                    }
+                                        // Send message org.centos.prod.ci.pipeline.image.test.smoke.complete on fedmsg
+                                        pipelineUtils.sendMessageWithAudit(messageFields['properties'], messageFields['content'], msgAuditFile, fedmsgRetryCount)
 
-                    currentStage = "ci-pipeline-ostree-boot-sanity"
-                    stage(currentStage) {
-                        pipelineUtils.setStageEnvVars(currentStage)
+                                    }
+                                } else {
+                                    echo "Not Running Image Boot Sanity on Image"
+                                }
 
-                        // Run ostree boot sanity
-                        pipelineUtils.executeInContainer(currentStage, "ostree-boot-image", "/home/ostree-boot-image.sh")
-
-                        // Set our message topic, properties, and content
-                        messageFields = pipelineUtils.setMessageFields("package.test.functional.queued")
-
-                        // Send message org.centos.prod.ci.pipeline.package.test.functional.queued on fedmsg
-                        pipelineUtils.sendMessageWithAudit(messageFields['properties'], messageFields['content'], msgAuditFile, fedmsgRetryCount)
-                    }
-
-                    currentStage = "ci-pipeline-functional-tests"
-                    stage(currentStage) {
-                        // Set stage specific vars
-                        pipelineUtils.setStageEnvVars(currentStage)
-
-                        //Set our message topic, properties, and content
-                        messageFields = pipelineUtils.setMessageFields("package.test.functional.running")
-
-                        // Send message org.centos.prod.ci.pipeline.package.test.functional.running on fedmsg
-                        pipelineUtils.sendMessage(messageFields['properties'], messageFields['content'])
-
-                        // Run functional tests
-                        pipelineUtils.executeInContainer(currentStage, "singlehost-test", "/tmp/package-test.sh")
-
-                        // Set our message topic, properties, and content
-                        messageFields = pipelineUtils.setMessageFields("package.test.functional.complete")
-
-                        // Send message org.centos.prod.ci.pipeline.package.test.functional.complete on fedmsg
-                        pipelineUtils.sendMessage(messageFields['properties'], messageFields['content'])
-
-                        // Set our message topic, properties, and content
-                        messageFields = pipelineUtils.setMessageFields("compose.test.integration.queued")
-
-                        // Send message org.centos.prod.ci.pipeline.compose.test.integration.queued on fedmsg
-                        pipelineUtils.sendMessageWithAudit(messageFields['properties'], messageFields['content'], msgAuditFile, fedmsgRetryCount)
-                    }
-
-                    currentStage = "ci-pipeline-atomic-host-tests"
-                    stage(currentStage) {
-                        // Set stage specific vars
-                        pipelineUtils.setStageEnvVars(currentStage)
-
-                        // Set our message topic, properties, and content
-                        messageFields = pipelineUtils.setMessageFields("compose.test.integration.running")
-
-                        // Send message org.centos.prod.ci.pipeline.compose.test.integration.running on fedmsg
-                        pipelineUtils.sendMessageWithAudit(messageFields['properties'], messageFields['content'], msgAuditFile, fedmsgRetryCount)
-
-                        // Run integration tests
-                        pipelineUtils.executeInContainer(currentStage, "singlehost-test", "/tmp/integration-test.sh")
-
-                        // Set our message topic, properties, and content
-                        messageFields = pipelineUtils.setMessageFields("compose.test.integration.complete")
-
-                        // Send message org.centos.prod.ci.pipeline.compose.test.integration.complete on fedmsg
-                        pipelineUtils.sendMessageWithAudit(messageFields['properties'], messageFields['content'], msgAuditFile, fedmsgRetryCount)
-
-                    }
-                    currentStage = "openshift-e2e-tests"
-                    stage(currentStage) {
-                        // run linchpin up and other steps
-                        // note: need to be updated
-
-                        // Set stage specific vars
-                        pipelineUtils.setStageEnvVars(currentStage)
-
-                        // run linchpin workspace for e2e tests
-                        //pipelineUtils.executeInContainer(currentStage, "linchpin-libvirt", "/root/linchpin_workspace/run_e2e_tests.sh")
+                            }
+                        },
+//                        }, ostreeBootSanity: {
+//                            withEnv(["currentStage=ci-pipeline-ostree-boot-sanity"]) {
+//                                withEnv(pipelineUtils.setStageEnvVars(env.currentStage)) {
+//                                    // Run ostree boot sanity
+//                                    pipelineUtils.executeInContainer(env.currentStage, "ostree-boot-image", "/home/ostree-boot-image.sh")
+//
+//                                    // Set our message topic, properties, and content
+//                                    messageFields = pipelineUtils.setMessageFields("package.test.functional.queued")
+//
+//                                    // Send message org.centos.prod.ci.pipeline.package.test.functional.queued on fedmsg
+//                                    pipelineUtils.sendMessageWithAudit(messageFields['properties'], messageFields['content'], msgAuditFile, fedmsgRetryCount)
+//                                }
+//                            }
+//                        }, functionalTests: {
+//                            withEnv(["currentStage=ci-pipeline-functional-tests"]) {
+//                                withEnv(pipelineUtils.setStageEnvVars(env.currentStage)) {
+//                                    messageFields = pipelineUtils.setMessageFields("package.test.functional.running")
+//
+//                                    // Send message org.centos.prod.ci.pipeline.package.test.functional.running on fedmsg
+//                                    pipelineUtils.sendMessage(messageFields['properties'], messageFields['content'])
+//
+//                                    // Run functional tests
+//                                    pipelineUtils.executeInContainer(env.currentStage, "singlehost-test", "/tmp/package-test.sh")
+//
+//                                    // Set our message topic, properties, and content
+//                                    messageFields = pipelineUtils.setMessageFields("package.test.functional.complete")
+//
+//                                    // Send message org.centos.prod.ci.pipeline.package.test.functional.complete on fedmsg
+//                                    pipelineUtils.sendMessage(messageFields['properties'], messageFields['content'])
+//
+//                                    // Set our message topic, properties, and content
+//                                    messageFields = pipelineUtils.setMessageFields("compose.test.integration.queued")
+//
+//                                    // Send message org.centos.prod.ci.pipeline.compose.test.integration.queued on fedmsg
+//                                    pipelineUtils.sendMessageWithAudit(messageFields['properties'], messageFields['content'], msgAuditFile, fedmsgRetryCount)
+//                                }
+//                            }
+//                        }, atomicHostTests: {
+//                            withEnv(["currentStage=ci-pipeline-atomic-host-tests"]) {
+//                                withEnv(pipelineUtils.setStageEnvVars(env.currentStage)) {
+//                                    // Set our message topic, properties, and content
+//                                    messageFields = pipelineUtils.setMessageFields("compose.test.integration.running")
+//
+//                                    // Send message org.centos.prod.ci.pipeline.compose.test.integration.running on fedmsg
+//                                    pipelineUtils.sendMessageWithAudit(messageFields['properties'], messageFields['content'], msgAuditFile, fedmsgRetryCount)
+//
+//                                    // Run integration tests
+//                                    pipelineUtils.executeInContainer(env.currentStage, "singlehost-test", "/tmp/integration-test.sh")
+//
+//                                    // Set our message topic, properties, and content
+//                                    messageFields = pipelineUtils.setMessageFields("compose.test.integration.complete")
+//
+//                                    // Send message org.centos.prod.ci.pipeline.compose.test.integration.complete on fedmsg
+//                                    pipelineUtils.sendMessageWithAudit(messageFields['properties'], messageFields['content'], msgAuditFile, fedmsgRetryCount)
+//                                }
+//                            }
+//                        }, openshiftE2ETests: {
+//                            withEnv(["currentStage=openshift-e2e-tests"]) {
+//                                withEnv(pipelineUtils.setStageEnvVars(env.currentStage)) {
+//                                    // run linchpin up and other steps
+//                                    // note: need to be updated
+//
+//                                    // run linchpin workspace for e2e tests
+//                                    // pipelineUtils.executeInContainer(env.currentStage, "linchpin-libvirt", "/root/linchpin_workspace/run_e2e_tests.sh")
+//                                    pipelineUtils.executeInContainer(currentStage, "linchpin-libvirt", "date")
+//                                }
+//                            }
+//                        },
+                        failFast: true
                     }
 
                 } catch (e) {
@@ -460,7 +481,7 @@ podTemplate(name: podName,
                     currentBuild.result = 'FAILURE'
 
                     // Report the exception
-                    echo "Error: Exception from " + currentStage + ":"
+                    echo "Error: Exception from ${env.currentStage}:"
                     echo e.getMessage()
 
                     // Throw the error
