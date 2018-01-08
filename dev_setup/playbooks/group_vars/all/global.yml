@@ -80,3 +80,11 @@ tag: stable
 
 # modify security context contraints (SCC) to run privileged containers
 modify_scc: true
+
+# enable the sample pipeline
+# Note: This will eventually moved to an example project repo)
+enable_sample_pipeline: true
+
+# enable running a VM in an image as a sample pipeline container
+enable_vm: false
+
