@@ -88,3 +88,6 @@ enable_sample_pipeline: true
 # enable running a VM in an image as a sample pipeline container
 enable_vm: false
 
+# Location of the VM_IMAGE_URL
+vm_image_url: http://artifacts.ci.centos.org/artifacts/fedora-atomic/f26/images/latest-atomic.qcow2
+
