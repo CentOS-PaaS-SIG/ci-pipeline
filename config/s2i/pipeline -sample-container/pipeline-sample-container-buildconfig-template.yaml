@@ -40,8 +40,8 @@ objects:
             value: pipeline-sample-container
           - name: ENABLE_VM
             value: ${ENABLE_VM}
-          - name: VM_IMAGE_URL
-            value: ${VM_IMAGE_URL}
+          - name: VM_IMG_URL
+            value: ${VM_IMG_URL}
       type: Docker
     triggers:
     - type: ConfigChange
@@ -64,6 +64,6 @@ parameters:
   value: 'false'
 - description: Cloud image full url.
   displayName: VM cloud image URL
-  name: VM_IMAGE_URL
+  name: VM_IMG_URL
   value: http://artifacts.ci.centos.org/artifacts/fedora-atomic/f26/images/latest-atomic.qcow2
 
