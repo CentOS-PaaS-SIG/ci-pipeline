@@ -122,9 +122,9 @@
 
 - name: "{{ container_config_name }} :: Check if the template being loaded contains the parameter..."
   shell: "oc describe template {{ template_name }} | grep {{ item.key }}"
-    register: check_temp_params
-    with_items: "{{ PARAMS }}"
-    ignore_errors: yes
+  register: check_temp_params
+  with_items: "{{ PARAMS }}"
+  ignore_errors: yes
 
 - set_fact:
     params: "{{ params | default([]) }} + [ '-p {{ item.item.key }}_PARAM={{ item.item.val }}' ]"
