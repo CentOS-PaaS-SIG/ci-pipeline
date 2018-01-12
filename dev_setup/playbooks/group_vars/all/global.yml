@@ -88,9 +88,9 @@ enable_sample_pipeline: true
 # These are parameters that are passed to setup the containers for the pipeline
 PARAMS:
   - key: REPO_URL
-    val: https://github.com/CentOS-PaaS-SIG/ci-pipeline.git
+    val: ""
   - key: REPO_REF
-    val: master
+    val: ""
   - key: ENABLE_VM
     val: false
   - key: VM_IMG_URL
