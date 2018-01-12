@@ -121,7 +121,7 @@
 #         (lookup('env','REPO_URL') == "" and lookup('env','REPO_REF') == ""))
 
 - name: "{{ container_config_name }} :: Check if the template being loaded contains the parameter..."
-  shell: "oc describe template {{ template_name }} | grep {{ item.key }}"
+  shell: "oc describe template {{ template_name_file.stdout }} | grep {{ item.key }}"
   register: check_temp_params
   with_items: "{{ PARAMS }}"
   ignore_errors: yes
