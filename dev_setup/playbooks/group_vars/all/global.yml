@@ -95,3 +95,4 @@ PARAMS:
     val: false
   - key: VM_IMG_URL
     val: http://artifacts.ci.centos.org/artifacts/fedora-atomic/f26/images/latest-atomic.qcow2
+params: []
