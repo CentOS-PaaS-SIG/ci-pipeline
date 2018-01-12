@@ -129,6 +129,7 @@
 - set_fact:
     params: "{{ params | default([]) }} + [ '-p {{ item.item.key }}_PARAM={{ item.item.val }}' ]"
   when: (item.stdout != "" and item.item.val != "")
+  with_items: "{{ check_temp_params.results }}"
 
 - name: "{{ container_config_name }} :: Imagestream and buildconfig do not exist. Creating..."
   shell: oc new-app {{ template_name_file.stdout }} {{ params | join(" ") }}
