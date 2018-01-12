@@ -85,9 +85,13 @@ modify_scc: true
 # Note: This will eventually moved to an example project repo)
 enable_sample_pipeline: true
 
-# enable running a VM in an image as a sample pipeline container
-enable_vm: false
-
-# Location of the VM_IMAGE_URL
-vm_image_url: http://artifacts.ci.centos.org/artifacts/fedora-atomic/f26/images/latest-atomic.qcow2
-
+# These are parameters that are passed to setup the containers for the pipeline
+PARAMS:
+  - key: REPO_URL
+    val: https://github.com/arilivigni/ci-pipeline
+  - key: REPO_REF
+    val: master
+  - key: ENABLE_VM
+    val: false
+  - key: VM_IMG_URL
+    val: http://artifacts.ci.centos.org/artifacts/fedora-atomic/f26/images/latest-atomic.qcow2
