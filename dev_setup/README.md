@@ -110,37 +110,44 @@ _______
 ##### All Variables
 
 
-| Variable Name           | Description                                                     | Example                                   | Default                                   | Required |
-|:-----------------------:|:---------------------------------------------------------------:|:-----------------------------------------:|:-----------------------------------------:|:--------:|
-| skip_prereqs            |     Skip setting up virtualization and kvm-driver               | skip_prereqs=true                         |   false                                   | No       |
-| force_minishift_install |     Setup a minishift cluster                                   | force_minishift_install=true              |   false                                   | No       |
-| setup_minishift         |     Setup a minishift cluster                                   | setup_minishift=false                     |   true                                    | No       |
-| start_minishift         |     Start existing minishift cluster                            | start_minishift=false                     |   true                                    | No       |
-| setup_jenkins           |     Setup Jenkins infrastructure master/slaves                  | setup_jenkins=true                        |   true                                    | No       |
-| setup_fedmsg            |     Setup Fedmsg relay                                          | setup_fedmsg=true                         |   true                                    | No       |
-| setup_containers        |     Setup pipeline containers                                   | setup_containers=true                     |   true                                    | No       |
-| modify_tags             |     Modify tags of containers                                   | modify_tags=true                          |   true                                    | No       |
-| tag                     |     Add a tag besides latest                                    | tag=dev                                   |   "stable"                                | No       |
-| modify_scc              |     Create/update the security context constraints              | modify_scc=false                          |   true                                    | No       |
-| minishift_dest_dir      |     Directory to store minishift binary                         | minishift_dest_dir=/home/cloud-user/test  |   "{{ ansible_env.HOME }}/minishift"      | No       |
-| profile                 |     Minishift cluster profile name                              | profile=contra-cp                         |   "minishift"                             | No       |
-| disk_size               |     Disk size for minishift                                     | disk_size=25gb                            |   "40gb"                                  | No       |
-| memory                  |     Memory for minishift                                        | memory=4000mb                             |   "6400mb"                                | No       |
-| basedevice_size         |     Base device size for pods in minishift                      | basedevice_size=30G                       |   "20G"                                   | No       |
-| minishift_iso           |     Minishift ISO url location                                  | minishift_iso=[url]                       |   "[ci-pipeline-minishift-iso-url]"       | No       |
-| force_repo_clone        |     Force the clone of the pipeline git repo                    | force_repo_clone=true                     |   true                                    | No       |
-| pipeline_repo           |     Repo to clone for the pipeline                              | pipeline_repo=https://github.com/cip      |   This repo ci-pipeline                   | No       |
-| pipeline_dir            |     Directory to clone repo to                                  | pipeline_dir=/path_to_pipeline            |   "{{ ansible_env.HOME }}/minishift/cip"  | No       |
-| pipeline_refspec        |     Repo refpec to checkout                                     | pipeline_refspec=refs/heads/*             |  "+refs/pull/*:refs/heads/*"              | No       |
-| pipeline_branch         |     Branch or SHA to checkout                                   | pipeline_branch=[SHA]                     |  "+master"                                | No       |
-| username                |     Cluster username                                            | username=me                               |   "developer"                             | No       |
-| password                |     Cluster password                                            | password=password                         |   "developer"                             | No       |  
-| admin_username          |     Admin cluster username                                      | username=me                               |   "system"                                | No       |
-| admin_password          |     Admin cluster password                                      | password=password                         |   "admin"                                 | No       |
-| project                 |     Openshift project/namespace                                 | project=cvEngine                          |   "continuous-infra"                      | No       |
-| jenkins_bc_templates    |     Jenkins infrastrcuture container templates master/slaves    | List of Jenkins templates from the repo   |   check global.yaml                       | No       |
-| fedmsg_bc_templates     |     Fedmsg relay container templates                            | List of fedmsg templates from the repo    |   check global.yaml                       | No       |
-| pipeline_bc_templates   |     Pipeline container templates                                | List of Container templates from the repo |   check global.yaml                       | No       |
+| Variable Name           | Description                                                             | Example                                   | Default                                   | Required |
+|:-----------------------:|:-----------------------------------------------------------------------:|:-----------------------------------------:|:-----------------------------------------:|:--------:|
+| skip_prereqs            |     Skip setting up virtualization and kvm-driver                       | skip_prereqs=true                         |   false                                   | No       |
+| force_minishift_install |     Setup a minishift cluster                                           | force_minishift_install=true              |   false                                   | No       |
+| setup_minishift         |     Setup a minishift cluster                                           | setup_minishift=false                     |   true                                    | No       |
+| start_minishift         |     Start existing minishift cluster                                    | start_minishift=false                     |   true                                    | No       |
+| setup_jenkins           |     Setup Jenkins infrastructure master/slaves                          | setup_jenkins=true                        |   true                                    | No       |
+| setup_fedmsg            |     Setup Fedmsg relay                                                  | setup_fedmsg=true                         |   true                                    | No       |
+| setup_containers        |     Setup pipeline containers                                           | setup_containers=true                     |   true                                    | No       |
+| modify_tags             |     Modify tags of containers                                           | modify_tags=true                          |   true                                    | No       |
+| tag                     |     Add a tag besides latest                                            | tag=dev                                   |   "stable"                                | No       |
+| modify_scc              |     Create/update the security context constraints                      | modify_scc=false                          |   true                                    | No       |
+| minishift_dest_dir      |     Directory to store minishift binary                                 | minishift_dest_dir=/home/cloud-user/test  |   "{{ ansible_env.HOME }}/minishift"      | No       |
+| profile                 |     Minishift cluster profile name                                      | profile=contra-cp                         |   "minishift"                             | No       |
+| disk_size               |     Disk size for minishift                                             | disk_size=25gb                            |   "40gb"                                  | No       |
+| memory                  |     Memory for minishift                                                | memory=4000mb                             |   "6400mb"                                | No       |
+| basedevice_size         |     Base device size for pods in minishift                              | basedevice_size=30G                       |   "20G"                                   | No       |
+| minishift_iso           |     Minishift ISO url location                                          | minishift_iso=[url]                       |   "[ci-pipeline-minishift-iso-url]"       | No       |
+| force_repo_clone        |     Force the clone of the pipeline git repo                            | force_repo_clone=true                     |   true                                    | No       |
+| pipeline_repo           |     Repo to clone for the pipeline                                      | pipeline_repo=https://github.com/cip      |   This repo ci-pipeline                   | No       |
+| pipeline_dir            |     Directory to clone repo to                                          | pipeline_dir=/path_to_pipeline            |   "{{ ansible_env.HOME }}/minishift/cip"  | No       |
+| pipeline_refspec        |     Repo refpec to checkout                                             | pipeline_refspec=refs/heads/*             |  "+refs/pull/*:refs/heads/*"              | No       |
+| pipeline_branch         |     Branch or SHA to checkout                                           | pipeline_branch=[SHA]                     |  "+master"                                | No       |
+| username                |     Cluster username                                                    | username=me                               |   "developer"                             | No       |
+| password                |     Cluster password                                                    | password=password                         |   "developer"                             | No       |  
+| admin_username          |     Admin cluster username                                              | username=me                               |   "system"                                | No       |
+| admin_password          |     Admin cluster password                                              | password=password                         |   "admin"                                 | No       |
+| project                 |     Openshift project/namespace                                         | project=cvEngine                          |   "continuous-infra"                      | No       |
+| jenkins_bc_templates    |     Jenkins infrastrcuture container templates master/slaves            | List of Jenkins templates from the repo   |   check global.yaml                       | No       |
+| fedmsg_bc_templates     |     Fedmsg relay container templates                                    | List of fedmsg templates from the repo    |   check global.yaml                       | No       |
+| pipeline_bc_templates   |     Pipeline container templates                                        | List of Container templates from the repo |   check global.yaml                       | No       |
+| enable_sample_pipeline  |     Enable a sample pipeline with all stage containers                  | enable_sample_pipeline=true               |   true                                    | No       |
+| PARAMS                  |     Parameters that are passed when setting up a new app in Openshift   | List of key/value pairs                   |   check global.yml                        | No       |
+
+
+##### Sample project with running a VM inside a container
+
+
 
 #### Examples
 
