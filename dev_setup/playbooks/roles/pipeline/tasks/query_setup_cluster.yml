@@ -79,7 +79,7 @@
   ignore_errors: yes
 
 - set_fact:
-    params: "{{ params | default([]) }} + [ '-p {{ item.item.key }}_PARAM={{ item.item.val }}' ]"
+    params: "{{ params | default([]) }} + [ '-p {{ item.item.key }}={{ item.item.val }}' ]"
   when: (item.stdout != "" and item.item.val != "")
   with_items: "{{ check_temp_params.results }}"
 
