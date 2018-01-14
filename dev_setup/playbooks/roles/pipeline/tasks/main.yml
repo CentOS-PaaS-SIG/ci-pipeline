@@ -39,6 +39,14 @@
 - include: check_builds.yml
   when: setup_jenkins|bool == true
 
+# setup_sample_pipelines.yml
+- name: "Setup Sample Pipelines"
+  include: setup_sample_pipelines.yml
+  when: ((enable_sample_pipeline|bool == true) and (setup_jenkins|bool == true))
+
+- include: check_builds.yml
+  when: ((enable_sample_pipeline|bool == true) and (setup_jenkins|bool == true))
+
 # setup_fedmsg_relay.yml
 - name: "Setup Fedmsg relay"
   include: setup_fedmsg_relay.yml

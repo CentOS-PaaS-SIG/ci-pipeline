@@ -94,7 +94,7 @@ podTemplate(name: podName,
                         //
                         try {
                             // Prepare our environment
-                            currentStage = "pipeline-prepare-environment"
+                            currentStage = "pipeline-sample-prepare-environment"
                             stage(currentStage) {
                                 deleteDir()
                                 // Decorate our build
@@ -119,17 +119,16 @@ podTemplate(name: podName,
                                     ])
                                 }
                             }
-                            currentStage = "pipeline-sample-execute-stage"
+                            currentStage = "pipeline-sample-execute-script"
                             stage(currentStage) {
                                 pipelineUtils.executeInContainer(currentStage, "pipeline-sample-container", "${SCRIPT_LOCATION}")
 
                             }
-                            currentStage = "pipeline-sample-stage"
+                            currentStage = "pipeline-sample-top-in-container"
                             stage(currentStage) {
-                                pipelineUtils.executeInContainer(currentStage, "pipeline-sample-container", "${SCRIPT_LOCATION}")
-
+                                pipelineUtils.executeInContainer(currentStage, "pipeline-sample-container", "top -n 5 -b > top-output.txt")
+                                pipelineUtils.executeInContainer(currentStage, "pipeline-sample-container", "cat top-output.txt")
                             }
-
                         } catch (e) {
                             // Set build result
                             currentBuild.result = 'FAILURE'
@@ -147,13 +146,13 @@ podTemplate(name: podName,
                             currentBuild.description = "${currentBuild.currentResult} - ENABLE_VM=${env.ENABLE_VM}"
 
                             // only post to IRC on a failure
-                            // if (currentBuild.result == 'FAILURE') {
-                            //     // only if this is a production build
-                            //     if (env.ghprbActualCommit == null || env.ghprbActualCommit == "master") {
-                            //         def message = "${JOB_NAME} build #${BUILD_NUMBER}: ${currentBuild.currentResult}: ${BUILD_URL}"
-                            //         pipelineUtils.sendIRCNotification("${IRC_NICK}-${UUID.randomUUID()}", IRC_CHANNEL, message)
-                            //     }
-                            // }
+                            if (currentBuild.result == 'FAILURE') {
+                                // only if this is a production build
+                                if (env.ghprbActualCommit == null || env.ghprbActualCommit == "master") {
+                                    def message = "${JOB_NAME} build #${BUILD_NUMBER}: ${currentBuild.currentResult}: ${BUILD_URL}"
+                                    pipelineUtils.sendIRCNotification("${IRC_NICK}-${UUID.randomUUID()}", IRC_CHANNEL, message)
+                                }
+                            }
 
                             try {
                                 pipelineUtils.getContainerLogsFromPod(OPENSHIFT_NAMESPACE, env.NODE_NAME)

@@ -81,9 +81,19 @@ tag: stable
 # modify security context contraints (SCC) to run privileged containers
 modify_scc: true
 
+## Sample pipeline vars used
 # enable the sample pipeline
 # Note: This will eventually moved to an example project repo)
 enable_sample_pipeline: true
+
+# Pipeline sample buildconfig templates:
+sample_pipeline_bc_templates:
+  - pipeline-sample-container/pipeline-sample-container
+
+sample_pipelines:
+  - src_loc: "{{ pipeline_dir }}/dev_setup/playbooks/roles/pipeline/templates/contra-sample-pipeline1.xml.j2"
+    dest_loc: "{{ pipeline_dir }}/config/s2i/jenkins/master/configuration/contra-sample-pipeline1/config.xml"
+    jenkins_file: JenkinsContraSample1
 
 # These are parameters that are passed to setup the containers for the pipeline
 PARAMS:

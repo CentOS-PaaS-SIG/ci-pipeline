@@ -1,0 +1,10 @@
+---
+# create/update and add security for sample pipelines
+
+- name: "Set the container_config_name to Sample Pipelines"
+  set_fact:
+    container_config_name: "Sample Pipelines"
+
+- include: query_setup_cluster.yml template_name={{ item }}
+  with_items: "{{ sample_pipeline_bc_templates }}"
+  when: sample_pipeline_bc_templates != ""
