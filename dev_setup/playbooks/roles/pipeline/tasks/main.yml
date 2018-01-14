@@ -39,10 +39,16 @@
 - include: check_builds.yml
   when: setup_jenkins|bool == true
 
+# Check if Jenkins is running
+- name: "Check to see if a Jenkins Master instance is running"
+  shell: oc get pods | grep -i 'running' | grep -i 'jenkins'
+  register: jenkins_running
+  ignore_errors: yes
+
 # setup_sample_pipelines.yml
 - name: "Setup Sample Pipelines"
   include: setup_sample_pipelines.yml
-  when: ((enable_sample_pipeline|bool == true) and (setup_jenkins|bool == true))
+  when: ((enable_sample_pipeline|bool == true) and (jenkins_running.stdout != ""))
 
 - include: check_builds.yml
   when: ((enable_sample_pipeline|bool == true) and (setup_jenkins|bool == true))

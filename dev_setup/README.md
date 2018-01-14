@@ -147,6 +147,23 @@ _______
 
 ##### Sample pipeline project with running a VM inside a container
 
+###### Overview
+
+##### Sample Pipeline Variables and Options
+
+| Variable Name           | Description                                                             | Example                                   | Default                                   | Required |
+|:-----------------------:|:-----------------------------------------------------------------------:|:-----------------------------------------:|:-----------------------------------------:|:--------:|
+| enable_sample_pipeline        |     Enable a sample pipeline with all stage containers                  | enable_sample_pipeline=true               |   true                                    | No       |
+| sample_pipeline_bc_templates
+
+sample_pipelines:
+  - src_loc: "{{ pipeline_dir }}/dev_setup/playbooks/roles/pipeline/templates/contra-sample-pipeline1.xml.j2"
+    dest_loc: "{{ pipeline_dir }}/config/s2i/jenkins/master/configuration/contra-sample-pipeline1/config.xml"
+    jenkins_file: JenkinsContraSample1
+| PARAMS                  |     Parameters that are passed when setting up a new app in Openshift   | List of key/value pairs                   |   check global.yml                        | No       |
+
+
+##### Sample Pipeline Project Files
 The sample pipeline project uses the following files to demonstrate a basic pipeline.
 There is an option to enable running a VM inside a container as part of pipeline stage.
 
