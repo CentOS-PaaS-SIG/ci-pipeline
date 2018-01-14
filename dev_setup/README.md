@@ -145,9 +145,10 @@ _______
 | PARAMS                  |     Parameters that are passed when setting up a new app in Openshift   | List of key/value pairs                   |   check global.yml                        | No       |
 
 
-##### Sample project with running a VM inside a container
+##### Sample pipeline project with running a VM inside a container
 
-
+The sample pipeline project uses the following files to demonstrate a basic pipeline.
+There is an option to enable VM support in the container to do more complex testing on a VM inside a container
 
 #### Examples
 
