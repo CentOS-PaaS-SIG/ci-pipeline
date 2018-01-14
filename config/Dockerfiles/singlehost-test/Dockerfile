@@ -15,6 +15,7 @@ RUN curl -o /etc/yum.repos.d/bpeck-restraint-fedora-26.repo https://copr.fedorai
 RUN for i in {1..5} ; do dnf -y install ansible \
         beakerlib \
         curl \
+        dnf-plugins-core \
         file \
         findutils \
         git \

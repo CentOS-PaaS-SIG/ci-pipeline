@@ -20,7 +20,7 @@ This can be a static file, dynamic inventory, or a comma separated list of machi
 ### Generic Example
 
 ```
-ansible -i <inventory> --private-key=</full/path/to/private/ssh/key> \
+ansible-playbook -i <inventory> --private-key=</full/path/to/private/ssh/key> \
 ci-pipeline/dev_setup/playbooks/setup.yml
 ```
 
@@ -70,7 +70,7 @@ ci-pipeline/dev_setup/playbooks/setup.yml
 ### Example
 
 ```
-ansible -i "10.8.170.204," --private-key=/home/test-user/.ssh/ci-factory \
+ansible-playbook -i "10.8.170.204," --private-key=/home/test-user/.ssh/ci-factory \
 ci-pipeline/dev_setup/playbooks/setup.yml
 
 ```
