@@ -98,9 +98,9 @@ sample_pipelines:
 # These are parameters that are passed to setup the containers for the pipeline
 PARAMS:
   - key: REPO_URL
-    val: ""
+    val: "{{ pipeline_repo }}"
   - key: REPO_REF
-    val: ""
+    val: "{{ pipeline_branch }}"
   - key: ENABLE_VM
     val: false
   - key: VM_IMG_URL
