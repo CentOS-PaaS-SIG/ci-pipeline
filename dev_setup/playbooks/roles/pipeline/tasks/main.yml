@@ -41,7 +41,7 @@
 
 # Check if Jenkins is running
 - name: "Check to see if a Jenkins Master instance is running"
-  shell: oc get pods | grep -i 'running' | grep -i 'jenkins'
+  shell: oc get pods | grep -i 'running' | grep -i 'jenkins' | awk '{print $1}'
   register: jenkins_running
   ignore_errors: yes
 
