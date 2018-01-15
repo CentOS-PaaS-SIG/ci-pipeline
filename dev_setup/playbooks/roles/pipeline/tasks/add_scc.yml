@@ -13,6 +13,12 @@
   shell: oc get scc | grep '{{ scc_file.stdout }}' | awk '{print $1}'
   register: scc_name_file
 
+- name: "Generate and override the security context file from a template"
+  template:
+    src: "{{ pipeline_dir }}/dev_setup/playbooks/roles/pipeline/templates/pipeline-scc.yaml.j2"
+    dest: "{{ pipeline_dir }}/dev_setup/playbooks/roles/pipeline/files/pipeline-scc.yaml"
+    mode: 0755
+
 - name: "Create the {{ scc_name_file.stdout }} security context constraints"
   shell: oc create -f "{{ pipeline_dir }}/dev_setup/playbooks/roles/pipeline/files/pipeline-scc.yaml"
   when: scc_name_file.stdout == ""

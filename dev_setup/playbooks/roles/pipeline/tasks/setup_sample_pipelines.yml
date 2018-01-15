@@ -19,6 +19,7 @@
   template:
     src: "{{ item.src_loc }}"
     dest: "{{ item.dest_loc }}"
+    mode: 0755
   with_items: "{{ sample_pipelines }}"
 
 - name: "Update sample pipeline job inside the Jenkins Master pod"
