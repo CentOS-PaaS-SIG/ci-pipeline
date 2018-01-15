@@ -8,3 +8,25 @@
 - include: query_setup_cluster.yml template_name={{ item }}
   with_items: "{{ sample_pipeline_bc_templates }}"
   when: sample_pipeline_bc_templates != ""
+
+- include: check_builds.yml
+
+- name: "Create directory for sample pipleine job"
+  shell: mkdir -p {{ item.dest_loc | dirname }}
+  with_items: "{{ sample_pipelines }}"
+
+- name: "Generate sample pipeline job from template {{ item.src_loc }}"
+  template:
+    src: "{{ item.src_loc }}"
+    dest: "{{ item.dest_loc }}"
+  with_items: "{{ sample_pipelines }}"
+
+- name: "Update sample pipeline job inside the Jenkins Master pod"
+  shell: "oc rsync {{ item.dest_loc }} {{ jenkins_running.stdout }}:/var/lib/jenkins/jobs/"
+  with_items: "{{ sample_pipelines }}"
+
+- name: "Scale the pod down to update the sample pipeline jobs in Jenkins"
+  shell: "oc scale --replicas=0 dc jenkins"
+
+- name: "Scale the pod up to update the sample pipeline jobs in Jenkins"
+  shell: "oc scale --replicas=1 dc jenkins"

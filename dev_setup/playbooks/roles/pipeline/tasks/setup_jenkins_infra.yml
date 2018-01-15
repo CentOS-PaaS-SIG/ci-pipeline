@@ -5,18 +5,8 @@
   set_fact:
     container_config_name: "Jenkins infra"
 
-- name: "Create directory for sample pipleine job"
-  shell: mkdir -p {{ item.dest_loc | dirname }}
-  with_items: "{{ sample_pipelines }}"
-  when: enable_sample_pipeline|bool == true
-
-- name: "Copy sample pipeline job to jenkins master s2i config"
-  template:
-    src: "{{ item.src_loc }}"
-    dest: "{{ item.dest_loc }}"
-  with_items: "{{ sample_pipelines }}"
-  when: enable_sample_pipeline|bool == true
-
 - include: query_setup_cluster.yml template_name={{ item }}
   with_items: "{{ jenkins_bc_templates }}"
   when: jenkins_bc_templates != ""
+
+- include: check_builds.yml

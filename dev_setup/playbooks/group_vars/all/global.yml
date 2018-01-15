@@ -92,8 +92,8 @@ sample_pipeline_bc_templates:
 
 sample_pipelines:
   - src_loc: "{{ pipeline_dir }}/dev_setup/playbooks/roles/pipeline/templates/contra-sample-pipeline1.xml.j2"
-    dest_loc: "{{ pipeline_dir }}/config/s2i/jenkins/master/configuration/jobs/contra-sample-pipeline1/config.xml"
-    jenkins_file: JenkinsContraSample1
+    dest_loc: "/tmp/contra-sample-pipeline1/config.xml"
+    jenkins_file: "dev_setup/playbooks/roles/pipeline/files/JenkinsfileContraSample1"
 
 # These are parameters that are passed to setup the containers for the pipeline
 PARAMS:

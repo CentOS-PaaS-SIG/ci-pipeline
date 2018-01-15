@@ -36,12 +36,9 @@
   include: setup_jenkins_infra.yml
   when: setup_jenkins|bool == true
 
-- include: check_builds.yml
-  when: setup_jenkins|bool == true
-
 # Check if Jenkins is running
 - name: "Check to see if a Jenkins Master instance is running"
-  shell: oc get pods | grep -i 'running' | grep -i 'jenkins' | awk '{print $1}'
+  shell: oc get pods | grep -i 'running' | grep -i 'jenkins' | tail -1 |  awk '{print $1}'
   register: jenkins_running
   ignore_errors: yes
 
@@ -58,15 +55,9 @@
   include: setup_fedmsg_relay.yml
   when: setup_fedmsg|bool == true
 
-- include: check_builds.yml
-  when: setup_fedmsg|bool == true
-
 # setup_containers.yml
 - name: "Setup Pipeline containers"
   include: setup_containers.yml
-  when: setup_containers|bool == true
-
-- include: check_builds.yml
   when: setup_containers|bool == true
 
 # add security context constraints

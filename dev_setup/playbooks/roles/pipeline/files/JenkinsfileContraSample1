@@ -36,11 +36,11 @@ properties(
                 disableConcurrentBuilds(),
                 parameters(
                         [
-                                string(defaultValue: 'master', description: '', name: 'ghprbActualCommit'),
-                                string(defaultValue: 'arilivigni/ci-pipeline', description: '', name: 'ghprbGhRepository'),
+                                string(defaultValue: "${env.ghprbActualCommit}", description: '', name: 'ghprbActualCommit'),
+                                string(defaultValue: "${env.ghprbGhRepository}", description: '', name: 'ghprbGhRepository'),
                                 string(defaultValue: '', description: '', name: 'ghprbPullId'),
                                 string(defaultValue: '', description: '', name: 'ghprbPullAuthorLogin'),
-                                string(defaultValue: 'continuous-infra', description: 'Project namespace for Openshift operations', name: 'OPENSHIFT_NAMESPACE'),
+                                string(defaultValue: "${env.OPENSHIFT_NAMESPACE}", description: 'Project namespace for Openshift operations', name: 'OPENSHIFT_NAMESPACE'),
                                 string(defaultValue: 'jenkins', description: 'Service Account for Openshift operations', name: 'OPENSHIFT_SERVICE_ACCOUNT'),
                                 string(defaultValue: '/home/images/latest-atomic.qcow2', description: 'VM cloud image (local or URL)', name: 'IMG_URL'),
                                 string(defaultValue: '/home/execute.sh', description: 'script to execute in the pipeline container', name: 'SCRIPT_LOCATION'),
