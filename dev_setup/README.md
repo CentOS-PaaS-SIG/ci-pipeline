@@ -246,6 +246,10 @@ PARAMS:
 │   │   │   │   └── templates
 │   │   │   │       ├── contra-sample-pipeline1.xml.j2
 │   │   │   │       └── pipeline-scc.yaml.j2
+├── playbooks
+│   ├── pipeline-sample-boot-verify.yml
+│   ├── pipeline-sample.yml
+
 ```
 
 #### Examples

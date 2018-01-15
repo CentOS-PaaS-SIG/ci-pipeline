@@ -15,7 +15,7 @@
   shell: mkdir -p {{ item.dest_loc | dirname }}
   with_items: "{{ sample_pipelines }}"
 
-- name: "Generate sample pipeline job from template {{ item.src_loc }}"
+- name: "Generate sample pipeline job from the template"
   template:
     src: "{{ item.src_loc }}"
     dest: "{{ item.dest_loc }}"
@@ -23,7 +23,7 @@
   with_items: "{{ sample_pipelines }}"
 
 - name: "Update sample pipeline job inside the Jenkins Master pod"
-  shell: "oc rsync {{ item.dest_loc }} {{ jenkins_running.stdout }}:/var/lib/jenkins/jobs/"
+  shell: "oc rsync {{ item.dest_loc | dirname }} {{ jenkins_running.stdout }}:/var/lib/jenkins/jobs/"
   with_items: "{{ sample_pipelines }}"
 
 - name: "Scale the pod down to update the sample pipeline jobs in Jenkins"
