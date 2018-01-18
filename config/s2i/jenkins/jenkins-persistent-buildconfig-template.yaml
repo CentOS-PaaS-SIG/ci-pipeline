@@ -135,6 +135,8 @@ objects:
             value: "${ENABLE_OAUTH}"
           - name: OPENSHIFT_ENABLE_REDIRECT_PROMPT
             value: 'true'
+          - name: OPENSHIFT_JENKINS_JVM_ARCH
+            value: 'x86_64'
           - name: KUBERNETES_MASTER
             value: https://kubernetes.default:443
           - name: KUBERNETES_TRUST_CERTIFICATES
