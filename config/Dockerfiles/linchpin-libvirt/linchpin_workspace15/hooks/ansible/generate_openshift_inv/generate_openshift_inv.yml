@@ -7,8 +7,11 @@
     - name: "Pause for a while for dhcp to catch up"
       pause: 
         minutes: 5
+    - name: "Get inventory file"
+      set_fact:
+        inv_file:  "{{ playbook_dir }}/../../../inventories/"
     - name: "cat inventory out generated inventory"
-      shell: "cat {{ inventory_file }}"
+      shell: "cat {{ inv_file | get_inv_file }}"
       register: inventory_output
     - name: "debug: inventory get first ip address in inventory"
       debug:
