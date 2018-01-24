@@ -9,13 +9,13 @@ resource_groups:
         uri: 'qemu:///system'
         count: 1
         image_src: "file:///home/output/images/untested-atomic.qcow2"
-        memory: 6144
+        memory: 3096
         vcpus: 2
         arch: x86_64
         network_bridge: 'virbr3'
         networks:
           - name: default
-        additional_storage: 15G
+        additional_storage: 10G
         cloud_config:
           users:
             - name: admin
@@ -23,4 +23,4 @@ resource_groups:
               groups: wheel
               sudo: ALL=(ALL) NOPASSWD:ALL
               ssh-import-id: None
-              lock_passwd: true        
+              lock_passwd: true 

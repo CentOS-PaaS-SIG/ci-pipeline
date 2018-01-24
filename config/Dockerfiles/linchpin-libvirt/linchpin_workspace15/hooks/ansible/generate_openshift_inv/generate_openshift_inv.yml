@@ -46,10 +46,10 @@
     - name: "Copy hosts file to /etc/"
       shell: "cat /tmp/hosts > /etc/hosts"                                                                  
     - name: "Add ip to /etc/hosts file"
-      shell: ansible -i {{ inv_file | get_inv }} all -u admin --become --private-key ~/.ssh/ex -m lineinfile -a"line='{{ ipaddr }} atomic01 atomic01.example.com' destfile='/etc/hosts' state='present'"
+      shell: ansible -i {{ inv_file | get_inv_file }} all -u admin --become --private-key ~/.ssh/ex -m lineinfile -a"line='{{ ipaddr }} atomic01 atomic01.example.com' destfile='/etc/hosts' state='present'"
       environment:
         ANSIBLE_HOST_KEY_CHECKING: False
     - name: "Use ansible adhoc command to hostnamectl set-hostname to atomic01.example.com"
-      shell: "ansible -i {{ inv_file | get_inv }} all -u admin --become --private-key ~/.ssh/ex -a \"hostnamectl set-hostname atomic01.example.com\""
+      shell: "ansible -i {{ inv_file | get_inv_file }} all -u admin --become --private-key ~/.ssh/ex -a \"hostnamectl set-hostname atomic01.example.com\""
       environment:
         ANSIBLE_HOST_KEY_CHECKING: False
