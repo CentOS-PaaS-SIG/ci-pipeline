@@ -12,10 +12,10 @@ libvirt_one:
         context: false
         actions:
           - playbook: main.yml
-      - name: run_e2e_tests                                                                                                                                                                                                    
-        type: ansible                                                                                                                                                                                                              
-        context: false                                                                                                                                                                                                             
-        actions:                                                                                                                                                                                                                   
+      - name: run_e2e_tests                                                                                     
+        type: ansible                                                                                                                  
+        context: false
+        actions:
           - playbook: main.yml
       - name: display_results
         type: shell
