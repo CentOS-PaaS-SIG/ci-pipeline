@@ -5,6 +5,9 @@
 # hopefully using the oc module in Ansible 2.4
 
 # templates
+- set_fact:
+    params: []
+
 - name: "{{ container_config_name }} :: Get template name from the yaml file"
   shell: oc process -f {{ pipeline_dir }}/config/s2i/{{ template_name }}-buildconfig-template.yaml | jq '.items[1].metadata.labels.template' | sed 's/"//g'
   args:
