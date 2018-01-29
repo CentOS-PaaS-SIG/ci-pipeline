@@ -8,7 +8,7 @@
     minutes: 3
 
 - name: Stop the cluster
-  shell: minishift stop --profile {{ profile }}
+  shell: "{{ minishift_dest_dir }}/minishift stop --profile {{ profile }}"
 
 - name: Update the VM config
   lineinfile:

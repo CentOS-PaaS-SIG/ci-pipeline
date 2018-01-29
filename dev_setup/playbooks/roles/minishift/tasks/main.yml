@@ -13,7 +13,7 @@
 
 # set disk size and memory
 - name: "Set minishift disk-size {{ disk_size }}"
-  shell: minishift config set disk-size {{ disk_size }}
+  shell: "{{ minishift_dest_dir }}/minishift config set disk-size {{ disk_size }}"
 
 - name: "Set minishift disk-size {{ memory }}"
   shell: "{{ minishift_dest_dir }}/minishift config set memory {{ memory }}"

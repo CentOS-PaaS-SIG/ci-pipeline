@@ -254,7 +254,30 @@ PARAMS:
 
 #### Examples
 
-###### Example 1: Setup on a remote server
+###### Example 1: Setup on a local server :: Jenkins Infra and pipeline containers
+
+ 1. Install on a remote server as user cloud-user.
+ 2. Don't setup pre-reqs (kvm driver and nested virtualization)
+ 3. Setup a minishift cluster.
+ 4. Setup jenkins infra and pipeline containers.
+ 5. Don't setup fedmsg relay.
+ 6. Modify my container tags with the default tag. tag=stable
+ 7. Override the pipeline_repo with another one then the default in global.yml
+ 8. The -K is used to prompt you for your password for sudo (if you require one)
+ 9. The -k is used to prompt you for your ssh password can hit enter if using -K and they are the same<br>
+    _Note: Instead of -k you could use --private-key=<absolute_path_to_ssh_private_key>_
+    
+```
+    ansible-playbook -vv -i "localhost," \
+    ~/CentOS-PaaS-SIG/ci-pipeline/dev_setup/playbooks/setup.yml \
+    -e remote_user=cloud-user -e skip_prereqs=true -e setup_minishift=true \
+    -e setup_jenkins=true -e setup_containers=true \
+    -e setup_fedmsg=false -e modify_tags=true \
+    -e pipeline_repo=https://github.com/arilivigni/ci-pipeline -K -k
+
+```
+
+###### Example 2: Setup on a local server :: Jenkins Infra, fedmsg relay, and pipeline containers
 
  1. Install on a remote server as user cloud-user.
  2. Don't setup pre-reqs (kvm driver and nested virtualization)
@@ -264,7 +287,7 @@ PARAMS:
  6. Don't clone the pipeline repo if it exists.
 
 ```
-    ansible-playbook -vv -i "myserver.mydomain," --private-key=/home/cloud-user/my-key \
+    ansible-playbook -vv -i "localhost," --private-key=/home/cloud-user/my-key \
     ~/CentOS-PaaS-SIG/ci-pipeline/dev_setup/playbooks/setup.yml \
     -e remote_user=cloud-user -e skip_prereqs=false -e setup_minishift=false \
     -e setup_jenkins=true -e setup_containers=true \
@@ -272,7 +295,7 @@ PARAMS:
 ```
 
 
-###### Example 2: Setup on a remote server
+###### Example 3: Setup on a remote server
 
  1. Install on a remote server as user cloud-user.
  2. Don't setup pre-reqs (kvm driver and nested virtualization)
@@ -293,7 +316,7 @@ PARAMS:
 
 ```
 
-###### Example 3: Setup on a local server
+###### Example 3: Setup on a local server :: Jenkins Infra and pipeline containers
 
  1. Install on a remote server as user cloud-user.
  2. Don't setup pre-reqs (kvm driver and nested virtualization)
