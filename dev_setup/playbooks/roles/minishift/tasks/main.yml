@@ -23,7 +23,10 @@
   shell: "{{ minishift_dest_dir }}/minishift config set docker-opt 'storage-opt=dm.basesize={{ basedevice_size }}'"
 
 - name: Pull down the minishift iso
-  shell: "curl {{ minishift_iso }} > {{ minishift_dest_dir }}/minishift.iso"
+  get_url:
+    url: "{{ minishift_iso }}"
+    dest: "{{ minishift_dest_dir }}/minishift.iso"
+    timeout: 120
 
 # check if the minishift profile exists
 - name: "Check if the minishift profile exists"
