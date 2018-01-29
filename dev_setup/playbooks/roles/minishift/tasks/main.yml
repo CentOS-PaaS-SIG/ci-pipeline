@@ -16,11 +16,11 @@
   shell: minishift config set disk-size {{ disk_size }}
 
 - name: "Set minishift disk-size {{ memory }}"
-  shell: minishift config set memory {{ memory }}
+  shell: "{{ minishift_dest_dir }}/minishift config set memory {{ memory }}"
 
 # set base device size
 - name: "Set minishift base device size to {{basedevice_size}}"
-  shell: minishift config set docker-opt "storage-opt=dm.basesize={{basedevice_size}}"
+  shell: "{{ minishift_dest_dir }}/minishift config set docker-opt 'storage-opt=dm.basesize={{ basedevice_size }}'"
 
 - name: Pull down the minishift iso
   get_url:
@@ -30,7 +30,7 @@
 
 # check if the minishift profile exists
 - name: "Check if the minishift profile exists"
-  shell: "minishift status --profile {{ profile }} | head -1 | grep -i 'does not exist'"
+  shell: "{{ minishift_dest_dir }}/minishift status --profile {{ profile }} | head -1 | grep -i 'does not exist'"
   register: minishift_exist
   ignore_errors: yes
 

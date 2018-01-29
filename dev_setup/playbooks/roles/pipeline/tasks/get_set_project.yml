@@ -7,11 +7,11 @@
   ignore_errors: true
 
 - name: Create project/namespace in the openshift cluster
-  shell: oc new-project "{{ project }}" --display-name="{{ project }}"
+  shell: "oc new-project '{{ project }}' --display-name='{{ project }}'"
   when: project_query.stdout == ""
 
 - name: add-role-to-user
-  shell: oc policy add-role-to-user edit -z default -n "{{ project }}"
+  shell: "oc policy add-role-to-user edit -z default -n '{{ project }}'"
 
 
 
