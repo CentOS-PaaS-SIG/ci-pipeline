@@ -38,17 +38,17 @@ RUN yum install -y python34 --nogpgcheck
 RUN pip install pip --upgrade && pip install setuptools --upgrade
 RUN ssh-keygen -f /root/.ssh/id_rsa -t rsa -N ''
 RUN printf "Host *\n    StrictHostKeyChecking no" > /root/.ssh/config
-ADD linchpin_workspace /root/linchpin_workspace
+ADD linchpin_workspace15 /root/linchpin_workspace
 WORKDIR "/root/linchpin_workspace/hooks/ansible/"
 RUN git clone -b release-3.6 https://github.com/openshift/openshift-ansible
 RUN git clone -b v1.1 https://github.com/samvarankashyap/paas-sig-ci
 WORKDIR "/tmp/"
-RUN git clone -b libvirt_cloudconfig7 https://github.com/samvarankashyap/linchpin
+#RUN git clone -b file_module_patch https://github.com/samvarankashyap/linchpin
+RUN git clone -b develop https://github.com/samvarankashyap/linchpin
 WORKDIR "/tmp/linchpin"
 RUN "$PWD/install.sh"
 RUN cd /tmp/linchpin && python /tmp/linchpin/setup.py install
 WORKDIR "/root/linchpin_workspace/"
-
 #END: Linchpin specific workspace installations
 
 #START: Install origin-tests rpms
