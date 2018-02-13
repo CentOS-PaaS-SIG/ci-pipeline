@@ -83,6 +83,9 @@ function archive_logs {
 }
 trap archive_logs EXIT SIGHUP SIGINT SIGTERM
 
+ # Some packages are requiring configure not be run as root, so set this to bypass the error
+ export FORCE_UNSAFE_CONFIGURE=1
+
 # Build the package into ./results_${fed_repo}/$VERSION/$RELEASE/ and concurrently do a koji build
 { time fedpkg --release ${fed_branch} mockbuild ; } 2> ${LOGDIR}/mockbuild.txt &
 { time python2 /usr/bin/koji build --wait --arch-override=x86_64 --scratch $RSYNC_BRANCH ~/rpmbuild/SRPMS/${fed_repo}*.src.rpm ; } 2> ${LOGDIR}/kojibuildtime.txt &
