@@ -135,6 +135,8 @@ objects:
             value: "${ENABLE_OAUTH}"
           - name: OPENSHIFT_ENABLE_REDIRECT_PROMPT
             value: 'true'
+          - name: OPENSHIFT_JENKINS_JVM_ARCH
+            value: 'x86_64'
           - name: KUBERNETES_MASTER
             value: https://kubernetes.default:443
           - name: KUBERNETES_TRUST_CERTIFICATES
@@ -156,6 +158,8 @@ objects:
                 -XX:+UseParallelGC -XX:MaxPermSize=100m -XX:MinHeapFreeRatio=20
                 -XX:MaxHeapFreeRatio=40 -XX:GCTimeRatio=4
                 -XX:AdaptiveSizePolicyWeight=90 -XX:MaxMetaspaceSize=500m
+          - name: GIT_SSL_NO_VERIFY
+            value: 'true'
           resources:
             limits:
               memory: "${MEMORY_LIMIT}"

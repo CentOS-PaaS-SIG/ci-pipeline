@@ -1,0 +1,76 @@
+---
+- hosts: localhost
+  connection: local
+  remote_user: root
+  become: true
+  tasks:
+    - name: "Pause for a while for dhcp to catch up"
+      pause: 
+        minutes: 5
+    - name: "Get inventory file"
+      set_fact:
+        inv_file:  "{{ playbook_dir }}/../../../inventories/"
+    - name: "cat inventory out generated inventory"
+      shell: "cat {{ inv_file | get_inv_file }}"
+      register: inventory_output
+    - name: "debug: inventory get first ip address in inventory"
+      debug:
+        msg: "{{ inventory_output.stdout | get_first_ip }}"
+    - name: "Set fact for ip_address"
+      set_fact:
+        ipaddr: "{{ inventory_output.stdout | get_first_ip  }}"
+    - name: "Generate single node deployment inventory"
+      template:
+        src: singlenode.j2
+        dest: /tmp/singlenode.inv
+    - name: "List out running vms"
+      virt:
+        command: list_vms
+      register: out
+    - debug:
+        msg: "{{ out }}"
+    - name: "destroy the vm domains"
+      virt:
+        command: destroy
+        name: "{{ item }}"
+      with_items: 
+        - "{{ out['list_vms'] }}"
+    - name: "Pause a min for stablizing dhcp"
+      pause:
+        minutes: 1
+    - name: "restart the vm domains"
+      virt:
+        command: start
+        name: "{{ item }}"
+      with_items: 
+        - "{{ out['list_vms'] }}"
+    - name: "enable the network service"
+      shell: "ansible -i {{ inv_file | get_inv_file }} all -u admin --become --private-key ~/.ssh/ex -a\"systemctl enable network\""
+      environment:
+        ANSIBLE_HOST_KEY_CHECKING: False
+      ignore_errors: yes
+    - name: "Start the network service"
+      shell: "ansible -i {{ inv_file | get_inv_file }} all -u admin --become --private-key ~/.ssh/ex -a\"systemctl start network\""
+      environment:
+        ANSIBLE_HOST_KEY_CHECKING: False
+      ignore_errors: yes
+    - name: "Copy hosts file to tmp"
+      copy:
+        src: /etc/hosts
+        dest: /tmp/hosts
+        remote_src: true
+    - name: "Add ip to /etc/hosts on tmp hosts"
+      lineinfile:
+        line: "{{ ipaddr }} atomic01 atomic01.example.com"
+        destfile: "/tmp/hosts"
+        state: "present"
+    - name: "Copy hosts file to /etc/"
+      shell: "cat /tmp/hosts > /etc/hosts"                                                                  
+    - name: "Add ip to /etc/hosts file"
+      shell: ansible -i {{ inv_file | get_inv_file }} all -u admin --become --private-key ~/.ssh/ex -m lineinfile -a"line='{{ ipaddr }} atomic01 atomic01.example.com' destfile='/etc/hosts' state='present'"
+      environment:
+        ANSIBLE_HOST_KEY_CHECKING: False
+    - name: "Use ansible adhoc command to hostnamectl set-hostname to atomic01.example.com"
+      shell: "ansible -i {{ inv_file | get_inv_file }} all -u admin --become --private-key ~/.ssh/ex -a \"hostnamectl set-hostname atomic01.example.com\""
+      environment:
+        ANSIBLE_HOST_KEY_CHECKING: False

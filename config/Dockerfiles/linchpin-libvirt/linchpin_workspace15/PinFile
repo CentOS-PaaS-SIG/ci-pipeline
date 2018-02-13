@@ -1,0 +1,24 @@
+libvirt_one:
+  topology: example-topology.yml
+  layout: example-layout.yml
+  hooks:
+    postup:
+      - name: generate_openshift_inv
+        type: ansible
+        actions:
+          - playbook: generate_openshift_inv.yml
+      - name: install_openshift
+        type: ansible
+        context: false
+        actions:
+          - playbook: main.yml
+      - name: run_e2e_tests                                                                                     
+        type: ansible                                                                                                                  
+        context: false
+        actions:
+          - playbook: main.yml
+      - name: display_results
+        type: shell
+        context: false
+        actions:
+          - tail /tmp/e2e.log
