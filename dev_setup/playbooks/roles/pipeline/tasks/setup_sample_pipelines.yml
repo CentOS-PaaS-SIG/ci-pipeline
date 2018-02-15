@@ -9,8 +9,6 @@
   with_items: "{{ sample_pipeline_bc_templates }}"
   when: sample_pipeline_bc_templates != ""
 
-- include: check_builds.yml
-
 - name: "Create directory for sample pipleine job"
   shell: mkdir -p {{ item.dest_loc | dirname }}
   with_items: "{{ sample_pipelines }}"
