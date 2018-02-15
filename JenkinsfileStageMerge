@@ -1,6 +1,4 @@
 // Openshift project
-openshiftProject = "continuous-infra"
-DOCKER_REPO_URL = '172.30.254.79:5000'
 STABLE_LABEL = "stable"
 
 // Defaults for SCM operations
@@ -19,6 +17,9 @@ library identifier: "ci-pipeline@${env.ghprbActualCommit}",
                                         templates: [[value: '+refs/heads/*:refs/remotes/@{remote}/*'],
                                                     [value: '+refs/pull/*:refs/remotes/origin/pr/*']]]]])
 
+dockerRegistryUrl = pipelineUtils.getOpenShiftDockerRegistryUrl()
+openshiftProject = pipelineUtils.getDefaultOpenShiftProject()
+
 pipeline {
     agent {
         kubernetes {
@@ -27,7 +28,7 @@ pipeline {
             containerTemplate {
                 name 'jnlp'
                 args '${computer.jnlpmac} ${computer.name}'
-                image DOCKER_REPO_URL + '/' + openshiftProject + '/jenkins-continuous-infra-slave:' + STABLE_LABEL
+                image "$dockerRegistryUrl/$openshiftProject/jenkins-continuous-infra-slave:" + STABLE_LABEL
                 ttyEnabled false
                 command ''
             }

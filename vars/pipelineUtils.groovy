@@ -280,4 +280,22 @@ class pipelineUtils implements Serializable {
         return pipelineUtils.checkTests(mypackage)
     }
 
+    /**
+     * Figures out the current project name (AKA namespace). Current project is the one Jenkins is running in.
+     *
+     * @return current project name
+     */
+    def getDefaultOpenShiftProject() {
+        pipelineUtils.getDefaultOpenShiftProject()
+    }
+
+    /**
+     * Figures out the URL for internal OpenShift's Docker registry.
+     *
+     * @return internal OpenShift Docker registry URL
+     */
+    def getOpenShiftDockerRegistryUrl() {
+        pipelineUtils.getOpenShiftDockerRegistryUrl()
+    }
+
 }

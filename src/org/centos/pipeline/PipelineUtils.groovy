@@ -1071,3 +1071,44 @@ def checkTests(String mypackage) {
     return sh (returnStatus: true, script: """
     git ls-remote --exit-code -h https://upstreamfirst.fedorainfracloud.org/${mypackage}""") == 0
 }
+
+/**
+ * Figures out current OpenShift project name. That is the project the Jenkins is running in.
+ * The method assumes that the Jenkins instance has kubernetes plugin installed and properly configured.
+ */
+def getDefaultOpenShiftProject() {
+    return openshift.withCluster() {
+        openshift.project()
+    }
+}
+
+/**
+ * Figures out the internal Docker registry URL which is supposed to host all the images for current OpenShift project.
+ *
+ * The method tries few default hostnames which are known to work on different OpenShift versions and if none of those
+ * is resolvable, it falls back to a "hacky" way, based on the content of ImageStream. The fallback approach assumes
+ * that all images in the current project are stored in the internal Docker registry (as it just looks at the first
+ * imagestream it finds). This is not 100% bullet proof, but should be good enough as a fallback.
+ */
+def getOpenShiftDockerRegistryUrl() {
+    def knownHostnames = ["docker-registry.default.svc.cluster.local", "docker-registry-default"]
+    for (String hostname : knownHostnames) {
+        node("master") { // the shell script below needs to run on an actual node
+            def status = sh(script: "getent hosts $hostname > /dev/null", returnStatus: true)
+            if (status == 0) {
+                return "$hostname:5000"
+            }
+        }
+    }
+    // fallback to the "hacky" way, based on content of ImageStream
+    return openshift.withCluster() {
+        def someImageUrl = openshift.raw("get imagestream -o=jsonpath='{.items[0].status.dockerImageRepository}'").out
+        String[] urlParts = someImageUrl.split('/')
+        if (urlParts.length != 3) { // there should be three parts in the image url: <docker-registry-url>/<namespace>/<image-name:tag>
+            throw new IllegalStateException("Can not determine Docker registry URL! Unexpected image URL: $someImageUrl " +
+                    "- expecting the URL in the following format: '<docker-registry-url>/<namespace>/<image-name:tag>'.")
+        }
+        def registryUrl = urlParts[0]
+        registryUrl
+    }
+}
