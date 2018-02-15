@@ -7,5 +7,3 @@
 - include: query_setup_cluster.yml template_name={{ item }}
   with_items: "{{ fedmsg_bc_templates }}"
   when: fedmsg_bc_templates != ""
-
-- include: check_builds.yml
