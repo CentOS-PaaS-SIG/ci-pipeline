@@ -32,6 +32,13 @@ virtlogd &
 
 chmod 666 /dev/kvm
 
+# If rpm_repo is local, need to start local http server to host rpms
+if [[ $rpm_repo == /* ]]; then
+    pushd $(dirname $rpm_repo)
+    python -m SimpleHTTPServer 8000 &
+    popd
+fi
+
 imgname="fedora-cloud-rawhide-$package"
 
 function clean_up {
@@ -74,8 +81,14 @@ if [ "$noboot" == "yes" ] ; then
     sed -i "s/^autopart/$autopart_line/" ${base_dir}/logs/fedora-cloud-base-flat.ks
 fi
 # Modify kickstart file to add rpm under test
-sed -i '/^repo/a repo --name="'$package'" --baseurl='$rpm_repo'' ${base_dir}/logs/fedora-cloud-base-flat.ks
 sed -i '/^%packages/a '$package'' ${base_dir}/logs/fedora-cloud-base-flat.ks
+# Add the repo to the kickstart file, based on if repo was remote or not
+if [[ $rpm_repo == /* ]]; then
+    # Server IP may need to be modified based on environment
+    sed -i '/^repo/a repo --name="'$package'" --baseurl=http://192.168.124.1:8000/'$(basename $rpm_repo)'' ${base_dir}/logs/fedora-cloud-base-flat.ks
+else
+    sed -i '/^repo/a repo --name="'$package'" --baseurl='$rpm_repo'' ${base_dir}/logs/fedora-cloud-base-flat.ks
+fi
 
 # Create a tdl file for imagefactory
 cat <<EOF >${base_dir}/logs/fedora-${branch}.tdl
