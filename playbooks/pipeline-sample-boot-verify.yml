@@ -1,0 +1,28 @@
+---
+- hosts: '{{ hosts | default("all") }}'
+  become: '{{ become | default("no") }}'
+  become_user: '{{ become_user | default("root") }}'
+  remote_user: '{{ remote_user | default("root") }}'
+  tasks:
+      - set_fact:
+          real_ansible_host: "{{ ansible_host | default(inventory_hostname) }}"
+
+      - name: 01 Get rpm-ostree status --json output
+        command: rpm-ostree status --json
+        register: ros
+
+      - name: 02 Convert to JSON
+        set_fact:
+            ros_json: "{{ ros.stdout|from_json }}"
+
+      - name: 03 Set ros variable if deployment 0 is booted
+        set_fact:
+            ros_booted: "{{ ros_json['deployments'][0] }}"
+            ros_not_booted: "{{ ros_json['deployments'][1] if ros_json['deployments'][1] is defined else false }}"
+        when: ros_json['deployments'][0] is defined and ros_json['deployments'][0]['booted']
+
+      - name: 04 Set ros variable if deployment 1 is booted
+        set_fact:
+            ros_booted: "{{ ros_json['deployments'][1] }}"
+            ros_not_booted: "{{ ros_json['deployments'][0] if ros_json['deployments'][0] is defined else false }}"
+        when: ros_json['deployments'][1] is defined and ros_json['deployments'][1]['booted']

@@ -1,0 +1,172 @@
+env.ghprbGhRepository = env.ghprbGhRepository ?: 'CentOS-PaaS-SIG/ci-pipeline'
+env.ghprbActualCommit = env.ghprbActualCommit ?: 'master'
+env.ghprbPullAuthorLogin = env.ghprbPullAuthorLogin ?: ''
+
+
+// Needed for podTemplate()
+env.SLAVE_TAG = env.SLAVE_TAG ?: 'stable'
+env.PIPELINE_SAMPLE_CONTAINER_TAG = env.PIPELINE_SAMPLE_CONTAINER_TAG ?: 'stable'
+
+
+env.DOCKER_REPO_URL = env.DOCKER_REPO_URL ?: '172.30.1.1:5000'
+env.OPENSHIFT_NAMESPACE = env.OPENSHIFT_NAMESPACE ?: 'continuous-infra'
+env.OPENSHIFT_SERVICE_ACCOUNT = env.OPENSHIFT_SERVICE_ACCOUNT ?: 'jenkins'
+
+// IRC properties
+IRC_NICK = "contra-bot"
+IRC_CHANNEL = "#contra-ci-cd"
+
+// Execution ID for this run of the pipeline
+executionID = UUID.randomUUID().toString()
+sampleID = 1
+
+podName = 'contra-pipeline-sample-' + executionID + '-' + sampleID
+
+library identifier: "ci-pipeline@${env.ghprbActualCommit}",
+        retriever: modernSCM([$class: 'GitSCMSource',
+                              remote: "https://github.com/${env.ghprbGhRepository}",
+                              traits: [[$class: 'jenkins.plugins.git.traits.BranchDiscoveryTrait'],
+                                       [$class: 'RefSpecsSCMSourceTrait',
+                                        templates: [[value: '+refs/heads/*:refs/remotes/@{remote}/*'],
+                                                    [value: '+refs/pull/*:refs/remotes/origin/pr/*']]]]])
+
+properties(
+        [
+                buildDiscarder(logRotator(artifactDaysToKeepStr: '30', artifactNumToKeepStr: '', daysToKeepStr: '90', numToKeepStr: '')),
+                disableConcurrentBuilds(),
+                parameters(
+                        [
+                                string(defaultValue: "${env.ghprbActualCommit}", description: '', name: 'ghprbActualCommit'),
+                                string(defaultValue: "${env.ghprbGhRepository}", description: '', name: 'ghprbGhRepository'),
+                                string(defaultValue: '', description: '', name: 'ghprbPullId'),
+                                string(defaultValue: '', description: '', name: 'ghprbPullAuthorLogin'),
+                                string(defaultValue: "${env.OPENSHIFT_NAMESPACE}", description: 'Project namespace for Openshift operations', name: 'OPENSHIFT_NAMESPACE'),
+                                string(defaultValue: 'jenkins', description: 'Service Account for Openshift operations', name: 'OPENSHIFT_SERVICE_ACCOUNT'),
+                                string(defaultValue: '/home/images/latest-atomic.qcow2', description: 'VM cloud image (local or URL)', name: 'IMG_URL'),
+                                string(defaultValue: '/home/execute.sh', description: 'script to execute in the pipeline container', name: 'SCRIPT_LOCATION'),
+                                booleanParam(defaultValue: false, description: 'Enable running example on a VM cloud image', name: 'ENABLE_VM'),
+                        ]
+                ),
+        ]
+)
+
+podTemplate(name: podName,
+        label: podName,
+        cloud: 'openshift',
+        serviceAccount: OPENSHIFT_SERVICE_ACCOUNT,
+        idleMinutes: 0,
+        namespace: OPENSHIFT_NAMESPACE,
+
+
+        containers: [
+                //This adds the custom slave container to the pod. Must be first with name 'jnlp'
+                containerTemplate(name: 'jnlp',
+                        image: DOCKER_REPO_URL + '/' + OPENSHIFT_NAMESPACE + '/jenkins-continuous-infra-slave:' + SLAVE_TAG,
+                        ttyEnabled: false,
+                        args: '${computer.jnlpmac} ${computer.name}',
+                        command: '',
+                        workingDir: '/workDir'),
+                containerTemplate(name: 'pipeline-sample-container',
+                        alwaysPullImage: true,
+                        image: DOCKER_REPO_URL + '/' + OPENSHIFT_NAMESPACE + '/pipeline-sample-container:' + PIPELINE_SAMPLE_CONTAINER_TAG,
+                        ttyEnabled: true,
+                        command: '/usr/sbin/init',
+                        privileged: true,
+                        workingDir: '/workDir')
+        ],
+        volumes: [emptyDirVolume(memory: false, mountPath: '/sys/class/net')])
+        {
+            node(podName) {
+                def currentStage = ""
+
+                ansiColor('xterm') {
+                    timestamps {
+                        // We need to set env.HOME because the openshift slave image
+                        // forces this to /home/jenkins and then ~ expands to that
+                        // even though id == "root"
+                        // See https://github.com/openshift/jenkins/blob/master/slave-base/Dockerfile#L5
+                        //
+                        // Even the kubernetes plugin will create a pod with containers
+                        // whose $HOME env var will be its workingDir
+                        // See https://github.com/jenkinsci/kubernetes-plugin/blob/master/src/main/java/org/csanchez/jenkins/plugins/kubernetes/KubernetesLauncher.java#L311
+                        //
+                        env.HOME = "/root"
+                        //
+                        try {
+                            // Prepare our environment
+                            currentStage = "pipeline-sample-prepare-environment"
+                            stage(currentStage) {
+                                deleteDir()
+                                // Decorate our build
+                                //pipelineUtils.updateBuildDisplayAndDescription()
+                                currentBuild.displayName = "Build#: ${env.BUILD_NUMBER} - Repo: ${env.ghprbGhRepository} - OS Namespace: ${env.OPENSHIFT_NAMESPACE}"
+
+                                // Gather some info about the node we are running on for diagnostics
+                                pipelineUtils.verifyPod(OPENSHIFT_NAMESPACE, env.NODE_NAME)
+
+                                // SCM
+                                dir('ci-pipeline') {
+                                    // Checkout our ci-pipeline repo based on the value of env.ghprbActualCommit
+                                    checkout([$class: 'GitSCM', branches: [[name: env.ghprbActualCommit]],
+                                              doGenerateSubmoduleConfigurations: false,
+                                              extensions                       : [],
+                                              submoduleCfg                     : [],
+                                              userRemoteConfigs                : [
+                                                      [refspec:
+                                                               '+refs/heads/*:refs/remotes/origin/*  +refs/pull/*:refs/remotes/origin/pr/* ',
+                                                       url: "https://github.com/${env.ghprbGhRepository}"]
+                                              ]
+                                    ])
+                                }
+                            }
+                            currentStage = "pipeline-sample-execute-script"
+                            stage(currentStage) {
+                                pipelineUtils.executeInContainer(currentStage, "pipeline-sample-container", "${SCRIPT_LOCATION}")
+
+                            }
+                            currentStage = "pipeline-sample-top-in-container"
+                            stage(currentStage) {
+                                pipelineUtils.executeInContainer(currentStage, "pipeline-sample-container", "top -n 5 -b > top-output.txt")
+                                pipelineUtils.executeInContainer(currentStage, "pipeline-sample-container", "cat top-output.txt")
+                            }
+                        } catch (e) {
+                            // Set build result
+                            currentBuild.result = 'FAILURE'
+
+                            // Report the exception
+                            echo "Error: Exception from " + currentStage + ":"
+                            echo e.getMessage()
+
+                            // Throw the error
+                            throw e
+
+                        } finally {
+                            // Set the build display name and description
+                            currentBuild.displayName = "Build#: ${env.BUILD_NUMBER} - Repo: ${env.ghprbGhRepository} - OS Namespace: ${env.OPENSHIFT_NAMESPACE}"
+                            currentBuild.description = "${currentBuild.currentResult} - ENABLE_VM=${env.ENABLE_VM}"
+
+                            // only post to IRC on a failure
+                            if (currentBuild.result == 'FAILURE') {
+                                // only if this is a production build
+                                if (env.ghprbActualCommit == null || env.ghprbActualCommit == "master") {
+                                    def message = "${JOB_NAME} build #${BUILD_NUMBER}: ${currentBuild.currentResult}: ${BUILD_URL}"
+                                    pipelineUtils.sendIRCNotification("${IRC_NICK}-${UUID.randomUUID()}", IRC_CHANNEL, message)
+                                }
+                            }
+
+                            try {
+                                pipelineUtils.getContainerLogsFromPod(OPENSHIFT_NAMESPACE, env.NODE_NAME)
+                            } catch (e) {
+                                // Report the exception
+                                echo "Warning: Could not get containerLogsFromPod: "
+                                echo e.getMessage()
+                            }
+
+                            // Archive our artifacts
+                            step([$class: 'ArtifactArchiver', allowEmptyArchive: true, artifacts: '**/logs/**,*.txt,*.groovy,**/job.*,**/*.groovy,**/inventory.*', excludes: '**/job.props,**/job.props.groovy,**/*.example', fingerprint: true])
+
+                        }
+                    }
+                }
+            }
+        }

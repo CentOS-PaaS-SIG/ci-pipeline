@@ -1,10 +1,11 @@
 ---
-# query for facts and setup the cluster for Jenkins infra, containers, etc.
+- set_fact:
+    params: []
 
-# In the future everthing in the create-containers.sh will move into this role
-# hopefully using the oc module in Ansible 2.4
+- name: Cleanup any failed containers on the cluster
+  shell: "oc get all | egrep 'Failed|Error' | egrep 'builds' | awk '{print $1}' | awk -F'/' '{print $2}' | sed 's/-[0-9+]//g' | xargs -i oc delete bc/{} is/{}"
+  ignore_errors: yes
 
-# templates
 - name: "{{ container_config_name }} :: Get template name from the yaml file"
   shell: oc process -f {{ pipeline_dir }}/config/s2i/{{ template_name }}-buildconfig-template.yaml | jq '.items[1].metadata.labels.template' | sed 's/"//g'
   args:
@@ -72,59 +73,64 @@
     msg: "{{ container_config_name }} :: Buildconfig {{ build_config_name_check.stdout }} already exists"
   when: build_config_name_check.stdout != ""
 
-- name: "{{ container_config_name }} :: Imagestream and buildconfig do not exist and REPO_URL is set.  Creating..."
-  shell: oc new-app {{ template_name_file.stdout }} ${REPO_URL_PARAM} ${REPO_REF_PARAM}
-  args:
-    chdir: "{{ pipeline_dir }}/config/s2i/"
-  environment:
-    REPO_URL_PARAM: "-p REPO_URL={{ lookup('env','REPO_URL') }}"
-    REPO_REF_PARAM: ""
-  when: ((image_stream_name_check.stdout == "" and build_config_name_check.stdout == "") and
-         (lookup('env','REPO_URL') != "" and lookup('env','REPO_REF') == ""))
+- name: "{{ container_config_name }} :: Check if the template being loaded contains the parameter..."
+  shell: "oc describe template {{ template_name_file.stdout }} | grep {{ item.key }}"
+  register: check_temp_params
+  with_items: "{{ PARAMS }}"
+  ignore_errors: yes
 
-- name: "{{ container_config_name }} :: Imagestream and buildconfig do not exist and REPO_REF is set.  Creating..."
-  shell: oc new-app {{ template_name_file.stdout }} ${REPO_URL_PARAM} ${REPO_REF_PARAM}
-  args:
-    chdir: "{{ pipeline_dir }}/config/s2i/"
-  environment:
-    REPO_URL_PARAM: ""
-    REPO_REF_PARAM: "-p REPO_REF={{ lookup('env','REPO_REF') }}"
-  when: ((image_stream_name_check.stdout == "" and build_config_name_check.stdout == "") and
-         (lookup('env','REPO_URL') == "" and lookup('env','REPO_REF') != ""))
+- set_fact:
+    params: "{{ params | default([]) }} + [ '-p {{ item.item.key }}={{ item.item.val }}' ]"
+  when: (item.stdout != "" and item.item.val != "")
+  with_items: "{{ check_temp_params.results }}"
 
-- name: "{{ container_config_name }} :: Imagestream and buildconfig do not exist and REPO_URL and REPO_REF are set.  Creating..."
-  shell: oc new-app {{ template_name_file.stdout }} ${REPO_URL_PARAM} ${REPO_REF_PARAM}
-  args:
-    chdir: "{{ pipeline_dir }}/config/s2i/"
-  environment:
-    REPO_URL_PARAM: "-p REPO_URL={{ lookup('env','REPO_URL') }}"
-    REPO_REF_PARAM: "-p REPO_REF={{ lookup('env','REPO_REF') }}"
-  when: ((image_stream_name_check.stdout == "" and build_config_name_check.stdout == "") and
-         (lookup('env','REPO_URL') != "" and lookup('env','REPO_REF') != ""))
+- set_fact:
+    build_success: false
 
-- name: "{{ container_config_name }} :: Imagestream and buildconfig do not exist and REPO_URL and REPO_REF are NOT set.  Creating..."
-  shell: oc new-app {{ template_name_file.stdout }} ${REPO_URL_PARAM} ${REPO_REF_PARAM}
+- include: build_new_app.yml
+  with_items:
+    - 1
+    - 2
+    - 3
+  when: build_success|bool == false
+
+- name: "{{ container_config_name }} :: Imagestream and buildconfig do not exist. Creating..."
+  shell: oc new-app {{ template_name_file.stdout }} {{ params | join(" ") }}
   args:
     chdir: "{{ pipeline_dir }}/config"
-  environment:
-    REPO_URL_PARAM: ""
-    REPO_REF_PARAM: ""
-  when: ((image_stream_name_check.stdout == "" and build_config_name_check.stdout == "") and
-         (lookup('env','REPO_URL') == "" and lookup('env','REPO_REF') == ""))
+  when: (image_stream_name_check.stdout == "" and build_config_name_check.stdout == "" and build_success|bool == false)
 
-# Wait container in the pipeline to be finished building
-- name: "{{ container_config_name }} :: Wait for {{  build_config_name_file.stdout }} to be queued"
+# Wait container in the pipeline to start building :: FINAL ATTEMPT
+- name: "{{ container_config_name }} :: Wait for {{  build_config_name_file.stdout }} to be queued :: FINAL ATTEMPT"
   shell: "oc get builds | grep '{{  build_config_name_file.stdout }}'"
   register: oc_build_result
   until: oc_build_result.stdout.find(" Pending ") == -1
   retries: 6
   delay: 10
+  ignore_errors: yes
+  when: build_success|bool == false
 
-# Wait container in the pipeline to be finished building
-- name: "{{ container_config_name }} :: Wait for {{  build_config_name_file.stdout }} to be built and marked with latest tag"
+# Wait container in the pipeline to be finished building :: FINAL ATTEMPT
+- name: "{{ container_config_name }} :: Wait for {{  build_config_name_file.stdout }} to be built and marked with latest tag :: FINAL ATTEMPT"
   shell: "oc get builds | grep '{{  build_config_name_file.stdout }}'"
   register: oc_build_result
-  until: oc_build_result.stdout.find(" Running ") == -1
+  until: (oc_build_result.stdout.find(" Running ") == -1 or oc_build_result.stdout.find(" Failed ") != -1)
   retries: 300
   delay: 10
-  failed_when: oc_build_result.stdout.find(" Failed ") != -1
+  when: build_success|bool == false
+
+# Cleanup any failed containers
+- name: Cleanup any failed containers
+  shell: "oc get all | egrep 'Failed|Error' | egrep 'builds' | awk '{print $1}' | awk -F'/' '{print $2}' | sed 's/-[0-9+]//g' | xargs -i oc delete bc/{} is/{}"
+  ignore_errors: yes
+  when: (build_success|bool == false and oc_build_result is defined and oc_build_result.stdout.find(" Failed ") != -1)
+
+# If oc_build result is defined publish the outcome
+- debug:
+    msg: "End result of building the container image :: {{ oc_build_result.stdout }}"
+  when: oc_build_result.stdout is defined
+
+# Setup tag if container image build successful
+- name: Modify tags on images
+  shell: "oc get is | awk '{print $2}' | grep -v DOCKER | sed 's/.*5000\\///g' | grep '{{ build_config_name_file.stdout }}' | xargs -i oc tag {}:latest {}:{{ tag }}"
+  when: ('modify_tags|bool == true' and build_success|bool == true)

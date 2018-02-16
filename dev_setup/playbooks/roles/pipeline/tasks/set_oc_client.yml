@@ -1,7 +1,7 @@
 ---
 # set the oc client for the minishift cluster
 - name: "Determine the oc client is for profile {{ profile}}"
-  shell: "minishift oc-env --profile {{ profile }} | head -1"
+  shell: "{{ minishift_dest_dir }}/minishift oc-env --profile {{ profile }} | head -1"
   register: oc_client_path
 
 - name: Update the path with the oc client

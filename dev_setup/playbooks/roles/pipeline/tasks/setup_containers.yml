@@ -9,4 +9,3 @@
   with_items: "{{ pipeline_bc_templates }}"
   when: pipeline_bc_templates != ""
 
-
