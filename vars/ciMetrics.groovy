@@ -1,11 +1,24 @@
 import org.centos.pipeline.CIMetrics
 
+/*
+A class to store build metrics over the lifetime of the build.
+Metrics are stored in customDataMap and then sent to influx at
+the end of the job. Example usage:
+ciMetrics.timed "mystep", {
+    echo "in mystep"
+}
 
+ciMetrics.writeToInflux()
+ */
 class ciMetrics {
 
+    // A map to store the data sent to influx
     def customDataMap = ["ci_pipeline": [:]]
+    // This will prefix the data sent to influx. Usually set to the job name.
     def prefix = "ci_pipeline"
+    // The influx target configured in jenkins
     def influxTarget = "localInflux"
+    // The influx database that will be written to
     def measurement = "ci_pipeline"
     def cimetrics = new CIMetrics()
 
