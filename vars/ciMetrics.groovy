@@ -4,11 +4,21 @@ import org.centos.pipeline.CIMetrics
 A class to store build metrics over the lifetime of the build.
 Metrics are stored in customDataMap and then sent to influx at
 the end of the job. Example usage:
-ciMetrics.timed "mystep", {
-    echo "in mystep"
-}
 
-ciMetrics.writeToInflux()
+try {
+    def stepName = "mystep"
+    ciMetrics.timed stepName, {
+        stage(stepName) {
+            echo "in mystep"
+        }
+    }
+} catch(err) {
+    currentBuild.result = "FAILED"
+    throw err
+} finally {
+    currentBuild.result = "SUCCESS"
+    ciMetrics.writeToInflux()
+}
  */
 class ciMetrics {
 
