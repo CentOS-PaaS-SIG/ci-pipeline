@@ -12,11 +12,11 @@ try {
             echo "in mystep"
         }
     }
+    currentBuild.result = "SUCCESS"
 } catch(err) {
     currentBuild.result = "FAILED"
     throw err
 } finally {
-    currentBuild.result = "SUCCESS"
     ciMetrics.writeToInflux()
 }
  */
