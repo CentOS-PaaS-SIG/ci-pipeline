@@ -17,7 +17,6 @@ def writeToInflux(String influxTarget, String prefix, Map customDataMap) {
 
 /**
  *
- * @param name
  * @param body
  * @return the duration of the step
  */
