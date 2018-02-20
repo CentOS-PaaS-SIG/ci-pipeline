@@ -48,7 +48,7 @@ RUN echo "config_opts['use_nspawn'] = False" >> /etc/mock/site-defaults.cfg
 RUN sed -i 's@anongiturl.*$@anongiturl = https://src.fedoraproject.org/%(module)s@g' /etc/rpkg/fedpkg.conf
 
 # Copy the build script to the container
-COPY rpmbuild-test.sh /tmp/rpmbuild-test.sh
+COPY rpmbuild-test.sh rpmbuild-local.sh /tmp/
 
 # Run the build script
 ENTRYPOINT ["bash", "/tmp/rpmbuild-test.sh"]
