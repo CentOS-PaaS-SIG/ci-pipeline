@@ -43,15 +43,6 @@ class ciMetrics {
     }
 
     /**
-     *
-     * @param name
-     * @param value
-     */
-    def setTagField(String name, def value) {
-        customDataMap[measurement][name] = value
-    }
-
-    /**
      * Write customDataMap to influxDB
      */
     def writeToInflux() {
