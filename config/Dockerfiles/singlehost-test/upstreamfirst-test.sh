@@ -6,8 +6,10 @@ if [ ${CURRENTDIR} == "/" ] ; then
     cd /home
     CURRENTDIR=/home
 fi
-export TEST_SUBJECTS=${CURRENTDIR}/untested-atomic.qcow2
 export TEST_ARTIFACTS=${CURRENTDIR}/logs
+if [ -z "${TEST_SUBJECTS:-}" ]; then
+    export TEST_SUBJECTS=${CURRENTDIR}/untested-atomic.qcow2
+fi
 # The test artifacts must be an empty directory
 rm -rf ${TEST_ARTIFACTS}
 mkdir -p ${TEST_ARTIFACTS}
