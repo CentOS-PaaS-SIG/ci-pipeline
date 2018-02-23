@@ -20,7 +20,7 @@ mkdir -p ${TEST_ARTIFACTS}
 if [ -z "${package:-}" ]; then
 	if [ $# -lt 1 ]; then
 		echo "No package defined"
-		exit 2
+		exit 1
 	else
 		package="$1"
 	fi
@@ -32,7 +32,7 @@ cp -f /tmp/beakerlib-role-main.yml /etc/ansible/roles/standard-test-beakerlib/ta
 # Make sure we have or have downloaded the test subject
 if [ -z "${TEST_SUBJECTS:-}" ]; then
 	echo "No subject defined"
-	exit 2
+	exit 1
 elif ! file ${TEST_SUBJECTS:-}; then
 	wget -q -O testimage.qcow2 ${TEST_SUBJECTS}
 	export TEST_SUBJECTS=${PWD}/testimage.qcow2
