@@ -49,24 +49,26 @@ class pipelineUtils implements Serializable {
 
     /**
      * Method to send message
+     * @param msgTopic The topic to send the message on
      * @param msgProps The message properties in key=value form, one key/value per line ending in '\n'
      * @param msgContent Message content.
      * @return
      */
-    def sendMessage(String msgProps, String msgContent) {
-        pipelineUtils.sendMessage(msgProps, msgContent)
+    def sendMessage(String msgTopic, String msgProps, String msgContent) {
+        pipelineUtils.sendMessage(msgTopic, msgProps, msgContent)
     }
 
     /**
      * Method to send message and store an audit
+     * @param msgTopic The topic to send the message on
      * @param msgProps The message properties in key=value form, one key/value per line ending in '\n'
      * @param msgContent Message content.
      * @param msgAuditFile - File containing all past messages. It will get appended to.
      * @param fedmsgRetryCount number of times to keep trying.
      * @return
      */
-    def sendMessageWithAudit(String msgProps, String msgContent, String msgAuditFile, fedmsgRetryCount) {
-        pipelineUtils.sendMessageWithAudit(msgProps, msgContent, msgAuditFile, fedmsgRetryCount)
+    def sendMessageWithAudit(String msgTopic, String msgProps, String msgContent, String msgAuditFile, fedmsgRetryCount) {
+        pipelineUtils.sendMessageWithAudit(msgTopic, msgProps, msgContent, msgAuditFile, fedmsgRetryCount)
     }
 
     /**

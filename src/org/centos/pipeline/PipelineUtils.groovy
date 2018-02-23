@@ -296,13 +296,13 @@ def setMessageFields(String messageType) {
  * @param msgContent - Message content.
  * @return
  */
-def sendMessage(String msgProps, String msgContent) {
+def sendMessage(String msgTopic, String msgProps, String msgContent) {
 
     // Send message and return SendResult
     sendResult = sendCIMessage messageContent: msgContent,
             messageProperties: msgProps,
             messageType: 'Custom',
-            overrides: [topic: "${topic}"],
+            overrides: [topic: msgTopic],
             providerName: "${MSG_PROVIDER}"
 
     return sendResult
@@ -316,12 +316,12 @@ def sendMessage(String msgProps, String msgContent) {
  * @param fedmsgRetryCount number of times to keep trying.
  * @return
  */
-def sendMessageWithAudit(String msgProps, String msgContent, String msgAuditFile, fedmsgRetryCount) {
+def sendMessageWithAudit(String msgTopic, String msgProps, String msgContent, String msgAuditFile, fedmsgRetryCount) {
     // Get contents of auditFile
     auditContent = readJSON file: msgAuditFile
 
     // Send message and get handle on SendResult
-    sendResult = sendMessage(msgProps, msgContent)
+    sendResult = sendMessage(msgTopic, msgProps, msgContent)
 
     String id = sendResult.getMessageId()
     String msg = sendResult.getMessageContent()
