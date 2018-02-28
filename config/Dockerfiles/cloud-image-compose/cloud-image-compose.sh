@@ -84,8 +84,8 @@ fi
 sed -i '/^%packages/a '$package'' ${base_dir}/logs/fedora-cloud-base-flat.ks
 # Add the repo to the kickstart file, based on if repo was remote or not
 if [[ $rpm_repo == /* ]]; then
-    # Server IP may need to be modified based on environment
-    sed -i '/^repo/a repo --name="'$package'" --baseurl=http://192.168.124.1:8000/'$(basename $rpm_repo)'' ${base_dir}/logs/fedora-cloud-base-flat.ks
+    CUSTOM_IP=$(ip -o a s eth0 | awk '/inet / { print $4 }' | cut -d '/' -f 1)
+    awk '/^repo/ && !x {print "repo --name=\"'$package'\" --baseurl=http://'$CUSTOM_IP':8000/'$(basename $rpm_repo)'"; x=1} 1' ${base_dir}/logs/fedora-cloud-base-flat.ks > tmp && mv -f tmp ${base_dir}/logs/fedora-cloud-base-flat.ks
 else
     sed -i '/^repo/a repo --name="'$package'" --baseurl='$rpm_repo'' ${base_dir}/logs/fedora-cloud-base-flat.ks
 fi
