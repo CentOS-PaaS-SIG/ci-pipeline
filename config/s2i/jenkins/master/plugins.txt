@@ -37,6 +37,7 @@ docker-commons:1.9
 docker-workflow:1.14
 durable-task:1.16
 favorite:2.3.1
+ghprb:1.39.0
 git:3.6.4
 git-client:2.6.0
 github:1.28.1
@@ -59,6 +60,7 @@ jquery-detached:1.2.1
 jsch:0.1.54.1
 junit:1.22.2
 kubernetes:1.1
+lockable-resources:2.1
 mailer:1.20
 managed-scripts:1.4
 mapdb-api:1.0.9.0
