@@ -271,4 +271,13 @@ class pipelineUtils implements Serializable {
         pipelineUtils.sendIRCNotification(nick, channel, message, ircServer)
     }
 
+    /**
+     * Test if an upstreamfirst.fedorainfracloud.org test repo exists for package
+     * @param mypackage
+     * @return
+     */
+    def checkTests(String mypackage) {
+        return pipelineUtils.checkTests(mypackage)
+    }
+
 }
