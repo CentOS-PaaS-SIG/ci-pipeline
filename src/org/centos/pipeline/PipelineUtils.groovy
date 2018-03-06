@@ -1060,3 +1060,14 @@ def watchForMessages(String msg_provider, String message) {
         }
     }
 }
+
+/**
+ * Test if an upstreamfirst.fedorainfracloud.org test repo exists for package
+ * @param mypackage
+ * @return
+ */
+def checkTests(String mypackage) {
+    echo "Currently checking if an upstreamfirst repo exists"
+    return sh (returnStatus: true, script: """
+    git ls-remote --exit-code -h https://upstreamfirst.fedorainfracloud.org/${mypackage}""") == 0
+}
