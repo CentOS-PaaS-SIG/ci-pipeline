@@ -68,11 +68,16 @@ if [ "$package" == "systemd" ]; then
     sed -i '/loginctl/c\' tests.yml
 fi
 
+PYTHON_INTERPRETER=""
+
+if [[ ! -z "${python3}" && "${python3}" == "yes" ]] ; then
+    PYTHON_INTERPRETER='--extra-vars "ansible_python_interpreter=/usr/bin/python3"'
+fi
+
 # Invoke each playbook according to the specification
 for playbook in tests*.yml; do
 	if [ -f ${playbook} ]; then
-		ansible-playbook --inventory=$ANSIBLE_INVENTORY \
-                        --extra-vars "ansible_python_interpreter=/usr/bin/python3" \
+		ansible-playbook --inventory=$ANSIBLE_INVENTORY $PYTHON_INTERPRETER \
 			--extra-vars "subjects=$TEST_SUBJECTS" \
 			--extra-vars "artifacts=$TEST_ARTIFACTS" \
 			--tags classic ${playbook}
