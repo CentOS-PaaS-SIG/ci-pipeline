@@ -13,11 +13,16 @@ metadata:
     template.openshift.io/provider-display-name: Red Hat, Inc.
     template.openshift.io/documentation-url: https://docs.openshift.org/latest
     template.openshift.io/support-url: https://access.redhat.com
-message: Insert quickstart message here
 parameters:
-- name: influxdb url
-  value: influxurl
+- name: INFLUXDB_ENDPOINT
+  value: https://influxdb-continuous-infra.192.168.42.226.nip.io
   description: The url of the influxdb instance
+- name: INFLUXDB_DATABASE
+  value: db0
+  description: The influxdb to use
+- name: JENKINS_METRICS_ENDPOINT
+  value: https://jenkins-continuous-infra.192.168.42.226.nip.io/metrics/QshFlcx0G7NHOh-IjcZ81mLx0xYl7xNqgbFFAoNQpu0JkVtLD2bdEtZ_Ijbt8tp4/metrics?pretty=true
+  description: The jenkins metrics endpoint
 objects:
 - apiVersion: v1
   kind: ImageStream
@@ -47,12 +52,12 @@ objects:
       spec:
         containers:
         - env:
-          - name: INFLUXDB_UDP_ENABLED
-            value: "true"
-          - name: INFLUXDB_UDP_BIND_ADDRESS
-            value: :8087
-          - name: INFLUXDB_UDP_DATABASE
-            value: udp
+          - name: INFLUXDB_ENDPOINT
+            value: ${INFLUXDB_ENDPOINT}
+          - name: INFLUXDB_DATABASE
+            value: ${INFLUXDB_DATABASE}
+          - name: JENKINS_METRICS_ENDPOINT
+            value: ${JENKINS_METRICS_ENDPOINT}
           image: jjstuart79/telegraf
           imagePullPolicy: Always
           name: telegraf
