@@ -272,12 +272,15 @@ class pipelineUtils implements Serializable {
     }
 
     /**
-     * Test if an upstreamfirst.fedorainfracloud.org test repo exists for package
+     * Test if $tag tests exist for $mypackage on $mybranch in fedora dist-git
+     * For mybranch, use fXX or master
      * @param mypackage
+     * @param mybranch
+     * @param tag
      * @return
      */
-    def checkTests(String mypackage) {
-        return pipelineUtils.checkTests(mypackage)
+    def checkTests(String mypackage, String mybranch, String tag) {
+        return pipelineUtils.checkTests(mypackage, mybranch, tag)
     }
 
 }
