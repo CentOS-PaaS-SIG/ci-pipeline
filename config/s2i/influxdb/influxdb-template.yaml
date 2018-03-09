@@ -90,15 +90,15 @@ objects:
   spec:
     triggers:
     - type: ImageChange
-    imageChangeParams:
-      automatic: true
-      containerNames:
-      - influxdb
-      from:
-        kind: ImageStreamTag
-        name: influxdb:latest
-        namespace: openshift
-        lastTriggeredImage: ''
+      imageChangeParams:
+        automatic: true
+        containerNames:
+        - influxdb
+        from:
+          kind: ImageStreamTag
+          name: influxdb:latest
+          namespace: openshift
+          lastTriggeredImage: ''
     - type: ConfigChange
     replicas: 1
     selector:
