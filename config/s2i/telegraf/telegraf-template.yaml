@@ -66,20 +66,23 @@ objects:
             value: ${INFLUXDB_DATABASE}
           - name: JENKINS_METRICS_ENDPOINT
             value: ${JENKINS_METRICS_ENDPOINT}/${JENKINS_API_KEY}/${JENKINS_ENDPOINT_TYPE}
-          image: jjstuart79/telegraf
+          image: telegraf:stable
           imagePullPolicy: Always
           name: telegraf
         dnsPolicy: ClusterFirst
         restartPolicy: Always
-      triggers:
-      - imageChangeParams:
-          automatic: true
-          containerNames:
-          - telegraf
-          from:
-            kind: ImageStreamTag
-            name: telegraf:latest
-        type: ImageChange
+    triggers:
+    - type: ImageChange
+      imageChangeParams:
+        automatic: true
+        containerNames:
+        - influxdb
+        from:
+          kind: ImageStreamTag
+          name: influxdb:latest
+          namespace: openshift
+          lastTriggeredImage: ''
+    - type: ConfigChange
   status: {}
 labels:
   template: telegraf

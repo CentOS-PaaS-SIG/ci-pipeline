@@ -88,6 +88,18 @@ objects:
       metrics: influxdb
     name: influxdb
   spec:
+    triggers:
+    - type: ImageChange
+    imageChangeParams:
+      automatic: true
+      containerNames:
+      - influxdb
+      from:
+        kind: ImageStreamTag
+        name: influxdb:latest
+        namespace: openshift
+        lastTriggeredImage: ''
+    - type: ConfigChange
     replicas: 1
     selector:
       metrics: influxdb
@@ -105,7 +117,7 @@ objects:
             value: :8087
           - name: INFLUXDB_UDP_DATABASE
             value: udp
-          image: jjstuart79/influxdb
+          image: influxdb:stable
           imagePullPolicy: Always
           name: influxdb
           livenessProbe:
@@ -144,15 +156,6 @@ objects:
         - name: influxdb-data
           persistentVolumeClaim:
             claimName: influxdb-data
-      triggers:
-      - imageChangeParams:
-          automatic: true
-          containerNames:
-          - influxdb
-          from:
-            kind: ImageStreamTag
-            name: influxdb:latest
-        type: ImageChange
   status: {}
 labels:
   template: influxdb

@@ -71,6 +71,18 @@ objects:
       metrics: grafana
     name: grafana
   spec:
+    triggers:
+    - type: ImageChange
+      imageChangeParams:
+        automatic: true
+        containerNames:
+        - grafana
+        from:
+          kind: ImageStreamTag
+          name: grafana:latest
+          namespace: openshift
+          lastTriggeredImage: ''
+    - type: ConfigChange
     replicas: 1
     selector:
       metrics: grafana
@@ -92,9 +104,9 @@ objects:
             value: secret
           - name: GF_PATHS_PLUGINS
             value: /var/lib/grafana/plugins
-          image: jjstuart79/mygrafana
+          image: grafana:stable
           imagePullPolicy: Always
-          name: mygrafana
+          name: grafana
           livenessProbe:
             failureThreshold: 3
             httpGet:
