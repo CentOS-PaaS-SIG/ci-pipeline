@@ -13,6 +13,8 @@ metadata:
     template.openshift.io/provider-display-name: Red Hat, Inc.
     template.openshift.io/documentation-url: https://docs.openshift.org/latest
     template.openshift.io/support-url: https://access.redhat.com
+message: A data collector for jenkins metrics.
+Usage oc new-app -f telegraf-template.yaml -p JENKINS_API_KEY=jenkins_api_key
 parameters:
 - name: INFLUXDB_ENDPOINT
   value: https://influxdb-continuous-infra.192.168.42.226.nip.io
