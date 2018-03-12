@@ -1071,6 +1071,6 @@ def watchForMessages(String msg_provider, String message) {
  */
 def checkTests(String mypackage, String mybranch, String tag) {
     echo "Currently checking if package tests exist"
-    return sh (returnStatus: true, script: """
-    wget -O- -q https://src.fedoraproject.org/rpms/${mypackage}/raw/${mybranch}/f/tests/tests.yml | grep "\- ${tag}" """) == 0
+    //return sh (returnStatus: true, script: """
+    //wget -O- -q https://src.fedoraproject.org/rpms/${mypackage}/raw/${mybranch}/f/tests/tests.yml | grep "\- ${tag}" """) == 0
 }
