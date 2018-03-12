@@ -1062,12 +1062,15 @@ def watchForMessages(String msg_provider, String message) {
 }
 
 /**
- * Test if an upstreamfirst.fedorainfracloud.org test repo exists for package
+ * Test if $tag tests exist for $mypackage on $mybranch in fedora dist-git
+ * For mybranch, use fXX or master
  * @param mypackage
+ * @param mybranch
+ * @param tag
  * @return
  */
-def checkTests(String mypackage) {
-    echo "Currently checking if an upstreamfirst repo exists"
+def checkTests(String mypackage, String mybranch, String tag) {
+    echo "Currently checking if package tests exist"
     return sh (returnStatus: true, script: """
-    git ls-remote --exit-code -h https://upstreamfirst.fedorainfracloud.org/${mypackage}""") == 0
+    wget -O- -q https://src.fedoraproject.org/rpms/${mypackage}/raw/${mybranch}/f/tests/tests.yml | grep "\- ${tag}" """) == 0
 }
