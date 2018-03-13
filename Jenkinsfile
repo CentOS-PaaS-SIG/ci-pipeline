@@ -389,39 +389,43 @@ podTemplate(name: podName,
                         // Run ostree boot sanity
                         pipelineUtils.executeInContainer(currentStage, "ostree-boot-image", "/home/ostree-boot-image.sh")
 
+                    }
+
+                    // Only run this stage if tests exist
+                    if (pipelineUtils.checkTests(env.fed_repo, env.fed_branch, 'atomic')) {
                         // Set our message topic, properties, and content
                         messageFields = pipelineUtils.setMessageFields("package.test.functional.queued")
 
                         // Send message org.centos.prod.ci.pipeline.package.test.functional.queued on fedmsg
                         pipelineUtils.sendMessageWithAudit(messageFields['topic'], messageFields['properties'], messageFields['content'], msgAuditFile, fedmsgRetryCount)
+
+                        currentStage = "ci-pipeline-functional-tests"
+                        stage(currentStage) {
+                            // Set stage specific vars
+                            pipelineUtils.setStageEnvVars(currentStage)
+
+                            //Set our message topic, properties, and content
+                            messageFields = pipelineUtils.setMessageFields("package.test.functional.running")
+
+                            // Send message org.centos.prod.ci.pipeline.package.test.functional.running on fedmsg
+                            pipelineUtils.sendMessage(messageFields['topic'], messageFields['properties'], messageFields['content'])
+
+                            // Run functional tests
+                            pipelineUtils.executeInContainer(currentStage, "singlehost-test", "/tmp/package-test.sh")
+
+                            // Set our message topic, properties, and content
+                            messageFields = pipelineUtils.setMessageFields("package.test.functional.complete")
+
+                            // Send message org.centos.prod.ci.pipeline.package.test.functional.complete on fedmsg
+                            pipelineUtils.sendMessage(messageFields['topic'], messageFields['properties'], messageFields['content'])
+
+                        }
                     }
+                    // Set our message topic, properties, and content
+                    messageFields = pipelineUtils.setMessageFields("compose.test.integration.queued")
 
-                    currentStage = "ci-pipeline-functional-tests"
-                    stage(currentStage) {
-                        // Set stage specific vars
-                        pipelineUtils.setStageEnvVars(currentStage)
-
-                        //Set our message topic, properties, and content
-                        messageFields = pipelineUtils.setMessageFields("package.test.functional.running")
-
-                        // Send message org.centos.prod.ci.pipeline.package.test.functional.running on fedmsg
-                        pipelineUtils.sendMessage(messageFields['topic'], messageFields['properties'], messageFields['content'])
-
-                        // Run functional tests
-                        pipelineUtils.executeInContainer(currentStage, "singlehost-test", "/tmp/package-test.sh")
-
-                        // Set our message topic, properties, and content
-                        messageFields = pipelineUtils.setMessageFields("package.test.functional.complete")
-
-                        // Send message org.centos.prod.ci.pipeline.package.test.functional.complete on fedmsg
-                        pipelineUtils.sendMessage(messageFields['topic'], messageFields['properties'], messageFields['content'])
-
-                        // Set our message topic, properties, and content
-                        messageFields = pipelineUtils.setMessageFields("compose.test.integration.queued")
-
-                        // Send message org.centos.prod.ci.pipeline.compose.test.integration.queued on fedmsg
-                        pipelineUtils.sendMessageWithAudit(messageFields['topic'], messageFields['properties'], messageFields['content'], msgAuditFile, fedmsgRetryCount)
-                    }
+                    // Send message org.centos.prod.ci.pipeline.compose.test.integration.queued on fedmsg
+                    pipelineUtils.sendMessageWithAudit(messageFields['topic'], messageFields['properties'], messageFields['content'], msgAuditFile, fedmsgRetryCount)
 
                     currentStage = "ci-pipeline-atomic-host-tests"
                     stage(currentStage) {
