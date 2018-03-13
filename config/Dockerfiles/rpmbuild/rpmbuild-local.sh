@@ -36,7 +36,7 @@ git checkout ${fed_rev}
 git checkout -b test_branch
 # Get current NVR
 truenvr=$(rpm -q --define "dist .$DIST_BRANCH" --queryformat '%{name}-%{version}-%{release}\n' --specfile ${fed_repo}.spec | head -n 1)
-echo "original_spec_nvr=${truenvr}" >> ${LOGDIR}/package_props.txt
+echo "original_spec_nvr=${truenvr}" >> ${LOGDIR}/job.props
 # Find number of git commits in log to append to RELEASE before %{?dist}
 commits=$(git log --pretty=format:'' | wc -l)
 # %{?dist} seems to only be used when defining $release, but some
@@ -61,15 +61,15 @@ python2 /usr/bin/koji build --wait --arch-override=x86_64 --scratch rawhide ~/rp
 # Set status if either job fails to build the rpm
 RPMBUILD_RC=$?
 if [ "$RPMBUILD_RC" != 0 ]; then
-     echo "status=FAIL" >> ${LOGDIR}/package_props.txt
+     echo "status=FAIL" >> ${LOGDIR}/job.props
      echo -e "ERROR: KOJI BUILD\nSTATUS: $MOCKBUILD_RC"
      exit 1
 fi
-echo "status=SUCCESS" >> ${LOGDIR}/package_props.txt
+echo "status=SUCCESS" >> ${LOGDIR}/job.props
 popd
 
 SCRATCHID=$(cat ${LOGDIR}/kojioutput.txt | awk '/Created task:/ { print $3 }')
-echo "koji_task_id=${SCRATCHID}" >> ${LOGDIR}/package_props.txt
+echo "koji_task_id=${SCRATCHID}" >> ${LOGDIR}/job.props
 
 # Make repo to download rpms to
 rm -rf ${RPMDIR}
@@ -84,7 +84,6 @@ popd
 set +e
 RPM_TO_CHECK=$(find ${RPMDIR}/ -name "${fed_repo}-${VERSION}*" | grep -v src)
 RPM_NAME=$(basename $RPM_TO_CHECK)
-echo "package_url=${HTTP_BASE}/${RSYNC_BRANCH}/repo/${fed_repo}_repo/$RPM_NAME" >> ${LOGDIR}/package_props.txt
 RPM_NAME=$(echo $RPM_NAME | rev | cut -d '.' -f 2- | rev)
-echo "nvr=${RPM_NAME}" >> ${LOGDIR}/package_props.txt
+echo "nvr=${RPM_NAME}" >> ${LOGDIR}/job.props
 exit 0

@@ -6,8 +6,10 @@ if [ ${CURRENTDIR} == "/" ] ; then
     cd /home
     CURRENTDIR=/home
 fi
-export TEST_SUBJECTS=${CURRENTDIR}/untested-atomic.qcow2
 export TEST_ARTIFACTS=${CURRENTDIR}/logs
+if [ -z "${TEST_SUBJECTS:-}" ]; then
+    export TEST_SUBJECTS=${CURRENTDIR}/untested-atomic.qcow2
+fi
 # The test artifacts must be an empty directory
 rm -rf ${TEST_ARTIFACTS}
 mkdir -p ${TEST_ARTIFACTS}
@@ -48,10 +50,8 @@ fi
 pushd ${package}
 
 # Check out the appropriate branch and rev
-#git checkout ${branch}
-#git checkout ${rev}
-# For now, run all master tests as that is the only spot with tests in most packages
-git checkout master
+git checkout ${branch}
+git checkout ${rev}
 
 # Check if there is a tests dir from dist-git, if not, exit
 if [ -d tests ]; then
@@ -78,11 +78,13 @@ if [ -e inventory ] ; then
     export ANSIBLE_INVENTORY
 fi
 
+set +u
 PYTHON_INTERPRETER=""
 
 if [[ ! -z "${python3}" && "${python3}" == "yes" ]] ; then
     PYTHON_INTERPRETER='--extra-vars "ansible_python_interpreter=/usr/bin/python3"'
 fi
+set -u
 
 # Invoke each playbook according to the specification
 for playbook in tests*.yml; do
