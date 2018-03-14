@@ -17,7 +17,50 @@ parameters:
 - name: STORAGE_SIZE
   value: 10Gi
   description: The size of the persistent storage for Influxdb
+- name: REPO_URL
+  value: https://github.com/joejstuart/ci-pipeline.git
+  description: The dockerfile repo url
+- name: REPO_CONTEXTDIR
+  description: The sub-directory inside the repository.
+  value: config/Dockerfiles/influxdb
+- name: REPO_REF
+  description: The git ref or tag to use for customization.
+  value: master
+- name: INFLUXDB_BINARY
+  value: influxdb-1.5.0.x86_64.rpm
+  description: The influx rpm
 objects:
+- apiVersion: v1
+  kind: ImageStream
+  metadata:
+    annotations:
+    labels:
+    name: influxdb
+  spec: {}
+- apiVersion: v1
+  kind: BuildConfig
+  metadata:
+    name: influxdb
+  spec:
+    output:
+      to:
+        kind: ImageStreamTag
+        name: influxdb:latest
+    resources: {}
+    source:
+      contextDir: ${REPO_CONTEXTDIR}
+      git:
+        ref: ${REPO_REF}
+        uri: ${REPO_URL}
+      type: Git
+    strategy:
+      dockerStrategy:
+        env:
+          - name: INFLUXDB_BINARY
+            value: ${INFLUXDB_BINARY}
+      type: Docker
+    triggers:
+    - type: ConfigChange
 - kind: PersistentVolumeClaim
   apiVersion: v1
   metadata:

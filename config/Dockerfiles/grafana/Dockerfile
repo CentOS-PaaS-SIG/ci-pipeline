@@ -1,4 +1,5 @@
 FROM centos:7
+ENV GRAFANA_INSTALL=grafana-5.0.0-1.x86_64.rpm
 ENV GRAFANA_VERSION=5.0.0
 
 LABEL name="Grafana" \
@@ -10,7 +11,7 @@ ENV USERNAME=grafana
 RUN yum -y update && yum -y upgrade && \
     yum -y install epel-release && \
     yum -y install git unzip nss_wrapper && \
-    curl -L -o /tmp/grafana.rpm https://s3-us-west-2.amazonaws.com/grafana-releases/release/grafana-$GRAFANA_VERSION-1.x86_64.rpm && \
+    curl -L -o /tmp/grafana.rpm https://s3-us-west-2.amazonaws.com/grafana-releases/release/${GRAFANA_INSTALL} && \
     yum -y localinstall /tmp/grafana.rpm && \
     yum -y clean all && \
     rm -rf /var/cache/yum && \
