@@ -261,8 +261,8 @@ Below are the different message types that we listen and publish.  There will be
   - ex. custom
 * build_id - Jenkins pipeline build ID
   - ex. 91
-* build_url - Full url to the Jenkins pipeline build  
-  - ex. https://jenkins-continuous-infra.apps.ci.centos.org/job/ci-pipeline-f26/91/
+* build_url - Full url to the blue ocean Jenkins pipeline build view
+  - ex. https://jenkins-continuous-infra.apps.ci.centos.org/blue/organizations/jenkins/ci-pipeline-f26/detail/ci-pipeline-f26/91/pipeline/
 * username - Audit of who is sending the message (default value = fedora-atomic)
   - ex. fedora_atomic
 * compose_url - Full url to the OStree compose 
@@ -451,7 +451,7 @@ topic\":\"org.centos.prod.ci.pipeline.package.queued\",\"username\":\"fedora-ato
   "crypto": "x509", 
   "topic": "org.centos.prod.ci.pipeline.package.running", 
   "msgJson": "{\"CI_NAME\":\"continuous-infra-ci-pipeline-f26\",\"CI_TYPE\":\"custom\",\"branch\":\"f26\",\"build_id\":\"464\",\"build_url\":\"https://jenkins-continuous-infra.apps.ci.centos
-.org/job/continuous-infra-ci-pipeline-f26/464/\",\"compose_rev\":\"\",\"message-content\":\"\",\"namespace\":\"rpms\",\"nvr\":\"\",\"original_spec_nvr\":\"\",\"ref\":\"fedora/f26/x86_64/atomic-host\",\"repo\":\"mesa\",\"rev\":\"35fdde92a0
+.org/blue/organizations/jenkins/continuous-infra-ci-pipeline-f26/detail/continuous-infra-ci-pipeline-f26/464/pipeline/\",\"compose_rev\":\"\",\"message-content\":\"\",\"namespace\":\"rpms\",\"nvr\":\"\",\"original_spec_nvr\":\"\",\"ref\":\"fedora/f26/x86_64/atomic-host\",\"repo\":\"mesa\",\"rev\":\"35fdde92a0
 292def6a99acd3c237272789d020b2\",\"status\":\"SUCCESS\",\"test_guidance\":\"''\",\"topic\":\"org.centos.prod.ci.pipeline.package.running\",\"username\":\"fedora-atomic\"}", 
   "msg": {
     "CI_TYPE": "custom", 
@@ -461,7 +461,7 @@ topic\":\"org.centos.prod.ci.pipeline.package.queued\",\"username\":\"fedora-ato
     "nvr": "", 
     "rev": "35fdde92a0292def6a99acd3c237272789d020b2", 
     "message-content": "", 
-    "build_url": "https://jenkins-continuous-infra.apps.ci.centos.org/job/continuous-infra-ci-pipeline-f26/464/", 
+    "build_url": "https://jenkins-continuous-infra.apps.ci.centos.org/blue/organizations/jenkins/continuous-infra-ci-pipeline-f26/detail/continuous-infra-ci-pipeline-f26/464/pipeline/", 
     "namespace": "rpms", 
     "CI_NAME": "continuous-infra-ci-pipeline-f26", 
     "repo": "mesa", 
@@ -485,7 +485,7 @@ topic\":\"org.centos.prod.ci.pipeline.package.queued\",\"username\":\"fedora-ato
   "crypto": "x509", 
   "topic": "org.centos.prod.ci.pipeline.package.complete", 
   "msgJson": "{\"CI_NAME\":\"continuous-infra-ci-pipeline-f26\",\"CI_TYPE\":\"custom\",\"branch\":\"f26\",\"build_id\":\"464\",\"build_url\":\"https://jenkins-continuous-infra.apps.ci.centos
-.org/job/continuous-infra-ci-pipeline-f26/464/\",\"compose_rev\":\"\",\"message-content\":\"\",\"namespace\":\"rpms\",\"nvr\":\"mesa-17.1.5-1.816.35fdde9.fc26.2.src\",\"original_spec_nvr\":\"mesa-17.1.5-1.fc26.2\",\"ref\":\"fedora/f26/x86
+.org/blue/organizations/jenkins/continuous-infra-ci-pipeline-f26/detail/continuous-infra-ci-pipeline-f26/464/pipeline/\",\"compose_rev\":\"\",\"message-content\":\"\",\"namespace\":\"rpms\",\"nvr\":\"mesa-17.1.5-1.816.35fdde9.fc26.2.src\",\"original_spec_nvr\":\"mesa-17.1.5-1.fc26.2\",\"ref\":\"fedora/f26/x86
 _64/atomic-host\",\"repo\":\"mesa\",\"rev\":\"35fdde92a0292def6a99acd3c237272789d020b2\",\"status\":\"SUCCESS\",\"test_guidance\":\"''\",\"topic\":\"org.centos.prod.ci.pipeline.package.complete\",\"username\":\"fedora-atomic\"}"
 , 
   "msg": {
@@ -496,7 +496,7 @@ _64/atomic-host\",\"repo\":\"mesa\",\"rev\":\"35fdde92a0292def6a99acd3c237272789
     "nvr": "mesa-17.1.5-1.816.35fdde9.fc26.2.src", 
     "rev": "35fdde92a0292def6a99acd3c237272789d020b2", 
     "message-content": "", 
-    "build_url": "https://jenkins-continuous-infra.apps.ci.centos.org/job/continuous-infra-ci-pipeline-f26/464/", 
+    "build_url": "https://jenkins-continuous-infra.apps.ci.centos.org/blue/organizations/jenkins/continuous-infra-ci-pipeline-f26/detail/continuous-infra-ci-pipeline-f26/464/pipeline/", 
     "namespace": "rpms", 
     "CI_NAME": "continuous-infra-ci-pipeline-f26", 
     "repo": "mesa", 
@@ -525,7 +525,8 @@ _64/atomic-host\",\"repo\":\"mesa\",\"rev\":\"35fdde92a0292def6a99acd3c237272789
     "username": "fedora-atomic",
     "rev": "591b0d2fc67a45e4ad13bdc3e312d5554852426a",
     "message-content": "",
-    "build_url": "https://jenkins-continuous-infra.apps.ci.centos.org/job/ci-pipeline-f26/91/",
+    "build_url": "https://jenkins-continuous-infra.apps.ci.centos
+.org/blue/organizations/jenkins/continuous-infra-ci-pipeline-f26/detail/continuous-infra-ci-pipeline-f26/91/pipeline/",
     "namespace": "rpms",
     "CI_NAME": "ci-pipeline-f26",
     "repo": "vim",
@@ -556,7 +557,8 @@ _64/atomic-host\",\"repo\":\"mesa\",\"rev\":\"35fdde92a0292def6a99acd3c237272789
     "username": "fedora-atomic",
     "rev": "591b0d2fc67a45e4ad13bdc3e312d5554852426a",
     "message-content": "",
-    "build_url": "https://jenkins-continuous-infra.apps.ci.centos.org/job/ci-pipeline-f26/91/",
+    "build_url": "https://jenkins-continuous-infra.apps.ci.centos
+.org/blue/organizations/jenkins/continuous-infra-ci-pipeline-f26/detail/continuous-infra-ci-pipeline-f26/91/pipeline/",
     "namespace": "rpms",
     "CI_NAME": "ci-pipeline-f26",
     "repo": "vim",
@@ -587,7 +589,7 @@ _64/atomic-host\",\"repo\":\"mesa\",\"rev\":\"35fdde92a0292def6a99acd3c237272789
     "username": "fedora-atomic",
     "rev": "591b0d2fc67a45e4ad13bdc3e312d5554852426a",
     "message-content": "",
-    "build_url": "https://jenkins-continuous-infra.apps.ci.centos.org/job/ci-pipeline-f26/91/",
+    "build_url": "https://jenkins-continuous-infra.apps.ci.centos.org/blue/organizations/jenkins/continuous-infra-ci-pipeline-f26/detail/continuous-infra-ci-pipeline-f26/91/pipeline/",
     "namespace": "rpms",
     "CI_NAME": "ci-pipeline-f26",
     "repo": "vim",
@@ -613,7 +615,7 @@ _64/atomic-host\",\"repo\":\"mesa\",\"rev\":\"35fdde92a0292def6a99acd3c237272789
   "crypto": "x509", 
   "topic": "org.centos.prod.ci.pipeline.compose.running", 
   "msgJson": "{\"CI_NAME\":\"continuous-infra-ci-pipeline-f26\",\"CI_TYPE\":\"custom\",\"branch\":\"f26\",\"build_id\":\"464\",\"build_url\":\"https://jenkins-continuous-infra.apps.ci.centos
-.org/job/continuous-infra-ci-pipeline-f26/464/\",\"compose_rev\":\"''\",\"compose_url\":\"http://artifacts.ci.centos.org/fedora-atomic/f26/ostree\",\"message-content\":\"\",\"namespace\":\"rpms\",\"nvr\":\"mesa-17.1.5-1.816.35fdde9.fc26.2
+.org/blue/organizations/jenkins/continuous-infra-ci-pipeline-f26/detail/continuous-infra-ci-pipeline-f26/464/pipeline/\",\"compose_rev\":\"''\",\"compose_url\":\"http://artifacts.ci.centos.org/fedora-atomic/f26/ostree\",\"message-content\":\"\",\"namespace\":\"rpms\",\"nvr\":\"mesa-17.1.5-1.816.35fdde9.fc26.2
 .src\",\"original_spec_nvr\":\"mesa-17.1.5-1.fc26.2\",\"ref\":\"fedora/f26/x86_64/atomic-host\",\"repo\":\"mesa\",\"rev\":\"35fdde92a0292def6a99acd3c237272789d020b2\",\"status\":\"SUCCESS\",\"test_guidance\":\"''\",\"topic\":\"org.centos.
 prod.ci.pipeline.compose.running\",\"username\":\"fedora-atomic\"}", 
   "msg": {
@@ -624,7 +626,7 @@ prod.ci.pipeline.compose.running\",\"username\":\"fedora-atomic\"}",
     "compose_url": "http://artifacts.ci.centos.org/fedora-atomic/f26/ostree", 
     "rev": "35fdde92a0292def6a99acd3c237272789d020b2", 
     "message-content": "", 
-    "build_url": "https://jenkins-continuous-infra.apps.ci.centos.org/job/continuous-infra-ci-pipeline-f26/464/", 
+    "build_url": "https://jenkins-continuous-infra.apps.ci.centos.org/blue/organizations/jenkins/continuous-infra-ci-pipeline-f26/detail/continuous-infra-ci-pipeline-f26/464/pipeline/", 
     "namespace": "rpms", 
     "CI_NAME": "continuous-infra-ci-pipeline-f26", 
     "repo": "mesa", 
@@ -649,7 +651,7 @@ prod.ci.pipeline.compose.running\",\"username\":\"fedora-atomic\"}",
   "crypto": "x509", 
   "topic": "org.centos.prod.ci.pipeline.compose.complete", 
   "msgJson": "{\"CI_NAME\":\"continuous-infra-ci-pipeline-f26\",\"CI_TYPE\":\"custom\",\"branch\":\"f26\",\"build_id\":\"464\",\"build_url\":\"https://jenkins-continuous-infra.apps.ci.centos
-.org/job/continuous-infra-ci-pipeline-f26/464/\",\"compose_rev\":\"9a4e37c459e67c7187df4c571ddd0ad75969633d40bdfaa7c1d95bbff5fe1e04\",\"compose_url\":\"http://artifacts.ci.centos.org/fedora-atomic/f26/ostree\",\"message-content\":\"\",\"n
+.org/blue/organizations/jenkins/continuous-infra-ci-pipeline-f26/detail/continuous-infra-ci-pipeline-f26/464/pipeline/\",\"compose_rev\":\"9a4e37c459e67c7187df4c571ddd0ad75969633d40bdfaa7c1d95bbff5fe1e04\",\"compose_url\":\"http://artifacts.ci.centos.org/fedora-atomic/f26/ostree\",\"message-content\":\"\",\"n
 amespace\":\"rpms\",\"nvr\":\"mesa-17.1.5-1.816.35fdde9.fc26.2.src\",\"original_spec_nvr\":\"mesa-17.1.5-1.fc26.2\",\"ref\":\"fedora/f26/x86_64/atomic-host\",\"repo\":\"mesa\",\"rev\":\"35fdde92a0292def6a99acd3c237272789d020b2\",\"status\
 ":\"SUCCESS\",\"test_guidance\":\"''\",\"topic\":\"org.centos.prod.ci.pipeline.compose.complete\",\"username\":\"fedora-atomic\"}", 
   "msg": {
@@ -660,7 +662,7 @@ amespace\":\"rpms\",\"nvr\":\"mesa-17.1.5-1.816.35fdde9.fc26.2.src\",\"original_
     "compose_url": "http://artifacts.ci.centos.org/fedora-atomic/f26/ostree", 
     "rev": "35fdde92a0292def6a99acd3c237272789d020b2", 
     "message-content": "", 
-    "build_url": "https://jenkins-continuous-infra.apps.ci.centos.org/job/continuous-infra-ci-pipeline-f26/464/", 
+    "build_url": "https://jenkins-continuous-infra.apps.ci.centos.org/blue/organizations/jenkins/continuous-infra-ci-pipeline-f26/detail/continuous-infra-ci-pipeline-f26/464/pipeline/", 
     "namespace": "rpms", 
     "CI_NAME": "continuous-infra-ci-pipeline-f26", 
     "repo": "mesa", 
@@ -685,7 +687,7 @@ amespace\":\"rpms\",\"nvr\":\"mesa-17.1.5-1.816.35fdde9.fc26.2.src\",\"original_
   "crypto": "x509", 
   "topic": "org.centos.prod.ci.pipeline.image.running", 
   "msgJson": "{\"CI_NAME\":\"continuous-infra-ci-pipeline-f26\",\"CI_TYPE\":\"custom\",\"branch\":\"f26\",\"build_id\":\"464\",\"build_url\":\"https://jenkins-continuous-infra.apps.ci.centos
-.org/job/continuous-infra-ci-pipeline-f26/464/\",\"compose_rev\":\"9a4e37c459e67c7187df4c571ddd0ad75969633d40bdfaa7c1d95bbff5fe1e04\",\"compose_url\":\"http://artifacts.ci.centos.org/fedora-atomic/f26/ostree\",\"image_name\":\"''\",\"imag
+.org/blue/organizations/jenkins/continuous-infra-ci-pipeline-f26/detail/continuous-infra-ci-pipeline-f26/464/pipeline/\",\"compose_rev\":\"9a4e37c459e67c7187df4c571ddd0ad75969633d40bdfaa7c1d95bbff5fe1e04\",\"compose_url\":\"http://artifacts.ci.centos.org/fedora-atomic/f26/ostree\",\"image_name\":\"''\",\"imag
 e_url\":\"''\",\"message-content\":\"\",\"namespace\":\"rpms\",\"nvr\":\"mesa-17.1.5-1.816.35fdde9.fc26.2.src\",\"original_spec_nvr\":\"mesa-17.1.5-1.fc26.2\",\"ref\":\"fedora/f26/x86_64/atomic-host\",\"repo\":\"mesa\",\"rev\":\"35fdde92a
 0292def6a99acd3c237272789d020b2\",\"status\":\"SUCCESS\",\"test_guidance\":\"''\",\"topic\":\"org.centos.prod.ci.pipeline.image.running\",\"type\":\"qcow2\",\"username\":\"fedora-atomic\"}", 
   "msg": {
@@ -696,7 +698,7 @@ e_url\":\"''\",\"message-content\":\"\",\"namespace\":\"rpms\",\"nvr\":\"mesa-17
     "compose_url": "http://artifacts.ci.centos.org/fedora-atomic/f26/ostree", 
     "rev": "35fdde92a0292def6a99acd3c237272789d020b2", 
     "message-content": "", 
-    "build_url": "https://jenkins-continuous-infra.apps.ci.centos.org/job/continuous-infra-ci-pipeline-f26/464/", 
+    "build_url": "https://jenkins-continuous-infra.apps.ci.centos.org/blue/organizations/jenkins/continuous-infra-ci-pipeline-f26/detail/continuous-infra-ci-pipeline-f26/464/pipeline/", 
     "namespace": "rpms", 
     "CI_NAME": "continuous-infra-ci-pipeline-f26", 
     "image_name": "''", 
@@ -724,7 +726,7 @@ e_url\":\"''\",\"message-content\":\"\",\"namespace\":\"rpms\",\"nvr\":\"mesa-17
   "crypto": "x509", 
   "topic": "org.centos.prod.ci.pipeline.image.complete", 
   "msgJson": "{\"CI_NAME\":\"continuous-infra-ci-pipeline-f26\",\"CI_TYPE\":\"custom\",\"branch\":\"f26\",\"build_id\":\"464\",\"build_url\":\"https://jenkins-continuous-infra.apps.ci.centos
-.org/job/continuous-infra-ci-pipeline-f26/464/\",\"compose_rev\":\"9a4e37c459e67c7187df4c571ddd0ad75969633d40bdfaa7c1d95bbff5fe1e04\",\"compose_url\":\"http://artifacts.ci.centos.org/fedora-atomic/f26/ostree\",\"image_name\":\"fedora-atom
+.org/blue/organizations/jenkins/continuous-infra-ci-pipeline-f26/detail/continuous-infra-ci-pipeline-f26/464/pipeline/\",\"compose_rev\":\"9a4e37c459e67c7187df4c571ddd0ad75969633d40bdfaa7c1d95bbff5fe1e04\",\"compose_url\":\"http://artifacts.ci.centos.org/fedora-atomic/f26/ostree\",\"image_name\":\"fedora-atom
 ic-26.391-9a4e37c459e67c7.qcow2\",\"image_url\":\"http://artifacts.ci.centos.org/fedora-atomic/f26/images/fedora-atomic-26.391-9a4e37c459e67c7.qcow2\",\"message-content\":\"\",\"namespace\":\"rpms\",\"nvr\":\"mesa-17.1.5-1.816.35fdde9.fc2
 6.2.src\",\"original_spec_nvr\":\"mesa-17.1.5-1.fc26.2\",\"ref\":\"fedora/f26/x86_64/atomic-host\",\"repo\":\"mesa\",\"rev\":\"35fdde92a0292def6a99acd3c237272789d020b2\",\"status\":\"SUCCESS\",\"test_guidance\":\"''\",\"topic\":\"org.cent
 os.prod.ci.pipeline.image.complete\",\"type\":\"qcow2\",\"username\":\"fedora-atomic\"}", 
@@ -736,7 +738,7 @@ os.prod.ci.pipeline.image.complete\",\"type\":\"qcow2\",\"username\":\"fedora-at
     "compose_url": "http://artifacts.ci.centos.org/fedora-atomic/f26/ostree", 
     "rev": "35fdde92a0292def6a99acd3c237272789d020b2", 
     "message-content": "", 
-    "build_url": "https://jenkins-continuous-infra.apps.ci.centos.org/job/continuous-infra-ci-pipeline-f26/464/", 
+    "build_url": "https://jenkins-continuous-infra.apps.ci.centos.org/blue/organizations/jenkins/continuous-infra-ci-pipeline-f26/detail/continuous-infra-ci-pipeline-f26/464/pipeline/", 
     "namespace": "rpms", 
     "CI_NAME": "continuous-infra-ci-pipeline-f26", 
     "image_name": "fedora-atomic-26.391-9a4e37c459e67c7.qcow2", 
@@ -764,7 +766,7 @@ os.prod.ci.pipeline.image.complete\",\"type\":\"qcow2\",\"username\":\"fedora-at
   "crypto": "x509", 
   "topic": "org.centos.prod.ci.pipeline.image.test.smoke.running", 
   "msgJson": "{\"CI_NAME\":\"continuous-infra-ci-pipeline-f26\",\"CI_TYPE\":\"custom\",\"branch\":\"f26\",\"build_id\":\"464\",\"build_url\":\"https://jenkins-continuous-infra.apps.ci.centos
-.org/job/continuous-infra-ci-pipeline-f26/464/\",\"compose_rev\":\"9a4e37c459e67c7187df4c571ddd0ad75969633d40bdfaa7c1d95bbff5fe1e04\",\"compose_url\":\"http://artifacts.ci.centos.org/fedora-atomic/f26/ostree\",\"image_name\":\"fedora-atom
+.org/blue/organizations/jenkins/continuous-infra-ci-pipeline-f26/detail/continuous-infra-ci-pipeline-f26/464/pipeline/\",\"compose_rev\":\"9a4e37c459e67c7187df4c571ddd0ad75969633d40bdfaa7c1d95bbff5fe1e04\",\"compose_url\":\"http://artifacts.ci.centos.org/fedora-atomic/f26/ostree\",\"image_name\":\"fedora-atom
 ic-26.391-9a4e37c459e67c7.qcow2\",\"image_url\":\"http://artifacts.ci.centos.org/fedora-atomic/f26/images/fedora-atomic-26.391-9a4e37c459e67c7.qcow2\",\"message-content\":\"\",\"namespace\":\"rpms\",\"nvr\":\"mesa-17.1.5-1.816.35fdde9.fc2
 6.2.src\",\"original_spec_nvr\":\"mesa-17.1.5-1.fc26.2\",\"ref\":\"fedora/f26/x86_64/atomic-host\",\"repo\":\"mesa\",\"rev\":\"35fdde92a0292def6a99acd3c237272789d020b2\",\"status\":\"SUCCESS\",\"test_guidance\":\"''\",\"topic\":\"org.cent
 os.prod.ci.pipeline.image.test.smoke.running\",\"type\":\"qcow2\",\"username\":\"fedora-atomic\"}", 
@@ -776,7 +778,7 @@ os.prod.ci.pipeline.image.test.smoke.running\",\"type\":\"qcow2\",\"username\":\
     "compose_url": "http://artifacts.ci.centos.org/fedora-atomic/f26/ostree", 
     "rev": "35fdde92a0292def6a99acd3c237272789d020b2", 
     "message-content": "", 
-    "build_url": "https://jenkins-continuous-infra.apps.ci.centos.org/job/continuous-infra-ci-pipeline-f26/464/", 
+    "build_url": "https://jenkins-continuous-infra.apps.ci.centos.org/blue/organizations/jenkins/continuous-infra-ci-pipeline-f26/detail/continuous-infra-ci-pipeline-f26/464/pipeline/", 
     "namespace": "rpms", 
     "CI_NAME": "continuous-infra-ci-pipeline-f26", 
     "image_name": "fedora-atomic-26.391-9a4e37c459e67c7.qcow2", 
@@ -804,7 +806,7 @@ os.prod.ci.pipeline.image.test.smoke.running\",\"type\":\"qcow2\",\"username\":\
   "crypto": "x509", 
   "topic": "org.centos.prod.ci.pipeline.image.test.smoke.complete", 
   "msgJson": "{\"CI_NAME\":\"continuous-infra-ci-pipeline-f26\",\"CI_TYPE\":\"custom\",\"branch\":\"f26\",\"build_id\":\"464\",\"build_url\":\"https://jenkins-continuous-infra.apps.ci.centos
-.org/job/continuous-infra-ci-pipeline-f26/464/\",\"compose_rev\":\"9a4e37c459e67c7187df4c571ddd0ad75969633d40bdfaa7c1d95bbff5fe1e04\",\"compose_url\":\"http://artifacts.ci.centos.org/fedora-atomic/f26/ostree\",\"image_name\":\"fedora-atom
+.org/blue/organizations/jenkins/continuous-infra-ci-pipeline-f26/detail/continuous-infra-ci-pipeline-f26/464/pipeline/\",\"compose_rev\":\"9a4e37c459e67c7187df4c571ddd0ad75969633d40bdfaa7c1d95bbff5fe1e04\",\"compose_url\":\"http://artifacts.ci.centos.org/fedora-atomic/f26/ostree\",\"image_name\":\"fedora-atom
 ic-26.391-9a4e37c459e67c7.qcow2\",\"image_url\":\"http://artifacts.ci.centos.org/fedora-atomic/f26/images/fedora-atomic-26.391-9a4e37c459e67c7.qcow2\",\"message-content\":\"\",\"namespace\":\"rpms\",\"nvr\":\"mesa-17.1.5-1.816.35fdde9.fc2
 6.2.src\",\"original_spec_nvr\":\"mesa-17.1.5-1.fc26.2\",\"ref\":\"fedora/f26/x86_64/atomic-host\",\"repo\":\"mesa\",\"rev\":\"35fdde92a0292def6a99acd3c237272789d020b2\",\"status\":\"SUCCESS\",\"test_guidance\":\"''\",\"topic\":\"org.cent
 os.prod.ci.pipeline.image.test.smoke.complete\",\"type\":\"qcow2\",\"username\":\"fedora-atomic\"}", 
@@ -816,7 +818,7 @@ os.prod.ci.pipeline.image.test.smoke.complete\",\"type\":\"qcow2\",\"username\":
     "compose_url": "http://artifacts.ci.centos.org/fedora-atomic/f26/ostree", 
     "rev": "35fdde92a0292def6a99acd3c237272789d020b2", 
     "message-content": "", 
-    "build_url": "https://jenkins-continuous-infra.apps.ci.centos.org/job/continuous-infra-ci-pipeline-f26/464/", 
+    "build_url": "https://jenkins-continuous-infra.apps.ci.centos.org/blue/organizations/jenkins/continuous-infra-ci-pipeline-f26/detail/continuous-infra-ci-pipeline-f26/464/pipeline/", 
     "namespace": "rpms", 
     "CI_NAME": "continuous-infra-ci-pipeline-f26", 
     "image_name": "fedora-atomic-26.391-9a4e37c459e67c7.qcow2", 
@@ -844,7 +846,7 @@ os.prod.ci.pipeline.image.test.smoke.complete\",\"type\":\"qcow2\",\"username\":
   "crypto": "x509", 
   "topic": "org.centos.prod.ci.pipeline.compose.test.integration.queued", 
   "msgJson": "{\"CI_NAME\":\"continuous-infra-ci-pipeline-f26\",\"CI_TYPE\":\"custom\",\"branch\":\"f26\",\"build_id\":\"464\",\"build_url\":\"https://jenkins-continuous-infra.apps.ci.centos
-.org/job/continuous-infra-ci-pipeline-f26/464/\",\"compose_rev\":\"9a4e37c459e67c7187df4c571ddd0ad75969633d40bdfaa7c1d95bbff5fe1e04\",\"compose_url\":\"http://artifacts.ci.centos.org/fedora-atomic/f26/ostree\",\"message-content\":\"\",\"n
+.org/blue/organizations/jenkins/continuous-infra-ci-pipeline-f26/detail/continuous-infra-ci-pipeline-f26/464/pipeline/\",\"compose_rev\":\"9a4e37c459e67c7187df4c571ddd0ad75969633d40bdfaa7c1d95bbff5fe1e04\",\"compose_url\":\"http://artifacts.ci.centos.org/fedora-atomic/f26/ostree\",\"message-content\":\"\",\"n
 amespace\":\"rpms\",\"nvr\":\"mesa-17.1.5-1.816.35fdde9.fc26.2.src\",\"original_spec_nvr\":\"mesa-17.1.5-1.fc26.2\",\"ref\":\"fedora/f26/x86_64/atomic-host\",\"repo\":\"mesa\",\"rev\":\"35fdde92a0292def6a99acd3c237272789d020b2\",\"status\
 ":\"SUCCESS\",\"test_guidance\":\"''\",\"topic\":\"org.centos.prod.ci.pipeline.compose.test.integration.queued\",\"username\":\"fedora-atomic\"}", 
   "msg": {
@@ -855,7 +857,7 @@ amespace\":\"rpms\",\"nvr\":\"mesa-17.1.5-1.816.35fdde9.fc26.2.src\",\"original_
     "compose_url": "http://artifacts.ci.centos.org/fedora-atomic/f26/ostree", 
     "rev": "35fdde92a0292def6a99acd3c237272789d020b2", 
     "message-content": "", 
-    "build_url": "https://jenkins-continuous-infra.apps.ci.centos.org/job/continuous-infra-ci-pipeline-f26/464/", 
+    "build_url": "https://jenkins-continuous-infra.apps.ci.centos.org/blue/organizations/jenkins/continuous-infra-ci-pipeline-f26/detail/continuous-infra-ci-pipeline-f26/464/pipeline/", 
     "namespace": "rpms", 
     "CI_NAME": "continuous-infra-ci-pipeline-f26", 
     "repo": "mesa", 
@@ -880,7 +882,7 @@ amespace\":\"rpms\",\"nvr\":\"mesa-17.1.5-1.816.35fdde9.fc26.2.src\",\"original_
   "crypto": "x509", 
   "topic": "org.centos.prod.ci.pipeline.compose.test.integration.running", 
   "msgJson": "{\"CI_NAME\":\"continuous-infra-ci-pipeline-f26\",\"CI_TYPE\":\"custom\",\"branch\":\"f26\",\"build_id\":\"464\",\"build_url\":\"https://jenkins-continuous-infra.apps.ci.centos
-.org/job/continuous-infra-ci-pipeline-f26/464/\",\"compose_rev\":\"9a4e37c459e67c7187df4c571ddd0ad75969633d40bdfaa7c1d95bbff5fe1e04\",\"compose_url\":\"http://artifacts.ci.centos.org/fedora-atomic/f26/ostree\",\"message-content\":\"\",\"n
+.org/blue/organizations/jenkins/continuous-infra-ci-pipeline-f26/detail/continuous-infra-ci-pipeline-f26/464/pipeline/\",\"compose_rev\":\"9a4e37c459e67c7187df4c571ddd0ad75969633d40bdfaa7c1d95bbff5fe1e04\",\"compose_url\":\"http://artifacts.ci.centos.org/fedora-atomic/f26/ostree\",\"message-content\":\"\",\"n
 amespace\":\"rpms\",\"nvr\":\"mesa-17.1.5-1.816.35fdde9.fc26.2.src\",\"original_spec_nvr\":\"mesa-17.1.5-1.fc26.2\",\"ref\":\"fedora/f26/x86_64/atomic-host\",\"repo\":\"mesa\",\"rev\":\"35fdde92a0292def6a99acd3c237272789d020b2\",\"status\
 ":\"SUCCESS\",\"test_guidance\":\"''\",\"topic\":\"org.centos.prod.ci.pipeline.compose.test.integration.running\",\"username\":\"fedora-atomic\"}", 
   "msg": {
@@ -891,7 +893,7 @@ amespace\":\"rpms\",\"nvr\":\"mesa-17.1.5-1.816.35fdde9.fc26.2.src\",\"original_
     "compose_url": "http://artifacts.ci.centos.org/fedora-atomic/f26/ostree", 
     "rev": "35fdde92a0292def6a99acd3c237272789d020b2", 
     "message-content": "", 
-    "build_url": "https://jenkins-continuous-infra.apps.ci.centos.org/job/continuous-infra-ci-pipeline-f26/464/", 
+    "build_url": "https://jenkins-continuous-infra.apps.ci.centos.org/blue/organizations/jenkins/continuous-infra-ci-pipeline-f26/detail/continuous-infra-ci-pipeline-f26/464/pipeline/", 
     "namespace": "rpms", 
     "CI_NAME": "continuous-infra-ci-pipeline-f26", 
     "repo": "mesa", 
@@ -916,7 +918,7 @@ amespace\":\"rpms\",\"nvr\":\"mesa-17.1.5-1.816.35fdde9.fc26.2.src\",\"original_
   "crypto": "x509", 
   "topic": "org.centos.prod.ci.pipeline.compose.test.integration.complete", 
   "msgJson": "{\"CI_NAME\":\"continuous-infra-ci-pipeline-f26\",\"CI_TYPE\":\"custom\",\"branch\":\"f26\",\"build_id\":\"464\",\"build_url\":\"https://jenkins-continuous-infra.apps.ci.centos
-.org/job/continuous-infra-ci-pipeline-f26/464/\",\"compose_rev\":\"9a4e37c459e67c7187df4c571ddd0ad75969633d40bdfaa7c1d95bbff5fe1e04\",\"compose_url\":\"http://artifacts.ci.centos.org/fedora-atomic/f26/ostree\",\"message-content\":\"\",\"n
+.org/blue/organizations/jenkins/continuous-infra-ci-pipeline-f26/detail/continuous-infra-ci-pipeline-f26/464/pipeline/\",\"compose_rev\":\"9a4e37c459e67c7187df4c571ddd0ad75969633d40bdfaa7c1d95bbff5fe1e04\",\"compose_url\":\"http://artifacts.ci.centos.org/fedora-atomic/f26/ostree\",\"message-content\":\"\",\"n
 amespace\":\"rpms\",\"nvr\":\"mesa-17.1.5-1.816.35fdde9.fc26.2.src\",\"original_spec_nvr\":\"mesa-17.1.5-1.fc26.2\",\"ref\":\"fedora/f26/x86_64/atomic-host\",\"repo\":\"mesa\",\"rev\":\"35fdde92a0292def6a99acd3c237272789d020b2\",\"status\
 ":\"SUCCESS\",\"test_guidance\":\"''\",\"topic\":\"org.centos.prod.ci.pipeline.compose.test.integration.complete\",\"username\":\"fedora-atomic\"}", 
   "msg": {
@@ -927,7 +929,7 @@ amespace\":\"rpms\",\"nvr\":\"mesa-17.1.5-1.816.35fdde9.fc26.2.src\",\"original_
     "compose_url": "http://artifacts.ci.centos.org/fedora-atomic/f26/ostree", 
     "rev": "35fdde92a0292def6a99acd3c237272789d020b2", 
     "message-content": "", 
-    "build_url": "https://jenkins-continuous-infra.apps.ci.centos.org/job/continuous-infra-ci-pipeline-f26/464/", 
+    "build_url": "https://jenkins-continuous-infra.apps.ci.centos.org/blue/organizations/jenkins/continuous-infra-ci-pipeline-f26/detail/continuous-infra-ci-pipeline-f26/464/pipeline/", 
     "namespace": "rpms", 
     "CI_NAME": "continuous-infra-ci-pipeline-f26", 
     "repo": "mesa", 
@@ -952,7 +954,7 @@ amespace\":\"rpms\",\"nvr\":\"mesa-17.1.5-1.816.35fdde9.fc26.2.src\",\"original_
   "crypto": "x509", 
   "topic": "org.centos.prod.ci.pipeline.complete", 
   "msgJson": "{\"CI_NAME\":\"continuous-infra-ci-pipeline-f26\",\"CI_TYPE\":\"custom\",\"branch\":\"f26\",\"build_id\":\"464\",\"build_url\":\"https://jenkins-continuous-infra.apps.ci.centos
-.org/job/continuous-infra-ci-pipeline-f26/464/\",\"compose_rev\":\"9a4e37c459e67c7187df4c571ddd0ad75969633d40bdfaa7c1d95bbff5fe1e04\",\"message-content\":\"\",\"namespace\":\"rpms\",\"nvr\":\"mesa-17.1.5-1.816.35fdde9.fc26.2.src\",\"origi
+.org/blue/organizations/jenkins/continuous-infra-ci-pipeline-f26/detail/continuous-infra-ci-pipeline-f26/464/pipeline/\",\"compose_rev\":\"9a4e37c459e67c7187df4c571ddd0ad75969633d40bdfaa7c1d95bbff5fe1e04\",\"message-content\":\"\",\"namespace\":\"rpms\",\"nvr\":\"mesa-17.1.5-1.816.35fdde9.fc26.2.src\",\"origi
 nal_spec_nvr\":\"mesa-17.1.5-1.fc26.2\",\"ref\":\"fedora/f26/x86_64/atomic-host\",\"repo\":\"mesa\",\"rev\":\"35fdde92a0292def6a99acd3c237272789d020b2\",\"status\":\"SUCCESS\",\"test_guidance\":\"''\",\"topic\":\"org.centos.prod.ci.pipeli
 ne.complete\",\"username\":\"fedora-atomic\"}", 
   "msg": {
@@ -963,7 +965,7 @@ ne.complete\",\"username\":\"fedora-atomic\"}",
     "nvr": "mesa-17.1.5-1.816.35fdde9.fc26.2.src", 
     "rev": "35fdde92a0292def6a99acd3c237272789d020b2", 
     "message-content": "", 
-    "build_url": "https://jenkins-continuous-infra.apps.ci.centos.org/job/continuous-infra-ci-pipeline-f26/464/", 
+    "build_url": "https://jenkins-continuous-infra.apps.ci.centos.org/blue/organizations/jenkins/continuous-infra-ci-pipeline-f26/detail/continuous-infra-ci-pipeline-f26/464/pipeline/", 
     "namespace": "rpms", 
     "CI_NAME": "continuous-infra-ci-pipeline-f26", 
     "repo": "mesa", 

@@ -235,7 +235,7 @@ def setMessageFields(String messageType) {
     def messageProperties = [
             branch           : env.branch,
             build_id         : env.BUILD_ID,
-            build_url        : env.BUILD_URL,
+            build_url        : env.JENKINS_URL + 'blue/organizations/jenkins/' + env.JOB_NAME + '/detail/' + env.JOB_NAME + '/' + env.BUILD_NUMBER + '/pipeline/',
             compose_rev      : messageType == 'compose.running' ? '' : env.commit,
             namespace        : env.fed_namespace,
             nvr              : env.nvr,
