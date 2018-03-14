@@ -1,9 +1,7 @@
 FROM centos:7
 ENV GRAFANA_INSTALL=grafana-5.0.0-1.x86_64.rpm
-ENV GRAFANA_VERSION=5.0.0
 
-LABEL name="Grafana" \
-      version=$GRAFANA_VERSION
+LABEL name="Grafana"
 
 # User grafana gets added by RPM
 ENV USERNAME=grafana

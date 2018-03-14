@@ -42,7 +42,7 @@ parameters:
   value: config/Dockerfiles/telegraf
 - name: REPO_REF
   description: The git ref or tag to use for customization.
-  value: master
+  value: containers
 - name: TELEGRAF_INSTALL
   value: telegraf-1.5.2-1.x86_64.rpm
   description: The telegraf rpm
@@ -77,6 +77,7 @@ objects:
             value: ${TELEGRAF_INSTALL}
       type: Docker
     triggers:
+    - type: ConfigChange
 - apiVersion: v1
   kind: DeploymentConfig
   metadata:
@@ -105,6 +106,14 @@ objects:
           image: telegraf:latest
           imagePullPolicy: Always
           name: telegraf
+          readinessProbe:
+            exec:
+              command:
+              - ls
+              - /usr/bin/telegraf
+            initialDelaySeconds: 15
+            timeoutSeconds: 1
+            failureThreshold: 3
         dnsPolicy: ClusterFirst
         restartPolicy: Always
     triggers:
@@ -116,7 +125,7 @@ objects:
         from:
           kind: ImageStreamTag
           name: telegraf:latest
-          namespace: openshift
+          namespace: continuous-infra
           lastTriggeredImage: ''
     - type: ConfigChange
   status: {}
