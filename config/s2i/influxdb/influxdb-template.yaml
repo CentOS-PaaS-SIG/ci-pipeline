@@ -18,15 +18,6 @@ parameters:
   value: 10Gi
   description: The size of the persistent storage for Influxdb
 objects:
-- apiVersion: v1
-  kind: ImageStream
-  metadata:
-    labels:
-      app: influxdb
-    name: influxdb
-  spec:
-    tags:
-    - name: latest
 - kind: PersistentVolumeClaim
   apiVersion: v1
   metadata:
@@ -96,8 +87,8 @@ objects:
         - influxdb
         from:
           kind: ImageStreamTag
-          name: influxdb:latest
-          namespace: openshift
+          name: influxdb:stable
+          namespace: continuous-infra
           lastTriggeredImage: ''
     - type: ConfigChange
     replicas: 1
