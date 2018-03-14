@@ -1,0 +1,166 @@
+apiVersion: v1
+kind: Template
+metadata:
+  creationTimestamp: null
+  name: grafana
+  annotations:
+    openshift.io/display-name: grafana
+    description: |-
+             contra grafana template
+    iconClass: icon-jenkins
+    tags: instant-app,influxdb
+    template.openshift.io/long-description: Grafana container
+    template.openshift.io/provider-display-name: Red Hat, Inc.
+    template.openshift.io/documentation-url: https://docs.openshift.org/latest
+    template.openshift.io/support-url: https://access.redhat.com
+parameters:
+- name: STORAGE_SIZE
+  value: 5Gi
+  description: The size of the persistent storage for Grafana
+objects:
+- apiVersion: v1
+  kind: ImageStream
+  metadata:
+    labels:
+      app: grafana
+    name: grafana
+- apiVersion: v1
+  kind: PersistentVolumeClaim
+  metadata:
+    name: grafana-lib
+  spec:
+    accessModes:
+      - ReadWriteOnce
+    resources:
+      requests:
+        storage: ${STORAGE_SIZE}
+- apiVersion: v1
+  kind: PersistentVolumeClaim
+  metadata:
+    name: grafana-log
+  spec:
+    accessModes:
+      - ReadWriteOnce
+    resources:
+      requests:
+        storage: ${STORAGE_SIZE}
+- apiVersion: v1
+  kind: Service
+  metadata:
+    creationTimestamp: null
+    labels:
+      metrics: grafana
+    name: grafana
+  spec:
+    ports:
+    - name: grafana-web
+      port: 3000
+      protocol: TCP
+      targetPort: 3000
+    selector:
+      metrics: grafana
+    sessionAffinity: None
+    type: ClusterIP
+  status:
+    loadBalancer: {}
+- apiVersion: v1
+  kind: DeploymentConfig
+  metadata:
+    creationTimestamp: null
+    labels:
+      metrics: grafana
+    name: grafana
+  spec:
+    triggers:
+    - type: ImageChange
+      imageChangeParams:
+        automatic: true
+        containerNames:
+        - grafana
+        from:
+          kind: ImageStreamTag
+          name: grafana:latest
+          namespace: openshift
+          lastTriggeredImage: ''
+    - type: ConfigChange
+    replicas: 1
+    selector:
+      metrics: grafana
+    template:
+      metadata:
+        creationTimestamp: null
+        labels:
+          metrics: grafana
+      spec:
+        containers:
+        - env:
+          - name: INFLUXDB_HOST
+            value: influxdb
+          - name: GF_LOG_MODE
+            value: console
+          - name: GF_SECURITY_ADMIN_USER
+            value: root
+          - name: GF_SECURITY_ADMIN_PASSWORD
+            value: secret
+          - name: GF_PATHS_PLUGINS
+            value: /var/lib/grafana/plugins
+          image: grafana:stable
+          imagePullPolicy: Always
+          name: grafana
+          livenessProbe:
+            failureThreshold: 3
+            httpGet:
+              path: /login
+              port: 3000
+              scheme: HTTP
+            initialDelaySeconds: 2
+            periodSeconds: 10
+            successThreshold: 1
+            timeoutSeconds: 1
+          readinessProbe:
+            failureThreshold: 3
+            httpGet:
+              path: /login
+              port: 3000
+              scheme: HTTP
+            initialDelaySeconds: 2
+            periodSeconds: 10
+            successThreshold: 1
+            timeoutSeconds: 1
+          ports:
+          - containerPort: 3000
+            protocol: TCP
+          volumeMounts:
+          - mountPath: /var/lib/grafana
+            name: grafana-lib
+          - mountPath: /var/log/grafana
+            name: grafana-log
+        dnsPolicy: ClusterFirst
+        restartPolicy: Always
+        terminationGracePeriodSeconds: 30
+        volumes:
+        - name: grafana-lib
+          persistentVolumeClaim:
+            claimName: grafana-lib
+        - name: grafana-log
+          persistentVolumeClaim:
+            claimName: grafana-log
+    test: false
+    triggers:
+    - type: ConfigChange
+  status: {}
+- apiVersion: v1
+  kind: Route
+  metadata:
+    creationTimestamp: null
+    labels:
+      metrics: grafana
+    name: grafana
+  spec:
+    port:
+      targetPort: grafana-web
+    to:
+      kind: Service
+      name: grafana
+labels:
+  template: grafana

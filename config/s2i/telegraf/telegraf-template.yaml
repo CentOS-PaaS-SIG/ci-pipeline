@@ -1,0 +1,88 @@
+apiVersion: v1
+kind: Template
+metadata:
+  creationTimestamp: null
+  name: telegraf
+  annotations:
+    openshift.io/display-name: telegraf
+    description: |-
+              contra telegraf template
+    iconClass: icon-jenkins
+    tags: instant-app,telegraf
+    template.openshift.io/long-description: Telegraf container
+    template.openshift.io/provider-display-name: Red Hat, Inc.
+    template.openshift.io/documentation-url: https://docs.openshift.org/latest
+    template.openshift.io/support-url: https://access.redhat.com
+message: A data collector for jenkins metrics.
+  Usage oc new-app -f telegraf-template.yaml -p JENKINS_API_KEY=jenkins_api_key
+parameters:
+- name: INFLUXDB_ENDPOINT
+  value: https://influxdb-continuous-infra.192.168.42.226.nip.io
+  description: The url of the influxdb instance
+- name: INFLUXDB_DATABASE
+  value: db0
+  description: The influxdb to use
+- name: JENKINS_METRICS_ENDPOINT
+  value: https://jenkins-continuous-infra.192.168.42.226.nip.io/metrics
+  description: The jenkins metrics endpoint
+- name: JENKINS_API_KEY
+  value: MY_KEY
+  description: The jenkins api key
+- name: JENKINS_ENDPOINT_TYPE
+  value: metrics?pretty=true
+  description:
+objects:
+- apiVersion: v1
+  kind: ImageStream
+  metadata:
+    labels:
+      app: telegraf
+    name: telegraf
+  spec:
+    tags:
+    - name: latest
+- apiVersion: v1
+  kind: DeploymentConfig
+  metadata:
+    creationTimestamp: null
+    labels:
+      metrics: telegraf
+    name: telegraf
+  spec:
+    replicas: 1
+    selector:
+      metrics: telegraf
+    template:
+      metadata:
+        creationTimestamp: null
+        labels:
+          metrics: telegraf
+      spec:
+        containers:
+        - env:
+          - name: INFLUXDB_ENDPOINT
+            value: ${INFLUXDB_ENDPOINT}
+          - name: INFLUXDB_DATABASE
+            value: ${INFLUXDB_DATABASE}
+          - name: JENKINS_METRICS_ENDPOINT
+            value: ${JENKINS_METRICS_ENDPOINT}/${JENKINS_API_KEY}/${JENKINS_ENDPOINT_TYPE}
+          image: telegraf:stable
+          imagePullPolicy: Always
+          name: telegraf
+        dnsPolicy: ClusterFirst
+        restartPolicy: Always
+    triggers:
+    - type: ImageChange
+      imageChangeParams:
+        automatic: true
+        containerNames:
+        - influxdb
+        from:
+          kind: ImageStreamTag
+          name: influxdb:latest
+          namespace: openshift
+          lastTriggeredImage: ''
+    - type: ConfigChange
+  status: {}
+labels:
+  template: telegraf
