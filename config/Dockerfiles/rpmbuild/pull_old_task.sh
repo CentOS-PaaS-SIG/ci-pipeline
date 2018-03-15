@@ -27,6 +27,8 @@ koji_task_id=${PROVIDED_KOJI_TASKID}
 fed_repo=${PACKAGE}
 fed_branch=${BRANCH}
 fed_rev=kojitask${PROVIDED_KOJI_TASKID}
+nvr=${NVR}
+original_spec_nvr=${NVR}
 EOF
 }
 trap archive_variables EXIT SIGHUP SIGINT SIGTERM
@@ -35,7 +37,8 @@ pushd ${RPMDIR}
 # Download brew build so we can archive it
 koji download-task ${PROVIDED_KOJI_TASKID} --logs
 createrepo .
-PACKAGE=$(echo $(ls *.src.rpm) | rev | cut -d '-' -f 3- | rev)
+PACKAGE=$(rpm --queryformat "%{NAME}\n" -qp *.src.rpm)
+NVR=$(rpm --queryformat "%{NAME} %{VERSION} %{RELEASE}\n" -qp *.src.rpm)
 BRANCH=$(grep -Po "chrootPath='/var/lib/mock/\K[^-]+" build.*.log | head -n 1)
 popd
 
