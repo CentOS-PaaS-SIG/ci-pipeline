@@ -80,13 +80,10 @@ koji download-task ${SCRATCHID} --logs
 createrepo .
 popd
 
-# Store some variables for messages
+# Store modified nvr as well
 set +e
 RPM_TO_CHECK=$(find ${RPMDIR}/ -name "${fed_repo}-${VERSION}*" | grep -v src)
 RPM_NAME=$(basename $RPM_TO_CHECK)
-RPM_NAME=$(rpm --queryformat "%{NAME}\n" -qp $RPM_NAME)
-echo "nvr=${RPM_NAME}" >> ${LOGDIR}/job.props
-# We aren't modifying the nvr in this script, but we promised to send both
-# nvr fields on the bus
-echo "original_spec_nvr=${RPM_NAME}" >> ${LOGDIR}/job.props
+NVR=$(rpm --queryformat "%{NAME} %{VERSION} %{RELEASE}\n" -qp $RPM_NAME)
+echo "nvr=${NVR}" >> ${LOGDIR}/job.props
 exit 0
