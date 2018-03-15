@@ -35,7 +35,7 @@ parameters:
   value: telegraf:latest
   description: The telegraf container image
 - name: REPO_URL
-  value: https://github.com/joejstuart/ci-pipeline.git
+  value: https://github.com/CentOS-PaaS-SIG/ci-pipeline.git
   description: The dockerfile repo url
 - name: REPO_CONTEXTDIR
   description: The sub-directory inside the repository.
