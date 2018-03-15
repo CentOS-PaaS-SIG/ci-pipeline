@@ -18,7 +18,7 @@ parameters:
   value: 5Gi
   description: The size of the persistent storage for Grafana
 - name: REPO_URL
-  value: https://github.com/CentOS-PaaS-SIG/ci-pipeline.git
+  value: https://github.com/joejstuart/ci-pipeline.git
   description: The dockerfile repo url
 - name: REPO_CONTEXTDIR
   description: The sub-directory inside the repository.
@@ -60,6 +60,7 @@ objects:
             value: ${GRAFANA_INSTALL}
       type: Docker
     triggers:
+    - type: ConfigChange
 - apiVersion: v1
   kind: PersistentVolumeClaim
   metadata:
@@ -107,6 +108,8 @@ objects:
       metrics: grafana
     name: grafana
   spec:
+    strategy:
+      type: Recreate
     triggers:
     - type: ImageChange
       imageChangeParams:
@@ -181,9 +184,6 @@ objects:
         - name: grafana-log
           persistentVolumeClaim:
             claimName: grafana-log
-    test: false
-    triggers:
-    - type: ConfigChange
   status: {}
 - apiVersion: v1
   kind: Route

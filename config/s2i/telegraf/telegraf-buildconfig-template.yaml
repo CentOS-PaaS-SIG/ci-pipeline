@@ -35,7 +35,7 @@ parameters:
   value: telegraf:latest
   description: The telegraf container image
 - name: REPO_URL
-  value: https://github.com/CentOS-PaaS-SIG/ci-pipeline.git
+  value: https://github.com/joejstuart/ci-pipeline.git
   description: The dockerfile repo url
 - name: REPO_CONTEXTDIR
   description: The sub-directory inside the repository.
@@ -86,6 +86,8 @@ objects:
       metrics: telegraf
     name: telegraf
   spec:
+    strategy:
+      type: Recreate
     replicas: 1
     selector:
       metrics: telegraf
@@ -103,7 +105,7 @@ objects:
             value: ${INFLUXDB_DATABASE}
           - name: JENKINS_METRICS_ENDPOINT
             value: ${JENKINS_METRICS_ENDPOINT}/${JENKINS_API_KEY}/${JENKINS_ENDPOINT_TYPE}
-          image: telegraf:latest
+          image: telegraf:stable
           imagePullPolicy: Always
           name: telegraf
           readinessProbe:
