@@ -1,5 +1,5 @@
 FROM centos:7
-ENV GRAFANA_INSTALL=grafana-5.0.0-1.x86_64.rpm
+ENV GRAFANA_INSTALL grafana-5.0.0-1.x86_64.rpm
 
 LABEL name="Grafana"
 
