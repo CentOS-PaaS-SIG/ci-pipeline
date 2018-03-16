@@ -398,9 +398,14 @@ podTemplate(name: podName,
 
                         // Send message org.centos.prod.ci.pipeline.package.test.functional.queued on fedmsg
                         pipelineUtils.sendMessageWithAudit(messageFields['topic'], messageFields['properties'], messageFields['content'], msgAuditFile, fedmsgRetryCount)
+                    }
 
-                        currentStage = "ci-pipeline-functional-tests"
-                        stage(currentStage) {
+                    currentStage = "ci-pipeline-functional-tests"
+                    stage(currentStage) {
+                        // Only run this stage if tests exist
+                        if (!pipelineUtils.checkTests(env.fed_repo, env.fed_branch, 'atomic')) {
+                            pipelineUtils.skip(currentStage)
+                        } else {
                             // Set stage specific vars
                             pipelineUtils.setStageEnvVars(currentStage)
 
@@ -418,9 +423,9 @@ podTemplate(name: podName,
 
                             // Send message org.centos.prod.ci.pipeline.package.test.functional.complete on fedmsg
                             pipelineUtils.sendMessage(messageFields['topic'], messageFields['properties'], messageFields['content'])
-
                         }
                     }
+
                     // Set our message topic, properties, and content
                     messageFields = pipelineUtils.setMessageFields("compose.test.integration.queued")
 
