@@ -24,6 +24,8 @@ class ciMetrics {
 
     // A map to store the data sent to influx
     def customDataMap = ["ci_pipeline": [:]]
+    // Global tags
+    def customDataMapTags = [:]
     // This will prefix the data sent to influx. Usually set to the job name.
     def prefix = "ci_pipeline"
     // The influx target configured in jenkins
@@ -46,6 +48,6 @@ class ciMetrics {
      * Write customDataMap to influxDB
      */
     def writeToInflux() {
-        cimetrics.writeToInflux(influxTarget, prefix, customDataMap)
+        cimetrics.writeToInflux(influxTarget, prefix, customDataMap, customDataMapTags)
     }
 }
