@@ -283,4 +283,13 @@ class pipelineUtils implements Serializable {
         return pipelineUtils.checkTests(mypackage, mybranch, tag)
     }
 
+    /**
+     * Mark stage stageName as skipped
+     * @param stageName
+     * @return
+     */
+    def skip(String stageName) {
+        return pipelineUtils.skip(stageName)
+    }
+
 }

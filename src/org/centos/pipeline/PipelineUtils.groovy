@@ -4,6 +4,7 @@ package org.centos.pipeline
 import org.centos.*
 
 import groovy.json.JsonSlurper
+import org.jenkinsci.plugins.pipeline.modeldefinition.Utils
 
 /**
  * Library to setup and configure the host the way ci-pipeline requires
@@ -1073,4 +1074,13 @@ def checkTests(String mypackage, String mybranch, String tag) {
     echo "Currently checking if package tests exist"
     return sh (returnStatus: true, script: """
     curl -q https://src.fedoraproject.org/rpms/${mypackage}/raw/${mybranch}/f/tests/tests.yml | grep '\\- '${tag}'' """) == 0
+}
+
+/**
+ * Mark stage stageName as skipped
+ * @param stageName
+ * @return
+ */
+def skip(String stageName) {
+    Utils.markStageSkippedForConditional(stageName)
 }
