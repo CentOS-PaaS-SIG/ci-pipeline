@@ -17,13 +17,50 @@ parameters:
 - name: STORAGE_SIZE
   value: 5Gi
   description: The size of the persistent storage for Grafana
+- name: REPO_URL
+  value: https://github.com/CentOS-PaaS-SIG/ci-pipeline.git
+  description: The dockerfile repo url
+- name: REPO_CONTEXTDIR
+  description: The sub-directory inside the repository.
+  value: config/Dockerfiles/grafana
+- name: REPO_REF
+  description: The git ref or tag to use for customization.
+  value: containers
+- name: GRAFANA_INSTALL
+  value: grafana-5.0.0-1.x86_64.rpm
+  description: The grafana rpm
 objects:
 - apiVersion: v1
   kind: ImageStream
   metadata:
+    annotations:
     labels:
-      app: grafana
     name: grafana
+  spec: {}
+- apiVersion: v1
+  kind: BuildConfig
+  metadata:
+    name: grafana
+  spec:
+    output:
+      to:
+        kind: ImageStreamTag
+        name: grafana:latest
+    resources: {}
+    source:
+      contextDir: ${REPO_CONTEXTDIR}
+      git:
+        ref: ${REPO_REF}
+        uri: ${REPO_URL}
+      type: Git
+    strategy:
+      dockerStrategy:
+        env:
+          - name: GRAFANA_INSTALL
+            value: ${GRAFANA_INSTALL}
+      type: Docker
+    triggers:
+    - type: ConfigChange
 - apiVersion: v1
   kind: PersistentVolumeClaim
   metadata:
@@ -71,6 +108,8 @@ objects:
       metrics: grafana
     name: grafana
   spec:
+    strategy:
+      type: Recreate
     triggers:
     - type: ImageChange
       imageChangeParams:
@@ -80,7 +119,7 @@ objects:
         from:
           kind: ImageStreamTag
           name: grafana:latest
-          namespace: openshift
+          namespace: continuous-infra
           lastTriggeredImage: ''
     - type: ConfigChange
     replicas: 1
@@ -145,9 +184,6 @@ objects:
         - name: grafana-log
           persistentVolumeClaim:
             claimName: grafana-log
-    test: false
-    triggers:
-    - type: ConfigChange
   status: {}
 - apiVersion: v1
   kind: Route

@@ -31,16 +31,53 @@ parameters:
 - name: JENKINS_ENDPOINT_TYPE
   value: metrics?pretty=true
   description:
+- name: IMAGE_STREAM_TAG
+  value: telegraf:latest
+  description: The telegraf container image
+- name: REPO_URL
+  value: https://github.com/CentOS-PaaS-SIG/ci-pipeline.git
+  description: The dockerfile repo url
+- name: REPO_CONTEXTDIR
+  description: The sub-directory inside the repository.
+  value: config/Dockerfiles/telegraf
+- name: REPO_REF
+  description: The git ref or tag to use for customization.
+  value: containers
+- name: TELEGRAF_INSTALL
+  value: telegraf-1.5.2-1.x86_64.rpm
+  description: The telegraf rpm
 objects:
 - apiVersion: v1
   kind: ImageStream
   metadata:
+    annotations:
     labels:
-      app: telegraf
+    name: telegraf
+  spec: {}
+- apiVersion: v1
+  kind: BuildConfig
+  metadata:
     name: telegraf
   spec:
-    tags:
-    - name: latest
+    output:
+      to:
+        kind: ImageStreamTag
+        name: telegraf:latest
+    resources: {}
+    source:
+      contextDir: ${REPO_CONTEXTDIR}
+      git:
+        ref: ${REPO_REF}
+        uri: ${REPO_URL}
+      type: Git
+    strategy:
+      dockerStrategy:
+        env:
+          - name: TELEGRAF_INSTALL
+            value: ${TELEGRAF_INSTALL}
+      type: Docker
+    triggers:
+    - type: ConfigChange
 - apiVersion: v1
   kind: DeploymentConfig
   metadata:
@@ -49,6 +86,8 @@ objects:
       metrics: telegraf
     name: telegraf
   spec:
+    strategy:
+      type: Recreate
     replicas: 1
     selector:
       metrics: telegraf
@@ -69,6 +108,14 @@ objects:
           image: telegraf:stable
           imagePullPolicy: Always
           name: telegraf
+          readinessProbe:
+            exec:
+              command:
+              - ls
+              - /usr/bin/telegraf
+            initialDelaySeconds: 15
+            timeoutSeconds: 1
+            failureThreshold: 3
         dnsPolicy: ClusterFirst
         restartPolicy: Always
     triggers:
@@ -76,11 +123,11 @@ objects:
       imageChangeParams:
         automatic: true
         containerNames:
-        - influxdb
+        - telegraf
         from:
           kind: ImageStreamTag
-          name: influxdb:latest
-          namespace: openshift
+          name: telegraf:latest
+          namespace: continuous-infra
           lastTriggeredImage: ''
     - type: ConfigChange
   status: {}
