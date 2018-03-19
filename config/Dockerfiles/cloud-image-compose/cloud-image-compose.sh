@@ -3,8 +3,7 @@
 set -xeuo pipefail
 
 # A simple shell script to create a cloud image
-# using Image Factory in a container. Currently,
-# this container is hardcoded to build just rawhide.
+# using Image Factory in a container.
 
 # Requires package and rpm_repo variables where package is the
 # rpm name and rpm_repo is the location of the repo
@@ -39,7 +38,7 @@ if [[ $rpm_repo == /* ]]; then
     popd
 fi
 
-imgname="fedora-cloud-rawhide-$package"
+imgname="fedora-cloud-$fed_branch-$package"
 
 function clean_up {
   set +e
@@ -58,8 +57,6 @@ trap clean_up EXIT SIGHUP SIGINT SIGTERM
 # Factory defaults to wanting a root PW in the TDL - this causes
 # problems with converted images - just force it
 
-branch="rawhide"
-
 mkdir -p ${base_dir}/images
 # Spot where imagefactory puts images
 imgdir=/var/lib/imagefactory/storage/
@@ -68,6 +65,12 @@ imgdir=/var/lib/imagefactory/storage/
 if [ ! -d "${base_dir}/fedora-kickstarts" ]; then
     git clone https://pagure.io/fedora-kickstarts ${base_dir}/fedora-kickstarts
 fi
+
+# Checkout proper branch of kickstarts
+pushd ${base_dir}/fedora-kickstarts
+git checkout ${fed_branch}
+popd
+
 # The centos7 pykickstart rpm doesnt support --noboot being in the .ks file
 noboot=no
 if grep -q '^autopart --noboot' "${base_dir}/fedora-kickstarts/fedora-cloud-base.ks" ; then
@@ -90,6 +93,21 @@ else
     sed -i '/^repo/a repo --name="'$package'" --baseurl='$rpm_repo'' ${base_dir}/logs/fedora-cloud-base-flat.ks
 fi
 
+# We no longer need the f in fXX
+if [ ${branch} != "rawhide" ]; then
+    branch=${branch:1}
+fi
+
+# Define proper install url
+if [[ $(curl -q https://dl.fedoraproject.org/pub/fedora/linux/development/ | grep "${branch}/") != "" ]]; then
+    INSTALL_URL="https://dl.fedoraproject.org/pub/fedora/linux/development/${branch}/Everything/x86_64/os/"
+elif [[ $(curl -q https://dl.fedoraproject.org/pub/fedora/linux/releases/ | grep "${branch}/") != "" ]]; then
+    INSTALL_URL="https://dl.fedoraproject.org/pub/fedora/linux/releases/${branch}/Everything/x86_64/os/"
+else
+    echo "Could not find installation source! Exiting..."
+    exit 1
+fi
+
 # Create a tdl file for imagefactory
 cat <<EOF >${base_dir}/logs/fedora-${branch}.tdl
 <template>
@@ -99,7 +117,7 @@ cat <<EOF >${base_dir}/logs/fedora-${branch}.tdl
         <version>${branch}</version>
         <arch>x86_64</arch>
         <install type='url'>
-            <url>https://dl.fedoraproject.org/pub/fedora/linux/development/rawhide/Everything/x86_64/os/</url>
+            <url>${INSTALL_URL}</url>
         </install>
         <rootpw>foobar</rootpw>
         <kernelparam>console=ttyS0</kernelparam>
