@@ -10,6 +10,9 @@ export TEST_ARTIFACTS=${CURRENTDIR}/logs
 if [ -z "${TEST_SUBJECTS:-}" ]; then
     export TEST_SUBJECTS=${CURRENTDIR}/untested-atomic.qcow2
 fi
+if [ -z "${TAG:-}" ]; then
+    export TAG=atomic
+fi
 # The test artifacts must be an empty directory
 rm -rf ${TEST_ARTIFACTS}
 mkdir -p ${TEST_ARTIFACTS}
@@ -87,12 +90,13 @@ fi
 set -u
 
 # Invoke each playbook according to the specification
+set -x
 for playbook in tests*.yml; do
 	if [ -f ${playbook} ]; then
 		ansible-playbook --inventory=$ANSIBLE_INVENTORY $PYTHON_INTERPRETER \
 			--extra-vars "subjects=$TEST_SUBJECTS" \
 			--extra-vars "artifacts=$TEST_ARTIFACTS" \
-			--tags atomic ${playbook}
+			--tags ${TAG} ${playbook}
 	fi
 done
 popd
