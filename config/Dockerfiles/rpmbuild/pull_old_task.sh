@@ -43,7 +43,7 @@ NVR=$(rpm --queryformat "%{NAME} %{VERSION} %{RELEASE}\n" -qp *.src.rpm)
 FED_BRANCH=$(grep -Po "chrootPath='/var/lib/mock/\K[^-]+" build.*.log | head -n 1)
 popd
 
-if [ "${FED_BRANCH}" = $(curl -s https://src.fedoraproject.org/rpms/fedora-release/raw/master/f/fedora-release.spec | awk '/%define dist_version/ {print $3}') ]; then
+if [ "$(echo $FED_BRANCH | sed -e 's/[a-zA-Z]*//')" = $(curl -s https://src.fedoraproject.org/rpms/fedora-release/raw/master/f/fedora-release.spec | awk '/%define dist_version/ {print $3}') ]; then
     BRANCH="master"
     FED_BRANCH="rawhide"
 else
