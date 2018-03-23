@@ -45,7 +45,7 @@ RPMDIR=${CURRENTDIR}/${PACKAGE}_repo
 rm -rf ${RPMDIR}
 mkdir -p ${RPMDIR}
 
-mv somewhere ${RPMDIR}
+mv somewhere/* ${RPMDIR}/
 
 if [ "$(echo $FED_BRANCH | sed -e 's/[a-zA-Z]*//')" = $(curl -s https://src.fedoraproject.org/rpms/fedora-release/raw/master/f/fedora-release.spec | awk '/%define dist_version/ {print $3}') ]; then
     BRANCH="master"
