@@ -26,6 +26,7 @@ branch=${BRANCH}
 fed_rev=kojitask${PROVIDED_KOJI_TASKID}
 nvr=${NVR}
 original_spec_nvr=${NVR}
+rpm_repo=${RPMDIR}
 EOF
 rm -rf somewhere
 }
