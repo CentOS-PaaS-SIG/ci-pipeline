@@ -66,7 +66,6 @@ fi
 
 # This will introduce a problem with concurrency as it has no locks
 function clean_up {
-    RSYNC_LOCATION="${RSYNC_USER}@${RSYNC_SERVER}::${RSYNC_DIR}/${RSYNC_BRANCH}"
     rm -rf tests/package
     mkdir -p tests/package
     cp ${TEST_ARTIFACTS}/* tests/package/
