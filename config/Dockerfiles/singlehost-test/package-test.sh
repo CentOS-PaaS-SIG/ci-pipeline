@@ -69,6 +69,7 @@ function clean_up {
     rm -rf tests/package
     mkdir -p tests/package
     cp ${TEST_ARTIFACTS}/* tests/package/
+    set +u
     if [[ ! -z "${RSYNC_USER}" && ! -z "${RSYNC_SERVER}" && ! -z "${RSYNC_DIR}" && ! -z "${RSYNC_PASSWORD}"  && ! -z "${RSYNC_BRANCH}" ]]; then
         RSYNC_LOCATION="${RSYNC_USER}@${RSYNC_SERVER}::${RSYNC_DIR}/${RSYNC_BRANCH}"
         rsync --stats -arv tests ${RSYNC_LOCATION}/repo/${package}_repo/logs
@@ -86,7 +87,7 @@ set +u
 PYTHON_INTERPRETER=""
 
 if [[ ! -z "${python3}" && "${python3}" == "yes" ]] ; then
-    PYTHON_INTERPRETER='--extra-vars "ansible_python_interpreter=/usr/bin/python3"'
+    PYTHON_INTERPRETER='--extra-vars ansible_python_interpreter=/usr/bin/python3'
 fi
 set -u
 
