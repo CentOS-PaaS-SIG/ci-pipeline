@@ -32,6 +32,7 @@ RUN for i in {1..5} ; do dnf -y install ansible \
         sudo \
         virt-install \
         which \
+        xmlto \
         yum-utils \
         && dnf clean all \
         && break || sleep 10 ; done

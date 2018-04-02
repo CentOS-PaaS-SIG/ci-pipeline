@@ -34,7 +34,7 @@ trap archive_variables EXIT SIGHUP SIGINT SIGTERM
 
 mkdir somewhere
 pushd somewhere
-# Download brew build so we can archive it
+# Download koji build so we can archive it
 koji download-task ${PROVIDED_KOJI_TASKID} --logs
 createrepo .
 PACKAGE=$(rpm --queryformat "%{NAME}\n" -qp *.src.rpm)
