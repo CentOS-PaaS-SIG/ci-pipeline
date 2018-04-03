@@ -16,7 +16,6 @@ if [ ${CURRENTDIR} == "/" ] ; then
 fi
 
 RPMDIR=${CURRENTDIR}/${fed_repo}_repo
-mkdir -p ~/rpmbuild/{BUILD,RPMS,SOURCES,SPECS,SRPMS}
 
 # Create one dir to store logs in that will be mounted
 LOGDIR=${CURRENTDIR}/logs
@@ -42,14 +41,10 @@ commits=$(git log --pretty=format:'' | wc -l)
 # %{?dist} seems to only be used when defining $release, but some
 # .spec files use different names for release, so just replace %{?dist}
 sed -i "s/%{?dist}/.${commits}.${fed_rev:0:7}%{?dist}/" ${fed_repo}.spec
-# fedpkg prep to unpack the tarball
-fedpkg --release ${fed_branch} prep
-VERSION=$(rpmspec --queryformat "%{VERSION}\n" -q ${fed_repo}.spec | head -n 1)
 
-# Prepare koji build
-cp -rp ../${fed_repo}/** ~/rpmbuild/SOURCES
-rpmbuild -bs --define "dist .$fed_branch" ${fed_repo}.spec
-ls
+# Build srpm to send to koji
+fedpkg --release ${fed_branch} srpm
+VERSION=$(rpmspec --queryformat "%{VERSION}\n" -q ${fed_repo}.spec | head -n 1)
 # Set up koji creds
 kinit -k -t "${CURRENTDIR}/fedora.keytab" $FEDORA_PRINCIPAL
 
@@ -57,7 +52,7 @@ kinit -k -t "${CURRENTDIR}/fedora.keytab" $FEDORA_PRINCIPAL
 export FORCE_UNSAFE_CONFIGURE=1
 
 # Build the package with koji
-python2 /usr/bin/koji build --wait --arch-override=x86_64 --scratch ${branch} ~/rpmbuild/SRPMS/${fed_repo}*.src.rpm | tee ${LOGDIR}/kojioutput.txt
+python2 /usr/bin/koji build --wait --arch-override=x86_64 --scratch ${branch} ${fed_repo}*.src.rpm | tee ${LOGDIR}/kojioutput.txt
 # Set status if either job fails to build the rpm
 RPMBUILD_RC=$?
 if [ "$RPMBUILD_RC" != 0 ]; then
