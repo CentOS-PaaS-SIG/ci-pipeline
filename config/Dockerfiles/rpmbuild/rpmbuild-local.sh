@@ -29,7 +29,7 @@ fedpkg clone -a ${fed_repo}
 if [ "$?" != 0 ]; then echo -e "ERROR: FEDPKG CLONE\nSTATUS: $?"; exit 1; fi
 pushd ${fed_repo}
 # Checkout the proper branch, likely unneeded since we checkout commit anyways
-fedpkg switch-branch master
+fedpkg switch-branch ${fed_branch}
 # Checkout the commit from the fedmsg
 git checkout ${fed_rev}
 # Create new branch because fedpkg wont build with detached head
@@ -57,7 +57,7 @@ kinit -k -t "${CURRENTDIR}/fedora.keytab" $FEDORA_PRINCIPAL
 export FORCE_UNSAFE_CONFIGURE=1
 
 # Build the package with koji
-python2 /usr/bin/koji build --wait --arch-override=x86_64 --scratch rawhide ~/rpmbuild/SRPMS/${fed_repo}*.src.rpm | tee ${LOGDIR}/kojioutput.txt
+python2 /usr/bin/koji build --wait --arch-override=x86_64 --scratch ${branch} ~/rpmbuild/SRPMS/${fed_repo}*.src.rpm | tee ${LOGDIR}/kojioutput.txt
 # Set status if either job fails to build the rpm
 RPMBUILD_RC=$?
 if [ "$RPMBUILD_RC" != 0 ]; then

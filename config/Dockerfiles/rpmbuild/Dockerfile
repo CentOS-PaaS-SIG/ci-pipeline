@@ -1,4 +1,4 @@
-FROM fedora:26
+FROM fedora:27
 LABEL maintainer "https://github.com/CentOS-PaaS-SIG/ci-pipeline"
 LABEL description="This container is meant to \
 use fedpkg mock to create rpms.  It also rsyncs \
@@ -32,6 +32,7 @@ RUN for i in {1..5} ; do dnf -y install ansible \
         sudo \
         virt-install \
         which \
+        xmlto \
         yum-utils \
         && dnf clean all \
         && break || sleep 10 ; done

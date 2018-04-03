@@ -10,6 +10,9 @@ export TEST_ARTIFACTS=${CURRENTDIR}/logs
 if [ -z "${TEST_SUBJECTS:-}" ]; then
     export TEST_SUBJECTS=${CURRENTDIR}/untested-atomic.qcow2
 fi
+if [ -z "${TAG:-}" ]; then
+    export TAG=atomic
+fi
 # The test artifacts must be an empty directory
 rm -rf ${TEST_ARTIFACTS}
 mkdir -p ${TEST_ARTIFACTS}
@@ -63,12 +66,14 @@ fi
 
 # This will introduce a problem with concurrency as it has no locks
 function clean_up {
-if [[ -z "${RSYNC_USER}" || -z "${RSYNC_SERVER}" || -z "${RSYNC_DIR}" || -z "${RSYNC_PASSWORD}"  || -z "${RSYNC_BRANCH}" ]]; then echo "Told to rsync but missing rsync env var(s)" ; exit 1 ; fi
-     RSYNC_LOCATION="${RSYNC_USER}@${RSYNC_SERVER}::${RSYNC_DIR}/${RSYNC_BRANCH}"
-     rm -rf tests/package
-     mkdir -p tests/package
-     cp ${TEST_ARTIFACTS}/* tests/package/
-     rsync --stats -arv tests ${RSYNC_LOCATION}/repo/${package}_repo/logs
+    rm -rf tests/package
+    mkdir -p tests/package
+    cp ${TEST_ARTIFACTS}/* tests/package/
+    set +u
+    if [[ ! -z "${RSYNC_USER}" && ! -z "${RSYNC_SERVER}" && ! -z "${RSYNC_DIR}" && ! -z "${RSYNC_PASSWORD}"  && ! -z "${RSYNC_BRANCH}" ]]; then
+        RSYNC_LOCATION="${RSYNC_USER}@${RSYNC_SERVER}::${RSYNC_DIR}/${RSYNC_BRANCH}"
+        rsync --stats -arv tests ${RSYNC_LOCATION}/repo/${package}_repo/logs
+    fi
 }
 trap clean_up EXIT SIGHUP SIGINT SIGTERM
 
@@ -82,17 +87,18 @@ set +u
 PYTHON_INTERPRETER=""
 
 if [[ ! -z "${python3}" && "${python3}" == "yes" ]] ; then
-    PYTHON_INTERPRETER='--extra-vars "ansible_python_interpreter=/usr/bin/python3"'
+    PYTHON_INTERPRETER='--extra-vars ansible_python_interpreter=/usr/bin/python3'
 fi
 set -u
 
 # Invoke each playbook according to the specification
+set -x
 for playbook in tests*.yml; do
 	if [ -f ${playbook} ]; then
 		ansible-playbook --inventory=$ANSIBLE_INVENTORY $PYTHON_INTERPRETER \
 			--extra-vars "subjects=$TEST_SUBJECTS" \
 			--extra-vars "artifacts=$TEST_ARTIFACTS" \
-			--tags atomic ${playbook}
+			--tags ${TAG} ${playbook}
 	fi
 done
 popd
