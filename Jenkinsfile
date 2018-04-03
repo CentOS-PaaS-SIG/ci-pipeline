@@ -14,8 +14,6 @@ env.SINGLEHOST_TEST_TAG = env.SINGLEHOST_TEST_TAG ?: 'stable'
 env.OSTREE_BOOT_IMAGE_TAG = env.OSTREE_BOOT_IMAGE_TAG ?: 'stable'
 env.LINCHPIN_LIBVIRT_TAG = env.LINCHPIN_LIBVIRT_TAG ?: 'stable'
 
-env.DOCKER_REPO_URL = env.DOCKER_REPO_URL ?: '172.30.254.79:5000'
-env.OPENSHIFT_NAMESPACE = env.OPENSHIFT_NAMESPACE ?: 'continuous-infra'
 env.OPENSHIFT_SERVICE_ACCOUNT = env.OPENSHIFT_SERVICE_ACCOUNT ?: 'jenkins'
 
 // Audit file for all messages sent.
@@ -42,6 +40,10 @@ library identifier: "ci-pipeline@${env.ghprbActualCommit}",
                                        [$class: 'RefSpecsSCMSourceTrait',
                                         templates: [[value: '+refs/heads/*:refs/remotes/@{remote}/*'],
                                                     [value: '+refs/pull/*:refs/remotes/origin/pr/*']]]]])
+
+dockerRegistryUrl = pipelineUtils.getOpenShiftDockerRegistryUrl()
+openshiftProject = pipelineUtils.getDefaultOpenShiftProject()
+
 properties(
         [
                 buildDiscarder(logRotator(artifactDaysToKeepStr: '30', artifactNumToKeepStr: '', daysToKeepStr: '90', numToKeepStr: '')),
@@ -72,8 +74,6 @@ properties(
                                 string(defaultValue: 'stable', description: 'Tag for ostree-image-compose image', name: 'OSTREE_IMAGE_COMPOSE_TAG'),
                                 string(defaultValue: 'stable', description: 'Tag for singlehost test image', name: 'SINGLEHOST_TEST_TAG'),
                                 string(defaultValue: 'stable', description: 'Tag for linchpin-libvirt image', name: 'LINCHPIN_LIBVIRT_TAG'),
-                                string(defaultValue: '172.30.254.79:5000', description: 'Docker repo url for Openshift instance', name: 'DOCKER_REPO_URL'),
-                                string(defaultValue: 'continuous-infra', description: 'Project namespace for Openshift operations', name: 'OPENSHIFT_NAMESPACE'),
                                 string(defaultValue: 'jenkins', description: 'Service Account for Openshift operations', name: 'OPENSHIFT_SERVICE_ACCOUNT'),
                                 booleanParam(defaultValue: false, description: 'Force generation of the image', name: 'GENERATE_IMAGE'),
                         ]
@@ -91,7 +91,7 @@ podTemplate(name: podName,
         containers: [
                 // This adds the custom slave container to the pod. Must be first with name 'jnlp'
                 containerTemplate(name: 'jnlp',
-                        image: DOCKER_REPO_URL + '/' + OPENSHIFT_NAMESPACE + '/jenkins-continuous-infra-slave:' + SLAVE_TAG,
+                        image: "$dockerRegistryUrl/$openshiftProject/jenkins-continuous-infra-slave:" + SLAVE_TAG,
                         ttyEnabled: false,
                         args: '${computer.jnlpmac} ${computer.name}',
                         command: '',
@@ -99,7 +99,7 @@ podTemplate(name: podName,
                 // This adds the rpmbuild test container to the pod.
                 containerTemplate(name: 'rpmbuild',
                         alwaysPullImage: true,
-                        image: DOCKER_REPO_URL + '/' + OPENSHIFT_NAMESPACE + '/rpmbuild:' + RPMBUILD_TAG,
+                        image: "$dockerRegistryUrl/$openshiftProject/rpmbuild:" + RPMBUILD_TAG,
                         ttyEnabled: true,
                         command: 'cat',
                         privileged: true,
@@ -107,7 +107,7 @@ podTemplate(name: podName,
                 // This adds the rsync test container to the pod.
                 containerTemplate(name: 'rsync',
                         alwaysPullImage: true,
-                        image: DOCKER_REPO_URL + '/' + OPENSHIFT_NAMESPACE + '/rsync:' + RSYNC_TAG,
+                        image: "$dockerRegistryUrl/$openshiftProject/rsync:" + RSYNC_TAG,
                         ttyEnabled: true,
                         command: 'cat',
                         privileged: true,
@@ -115,7 +115,7 @@ podTemplate(name: podName,
                 // This adds the ostree-compose test container to the pod.
                 containerTemplate(name: 'ostree-compose',
                         alwaysPullImage: true,
-                        image: DOCKER_REPO_URL + '/' + OPENSHIFT_NAMESPACE + '/ostree-compose:' + OSTREE_COMPOSE_TAG,
+                        image: "$dockerRegistryUrl/$openshiftProject/ostree-compose:" + OSTREE_COMPOSE_TAG,
                         ttyEnabled: true,
                         command: 'cat',
                         privileged: true,
@@ -123,7 +123,7 @@ podTemplate(name: podName,
                 // This adds the ostree-image-compose test container to the pod.
                 containerTemplate(name: 'ostree-image-compose',
                         alwaysPullImage: true,
-                        image: DOCKER_REPO_URL + '/' + OPENSHIFT_NAMESPACE + '/ostree-image-compose:' + OSTREE_IMAGE_COMPOSE_TAG,
+                        image: "$dockerRegistryUrl/$openshiftProject/ostree-image-compose:" + OSTREE_IMAGE_COMPOSE_TAG,
                         ttyEnabled: true,
                         command: 'cat',
                         privileged: true,
@@ -131,7 +131,7 @@ podTemplate(name: podName,
                 // This adds the singlehost test container to the pod.
                 containerTemplate(name: 'singlehost-test',
                         alwaysPullImage: true,
-                        image: DOCKER_REPO_URL + '/' + OPENSHIFT_NAMESPACE + '/singlehost-test:' + SINGLEHOST_TEST_TAG,
+                        image: "$dockerRegistryUrl/$openshiftProject/singlehost-test:" + SINGLEHOST_TEST_TAG,
                         ttyEnabled: true,
                         command: 'cat',
                         privileged: true,
@@ -139,14 +139,14 @@ podTemplate(name: podName,
                 // This adds the ostree boot image container to the pod.
                 containerTemplate(name: 'ostree-boot-image',
                         alwaysPullImage: true,
-                        image: DOCKER_REPO_URL + '/' + OPENSHIFT_NAMESPACE + '/ostree-boot-image:' + OSTREE_BOOT_IMAGE_TAG,
+                        image: "$dockerRegistryUrl/$openshiftProject/ostree-boot-image:" + OSTREE_BOOT_IMAGE_TAG,
                         ttyEnabled: true,
                         command: '/usr/sbin/init',
                         privileged: true,
                         workingDir: '/workDir'),
                 containerTemplate(name: 'linchpin-libvirt',
                         alwaysPullImage: true,
-                        image: DOCKER_REPO_URL + '/' + OPENSHIFT_NAMESPACE + '/linchpin-libvirt:' + LINCHPIN_LIBVIRT_TAG,
+                        image: "$dockerRegistryUrl/$openshiftProject/linchpin-libvirt:" + LINCHPIN_LIBVIRT_TAG,
                         ttyEnabled: true,
                         command: '/usr/sbin/init',
                         privileged: true,
