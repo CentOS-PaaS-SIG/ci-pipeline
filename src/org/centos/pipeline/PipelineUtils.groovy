@@ -964,6 +964,20 @@ def updateBuildDisplayAndDescription() {
 }
 
 /**
+ * Sets the Build displayName and Description based on params
+ * @param buildName
+ * @param buildDesc
+ */
+def setCustomBuildNameAndDescription(String buildName, String buildDesc) {
+    if (buildName?.trim()) {
+        currentBuild.displayName = buildName
+    }
+    if (buildDesc?.trim()) {
+        currentBuild.description = buildDesc
+    }
+}
+
+/**
  * get Variables From Message
  * @param message trigger message
  * @return map of message vars
