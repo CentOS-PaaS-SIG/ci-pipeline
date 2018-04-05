@@ -231,6 +231,15 @@ class pipelineUtils implements Serializable {
         pipelineUtils.updateBuildDisplayAndDescription()
     }
 
+    /**
+     * Sets the Build displayName and Description based on params
+     * @param buildName
+     * @param buildDesc
+     */
+    def setCustomBuildNameAndDescription(String buildName, String buildDesc) {
+        pipelineUtils.setCustomBuildNameAndDescription(buildName, buildDesc)
+    }
+
 /**
  * Check data grepper for presence of a message
  * @param messageID message ID to track.
