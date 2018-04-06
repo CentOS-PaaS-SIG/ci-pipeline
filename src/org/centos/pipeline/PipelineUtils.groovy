@@ -1099,3 +1099,15 @@ def checkTests(String mypackage, String mybranch, String tag) {
 def skip(String stageName) {
     Utils.markStageSkippedForConditional(stageName)
 }
+
+def parseTestLog(def fileLocation) {
+    String contents = new File(fileLocation).text.split('\n')
+
+    def testMap = [:]
+    contents.each { test, result ->
+        testMap[test] = result
+    }
+
+    return testMap
+
+}

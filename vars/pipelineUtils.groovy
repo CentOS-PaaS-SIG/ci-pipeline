@@ -301,4 +301,8 @@ class pipelineUtils implements Serializable {
         return pipelineUtils.skip(stageName)
     }
 
+    def parseTestLog(String fileLocation) {
+        return pipelineUtils.parseTestLog(fileLocation)
+    }
+
 }
