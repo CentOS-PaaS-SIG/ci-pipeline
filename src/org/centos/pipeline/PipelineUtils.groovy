@@ -1121,36 +1121,40 @@ def parseTestLog(def fileLocation) {
 }
 
 /**
- * Set default job metrics
- * @return
- */
-def setJobMetrics() {
-    def jobMeasurement = "jenkins_job_${env.JOB_NAME}"
-    ciMetrics.setMetricTag(jobMeasurement, 'package_name', env.fed_repo)
-    ciMetrics.setMetricTag(jobMeasurement, 'build_result', currentBuild.result)
-    ciMetrics.setMetricField(jobMeasurement, 'build_time', currentBuild.getDuration())
-}
-
-/**
  * Check the package test results and send them to influxdb
  * @param logFile - the location of the package-tests test.log
  * @return
  */
-def checkTestResults(def logFile, def packageName) {
+def checkTestResults(def testResults) {
     def buildResult = null
-    def testResults = [:]
-    try {
-        testResults = parseTestLog(logFile)
-    } catch(err) {
-        buildResult = 'FAILED'
-    }
 
     testResults.each { test, result ->
         if (result != 'PASSED') {
             buildResult = 'UNSTABLE'
         }
-        ciMetrics.setMetricTag(packageName, test, result)
     }
 
     return buildResult
+}
+
+/**
+ * Set default job metrics
+ * @return
+ */
+def setJobMetrics(def cimetrics, def tags, def fields) {
+    def jobMeasurement = "jenkins_job_${env.JOB_NAME}"
+    cimetrics.setMetricTags(jobMeasurement, tags)
+    cimetrics.setMetricFields(jobMeasurement, fields)
+}
+
+/**
+ * Set a Map of tags to influxdb
+ * @param cimetrics
+ * @param packageName
+ * @param tags
+ * @return
+ */
+def setPackageMetrics(def cimetrics, def packageName, def tags, def fields) {
+    cimetrics.setMetricTags(packageName, tags)
+    cimetrics.setMetricFields(packageName, fields)
 }

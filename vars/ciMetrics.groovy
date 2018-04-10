@@ -74,6 +74,34 @@ class ciMetrics {
     }
 
     /**
+     * Add multiple tags
+     * @param measurement
+     * @param tags
+     * @return
+     */
+    def setMetricTags(String measurement, Map tags) {
+        if (!customDataMapTags[measurement]) {
+            customDataMapTags[measurement] = [:]
+        }
+
+        customDataMapTags[measurement] = customDataMapTags[measurement] + tags
+    }
+
+    /**
+     * Add multiple fields
+     * @param measurement
+     * @param fields
+     * @return
+     */
+    def setMetricFields(String measurement, Map fields) {
+        if (!customDataMap[measurement]) {
+            customDataMap[measurement] = [:]
+        }
+
+        customDataMap[measurement] = customDataMap[measurement] + fields
+    }
+
+    /**
      * Write customDataMap to influxDB
      */
     def writeToInflux() {
