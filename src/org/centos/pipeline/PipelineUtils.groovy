@@ -1102,13 +1102,14 @@ def skip(String stageName) {
 
 def parseTestLog(def fileLocation) {
 
-    String contents = readFile(fileLocation)
+    def contents = readFile(fileLocation)
 
     def newContents = contents.split('\n')
 
     def testMap = [:]
-    newContents.each { test, result ->
-        testMap[test] = result
+    newContents.each { test ->
+        def splitTest = test.split()
+        testMap[splitTest[1]] = splitTest[0]
     }
 
     return testMap
