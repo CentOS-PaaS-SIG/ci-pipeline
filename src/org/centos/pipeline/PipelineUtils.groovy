@@ -1099,3 +1099,24 @@ def checkTests(String mypackage, String mybranch, String tag) {
 def skip(String stageName) {
     Utils.markStageSkippedForConditional(stageName)
 }
+
+/**
+ * Reads package test.log and return a map of test_name -> test_result
+ * @param fileLocation
+ * @return
+ */
+def parseTestLog(def fileLocation) {
+
+    def contents = readFile(fileLocation)
+
+    def newContents = contents.split('\n')
+
+    def testMap = [:]
+    newContents.each { test ->
+        def splitTest = test.split()
+        testMap[splitTest[1]] = splitTest[0]
+    }
+
+    return testMap
+
+}
