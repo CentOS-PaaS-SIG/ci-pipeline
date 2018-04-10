@@ -43,6 +43,13 @@ class ciMetrics {
 
     }
 
+    /**
+     * Method used to set fields in an influxdb measurement
+     * @param measurement
+     * @param key
+     * @param value
+     * @return
+     */
     def setMetricField(String measurement, String key, def value) {
         if (!customDataMap[measurement]) {
             customDataMap[measurement] = [:]
@@ -51,6 +58,13 @@ class ciMetrics {
         customDataMap[measurement][key] = value
     }
 
+    /**
+     * Method used to set tags in an influxdb measurement
+     * @param measurement
+     * @param key
+     * @param value
+     * @return
+     */
     def setMetricTag(String measurement, String key, String value) {
         if (!customDataMapTags[measurement]) {
             customDataMapTags[measurement] = [:]

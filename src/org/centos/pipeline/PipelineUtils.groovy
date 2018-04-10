@@ -1100,6 +1100,11 @@ def skip(String stageName) {
     Utils.markStageSkippedForConditional(stageName)
 }
 
+/**
+ * Reads package test.log and return a map of test_name -> test_result
+ * @param fileLocation
+ * @return
+ */
 def parseTestLog(def fileLocation) {
 
     def contents = readFile(fileLocation)
