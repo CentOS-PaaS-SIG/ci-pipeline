@@ -1121,9 +1121,9 @@ def parseTestLog(def fileLocation) {
 }
 
 /**
- * Check the package test results and send them to influxdb
+ * Check the package test results
  * @param logFile - the location of the package-tests test.log
- * @return
+ * @return return the build status
  */
 def checkTestResults(def testResults) {
     def buildResult = null
@@ -1135,26 +1135,4 @@ def checkTestResults(def testResults) {
     }
 
     return buildResult
-}
-
-/**
- * Set default job metrics
- * @return
- */
-def setJobMetrics(def cimetrics, def tags, def fields) {
-    def jobMeasurement = "jenkins_job_${env.JOB_NAME}"
-    cimetrics.setMetricTags(jobMeasurement, tags)
-    cimetrics.setMetricFields(jobMeasurement, fields)
-}
-
-/**
- * Set a Map of tags to influxdb
- * @param cimetrics
- * @param packageName
- * @param tags
- * @return
- */
-def setPackageMetrics(def cimetrics, def packageName, def tags, def fields) {
-    cimetrics.setMetricTags(packageName, tags)
-    cimetrics.setMetricFields(packageName, fields)
 }

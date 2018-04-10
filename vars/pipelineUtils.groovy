@@ -310,8 +310,13 @@ class pipelineUtils implements Serializable {
         return pipelineUtils.parseTestLog(fileLocation)
     }
 
-    def setJobMetrics() {
-        pipelineUtils.setJobMetrics()
+    /**
+     * Check the package test results
+     * @param testResults
+     * @return return the build status
+     */
+    def checkTestResults(Map testResults) {
+        return pipelineUtils.checkTestResults(testResults)
     }
 
 }
