@@ -1106,7 +1106,6 @@ def skip(String stageName) {
  * @return
  */
 def parseTestLog(def fileLocation) {
-
     def contents = readFile(fileLocation)
 
     def newContents = contents.split('\n')
@@ -1119,4 +1118,39 @@ def parseTestLog(def fileLocation) {
 
     return testMap
 
+}
+
+/**
+ * Set default job metrics
+ * @return
+ */
+def setJobMetrics() {
+    def jobMeasurement = "jenkins_job_${env.JOB_NAME}"
+    ciMetrics.setMetricTag(jobMeasurement, 'package_name', env.fed_repo)
+    ciMetrics.setMetricTag(jobMeasurement, 'build_result', currentBuild.result)
+    ciMetrics.setMetricField(jobMeasurement, 'build_time', currentBuild.getDuration())
+}
+
+/**
+ * Check the package test results and send them to influxdb
+ * @param logFile - the location of the package-tests test.log
+ * @return
+ */
+def checkTestResults(def logFile, def packageName) {
+    def buildResult = null
+    def testResults = [:]
+    try {
+        testResults = parseTestLog(logFile)
+    } catch(err) {
+        buildResult = 'FAILED'
+    }
+
+    testResults.each { test, result ->
+        if (result != 'PASSED') {
+            buildResult = 'UNSTABLE'
+        }
+        ciMetrics.setMetricTag(packageName, test, result)
+    }
+
+    return buildResult
 }
