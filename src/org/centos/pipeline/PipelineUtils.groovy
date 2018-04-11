@@ -1105,8 +1105,7 @@ def skip(String stageName) {
  * @param fileLocation
  * @return
  */
-def parseTestLog(def fileLocation) {
-
+def parseTestLog(String fileLocation) {
     def contents = readFile(fileLocation)
 
     def newContents = contents.split('\n')
@@ -1119,4 +1118,21 @@ def parseTestLog(def fileLocation) {
 
     return testMap
 
+}
+
+/**
+ * Check the package test results
+ * @param logFile - the location of the package-tests test.log
+ * @return return the build status
+ */
+def checkTestResults(Map testResults) {
+    def buildResult = null
+
+    testResults.each { test, result ->
+        if (result != 'PASSED') {
+            buildResult = 'UNSTABLE'
+        }
+    }
+
+    return buildResult
 }
