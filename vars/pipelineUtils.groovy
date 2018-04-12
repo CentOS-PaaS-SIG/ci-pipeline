@@ -319,4 +319,13 @@ class pipelineUtils implements Serializable {
         return pipelineUtils.checkTestResults(testResults)
     }
 
+    /**
+     * General function to check existence of a file
+     * @param fileLocation
+     * @return boolean
+     */
+    def fileExists(String fileLocation) {
+        return pipelineUtils.fileExists(fileLocation)
+    }
+
 }
