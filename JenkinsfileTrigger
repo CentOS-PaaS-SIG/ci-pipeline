@@ -4,7 +4,7 @@ properties(
                 parameters(
                     [
                         string(description: 'fedmsg msg', name: 'CI_MESSAGE'),
-                        string(defaultValue: '^(f26|f27)$', description: 'fedora branch targets', name: 'TARGETS'),
+                        string(defaultValue: '^(f26|f27|f28)$', description: 'fedora branch targets', name: 'TARGETS'),
                         string(defaultValue: 'ci-pipeline', description: 'Main project repo', name: 'PROJECT_REPO'),
                         string(defaultValue: 'org.centos.prod', description: 'main topic to publish on', name: 'MAIN_TOPIC'),
                     ]
