@@ -1097,7 +1097,7 @@ def checkTests(String mypackage, String mybranch, String tag) {
  * @return boolean
  */
 def checkIfFork(String message) {
-    def ciMessage = new JsonSlurperClassic().parseText(message)
+    def ciMessage = new JsonSlurper().parseText(message)
     def request = ciMessage['commit']['path']
     return request.contains('repositories/forks')
 }
