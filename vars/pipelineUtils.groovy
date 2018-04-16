@@ -293,6 +293,15 @@ class pipelineUtils implements Serializable {
     }
 
     /**
+     * Test to check if CI_MESSAGE is for a user's fork
+     * @param message - The CI_MESSAGE
+     * @return boolean
+     */
+    def checkIfFork(String message) {
+        return pipelineUtils.checkIfFork(message)
+    }
+
+    /**
      * Mark stage stageName as skipped
      * @param stageName
      * @return

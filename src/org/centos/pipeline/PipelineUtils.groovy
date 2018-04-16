@@ -1092,6 +1092,17 @@ def checkTests(String mypackage, String mybranch, String tag) {
 }
 
 /**
+ * Test to check if CI_MESSAGE is for a user's fork
+ * @param message - The CI_MESSAGE
+ * @return boolean
+ */
+def checkIfFork(String message) {
+    def ciMessage = new JsonSlurper().parseText(message)
+    def request = ciMessage['commit']['path']
+    return request.contains('repositories/forks')
+}
+
+/**
  * Mark stage stageName as skipped
  * @param stageName
  * @return
