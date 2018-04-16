@@ -94,6 +94,13 @@ node('master') {
                                 # Verify this is a package we are interested in
                                 valid=0
 
+                                # Verify this commit is not to a user's fork
+                                if [[ $fed_path == *"repositories/forks"* ]] ; then
+                                    echo "Not interested - Commit to user fork"
+                                    echo "topic=${MAIN_TOPIC}.ci.pipeline.package.ignore" >> ${WORKSPACE}/job.properties
+                                    break
+                                fi
+
                                 # Get the upstream package list
                                 rm -rf fedora-atomic
                                 git clone http://pagure.io/fedora-atomic
