@@ -84,7 +84,9 @@ if [ "$noboot" == "yes" ] ; then
     sed -i "s/^autopart/$autopart_line/" ${base_dir}/logs/fedora-cloud-base-flat.ks
 fi
 # Modify kickstart file to add rpm under test
-sed -i '/^%packages/a '$package'' ${base_dir}/logs/fedora-cloud-base-flat.ks
+for pkg in $(repoquery --disablerepo=\* --enablerepo=${package} --repofrompath=${package},${rpm_repo} --all | rev | cut -d '-' -f 3- | rev ) ; do
+    sed -i '/^%packages/a '$pkg'' ${base_dir}/logs/fedora-cloud-base-flat.ks
+done
 # Add the repo to the kickstart file, based on if repo was remote or not
 if [[ $rpm_repo == /* ]]; then
     CUSTOM_IP=$(ip -o a s eth0 | awk '/inet / { print $4 }' | cut -d '/' -f 1)
