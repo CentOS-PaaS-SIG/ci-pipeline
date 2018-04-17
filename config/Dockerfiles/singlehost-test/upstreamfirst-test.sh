@@ -72,7 +72,7 @@ set +u
 PYTHON_INTERPRETER=""
 
 if [[ ! -z "${python3}" && "${python3}" == "yes" ]] ; then
-    PYTHON_INTERPRETER='--extra-vars "ansible_python_interpreter=/usr/bin/python3"'
+    PYTHON_INTERPRETER='--extra-vars ansible_python_interpreter=/usr/bin/python3'
 fi
 set -u
 
