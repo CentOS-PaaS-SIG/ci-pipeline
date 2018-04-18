@@ -346,6 +346,12 @@ class pipelineUtils implements Serializable {
         return pipelineUtils.fileExists(fileLocation)
     }
 
+    /**
+     * Traverse a CI_MESSAGE with nested keys.
+     * @param prefix
+     * @param ciMessage
+     * @return env map with all keys at top level
+     */
     def flattenJSON(String prefix, String ciMessage) {
         pipelineUtils.flattenJSON(prefix, ciMessage)
     }
