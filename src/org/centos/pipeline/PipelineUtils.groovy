@@ -374,6 +374,7 @@ def trackMessage(String messageID, int retryCount) {
         }
     }
 }
+
 /**
  * Library to parse CI_MESSAGE and inject its key/value pairs as env variables.
  *
@@ -398,6 +399,53 @@ def injectFedmsgVars(String message) {
             env.branch = 'rawhide'
         } else {
             env.branch = env.fed_branch
+        }
+    }
+}
+
+/**
+ * Library to parse Pagure PR CI_MESSAGE and inject
+ * its key/value pairs as env variables.
+ *
+ */
+def injectPRVars(String message) {
+
+    // Parse the message into a Map
+    def ci_data = new JsonSlurper().parseText(message)
+
+    // If we have a 'pullrequest' key in the CI_MESSAGE, for each key under 'pullrequest', we
+    // * prepend the key name with fed_
+    // * replace any '-' with '_'
+    // * truncate the value for the key at the first '\n' character
+    // * replace any double-quote characters with single-quote characters in the value for the key.
+
+    if (ci_data['pullrequest']) {
+        ci_data.pullrequest.each { key, value ->
+            env."fed_${key.toString().replaceAll('-', '_')}" =
+                    value.toString().split('\n')[0].replaceAll('"', '\'')
+        }
+        if (env.fed_branch == 'master'){
+            env.branch = 'rawhide'
+        } else {
+            env.branch = env.fed_branch
+        }
+        // To support existing workflows, create some env vars
+        // that map to vars from commit CI_MESSAGEs
+        // Get the repo name
+        if (ci_data['pullrequest']['project']['name']) {
+            env.fed_repo = ci_data['pullrequest']['project']['name'].toString().split('\n')[0].replaceAll('"', '\'')
+        }
+        // Get the namespace value
+        if (ci_data['pullrequest']['project']['namespace']) {
+            env.fed_namespace = ci_data['pullrequest']['project']['namespace'].toString().split('\n')[0].replaceAll('"', '\'')
+        }
+        // Get the username value
+        if (ci_data['pullrequest']['user']['name']) {
+            env.fed_username = ci_data['pullrequest']['user']['name'].toString().split('\n')[0].replaceAll('"', '\'')
+        }
+        // Create a bogus rev value to use in build descriptions
+        if (env.fed_id) {
+            env.fed_rev = "PR-" + env.fed_id
         }
     }
 }

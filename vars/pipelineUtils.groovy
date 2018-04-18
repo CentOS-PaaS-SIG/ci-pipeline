@@ -81,6 +81,15 @@ class pipelineUtils implements Serializable {
     }
 
     /**
+     * Library to parse Pagure PR CI_MESSAGE and inject
+     * its key/value pairs as env variables.
+     *
+     */
+    def injectPRVars(String message) {
+        pipelineUtils.injectPRVars(message)
+    }
+
+    /**
      * Method to set default environmental variables. Performed once at start of Jenkinsfile
      * @param envMap Key/value pairs which will be set as environmental variables.
      * @return

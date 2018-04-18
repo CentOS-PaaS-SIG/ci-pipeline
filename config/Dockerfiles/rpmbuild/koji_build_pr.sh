@@ -38,7 +38,7 @@ echo "original_spec_nvr=${truenvr}" >> ${LOGDIR}/job.props
 commits=$(git log --pretty=format:'' | wc -l)
 # %{?dist} seems to only be used when defining $release, but some
 # .spec files use different names for release, so just replace %{?dist}
-sed -i "s/%{?dist}/%{dist}-pr-${fed_uid}/" ${fed_repo}.spec
+sed -i "s/%{?dist}/%{?dist}.pr.${fed_uid}/" ${fed_repo}.spec
 
 # Build srpm to send to koji
 fedpkg --release ${fed_branch} srpm
