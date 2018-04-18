@@ -1219,8 +1219,9 @@ def checkTestResults(Map testResults) {
  * @param ciMessage
  * @return env map with all keys at top level
  */
-def flattenJSON(String prefix, def ciMessage) {
+def flattenJSON(String prefix, String ciMessage) {
 
+    def ciMessage = new JsonSlurper().parseText(message)
     ciMessage.each { key, value ->
         if (value instanceof java.util.HashMap) {
             flattenJson("${prefix}_${key}", value)

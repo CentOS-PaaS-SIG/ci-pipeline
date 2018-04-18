@@ -346,4 +346,8 @@ class pipelineUtils implements Serializable {
         return pipelineUtils.fileExists(fileLocation)
     }
 
+    def flattenJSON(String prefix, String ciMessage) {
+        pipelineUtils.flattenJSON(prefix, ciMessage)
+    }
+
 }
