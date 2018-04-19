@@ -212,8 +212,6 @@ podTemplate(name: podName,
     node(podName) {
 
         def currentStage = ""
-        // Start a buildResult variable for failed vs unstable
-        def buildResult = null
 
         ansiColor('xterm') {
             timestamps {
@@ -474,9 +472,7 @@ podTemplate(name: podName,
                                 pipelineUtils.executeInContainer(currentStage, "singlehost-test", "/tmp/package-test.sh")
                             } catch (e) {
                                 if (pipelineUtils.fileExists("${WORKSPACE}/${currentStage}/logs/test.log")) {
-                                    buildResult = 'UNSTABLE'
-                                    // set currentBuild.result to update the message status
-                                    currentBuild.result = buildResult
+                                    currentBuild.result = 'UNSTABLE'
 
                                 } else {
                                     throw e
@@ -513,9 +509,7 @@ podTemplate(name: podName,
                             pipelineUtils.executeInContainer(currentStage, "singlehost-test", "/tmp/integration-test.sh")
                         } catch (e) {
                             // Should improve to actually parse result files, but for now if the script failed, call it a test failure
-                            buildResult = 'UNSTABLE'
-                            // set currentBuild.result to update the message status
-                            currentBuild.result = buildResult
+                            currentBuild.result = 'UNSTABLE'
                         }
 
                         // Set our message topic, properties, and content
@@ -538,18 +532,13 @@ podTemplate(name: podName,
                             pipelineUtils.executeInContainer(currentStage, "linchpin-libvirt", "/root/linchpin_workspace/run_e2e_tests.sh")
                         } catch (e) {
                             // Should improve to actually parse result files, but for now if the script failed, call it a test failure
-                            buildResult = 'UNSTABLE'
-                            // set currentBuild.result to update the message status
-                            currentBuild.result = buildResult
+                            currentBuild.result = 'UNSTABLE'
                         }
                     }
-                    // If we get this far we passed
-                    buildResult = buildResult ?: 'SUCCESS'
 
                 } catch (e) {
                     // Set build result
-                    buildResult = 'FAILURE'
-                    currentBuild.result = buildResult
+                    currentBuild.result = 'FAILURE'
 
                     // Send message org.centos.prod.ci.pipeline.<stage>.complete on fedmsg if stage failed
                     // as the execution of stage would have stopped with executeInContainer call
@@ -564,7 +553,7 @@ podTemplate(name: podName,
                     throw e
 
                 } finally {
-                    currentBuild.result = buildResult
+                    currentBuild.result = currentBuild.result ?: 'SUCCESS'
                     // Set the build display name and description
                     pipelineUtils.setBuildDisplayAndDescription()
 
