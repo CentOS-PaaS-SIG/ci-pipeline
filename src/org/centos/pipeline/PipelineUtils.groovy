@@ -1212,3 +1212,22 @@ def checkTestResults(Map testResults) {
 
     return buildResult
 }
+
+/**
+ * Traverse a CI_MESSAGE with nested keys.
+ * @param prefix
+ * @param message
+ * @return env map with all keys at top level
+ */
+def flattenJSON(String prefix, String message) {
+
+    def ciMessage = new JsonSlurper().parseText(message)
+    ciMessage.each { key, value ->
+        if (value instanceof java.util.HashMap) {
+            flattenJson("${prefix}_${key}", value)
+        } else {
+            env."${prefix}_${key.replaceAll('-', '_')}" =
+                    value.toString().split('\n')[0].replaceAll('"', '\'')
+        }
+    }
+}
