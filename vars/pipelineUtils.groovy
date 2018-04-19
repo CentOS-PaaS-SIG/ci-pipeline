@@ -352,8 +352,8 @@ class pipelineUtils implements Serializable {
      * @param ciMessage
      * @return env map with all keys at top level
      */
-    def flattenJSON(String prefix, String ciMessage) {
-        pipelineUtils.flattenJSON(prefix, ciMessage)
+    def flattenJSON(String prefix, String message) {
+        pipelineUtils.flattenJSON(prefix, message)
     }
 
 }
