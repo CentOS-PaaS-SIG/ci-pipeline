@@ -1214,20 +1214,43 @@ def checkTestResults(Map testResults) {
 }
 
 /**
+ * Wrapper to parse json before injecting env variables
+ * @param prefix
+ * @param message
+ * @return
+ */
+def flattenJSON(String prefix, String message) {
+    def ciMessage = new JsonSlurper().parseText(message)
+    flattenJSON(prefix, ciMessage)
+}
+
+/**
  * Traverse a CI_MESSAGE with nested keys.
  * @param prefix
  * @param message
  * @return env map with all keys at top level
  */
-def flattenJSON(String prefix, String message) {
+def injectCIMessage(String prefix, def ciMessage) {
 
-    def ciMessage = new JsonSlurper().parseText(message)
     ciMessage.each { key, value ->
-        if (value instanceof java.util.HashMap) {
-            flattenJson("${prefix}_${key}", value)
+        def new_key = key.replaceAll('-', '_')
+        if (value instanceof groovy.json.internal.LazyMap) {
+            injectCIMessage("${prefix}_${new_key}", value)
+        } else if (value instanceof  java.util.ArrayList) {
+            injectARRAY("${prefix}_${new_key}", value)
         } else {
-            env."${prefix}_${key.replaceAll('-', '_')}" =
-                    value.toString().split('\n')[0].replaceAll('"', '\'')
+            env."${prefix}_${new_key}" =
+                value.toString().split('\n')[0].replaceAll('"', '\'')
         }
     }
 }
+
+def injectARRAY(String prefix, def message) {
+    message.eachWithIndex { value, index ->
+        env."${prefix}_${index}" =
+            value.toString().split('\n')[0].replaceAll('"', '\'')
+
+    }
+}
+
+
