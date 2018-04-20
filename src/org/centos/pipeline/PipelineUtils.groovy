@@ -1245,6 +1245,12 @@ def injectCIMessage(String prefix, def ciMessage) {
     }
 }
 
+/**
+ * Inject array values
+ * @param prefix
+ * @param message
+ * @return
+ */
 def injectARRAY(String prefix, def message) {
     message.eachWithIndex { value, index ->
         env."${prefix}_${index}" =
