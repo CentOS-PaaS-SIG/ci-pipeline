@@ -48,6 +48,7 @@ mkdir -p ${RPMDIR}
 
 mv somewhere/* ${RPMDIR}/
 
+# build target is rawhide or f**-candidate
 if [ $FED_BRANCH == "rawhide" ]; then
     BRANCH="master"
 else
