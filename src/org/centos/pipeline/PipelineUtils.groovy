@@ -1221,7 +1221,7 @@ def checkTestResults(Map testResults) {
  */
 def flattenJSON(String prefix, String message) {
     def ciMessage = new JsonSlurper().parseText(message)
-    flattenJSON(prefix, ciMessage)
+    injectCIMessage(prefix, ciMessage)
 }
 
 /**
@@ -1237,7 +1237,7 @@ def injectCIMessage(String prefix, def ciMessage) {
         if (value instanceof groovy.json.internal.LazyMap) {
             injectCIMessage("${prefix}_${new_key}", value)
         } else if (value instanceof  java.util.ArrayList) {
-            injectARRAY("${prefix}_${new_key}", value)
+            injectArray("${prefix}_${new_key}", value)
         } else {
             env."${prefix}_${new_key}" =
                 value.toString().split('\n')[0].replaceAll('"', '\'')
@@ -1251,7 +1251,7 @@ def injectCIMessage(String prefix, def ciMessage) {
  * @param message
  * @return
  */
-def injectARRAY(String prefix, def message) {
+def injectArray(String prefix, def message) {
     message.eachWithIndex { value, index ->
         env."${prefix}_${index}" =
             value.toString().split('\n')[0].replaceAll('"', '\'')
