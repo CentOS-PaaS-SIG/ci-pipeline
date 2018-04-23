@@ -451,6 +451,29 @@ def injectPRVars(String message) {
 }
 
 /**
+ * Library to parse Pagure PR CI_MESSAGE and check if
+ * it is for a new commit added, the comment contains
+ * some keyword, or if the PR was rebased
+ * @param message - The CI_MESSAGE
+ * @param keyword - The keyword we care about
+ * @return bool
+ */
+def checkUpdatedPR(String message, String keyword) {
+
+    // Parse the message into a Map
+    def ci_data = new JsonSlurper().parseText(message)
+
+    if (ci_data['pullrequest']['comments']) {
+        if (ci_data['pullrequest']['comments'].last()['comment'].contains('new commits added**') || ci_data['pullrequest']['comments'].last()['comment'].contains(keyword) || ci_data['pullrequest']['comments'].last()['comment'].startsWith("rebased onto ")) {
+            return true
+        } else {
+            return false
+        }
+    }
+    return true
+}
+
+/**
  * Library to prepare credentials
  * @return
  */

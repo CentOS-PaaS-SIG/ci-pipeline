@@ -90,6 +90,17 @@ class pipelineUtils implements Serializable {
     }
 
     /**
+     * Library to parse Pagure PR CI_MESSAGE and check if
+     * it is for a new commit added, the comment contains
+     * some keyword, or if the PR was rebased
+     * @param message - The CI_MESSAGE
+     * @param keyword - The keyword we care about
+     */
+    def checkUpdatedPR(String message, String keyword) {
+        pipelineUtils.checkUpdatedPR(message, keyword)
+    }
+
+    /**
      * Method to set default environmental variables. Performed once at start of Jenkinsfile
      * @param envMap Key/value pairs which will be set as environmental variables.
      * @return
