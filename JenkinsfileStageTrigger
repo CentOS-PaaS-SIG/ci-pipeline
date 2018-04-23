@@ -68,7 +68,7 @@ properties([
       extensions: [
         [
           $class: 'org.jenkinsci.plugins.ghprb.extensions.status.GhprbSimpleStatus',
-          commitStatusContext: 'Docker Build',
+          commitStatusContext: 'Atomic Stage Job',
           showMatrixStatus: false,
           triggeredStatus: 'Starting job...',
           startedStatus: 'Building...',
