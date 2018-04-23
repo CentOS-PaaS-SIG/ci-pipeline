@@ -39,7 +39,7 @@ koji download-task --arch=x86_64 --arch=src ${PROVIDED_KOJI_TASKID} --logs
 createrepo .
 PACKAGE=$(rpm --queryformat "%{NAME}\n" -qp *.src.rpm)
 NVR=$(rpm --queryformat "%{NAME} %{VERSION} %{RELEASE}\n" -qp *.src.rpm)
-FED_BRANCH=$(koji taskinfo --verbose ${PROVIDED_KOJI_TASKID} | grep Target | awk '{print $3}' | grep -zo '.*[0-9]')
+FED_BRANCH=$(koji taskinfo --verbose ${PROVIDED_KOJI_TASKID} | grep Target | awk '{print $3}')
 popd
 
 RPMDIR=${CURRENTDIR}/${PACKAGE}_repo
@@ -48,11 +48,10 @@ mkdir -p ${RPMDIR}
 
 mv somewhere/* ${RPMDIR}/
 
-if [ "$(echo $FED_BRANCH | sed -e 's/[a-zA-Z]*//')" = $(curl -s https://src.fedoraproject.org/rpms/fedora-release/raw/master/f/fedora-release.spec | awk '/%define dist_version/ {print $3}') ]; then
+if [ $FED_BRANCH == "rawhide" ]; then
     BRANCH="master"
-    FED_BRANCH="rawhide"
 else
-    BRANCH=$FED_BRANCH
+    BRANCH="$(echo $FED_BRANCH |sed -E "s/-.*//")"
 fi
 
 # Let's archive the logs too
