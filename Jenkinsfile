@@ -48,34 +48,89 @@ properties(
                 disableConcurrentBuilds(),
                 parameters(
                         [
-                                string(description: 'CI Message that triggered the pipeline', name: 'CI_MESSAGE'),
-                                string(defaultValue: 'f26', description: 'Fedora target branch', name: 'TARGET_BRANCH'),
-                                string(defaultValue: '', description: 'HTTP Server', name: 'HTTP_SERVER'),
-                                string(defaultValue: '', description: 'HTTP dir', name: 'HTTP_DIR'),
-                                string(defaultValue: '', description: 'RSync User', name: 'RSYNC_USER'),
-                                string(defaultValue: '', description: 'RSync Server', name: 'RSYNC_SERVER'),
-                                string(defaultValue: '', description: 'RSync Dir', name: 'RSYNC_DIR'),
-                                string(defaultValue: 'ci-pipeline', description: 'Main project repo', name: 'PROJECT_REPO'),
-                                string(defaultValue: '', description: 'Main topic to publish on', name: 'MAIN_TOPIC'),
-                                string(defaultValue: 'fedora-fedmsg', description: 'Main provider to send messages on', name: 'MSG_PROVIDER'),
-                                string(defaultValue: '', description: 'Principal for authenticating with fedora build system', name: 'FEDORA_PRINCIPAL'),
-                                string(defaultValue: 'master', description: '', name: 'ghprbActualCommit'),
-                                string(defaultValue: 'CentOS-PaaS-SIG/ci-pipeline', description: '', name: 'ghprbGhRepository'),
-                                string(defaultValue: '', description: '', name: 'sha1'),
-                                string(defaultValue: '', description: '', name: 'ghprbPullId'),
-                                string(defaultValue: '', description: '', name: 'ghprbPullAuthorLogin'),
-                                string(defaultValue: 'stable', description: 'Tag for slave image', name: 'SLAVE_TAG'),
-                                string(defaultValue: 'stable', description: 'Tag for ostree boot image', name: 'OSTREE_BOOT_IMAGE_TAG'),
-                                string(defaultValue: 'stable', description: 'Tag for rpmbuild image', name: 'RPMBUILD_TAG'),
-                                string(defaultValue: 'stable', description: 'Tag for rsync image', name: 'RSYNC_TAG'),
-                                string(defaultValue: 'stable', description: 'Tag for ostree-compose image', name: 'OSTREE_COMPOSE_TAG'),
-                                string(defaultValue: 'stable', description: 'Tag for ostree-image-compose image', name: 'OSTREE_IMAGE_COMPOSE_TAG'),
-                                string(defaultValue: 'stable', description: 'Tag for singlehost test image', name: 'SINGLEHOST_TEST_TAG'),
-                                string(defaultValue: 'stable', description: 'Tag for linchpin-libvirt image', name: 'LINCHPIN_LIBVIRT_TAG'),
-                                string(defaultValue: '172.30.254.79:5000', description: 'Docker repo url for Openshift instance', name: 'DOCKER_REPO_URL'),
-                                string(defaultValue: 'continuous-infra', description: 'Project namespace for Openshift operations', name: 'OPENSHIFT_NAMESPACE'),
-                                string(defaultValue: 'jenkins', description: 'Service Account for Openshift operations', name: 'OPENSHIFT_SERVICE_ACCOUNT'),
-                                booleanParam(defaultValue: false, description: 'Force generation of the image', name: 'GENERATE_IMAGE'),
+                                string(name: 'CI_MESSAGE',
+                                       description: 'CI Message that triggered the pipeline'),
+                                string(name: 'TARGET_BRANCH',
+                                       defaultValue: 'f26',
+                                       description: 'Fedora target branch'),
+                                string(name: 'HTTP_SERVER',
+                                       defaultValue: '',
+                                       description: 'HTTP Server'),
+                                string(name: 'HTTP_DIR',
+                                       defaultValue: '',
+                                       description: 'HTTP dir'),
+                                string(name: 'RSYNC_USER',
+                                       defaultValue: '',
+                                       description: 'RSync User'),
+                                string(name: 'RSYNC_SERVER',
+                                       defaultValue: '',
+                                       description: 'RSync Server'),
+                                string(name: 'RSYNC_DIR',
+                                       defaultValue: '',
+                                       description: 'RSync Dir'),
+                                string(name: 'PROJECT_REPO',
+                                       defaultValue: 'ci-pipeline',
+                                       description: 'Main project repo'),
+                                string(name: 'MAIN_TOPIC',
+                                       defaultValue: '',
+                                       description: 'Main topic to publish on'),
+                                string(name: 'MSG_PROVIDER',
+                                       defaultValue: 'fedora-fedmsg',
+                                       description: 'Main provider to send messages on'),
+                                string(name: 'FEDORA_PRINCIPAL',
+                                       defaultValue: '',
+                                       description: 'Principal for authenticating with fedora build system'),
+                                string(name: 'ghprbActualCommit',
+                                       defaultValue: 'master',
+                                       description: 'The GitHub pull request commit'),
+                                string(name: 'ghprbGhRepository',
+                                       defaultValue: 'CentOS-PaaS-SIG/ci-pipeline',
+                                       description: 'The repo the PR is against'),
+                                string(name: 'sha1',
+                                       defaultValue: '',
+                                       description: ''),
+                                string(name: 'ghprbPullId',
+                                       defaultValue: '',
+                                       description: 'The GitHub pull request number'),
+                                string(name: 'ghprbPullAuthorLogin',
+                                       defaultValue: '',
+                                       description: 'Who raised the GitHub pull request'),
+                                string(name: 'SLAVE_TAG',
+                                       defaultValue: 'stable',
+                                       description: 'Tag for slave image'),
+                                string(name: 'OSTREE_BOOT_IMAGE_TAG',
+                                       defaultValue: 'stable',
+                                       description: 'Tag for ostree boot image'),
+                                string(name: 'RPMBUILD_TAG',
+                                       defaultValue: 'stable',
+                                       description: 'Tag for rpmbuild image'),
+                                string(name: 'RSYNC_TAG',
+                                       defaultValue: 'stable',
+                                       description: 'Tag for rsync image'),
+                                string(name: 'OSTREE_COMPOSE_TAG',
+                                       defaultValue: 'stable',
+                                       description: 'Tag for ostree-compose image'),
+                                string(name: 'OSTREE_IMAGE_COMPOSE_TAG',
+                                       defaultValue: 'stable',
+                                       description: 'Tag for ostree-image-compose image'),
+                                string(name: 'SINGLEHOST_TEST_TAG',
+                                       defaultValue: 'stable',
+                                       description: 'Tag for singlehost test image'),
+                                string(name: 'LINCHPIN_LIBVIRT_TAG',
+                                       defaultValue: 'stable',
+                                       description: 'Tag for linchpin-libvirt image'),
+                                string(name: 'DOCKER_REPO_URL',
+                                       defaultValue: '172.30.254.79:5000',
+                                       description: 'Docker repo url for Openshift instance'),
+                                string(name: 'OPENSHIFT_NAMESPACE',
+                                       defaultValue: 'continuous-infra',
+                                       description: 'Project namespace for Openshift operations'),
+                                string(name: 'OPENSHIFT_SERVICE_ACCOUNT',
+                                       defaultValue: 'jenkins',
+                                       description: 'Service Account for Openshift operations'),
+                                booleanParam(name: 'GENERATE_IMAGE',
+                                             defaultValue: false,
+                                             description: 'Force generation of the image'),
                         ]
                 ),
         ]
@@ -391,21 +446,18 @@ podTemplate(name: podName,
 
                     }
 
-                    // Only run this stage if tests exist
-                    if (pipelineUtils.checkTests(env.fed_repo, env.fed_branch, 'atomic')) {
-                        // Set our message topic, properties, and content
-                        messageFields = pipelineUtils.setMessageFields("package.test.functional.queued")
-
-                        // Send message org.centos.prod.ci.pipeline.package.test.functional.queued on fedmsg
-                        pipelineUtils.sendMessageWithAudit(messageFields['topic'], messageFields['properties'], messageFields['content'], msgAuditFile, fedmsgRetryCount)
-                    }
-
                     currentStage = "ci-pipeline-functional-tests"
                     stage(currentStage) {
                         // Only run this stage if tests exist
                         if (!pipelineUtils.checkTests(env.fed_repo, env.fed_branch, 'atomic')) {
                             pipelineUtils.skip(currentStage)
                         } else {
+                            // Set our message topic, properties, and content
+                            messageFields = pipelineUtils.setMessageFields("package.test.functional.queued")
+
+                            // Send message org.centos.prod.ci.pipeline.package.test.functional.queued on fedmsg
+                            pipelineUtils.sendMessageWithAudit(messageFields['topic'], messageFields['properties'], messageFields['content'], msgAuditFile, fedmsgRetryCount)
+
                             // Set stage specific vars
                             pipelineUtils.setStageEnvVars(currentStage)
 
@@ -416,7 +468,16 @@ podTemplate(name: podName,
                             pipelineUtils.sendMessage(messageFields['topic'], messageFields['properties'], messageFields['content'])
 
                             // Run functional tests
-                            pipelineUtils.executeInContainer(currentStage, "singlehost-test", "/tmp/package-test.sh")
+                            try {
+                                pipelineUtils.executeInContainer(currentStage, "singlehost-test", "/tmp/package-test.sh")
+                            } catch (e) {
+                                if (pipelineUtils.fileExists("${WORKSPACE}/${currentStage}/logs/test.log")) {
+                                    currentBuild.result = 'UNSTABLE'
+
+                                } else {
+                                    throw e
+                                }
+                            }
 
                             // Set our message topic, properties, and content
                             messageFields = pipelineUtils.setMessageFields("package.test.functional.complete")
@@ -444,7 +505,12 @@ podTemplate(name: podName,
                         pipelineUtils.sendMessageWithAudit(messageFields['topic'], messageFields['properties'], messageFields['content'], msgAuditFile, fedmsgRetryCount)
 
                         // Run integration tests
-                        pipelineUtils.executeInContainer(currentStage, "singlehost-test", "/tmp/integration-test.sh")
+                        try {
+                            pipelineUtils.executeInContainer(currentStage, "singlehost-test", "/tmp/integration-test.sh")
+                        } catch (e) {
+                            // Should improve to actually parse result files, but for now if the script failed, call it a test failure
+                            currentBuild.result = 'UNSTABLE'
+                        }
 
                         // Set our message topic, properties, and content
                         messageFields = pipelineUtils.setMessageFields("compose.test.integration.complete")
@@ -462,12 +528,22 @@ podTemplate(name: podName,
                         pipelineUtils.setStageEnvVars(currentStage)
 
                         // run linchpin workspace for e2e tests
-                        pipelineUtils.executeInContainer(currentStage, "linchpin-libvirt", "/root/linchpin_workspace/run_e2e_tests.sh")
+                        try {
+                            pipelineUtils.executeInContainer(currentStage, "linchpin-libvirt", "/root/linchpin_workspace/run_e2e_tests.sh")
+                        } catch (e) {
+                            // Should improve to actually parse result files, but for now if the script failed, call it a test failure
+                            currentBuild.result = 'UNSTABLE'
+                        }
                     }
 
                 } catch (e) {
                     // Set build result
                     currentBuild.result = 'FAILURE'
+
+                    // Send message org.centos.prod.ci.pipeline.<stage>.complete on fedmsg if stage failed
+                    // as the execution of stage would have stopped with executeInContainer call
+                    messageFields = packagepipelineUtils.setMessageFields(messageStage)
+                    pipelineUtils.sendMessageWithAudit(messageFields['topic'], messageFields['properties'], messageFields['content'], msgAuditFile, fedmsgRetryCount)
 
                     // Report the exception
                     echo "Error: Exception from " + currentStage + ":"
@@ -477,6 +553,7 @@ podTemplate(name: podName,
                     throw e
 
                 } finally {
+                    currentBuild.result = currentBuild.result ?: 'SUCCESS'
                     // Set the build display name and description
                     pipelineUtils.setBuildDisplayAndDescription()
 
