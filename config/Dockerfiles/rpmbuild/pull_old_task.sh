@@ -21,7 +21,7 @@ function archive_variables {
     cat << EOF > ${LOGDIR}/job.props
 koji_task_id=${PROVIDED_KOJI_TASKID}
 fed_repo=${PACKAGE}
-fed_branch=${FED_BRANCH}
+fed_branch=${BRANCH}
 branch=${BRANCH}
 fed_rev=kojitask-${PROVIDED_KOJI_TASKID}
 nvr=${NVR}
@@ -39,7 +39,7 @@ koji download-task --arch=x86_64 --arch=src ${PROVIDED_KOJI_TASKID} --logs
 createrepo .
 PACKAGE=$(rpm --queryformat "%{NAME}\n" -qp *.src.rpm)
 NVR=$(rpm --queryformat "%{NAME} %{VERSION} %{RELEASE}\n" -qp *.src.rpm)
-FED_BRANCH=$(koji taskinfo --verbose ${PROVIDED_KOJI_TASKID} | grep Target | awk '{print $3}')
+TARGET_BRANCH=$(koji taskinfo --verbose ${PROVIDED_KOJI_TASKID} | grep Target | awk '{print $3}')
 popd
 
 RPMDIR=${CURRENTDIR}/${PACKAGE}_repo
@@ -49,10 +49,10 @@ mkdir -p ${RPMDIR}
 mv somewhere/* ${RPMDIR}/
 
 # build target is rawhide or f**-candidate
-if [ $FED_BRANCH == "rawhide" ]; then
+if [ $TARGET_BRANCH == "rawhide" ]; then
     BRANCH="master"
 else
-    BRANCH="$(echo $FED_BRANCH |sed -E "s/-.*//")"
+    BRANCH="$(echo $TARGET_BRANCH |sed -E "s/-.*//")"
 fi
 
 # Let's archive the logs too
