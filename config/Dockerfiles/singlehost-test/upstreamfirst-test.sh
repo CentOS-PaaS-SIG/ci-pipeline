@@ -26,9 +26,6 @@ if [ -z "${package:-}" ]; then
 	fi
 fi
 
-# Replace beakerlib role with one that won't choke installing restraint while on a rawhide distro
-cp -f /tmp/beakerlib-role-main.yml /etc/ansible/roles/standard-test-beakerlib/tasks/main.yml
-
 # Make sure we have or have downloaded the test subject
 if [ -z "${TEST_SUBJECTS:-}" ]; then
 	echo "No subject defined"
