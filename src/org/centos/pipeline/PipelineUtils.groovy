@@ -406,46 +406,51 @@ def injectFedmsgVars(String message) {
 /**
  * Library to parse Pagure PR CI_MESSAGE and inject
  * its key/value pairs as env variables.
- *
+ * @param prefix - String to prefix env variables with
+ * @param message - The CI_MESSAGE
  */
-def injectPRVars(String message) {
+def injectPRVars(String prefix, String message) {
 
     // Parse the message into a Map
     def ci_data = new JsonSlurper().parseText(message)
 
     // If we have a 'pullrequest' key in the CI_MESSAGE, for each key under 'pullrequest', we
-    // * prepend the key name with fed_
+    // * prepend the key name with prefix_
     // * replace any '-' with '_'
     // * truncate the value for the key at the first '\n' character
     // * replace any double-quote characters with single-quote characters in the value for the key.
 
     if (ci_data['pullrequest']) {
         ci_data.pullrequest.each { key, value ->
-            env."fed_${key.toString().replaceAll('-', '_')}" =
+            env."${prefix}_${key.toString().replaceAll('-', '_')}" =
                     value.toString().split('\n')[0].replaceAll('"', '\'')
         }
-        if (env.fed_branch == 'master'){
+        if (env."${prefix}_branch" == 'master'){
             env.branch = 'rawhide'
         } else {
-            env.branch = env.fed_branch
+            env.branch = env."${prefix}_branch"
         }
         // To support existing workflows, create some env vars
         // that map to vars from commit CI_MESSAGEs
         // Get the repo name
         if (ci_data['pullrequest']['project']['name']) {
-            env.fed_repo = ci_data['pullrequest']['project']['name'].toString().split('\n')[0].replaceAll('"', '\'')
+            env."${prefix}_repo" = ci_data['pullrequest']['project']['name'].toString().split('\n')[0].replaceAll('"', '\'')
         }
         // Get the namespace value
         if (ci_data['pullrequest']['project']['namespace']) {
-            env.fed_namespace = ci_data['pullrequest']['project']['namespace'].toString().split('\n')[0].replaceAll('"', '\'')
+            env."${prefix}_namespace" = ci_data['pullrequest']['project']['namespace'].toString().split('\n')[0].replaceAll('"', '\'')
         }
         // Get the username value
         if (ci_data['pullrequest']['user']['name']) {
-            env.fed_username = ci_data['pullrequest']['user']['name'].toString().split('\n')[0].replaceAll('"', '\'')
+            env."${prefix}_username" = ci_data['pullrequest']['user']['name'].toString().split('\n')[0].replaceAll('"', '\'')
         }
         // Create a bogus rev value to use in build descriptions
-        if (env.fed_id) {
-            env.fed_rev = "PR-" + env.fed_id
+        if (env."${prefix}_id") {
+            env."${prefix}_rev" = "PR-" + env."${prefix}_id"
+        }
+        // Get the last comment id as it was requested
+        if (ci_data['pullrequest']['comments'].last()['id']) {
+            env."${prefix}_lastcid" = ci_data['pullrequest']['comments'].last()['id']
         }
     }
 }
@@ -454,6 +459,7 @@ def injectPRVars(String message) {
  * Library to parse Pagure PR CI_MESSAGE and check if
  * it is for a new commit added, the comment contains
  * some keyword, or if the PR was rebased
+ * If notification = true, commit was added or it was rebased
  * @param message - The CI_MESSAGE
  * @param keyword - The keyword we care about
  * @return bool
@@ -464,7 +470,7 @@ def checkUpdatedPR(String message, String keyword) {
     def ci_data = new JsonSlurper().parseText(message)
 
     if (ci_data['pullrequest']['comments']) {
-        if (ci_data['pullrequest']['comments'].last()['comment'].contains('new commits added**') || ci_data['pullrequest']['comments'].last()['comment'].contains(keyword) || ci_data['pullrequest']['comments'].last()['comment'].startsWith("rebased onto ")) {
+        if (ci_data['pullrequest']['comments'].last()['notification'] || ci_data['pullrequest']['comments'].last()['comment'].contains(keyword)) {
             return true
         } else {
             return false

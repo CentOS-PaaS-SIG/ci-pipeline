@@ -83,10 +83,11 @@ class pipelineUtils implements Serializable {
     /**
      * Library to parse Pagure PR CI_MESSAGE and inject
      * its key/value pairs as env variables.
-     *
+     * @param prefix - String to prefix env variables with
+     * @param message - The CI_MESSAGE
      */
-    def injectPRVars(String message) {
-        pipelineUtils.injectPRVars(message)
+    def injectPRVars(String prefix, String message) {
+        pipelineUtils.injectPRVars(prefix, message)
     }
 
     /**
