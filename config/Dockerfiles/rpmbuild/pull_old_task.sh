@@ -36,7 +36,7 @@ pushd somewhere
 koji download-task --arch=x86_64 --arch=src ${PROVIDED_KOJI_TASKID} --logs
 createrepo .
 PACKAGE=$(rpm --queryformat "%{NAME}\n" -qp *.src.rpm)
-NVR=$(rpm --queryformat "%{NAME} %{VERSION} %{RELEASE}\n" -qp *.src.rpm)
+NVR=$(rpm --queryformat "%{NAME}-%{VERSION}-%{RELEASE}\n" -qp *.src.rpm)
 popd
 
 RPMDIR=${CURRENTDIR}/${PACKAGE}_repo

@@ -38,7 +38,7 @@ if [[ $rpm_repo == /* ]]; then
     popd
 fi
 
-imgname="fedora-cloud-$fed_branch-$package"
+imgname="fedora-cloud-$branch-$package"
 
 function clean_up {
   set +e
@@ -68,7 +68,7 @@ fi
 
 # Checkout proper branch of kickstarts
 pushd ${base_dir}/fedora-kickstarts
-git checkout ${branch}
+git checkout ${fed_branch}
 popd
 
 # The centos7 pykickstart rpm doesnt support --noboot being in the .ks file
@@ -96,27 +96,27 @@ else
 fi
 
 # We no longer need the f in fXX
-if [ ${fed_branch} != "rawhide" ]; then
-    fed_branch=${fed_branch:1}
+if [ ${branch} != "rawhide" ]; then
+    branch=${branch:1}
 fi
 
 # Define proper install url
-if [[ $(curl -q https://dl.fedoraproject.org/pub/fedora/linux/development/ | grep "${fed_branch}/") != "" ]]; then
-    INSTALL_URL="https://dl.fedoraproject.org/pub/fedora/linux/development/${fed_branch}/Everything/x86_64/os/"
-elif [[ $(curl -q https://dl.fedoraproject.org/pub/fedora/linux/releases/ | grep "${fed_branch}/") != "" ]]; then
-    INSTALL_URL="https://dl.fedoraproject.org/pub/fedora/linux/releases/${fed_branch}/Everything/x86_64/os/"
+if [[ $(curl -q https://dl.fedoraproject.org/pub/fedora/linux/development/ | grep "${branch}/") != "" ]]; then
+    INSTALL_URL="https://dl.fedoraproject.org/pub/fedora/linux/development/${branch}/Everything/x86_64/os/"
+elif [[ $(curl -q https://dl.fedoraproject.org/pub/fedora/linux/releases/ | grep "${branch}/") != "" ]]; then
+    INSTALL_URL="https://dl.fedoraproject.org/pub/fedora/linux/releases/${branch}/Everything/x86_64/os/"
 else
     echo "Could not find installation source! Exiting..."
     exit 1
 fi
 
 # Create a tdl file for imagefactory
-cat <<EOF >${base_dir}/logs/fedora-${fed_branch}.tdl
+cat <<EOF >${base_dir}/logs/fedora-${branch}.tdl
 <template>
-    <name>${fed_branch}</name>
+    <name>${branch}</name>
     <os>
         <name>Fedora</name>
-        <version>${fed_branch}</version>
+        <version>${branch}</version>
         <arch>x86_64</arch>
         <install type='url'>
             <url>${INSTALL_URL}</url>
@@ -130,7 +130,7 @@ EOF
 #export LIBGUESTFS_BACKEND=direct
 export LIBGUESTFS_DEBUG=1 LIBGUESTFS_TRACE=1
 
-imagefactory --debug --imgdir $imgdir --timeout 3000 base_image ${base_dir}/logs/fedora-${fed_branch}.tdl --parameter offline_icicle true --file-parameter install_script ${base_dir}/logs/fedora-cloud-base-flat.ks
+imagefactory --debug --imgdir $imgdir --timeout 3000 base_image ${base_dir}/logs/fedora-${branch}.tdl --parameter offline_icicle true --file-parameter install_script ${base_dir}/logs/fedora-cloud-base-flat.ks
 
 # convert to qcow
 qemu-img convert -c -p -O qcow2 $imgdir/*body ${base_dir}/images/$imgname.qcow2
