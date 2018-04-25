@@ -38,7 +38,7 @@ if [[ $rpm_repo == /* ]]; then
     popd
 fi
 
-imgname="fedora-cloud-$branch-$package"
+imgname="fedora-cloud-$fed_branch-$package"
 
 function clean_up {
   set +e
