@@ -1254,6 +1254,31 @@ def flattenJSON(String prefix, String message) {
 }
 
 /**
+ * Set branch and $prefix_branch based on the candidate branch
+ * This is meant to be run with a CI_MESSAGE from a build task
+ * You should call flattenJSON on the CI_MESSAGE before using
+ * this function
+ * @param tag - The tag from the request field e.g. f27-candidate
+ * @param prefix - The prefix to add to the keys e.g. fed
+ * @return
+ */
+def setBuildBranch(String tag, String prefix) {
+    try {
+        if (tag == 'rawhide') {
+            env.branch = tag
+            env."${prefix}_branch" = 'master'
+        } else {
+            // assume that tag is branch-candidate
+            tokentag = tag.tokenize('-')
+            env."${prefix}_branch" = tokentag[0..tokentag.size()-2].join('-')
+            env.branch = env."${prefix}_branch"
+        }
+    } catch(e) {
+        throw new Exception('Something went wrong parsing branch', e)
+    }
+}
+
+/**
  * Traverse a CI_MESSAGE with nested keys.
  * @param prefix
  * @param message
@@ -1287,5 +1312,3 @@ def injectArray(String prefix, def message) {
 
     }
 }
-
-
