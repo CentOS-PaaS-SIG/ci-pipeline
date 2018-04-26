@@ -51,6 +51,33 @@ library identifier: "ci-pipeline@${env.ghprbActualCommit}",
                                         templates: [[value: '+refs/heads/*:refs/remotes/@{remote}/*'],
                                                     [value: '+refs/pull/*:refs/remotes/origin/pr/*']]]]])
 
+properties([
+  buildDiscarder(logRotator(artifactNumToKeepStr: '20', numToKeepStr: '20')),
+  [$class: 'GithubProjectProperty', displayName: '', projectUrlStr: 'https://github.com/CentOS-PaaS-SIG/ci-pipeline/'],
+  [$class: 'org.jenkinsci.plugins.workflow.job.properties.PipelineTriggersJobProperty', triggers:[
+    [
+      $class: 'org.jenkinsci.plugins.ghprb.GhprbTrigger',
+      orgslist: 'CentOS-PaaS-SIG',
+      cron: 'H/5 * * * *',
+      triggerPhrase: '.*\\[test\\].*',
+      onlyTriggerPhrase: false,
+      useGitHubHooks: true,
+      permitAll: true,
+      autoCloseFailedPullRequests: false,
+      displayBuildErrorsOnDownstreamBuilds: true,
+      extensions: [
+        [
+          $class: 'org.jenkinsci.plugins.ghprb.extensions.status.GhprbSimpleStatus',
+          commitStatusContext: 'Atomic Stage Job',
+          showMatrixStatus: false,
+          triggeredStatus: 'Starting job...',
+          startedStatus: 'Building...',
+        ]
+      ]
+    ]
+  ]]
+])
+
 pipeline {
     agent {
         kubernetes {
@@ -208,22 +235,38 @@ pipeline {
                         //sleep 30
                         //build job: 'ci-stage-pipeline-f26',
                                 //parameters: [
-                                        //string(name: 'CI_MESSAGE', value: CANNED_CI_MESSAGES['f26']),
-                                        //string(name: 'ghprbActualCommit', value: "${env.ghprbActualCommit}"),
-                                        //string(name: 'ghprbGhRepository', value: "${env.ghprbGhRepository}"),
-                                        //string(name: 'ghprbPullAuthorLogin', value: "${env.ghprbPullAuthorLogin}"),
-                                        //string(name: 'TARGET_BRANCH', value: "f26"),
-                                        //string(name: 'sha1', value: "${env.sha1}"),
-                                        //string(name: 'ghprbPullId', value: "${env.ghprbPullId}"),
-                                        //string(name: 'GENERATE_IMAGE', value: "true"),
-                                        //string(name: 'SLAVE_TAG', value: tagMap['jenkins-continuous-infra-slave']),
-                                        //string(name: 'RPMBUILD_TAG', value: tagMap['rpmbuild']),
-                                        //string(name: 'RSYNC_TAG', value: tagMap['rsync']),
-                                        //string(name: 'OSTREE_COMPOSE_TAG', value: tagMap['ostree-compose']),
-                                        //string(name: 'OSTREE_IMAGE_COMPOSE_TAG', value: tagMap['ostree-image-compose']),
-                                        //string(name: 'SINGLEHOST_TEST_TAG', value: tagMap['singlehost-test']),
-                                        //string(name: 'OSTREE_BOOT_IMAGE_TAG', value: tagMap['ostree-boot-image']),
-                                        //string(name: 'LINCHPIN_LIBVIRT_TAG', value: tagMap['linchpin-libvirt'])
+                                        //string(name: 'CI_MESSAGE',
+                                        //       value: CANNED_CI_MESSAGES['f26']),
+                                        //string(name: 'ghprbActualCommit',
+                                        //       value: "${env.ghprbActualCommit}"),
+                                        //string(name: 'ghprbGhRepository',
+                                        //       value: "${env.ghprbGhRepository}"),
+                                        //string(name: 'ghprbPullAuthorLogin',
+                                        //       value: "${env.ghprbPullAuthorLogin}"),
+                                        //string(name: 'TARGET_BRANCH',
+                                        //       value: "f26"),
+                                        //string(name: 'sha1',
+                                        //       value: "${env.sha1}"),
+                                        //string(name: 'ghprbPullId',
+                                        //       value: "${env.ghprbPullId}"),
+                                        //string(name: 'GENERATE_IMAGE',
+                                        //       value: "true"),
+                                        //string(name: 'SLAVE_TAG',
+                                        //       value: tagMap['jenkins-continuous-infra-slave']),
+                                        //string(name: 'RPMBUILD_TAG',
+                                        //       value: tagMap['rpmbuild']),
+                                        //string(name: 'RSYNC_TAG',
+                                        //       value: tagMap['rsync']),
+                                        //string(name: 'OSTREE_COMPOSE_TAG',
+                                        //       value: tagMap['ostree-compose']),
+                                        //string(name: 'OSTREE_IMAGE_COMPOSE_TAG',
+                                        //       value: tagMap['ostree-image-compose']),
+                                        //string(name: 'SINGLEHOST_TEST_TAG',
+                                        //       value: tagMap['singlehost-test']),
+                                        //string(name: 'OSTREE_BOOT_IMAGE_TAG',
+                                        //       value: tagMap['ostree-boot-image']),
+                                        //string(name: 'LINCHPIN_LIBVIRT_TAG',
+                                        //       value: tagMap['linchpin-libvirt'])
                                 //],
                                 //wait: true
                     //}
@@ -233,22 +276,38 @@ pipeline {
                         sleep 30
                         build job: 'ci-stage-pipeline-f27',
                                 parameters: [
-                                        string(name: 'CI_MESSAGE', value: CANNED_CI_MESSAGES['f27']),
-                                        string(name: 'ghprbActualCommit', value: "${env.ghprbActualCommit}"),
-                                        string(name: 'ghprbGhRepository', value: "${env.ghprbGhRepository}"),
-                                        string(name: 'ghprbPullAuthorLogin', value: "${env.ghprbPullAuthorLogin}"),
-                                        string(name: 'TARGET_BRANCH', value: "f27"),
-                                        string(name: 'sha1', value: "${env.sha1}"),
-                                        string(name: 'ghprbPullId', value: "${env.ghprbPullId}"),
-                                        string(name: 'GENERATE_IMAGE', value: "true"),
-                                        string(name: 'SLAVE_TAG', value: tagMap['jenkins-continuous-infra-slave']),
-                                        string(name: 'RPMBUILD_TAG', value: tagMap['rpmbuild']),
-                                        string(name: 'RSYNC_TAG', value: tagMap['rsync']),
-                                        string(name: 'OSTREE_COMPOSE_TAG', value: tagMap['ostree-compose']),
-                                        string(name: 'OSTREE_IMAGE_COMPOSE_TAG', value: tagMap['ostree-image-compose']),
-                                        string(name: 'SINGLEHOST_TEST_TAG', value: tagMap['singlehost-test']),
-                                        string(name: 'OSTREE_BOOT_IMAGE_TAG', value: tagMap['ostree-boot-image']),
-                                        string(name: 'LINCHPIN_LIBVIRT_TAG', value: tagMap['linchpin-libvirt'])
+                                        string(name: 'CI_MESSAGE',
+                                               value: CANNED_CI_MESSAGES['f27']),
+                                        string(name: 'ghprbActualCommit',
+                                               value: "${env.ghprbActualCommit}"),
+                                        string(name: 'ghprbGhRepository',
+                                               value: "${env.ghprbGhRepository}"),
+                                        string(name: 'ghprbPullAuthorLogin',
+                                               value: "${env.ghprbPullAuthorLogin}"),
+                                        string(name: 'TARGET_BRANCH',
+                                               value: "f27"),
+                                        string(name: 'sha1',
+                                               value: "${env.sha1}"),
+                                        string(name: 'ghprbPullId',
+                                               value: "${env.ghprbPullId}"),
+                                        string(name: 'GENERATE_IMAGE',
+                                               value: "true"),
+                                        string(name: 'SLAVE_TAG',
+                                               value: tagMap['jenkins-continuous-infra-slave']),
+                                        string(name: 'RPMBUILD_TAG',
+                                               value: tagMap['rpmbuild']),
+                                        string(name: 'RSYNC_TAG',
+                                               value: tagMap['rsync']),
+                                        string(name: 'OSTREE_COMPOSE_TAG',
+                                               value: tagMap['ostree-compose']),
+                                        string(name: 'OSTREE_IMAGE_COMPOSE_TAG',
+                                               value: tagMap['ostree-image-compose']),
+                                        string(name: 'SINGLEHOST_TEST_TAG',
+                                               value: tagMap['singlehost-test']),
+                                        string(name: 'OSTREE_BOOT_IMAGE_TAG',
+                                               value: tagMap['ostree-boot-image']),
+                                        string(name: 'LINCHPIN_LIBVIRT_TAG',
+                                               value: tagMap['linchpin-libvirt'])
                                 ],
                                 wait: true
                     }

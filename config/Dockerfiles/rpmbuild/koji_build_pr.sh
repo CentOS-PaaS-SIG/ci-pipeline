@@ -1,12 +1,13 @@
 #!/bin/bash
 
-# This container builds with koji into $RPMDIR
+# This container builds with koji into $RPMDIR starting from a pagure PR
 
 set -xe
 
 # Check to make sure we have all required vars
 if [ -z "${fed_repo}" ]; then echo "No fed_repo env var" ; exit 1 ; fi
-if [ -z "${fed_rev}" ]; then echo "No fed_rev env var" ; exit 1 ; fi
+if [ -z "${fed_id}" ]; then echo "No fed_id env var" ; exit 1 ; fi
+if [ -z "${fed_uid}" ]; then echo "No fed_uid env var" ; exit 1 ; fi
 if [ -z "${FEDORA_PRINCIPAL}" ]; then echo "No FEDORA_PRINCIPAL env var"; exit 1; fi
 
 CURRENTDIR=$(pwd)
@@ -27,12 +28,9 @@ rm -rf ${fed_repo}
 fedpkg clone -a ${fed_repo}
 if [ "$?" != 0 ]; then echo -e "ERROR: FEDPKG CLONE\nSTATUS: $?"; exit 1; fi
 pushd ${fed_repo}
-# Checkout the proper branch, likely unneeded since we checkout commit anyways
-fedpkg switch-branch ${fed_branch}
-# Checkout the commit from the fedmsg
-git checkout ${fed_rev}
-# Create new branch because fedpkg wont build with detached head
-git checkout -b test_branch
+# Checkout the PR
+git fetch -fu origin refs/pull/${fed_id}/head:pr
+git checkout pr
 # Get current NVR
 truenvr=$(rpm -q --define "dist .$DIST_BRANCH" --queryformat '%{name}-%{version}-%{release}\n' --specfile ${fed_repo}.spec | head -n 1)
 echo "original_spec_nvr=${truenvr}" >> ${LOGDIR}/job.props
@@ -40,7 +38,7 @@ echo "original_spec_nvr=${truenvr}" >> ${LOGDIR}/job.props
 commits=$(git log --pretty=format:'' | wc -l)
 # %{?dist} seems to only be used when defining $release, but some
 # .spec files use different names for release, so just replace %{?dist}
-sed -i "s/%{?dist}/.${commits}.${fed_rev:0:7}%{?dist}/" ${fed_repo}.spec
+sed -i "s/%{?dist}/%{?dist}.pr.${fed_uid}/" ${fed_repo}.spec
 
 # Build srpm to send to koji
 fedpkg --release ${fed_branch} srpm

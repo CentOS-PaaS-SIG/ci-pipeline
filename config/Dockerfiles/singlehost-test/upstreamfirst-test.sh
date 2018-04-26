@@ -26,9 +26,6 @@ if [ -z "${package:-}" ]; then
 	fi
 fi
 
-# Replace beakerlib role with one that won't choke installing restraint while on a rawhide distro
-cp -f /tmp/beakerlib-role-main.yml /etc/ansible/roles/standard-test-beakerlib/tasks/main.yml
-
 # Make sure we have or have downloaded the test subject
 if [ -z "${TEST_SUBJECTS:-}" ]; then
 	echo "No subject defined"
@@ -72,7 +69,7 @@ set +u
 PYTHON_INTERPRETER=""
 
 if [[ ! -z "${python3}" && "${python3}" == "yes" ]] ; then
-    PYTHON_INTERPRETER='--extra-vars "ansible_python_interpreter=/usr/bin/python3"'
+    PYTHON_INTERPRETER='--extra-vars ansible_python_interpreter=/usr/bin/python3'
 fi
 set -u
 

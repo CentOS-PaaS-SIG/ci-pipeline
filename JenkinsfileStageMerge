@@ -19,6 +19,33 @@ library identifier: "ci-pipeline@${env.ghprbActualCommit}",
                                         templates: [[value: '+refs/heads/*:refs/remotes/@{remote}/*'],
                                                     [value: '+refs/pull/*:refs/remotes/origin/pr/*']]]]])
 
+properties([
+  buildDiscarder(logRotator(artifactNumToKeepStr: '20', numToKeepStr: '20')),
+  [$class: 'GithubProjectProperty', displayName: '', projectUrlStr: 'https://github.com/CentOS-PaaS-SIG/ci-pipeline/'],
+  [$class: 'org.jenkinsci.plugins.workflow.job.properties.PipelineTriggersJobProperty', triggers:[
+    [
+      $class: 'org.jenkinsci.plugins.ghprb.GhprbTrigger',
+      orgslist: 'CentOS-PaaS-SIG',
+      cron: 'H/5 * * * *',
+      triggerPhrase: '.*\\[merge\\].*',
+      onlyTriggerPhrase: true,
+      useGitHubHooks: true,
+      permitAll: true,
+      autoCloseFailedPullRequests: false,
+      displayBuildErrorsOnDownstreamBuilds: true,
+      extensions: [
+        [
+          $class: 'org.jenkinsci.plugins.ghprb.extensions.status.GhprbSimpleStatus',
+          commitStatusContext: 'Merge PR',
+          showMatrixStatus: false,
+          triggeredStatus: 'Starting job...',
+          startedStatus: 'merging...',
+        ]
+      ]
+    ]
+  ]]
+])
+
 pipeline {
     agent {
         kubernetes {

@@ -81,6 +81,27 @@ class pipelineUtils implements Serializable {
     }
 
     /**
+     * Library to parse Pagure PR CI_MESSAGE and inject
+     * its key/value pairs as env variables.
+     * @param prefix - String to prefix env variables with
+     * @param message - The CI_MESSAGE
+     */
+    def injectPRVars(String prefix, String message) {
+        pipelineUtils.injectPRVars(prefix, message)
+    }
+
+    /**
+     * Library to parse Pagure PR CI_MESSAGE and check if
+     * it is for a new commit added, the comment contains
+     * some keyword, or if the PR was rebased
+     * @param message - The CI_MESSAGE
+     * @param keyword - The keyword we care about
+     */
+    def checkUpdatedPR(String message, String keyword) {
+        pipelineUtils.checkUpdatedPR(message, keyword)
+    }
+
+    /**
      * Method to set default environmental variables. Performed once at start of Jenkinsfile
      * @param envMap Key/value pairs which will be set as environmental variables.
      * @return
@@ -231,6 +252,15 @@ class pipelineUtils implements Serializable {
         pipelineUtils.updateBuildDisplayAndDescription()
     }
 
+    /**
+     * Sets the Build displayName and Description based on params
+     * @param buildName
+     * @param buildDesc
+     */
+    def setCustomBuildNameAndDescription(String buildName, String buildDesc) {
+        pipelineUtils.setCustomBuildNameAndDescription(buildName, buildDesc)
+    }
+
 /**
  * Check data grepper for presence of a message
  * @param messageID message ID to track.
@@ -284,12 +314,58 @@ class pipelineUtils implements Serializable {
     }
 
     /**
+     * Test to check if CI_MESSAGE is for a user's fork
+     * @param message - The CI_MESSAGE
+     * @return boolean
+     */
+    def checkIfFork(String message) {
+        return pipelineUtils.checkIfFork(message)
+    }
+
+    /**
      * Mark stage stageName as skipped
      * @param stageName
      * @return
      */
     def skip(String stageName) {
         return pipelineUtils.skip(stageName)
+    }
+
+    /**
+     * Reads package test.log and return a map of test_name -> test_result
+     * @param fileLocation
+     * @return
+     */
+    def parseTestLog(String fileLocation) {
+        return pipelineUtils.parseTestLog(fileLocation)
+    }
+
+    /**
+     * Check the package test results
+     * @param testResults
+     * @return return the build status
+     */
+    def checkTestResults(Map testResults) {
+        return pipelineUtils.checkTestResults(testResults)
+    }
+
+    /**
+     * General function to check existence of a file
+     * @param fileLocation
+     * @return boolean
+     */
+    def fileExists(String fileLocation) {
+        return pipelineUtils.fileExists(fileLocation)
+    }
+
+    /**
+     * Traverse a CI_MESSAGE with nested keys.
+     * @param prefix
+     * @param ciMessage
+     * @return env map with all keys at top level
+     */
+    def flattenJSON(String prefix, String message) {
+        pipelineUtils.flattenJSON(prefix, message)
     }
 
 }

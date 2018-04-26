@@ -24,6 +24,7 @@ RUN yum -y install curl \
         pykickstart \
         PyYAML \
         qemu-kvm \
+        yum-utils \
         && yum clean all
 
 COPY default.xml /etc/libvirt/qemu/networks/

@@ -374,6 +374,7 @@ def trackMessage(String messageID, int retryCount) {
         }
     }
 }
+
 /**
  * Library to parse CI_MESSAGE and inject its key/value pairs as env variables.
  *
@@ -400,6 +401,82 @@ def injectFedmsgVars(String message) {
             env.branch = env.fed_branch
         }
     }
+}
+
+/**
+ * Library to parse Pagure PR CI_MESSAGE and inject
+ * its key/value pairs as env variables.
+ * @param prefix - String to prefix env variables with
+ * @param message - The CI_MESSAGE
+ */
+def injectPRVars(String prefix, String message) {
+
+    // Parse the message into a Map
+    def ci_data = new JsonSlurper().parseText(message)
+
+    // If we have a 'pullrequest' key in the CI_MESSAGE, for each key under 'pullrequest', we
+    // * prepend the key name with prefix_
+    // * replace any '-' with '_'
+    // * truncate the value for the key at the first '\n' character
+    // * replace any double-quote characters with single-quote characters in the value for the key.
+
+    if (ci_data['pullrequest']) {
+        ci_data.pullrequest.each { key, value ->
+            env."${prefix}_${key.toString().replaceAll('-', '_')}" =
+                    value.toString().split('\n')[0].replaceAll('"', '\'')
+        }
+        if (env."${prefix}_branch" == 'master'){
+            env.branch = 'rawhide'
+        } else {
+            env.branch = env."${prefix}_branch"
+        }
+        // To support existing workflows, create some env vars
+        // that map to vars from commit CI_MESSAGEs
+        // Get the repo name
+        if (ci_data['pullrequest']['project']['name']) {
+            env."${prefix}_repo" = ci_data['pullrequest']['project']['name'].toString().split('\n')[0].replaceAll('"', '\'')
+        }
+        // Get the namespace value
+        if (ci_data['pullrequest']['project']['namespace']) {
+            env."${prefix}_namespace" = ci_data['pullrequest']['project']['namespace'].toString().split('\n')[0].replaceAll('"', '\'')
+        }
+        // Get the username value
+        if (ci_data['pullrequest']['user']['name']) {
+            env."${prefix}_username" = ci_data['pullrequest']['user']['name'].toString().split('\n')[0].replaceAll('"', '\'')
+        }
+        // Create a bogus rev value to use in build descriptions
+        if (env."${prefix}_id") {
+            env."${prefix}_rev" = "PR-" + env."${prefix}_id"
+        }
+        // Get the last comment id as it was requested
+        if (ci_data['pullrequest']['comments'].last()['id']) {
+            env."${prefix}_lastcid" = ci_data['pullrequest']['comments'].last()['id']
+        }
+    }
+}
+
+/**
+ * Library to parse Pagure PR CI_MESSAGE and check if
+ * it is for a new commit added, the comment contains
+ * some keyword, or if the PR was rebased
+ * If notification = true, commit was added or it was rebased
+ * @param message - The CI_MESSAGE
+ * @param keyword - The keyword we care about
+ * @return bool
+ */
+def checkUpdatedPR(String message, String keyword) {
+
+    // Parse the message into a Map
+    def ci_data = new JsonSlurper().parseText(message)
+
+    if (ci_data['pullrequest']['comments']) {
+        if (ci_data['pullrequest']['comments'].last()['notification'] || ci_data['pullrequest']['comments'].last()['comment'].contains(keyword)) {
+            return true
+        } else {
+            return false
+        }
+    }
+    return true
 }
 
 /**
@@ -964,6 +1041,20 @@ def updateBuildDisplayAndDescription() {
 }
 
 /**
+ * Sets the Build displayName and Description based on params
+ * @param buildName
+ * @param buildDesc
+ */
+def setCustomBuildNameAndDescription(String buildName, String buildDesc) {
+    if (buildName?.trim()) {
+        currentBuild.displayName = buildName
+    }
+    if (buildDesc?.trim()) {
+        currentBuild.description = buildDesc
+    }
+}
+
+/**
  * get Variables From Message
  * @param message trigger message
  * @return map of message vars
@@ -1074,7 +1165,18 @@ def watchForMessages(String msg_provider, String message) {
 def checkTests(String mypackage, String mybranch, String tag) {
     echo "Currently checking if package tests exist"
     return sh (returnStatus: true, script: """
-    curl -q https://src.fedoraproject.org/rpms/${mypackage}/raw/${mybranch}/f/tests/tests.yml | grep '\\- '${tag}'' """) == 0
+    git clone -b ${mybranch} --single-branch https://src.fedoraproject.org/rpms/${mypackage}/ && grep -r '\\- '${tag}'\$' ${mypackage}/tests""") == 0
+}
+
+/**
+ * Test to check if CI_MESSAGE is for a user's fork
+ * @param message - The CI_MESSAGE
+ * @return boolean
+ */
+def checkIfFork(String message) {
+    def ciMessage = new JsonSlurper().parseText(message)
+    def request = ciMessage['commit']['path']
+    return request.contains('repositories/forks')
 }
 
 /**
@@ -1085,3 +1187,105 @@ def checkTests(String mypackage, String mybranch, String tag) {
 def skip(String stageName) {
     Utils.markStageSkippedForConditional(stageName)
 }
+
+/**
+ * Reads package test.log and return a map of test_name -> test_result
+ * @param fileLocation
+ * @return
+ */
+def parseTestLog(String fileLocation) {
+    def contents = readFile(fileLocation)
+
+    def newContents = contents.split('\n')
+
+    def testMap = [:]
+    newContents.each { test ->
+        def splitTest = test.split()
+        testMap[splitTest[1]] = splitTest[0]
+    }
+
+    return testMap
+
+}
+
+/**
+ * General function to check existence of a file
+ * @param fileLocation
+ * @return boolean
+ */
+def fileExists(String fileLocation) {
+    def status = false
+    try {
+        def contents = readFile(fileLocation)
+        status = true
+    } catch(e) {
+        println "file not found: ${fileLocation}"
+    }
+
+    return status
+}
+
+/**
+ * Check the package test results
+ * @param logFile - the location of the package-tests test.log
+ * @return return the build status
+ */
+def checkTestResults(Map testResults) {
+    def buildResult = null
+
+    testResults.each { test, result ->
+        if (result != 'PASSED') {
+            buildResult = 'UNSTABLE'
+        }
+    }
+
+    return buildResult
+}
+
+/**
+ * Wrapper to parse json before injecting env variables
+ * @param prefix
+ * @param message
+ * @return
+ */
+def flattenJSON(String prefix, String message) {
+    def ciMessage = new JsonSlurper().parseText(message)
+    injectCIMessage(prefix, ciMessage)
+}
+
+/**
+ * Traverse a CI_MESSAGE with nested keys.
+ * @param prefix
+ * @param message
+ * @return env map with all keys at top level
+ */
+def injectCIMessage(String prefix, def ciMessage) {
+
+    ciMessage.each { key, value ->
+        def new_key = key.replaceAll('-', '_')
+        if (value instanceof groovy.json.internal.LazyMap) {
+            injectCIMessage("${prefix}_${new_key}", value)
+        } else if (value instanceof  java.util.ArrayList) {
+            injectArray("${prefix}_${new_key}", value)
+        } else {
+            env."${prefix}_${new_key}" =
+                value.toString().split('\n')[0].replaceAll('"', '\'')
+        }
+    }
+}
+
+/**
+ * Inject array values
+ * @param prefix
+ * @param message
+ * @return
+ */
+def injectArray(String prefix, def message) {
+    message.eachWithIndex { value, index ->
+        env."${prefix}_${index}" =
+            value.toString().split('\n')[0].replaceAll('"', '\'')
+
+    }
+}
+
+

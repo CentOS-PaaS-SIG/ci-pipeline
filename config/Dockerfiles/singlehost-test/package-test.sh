@@ -10,6 +10,9 @@ export TEST_ARTIFACTS=${CURRENTDIR}/logs
 if [ -z "${TEST_SUBJECTS:-}" ]; then
     export TEST_SUBJECTS=${CURRENTDIR}/untested-atomic.qcow2
 fi
+if [ -z "${TEST_LOCATION:-}" ]; then
+    export TEST_LOCATION=https://src.fedoraproject.org/rpms/${package}
+fi
 if [ -z "${TAG:-}" ]; then
     export TAG=atomic
 fi
@@ -44,7 +47,7 @@ fi
 
 # Check out the dist-git repository for this package
 rm -rf ${package}
-if ! git clone https://src.fedoraproject.org/rpms/${package}; then
+if ! git clone ${TEST_LOCATION}; then
 	echo "No dist-git repo for this package! Exiting..."
 	exit 0
 fi

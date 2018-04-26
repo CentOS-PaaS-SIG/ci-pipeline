@@ -1,4 +1,4 @@
-FROM fedora:26
+FROM fedora:27
 LABEL maintainer "https://github.com/CentOS-PaaS-SIG/ci-pipeline"
 LABEL description="This container is meant to \
 use dist-git tests to test packages, \
@@ -9,7 +9,7 @@ integration tests from the projectatomic repo by calling \
 the integration-test.sh script."
 
 # Copy restraint repo into container
-RUN curl -o /etc/yum.repos.d/bpeck-restraint-fedora-26.repo https://copr.fedorainfracloud.org/coprs/bpeck/restraint/repo/fedora-26/bpeck-restraint-fedora-26.repo
+RUN curl -o /etc/yum.repos.d/bpeck-restraint-fedora-27.repo https://copr.fedorainfracloud.org/coprs/bpeck/restraint/repo/fedora-27/bpeck-restraint-fedora-27.repo
 
 # Install all package requirements
 RUN for i in {1..5} ; do dnf -y install ansible \
@@ -37,9 +37,7 @@ RUN for i in {1..5} ; do dnf -y install ansible \
 COPY package-test.sh /tmp/package-test.sh
 COPY integration-test.sh /tmp/integration-test.sh
 COPY upstreamfirst-test.sh /tmp/upstreamfirst-test.sh
-COPY main.yml /tmp/beakerlib-role-main.yml
 
-COPY standard-inventory-qcow2 /usr/share/ansible/inventory/standard-inventory-qcow2
 ENV ANSIBLE_INVENTORY=/usr/share/ansible/inventory/standard-inventory-qcow2
 
 # Run the build script

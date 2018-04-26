@@ -3,10 +3,17 @@ properties(
                 buildDiscarder(logRotator(artifactDaysToKeepStr: '', artifactNumToKeepStr: '50', daysToKeepStr: '', numToKeepStr: '100')),
                 parameters(
                     [
-                        string(description: 'fedmsg msg', name: 'CI_MESSAGE'),
-                        string(defaultValue: '^(f26|f27)$', description: 'fedora branch targets', name: 'TARGETS'),
-                        string(defaultValue: 'ci-pipeline', description: 'Main project repo', name: 'PROJECT_REPO'),
-                        string(defaultValue: 'org.centos.prod', description: 'main topic to publish on', name: 'MAIN_TOPIC'),
+                        string(name: 'CI_MESSAGE',
+                               description: 'fedmsg msg'),
+                        string(name: 'TARGETS',
+                               defaultValue: '^(f26|f27)$',
+                               description: 'fedora branch targets'),
+                        string(name: 'PROJECT_REPO',
+                               defaultValue: 'ci-pipeline',
+                               description: 'Main project repo'),
+                        string(name: 'MAIN_TOPIC',
+                               defaultValue: 'org.centos.prod',
+                               description: 'main topic to publish on'),
                     ]
                 ),
                 pipelineTriggers(
@@ -94,6 +101,13 @@ node('master') {
                                 # Verify this is a package we are interested in
                                 valid=0
 
+                                # Verify this commit is not to a user's fork
+                                if [[ $fed_path == *"repositories/forks"* ]] ; then
+                                    echo "Not interested - Commit to user fork"
+                                    echo "topic=${MAIN_TOPIC}.ci.pipeline.package.ignore" >> ${WORKSPACE}/job.properties
+                                    break
+                                fi
+
                                 # Get the upstream package list
                                 rm -rf fedora-atomic
                                 git clone http://pagure.io/fedora-atomic
@@ -172,11 +186,16 @@ node('master') {
                                 retry(TRIGGER_RETRY_COUNT) {
                                     try {
                                         build job: "continuous-infra-ci-pipeline-${env.branch}",
-                                                parameters: [string(name: 'CI_MESSAGE', value: "${env.CI_MESSAGE}"),
-                                                             string(name: 'TARGET_BRANCH', value: "${env.fed_branch}"),
-                                                             string(name: 'PROJECT_REPO', value: 'ci-pipeline'),
-                                                             string(name: 'MAIN_TOPIC', value: 'org.centos.prod'),
-                                                             string(name: 'MSG_PROVIDER', value: 'fedora-fedmsg')],
+                                                parameters: [string(name: 'CI_MESSAGE',
+                                                                    value: "${env.CI_MESSAGE}"),
+                                                             string(name: 'TARGET_BRANCH',
+                                                                    value: "${env.fed_branch}"),
+                                                             string(name: 'PROJECT_REPO',
+                                                                    value: 'ci-pipeline'),
+                                                             string(name: 'MAIN_TOPIC',
+                                                                    value: 'org.centos.prod'),
+                                                             string(name: 'MSG_PROVIDER',
+                                                                    value: 'fedora-fedmsg')],
                                                 wait: false
                                     } catch (Exception e) {
                                         e.printStackTrace()

@@ -21,9 +21,7 @@ function archive_variables {
     cat << EOF > ${LOGDIR}/job.props
 koji_task_id=${PROVIDED_KOJI_TASKID}
 fed_repo=${PACKAGE}
-fed_branch=${FED_BRANCH}
-branch=${BRANCH}
-fed_rev=kojitask${PROVIDED_KOJI_TASKID}
+fed_rev=kojitask-${PROVIDED_KOJI_TASKID}
 nvr=${NVR}
 original_spec_nvr=${NVR}
 rpm_repo=${RPMDIR}
@@ -35,11 +33,10 @@ trap archive_variables EXIT SIGHUP SIGINT SIGTERM
 mkdir somewhere
 pushd somewhere
 # Download koji build so we can archive it
-koji download-task ${PROVIDED_KOJI_TASKID} --logs
+koji download-task --arch=x86_64 --arch=src ${PROVIDED_KOJI_TASKID} --logs
 createrepo .
 PACKAGE=$(rpm --queryformat "%{NAME}\n" -qp *.src.rpm)
-NVR=$(rpm --queryformat "%{NAME} %{VERSION} %{RELEASE}\n" -qp *.src.rpm)
-FED_BRANCH=$(grep -Po "chrootPath='/var/lib/mock/\K[^-]+" build.*.log | head -n 1)
+NVR=$(rpm --queryformat "%{NAME}-%{VERSION}-%{RELEASE}\n" -qp *.src.rpm)
 popd
 
 RPMDIR=${CURRENTDIR}/${PACKAGE}_repo
@@ -47,13 +44,6 @@ rm -rf ${RPMDIR}
 mkdir -p ${RPMDIR}
 
 mv somewhere/* ${RPMDIR}/
-
-if [ "$(echo $FED_BRANCH | sed -e 's/[a-zA-Z]*//')" = $(curl -s https://src.fedoraproject.org/rpms/fedora-release/raw/master/f/fedora-release.spec | awk '/%define dist_version/ {print $3}') ]; then
-    BRANCH="master"
-    FED_BRANCH="rawhide"
-else
-    BRANCH=$FED_BRANCH
-fi
 
 # Let's archive the logs too
 cp ${RPMDIR}/*.log ${LOGDIR}/
