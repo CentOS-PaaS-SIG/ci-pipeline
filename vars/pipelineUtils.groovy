@@ -381,4 +381,14 @@ class pipelineUtils implements Serializable {
         pipelineUtils.setBuildBranch(tag, prefix)
     }
 
+    /**
+     *
+     * @param prefix - env prefix
+     * @param request - the url that refers to the package
+     * @return
+     */
+    def repoFromRequest(String prefix, String request) {
+        pipelineUtils.repoFromRequest(prefix, request)
+    }
+
 }
