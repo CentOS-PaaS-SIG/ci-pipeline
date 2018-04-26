@@ -368,4 +368,17 @@ class pipelineUtils implements Serializable {
         pipelineUtils.flattenJSON(prefix, message)
     }
 
+    /**
+     * Set branch and $prefix_branch based on the candidate branch
+     * This is meant to be run with a CI_MESSAGE from a build task
+     * You should call flattenJSON on the CI_MESSAGE before using
+     * this function
+     * @param tag - The tag from the request field e.g. f27-candidate
+     * @param prefix - The prefix to add to the keys e.g. fed
+     * @return
+     */
+    def setBuildBranch(String tag, String prefix) {
+        pipelineUtils.setBuildBranch(tag, prefix)
+    }
+
 }
