@@ -1336,5 +1336,7 @@ def repoFromRequest(String request, String prefix) {
         } else {
             throw new Exception("Invalid request url: ${request}")
         }
+    } catch(e) {
+        throw e
     }
 }
