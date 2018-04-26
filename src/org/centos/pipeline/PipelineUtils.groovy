@@ -1314,12 +1314,11 @@ def injectArray(String prefix, def message) {
 }
 
 /**
- *
- * @param prefix - env prefix
  * @param request - the url that refers to the package
+ * @param prefix - env prefix
  * @return
  */
-def repoFromRequest(String prefix, String request) {
+def repoFromRequest(String request, String prefix) {
 
     try {
         def pkgUrlTok = request.tokenize('/')

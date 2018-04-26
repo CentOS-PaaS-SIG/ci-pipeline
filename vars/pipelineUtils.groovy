@@ -382,13 +382,12 @@ class pipelineUtils implements Serializable {
     }
 
     /**
-     *
-     * @param prefix - env prefix
      * @param request - the url that refers to the package
+     * @param prefix - env prefix
      * @return
      */
-    def repoFromRequest(String prefix, String request) {
-        pipelineUtils.repoFromRequest(prefix, request)
+    def repoFromRequest(String request, String prefix) {
+        pipelineUtils.repoFromRequest(request, prefix)
     }
 
 }
