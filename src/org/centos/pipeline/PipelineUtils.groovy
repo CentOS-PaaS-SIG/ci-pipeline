@@ -1331,7 +1331,7 @@ def repoFromRequest(String prefix, String request) {
         if (gitMatcher.matches()) {
             env."${prefix}_repo" = gitMatcher[0][1]
         } else if (httpMatcher.matches()) {
-            env."${prefix }_repo" = httpMatcher[0][1]
+            env."${prefix}_repo" = httpMatcher[0][1]
         } else if (cliMatcher.matches()) {
             env."${prefix}_repo" = cliMatcher[0][1]
         } else {
