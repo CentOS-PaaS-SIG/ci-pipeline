@@ -1312,3 +1312,31 @@ def injectArray(String prefix, def message) {
 
     }
 }
+
+/**
+ * @param request - the url that refers to the package
+ * @param prefix - env prefix
+ * @return
+ */
+def repoFromRequest(String request, String prefix) {
+
+    try {
+        def pkgUrlTok = request.tokenize('/')
+        def gitMatcher = request =~ /.+?\/([a-z0-9A-Z_\-]+)\.git.*/
+        def httpMatcher = request =~ /.+?\/([a-z0-9A-Z_\-]+)\?.*/
+        def cliMatcher = pkgUrlTok.last() =~ /([a-zA-Z0-9\-_]+)-.*/
+
+
+        if (gitMatcher.matches()) {
+            env."${prefix}_repo" = gitMatcher[0][1]
+        } else if (httpMatcher.matches()) {
+            env."${prefix}_repo" = httpMatcher[0][1]
+        } else if (cliMatcher.matches()) {
+            env."${prefix}_repo" = cliMatcher[0][1]
+        } else {
+            throw new Exception("Invalid request url: ${request}")
+        }
+    } catch(e) {
+        throw e
+    }
+}
