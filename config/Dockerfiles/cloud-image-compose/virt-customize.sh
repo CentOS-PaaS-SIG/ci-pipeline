@@ -27,9 +27,17 @@ if [$branch != "rawhide"]; then
     branch=${branch:1}
 fi
 
-# Get latest nightly build
-# We should cache this for speedup
-wget --quiet -r --no-parent -A 'Fedora-Cloud-Base*.qcow2' https://dl.fedoraproject.org/pub/fedora/linux/releases/${branch}/CloudImages/x86_64/images/
+# Define proper install url
+if [[ $(curl -q https://dl.fedoraproject.org/pub/fedora/linux/development/ | grep "${branch}/") != "" ]]; then
+    INSTALL_URL="https://dl.fedoraproject.org/pub/fedora/linux/development/${branch}/CloudImages/x86_64/images/"
+elif [[ $(curl -q https://dl.fedoraproject.org/pub/fedora/linux/releases/ | grep "${branch}/") != "" ]]; then
+    INSTALL_URL="https://dl.fedoraproject.org/pub/fedora/linux/releases/${branch}/CloudImages/x86_64/images/"
+else
+    echo "Could not find installation source! Exiting..."
+    exit 1
+fi
+
+wget --quiet -r --no-parent -A 'Fedora-Cloud-Base*.qcow2' ${INSTALL_URL}
 DOWNLOADED_IMAGE_LOCATION=$(pwd)/$(find dl.fedoraproject.org -name "*.qcow2")
 
 function clean_up {
