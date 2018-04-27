@@ -449,7 +449,7 @@ def injectPRVars(String prefix, String message) {
             env."${prefix}_rev" = "PR-" + env."${prefix}_id"
         }
         // Get the last comment id as it was requested
-        if (ci_data['pullrequest']['comments'].last()['id']) {
+        if (ci_data['pullrequest']['comments']) {
             env."${prefix}_lastcid" = ci_data['pullrequest']['comments'].last()['id']
         }
     }
