@@ -1264,7 +1264,7 @@ def flattenJSON(String prefix, String message) {
  */
 def setBuildBranch(String tag, String prefix) {
     try {
-        if (tag == 'rawhide') {
+        if (tag.toLowerCase() == 'rawhide') {
             env.branch = tag
             env."${prefix}_branch" = 'master'
         } else {
