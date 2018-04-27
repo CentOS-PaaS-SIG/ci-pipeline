@@ -1264,7 +1264,7 @@ def flattenJSON(String prefix, String message) {
  */
 def setBuildBranch(String tag, String prefix) {
     try {
-        if (tag == 'rawhide') {
+        if (tag.toLowerCase() == 'rawhide') {
             env.branch = tag
             env."${prefix}_branch" = 'master'
         } else {
@@ -1321,18 +1321,17 @@ def injectArray(String prefix, def message) {
 def repoFromRequest(String request, String prefix) {
 
     try {
-        def pkgUrlTok = request.tokenize('/')
-        def gitMatcher = request =~ /.+?\/([a-z0-9A-Z_\-]+)\.git.*/
-        def httpMatcher = request =~ /.+?\/([a-z0-9A-Z_\-]+)\?.*/
-        def cliMatcher = pkgUrlTok.last() =~ /([a-zA-Z0-9\-_]+)-.*/
+        def gitMatcher = request =~ /git.+?\/([a-z0-9A-Z_\-]+)(\.git|\?).*/
+        def cliMatcher = request =~ /cli-build.+?\/([a-zA-Z0-9\-_]+)-.*/
+        def pkgMatcher = request =~ /^([a-zA-Z0-9\-]+$)/
 
 
         if (gitMatcher.matches()) {
             env."${prefix}_repo" = gitMatcher[0][1]
-        } else if (httpMatcher.matches()) {
-            env."${prefix}_repo" = httpMatcher[0][1]
         } else if (cliMatcher.matches()) {
             env."${prefix}_repo" = cliMatcher[0][1]
+        } else if (pkgMatcher.matches()) {
+            env."${prefix}_repo" = pkgMatcher[0][1]
         } else {
             throw new Exception("Invalid request url: ${request}")
         }
