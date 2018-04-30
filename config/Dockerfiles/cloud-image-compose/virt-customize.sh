@@ -62,7 +62,8 @@ for pkg in $(dnf repoquery --disablerepo=\* --enablerepo=${package} --repofrompa
     RPM_LIST="${RPM_LIST} ${pkg}"
 done
 if ! virt-customize -a ${DOWNLOADED_IMAGE_LOCATION} --run-command "dnf install -y --nogpgcheck ${REPO_LIST} ${RPM_LIST}" ; then
-    echo "failure"
+    echo "failure installing rpms"
+    exit 1
 fi
 
 } 2>&1 | tee ${CURRENTDIR}/logs/console.log #group for tee
