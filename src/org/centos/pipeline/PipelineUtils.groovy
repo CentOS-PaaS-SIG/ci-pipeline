@@ -1164,6 +1164,7 @@ def watchForMessages(String msg_provider, String message) {
  */
 def checkTests(String mypackage, String mybranch, String tag) {
     echo "Currently checking if package tests exist"
+    sh "rm -rf ${mypackage}"
     return sh (returnStatus: true, script: """
     git clone -b ${mybranch} --single-branch https://src.fedoraproject.org/rpms/${mypackage}/ && grep -r '\\- '${tag}'\$' ${mypackage}/tests""") == 0
 }
