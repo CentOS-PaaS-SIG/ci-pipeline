@@ -303,9 +303,9 @@ class pipelineUtils implements Serializable {
 
     /**
      * Test if $tag tests exist for $mypackage on $mybranch in fedora dist-git
-     * For mybranch, use fXX or master
+     * For mybranch, use fXX or master or PR number (digits only)
      * @param mypackage
-     * @param mybranch
+     * @param mybranch - Fedora branch or PR number
      * @param tag
      * @return
      */
