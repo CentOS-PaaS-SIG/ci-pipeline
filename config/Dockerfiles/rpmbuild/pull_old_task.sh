@@ -33,7 +33,7 @@ trap archive_variables EXIT SIGHUP SIGINT SIGTERM
 mkdir somewhere
 pushd somewhere
 # Download koji build so we can archive it
-koji download-task --arch=x86_64 --arch=src ${PROVIDED_KOJI_TASKID} --logs
+koji download-build --arch=x86_64 --arch=src --debuginfo --task-id ${PROVIDED_KOJI_TASKID}
 createrepo .
 PACKAGE=$(rpm --queryformat "%{NAME}\n" -qp *.src.rpm)
 NVR=$(rpm --queryformat "%{NAME}-%{VERSION}-%{RELEASE}\n" -qp *.src.rpm)
@@ -44,8 +44,5 @@ rm -rf ${RPMDIR}
 mkdir -p ${RPMDIR}
 
 mv somewhere/* ${RPMDIR}/
-
-# Let's archive the logs too
-cp ${RPMDIR}/*.log ${LOGDIR}/
 
 archive_variables
