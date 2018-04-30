@@ -64,7 +64,7 @@ while read rpm ; do
     TIMEDIFF=$(expr $(date '+%s') - $(date '+%s' -d $(echo $rpm | cut -d ' ' -f 2)))
     # Only rpms saved within last day
     if [[ $TIMEDIFF -le 86400 ]]; then
-        virt-copy-in -a ${DOWNLOADED_IMAGE_LOCATION} ${ARTIFACT_MNT}/${rpm_name} /etc/yum.repos.d/
+        virt-copy-in -a ${DOWNLOADED_IMAGE_LOCATION} ${rpm_repo}/${rpm_name} /etc/yum.repos.d/
         for pkg in $(repoquery --disablerepo=\* --enablerepo=${rpm_name} --repofrompath=${rpm_name},${rpm_repo} --all | grep -v '\-debug\|\-devel' | rev | cut -d '-' -f 3- | rev ) ; do
             if ! virt-customize -a ${DOWNLOADED_IMAGE_LOCATION} --run-command "yum install -y --nogpgcheck --repofrompath=testrepo,file:///etc/yum.repos.d/${rpm_name} ${pkg}" ; then
                 if [ $package == $rpm_name ] ; then
