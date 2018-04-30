@@ -1323,7 +1323,7 @@ def repoFromRequest(String request, String prefix) {
     try {
         def gitMatcher = request =~ /git.+?\/([a-z0-9A-Z_\-]+)(\.git|\?).*/
         def cliMatcher = request =~ /cli-build.+?\/([a-zA-Z0-9\-_]+)-.*/
-        def pkgMatcher = request =~ /^([a-zA-Z0-9\-]+$)/
+        def pkgMatcher = request =~ /^([a-zA-Z0-9\-_]+$)/
 
 
         if (gitMatcher.matches()) {

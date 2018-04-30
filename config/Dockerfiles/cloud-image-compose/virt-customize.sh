@@ -50,7 +50,7 @@ function clean_up {
   # In case of first build, ensure image_artifacts dir exists
   mkdir -p ${image_artifacts}
   cp -rp ${CURRENTDIR}/images/* ${CURRENTDIR}/logs ${image_artifacts}
-  ln -sf ${ARTIFACT_MNT}/${package}  ${ARTIFACT_MNT}/latest
+  #ln -sf ${ARTIFACT_MNT}/${package}  ${ARTIFACT_MNT}/latest
 }
 trap clean_up EXIT SIGHUP SIGINT SIGTERM
 
@@ -58,7 +58,7 @@ trap clean_up EXIT SIGHUP SIGINT SIGTERM
 
 mkdir -p ${CURRENTDIR}/images
 
-# Add custom rpms to kickstart file
+# Add custom rpms to image
 while read rpm ; do
     rpm_name=$(echo $rpm | cut -d ' ' -f 1)
     TIMEDIFF=$(expr $(date '+%s') - $(date '+%s' -d $(echo $rpm | cut -d ' ' -f 2)))
