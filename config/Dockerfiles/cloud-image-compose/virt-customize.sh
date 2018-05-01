@@ -58,10 +58,10 @@ REPO_LIST="--repofrompath=${package},file:///etc/yum.repos.d"
 # Add custom rpms to image
 virt-copy-in -a ${DOWNLOADED_IMAGE_LOCATION} ${rpm_repo}/*.rpm ${rpm_repo}/repodata /etc/yum.repos.d/
 
-for pkg in $(dnf repoquery --disablerepo=\* --enablerepo=${package} --repofrompath=${package},${rpm_repo} --all | egrep -v '\-debug\|\-devel|.src' | rev | cut -d '-' -f 3- | rev ) ; do
+for pkg in $(repoquery --disablerepo=\* --enablerepo=${package} --repofrompath=${package},${rpm_repo} --all | egrep -v '\-debug\|\-devel|.src' | rev | cut -d '-' -f 3- | rev ) ; do
     RPM_LIST="${RPM_LIST} ${pkg}"
 done
-if ! virt-customize -a ${DOWNLOADED_IMAGE_LOCATION} --run-command "dnf install -y --nogpgcheck ${REPO_LIST} ${RPM_LIST}" ; then
+if ! virt-customize -a ${DOWNLOADED_IMAGE_LOCATION} --run-command "yum install -y --nogpgcheck ${REPO_LIST} ${RPM_LIST} && yum clean all" ; then
     echo "failure installing rpms"
     exit 1
 fi
