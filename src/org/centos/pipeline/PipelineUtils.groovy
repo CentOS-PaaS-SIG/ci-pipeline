@@ -447,6 +447,7 @@ def injectPRVars(String prefix, String message) {
         // Create a bogus rev value to use in build descriptions
         if (env."${prefix}_id") {
             env."${prefix}_rev" = "PR-" + env."${prefix}_id"
+            env."${prefix}_pr_id" = env."${prefix}_id"
         }
         // Get the last comment id as it was requested
         if (ci_data['pullrequest']['comments']) {
