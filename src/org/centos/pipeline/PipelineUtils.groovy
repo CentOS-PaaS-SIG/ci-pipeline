@@ -1200,6 +1200,67 @@ def skip(String stageName) {
 }
 
 /**
+ * Lock a directory on localhost
+ * @param fileLocation - The location to store the lock file
+ * @param duration - The number of seconds that if lock is this age, overwrite it
+ * @return myuuid - Generate uuid
+ */
+def obtainLock(String fileLocation, int duration) {
+    echo "Currently in obtainLock function"
+    def myuuid = sh (returnStdout: true, script: 'uuidgen').trim()
+
+    sh '''
+        set -x
+
+        currentTime=$(date +%s)
+        while true ; do
+            # Check if lock file exists
+            while [ -f ${fileLocation} ] ; do
+                lockAge=$(stat -c %Y ${fileLocation})
+                ageDiff=$(($currentTime - $lockAge))
+                # Break if lock file is too old
+                if [ $ageDiff -ge ${duration} ]; then
+                    break
+                fi
+            done
+            # Now, either lock file is older than duration
+            # or the lock is gone, so proceed
+            echo ${myuuid} > ${fileLocation}
+            testuuid=$(cat ${fileLocation})
+            # If uuid matches, we got the lock
+            if [ $testuuid == $myuuid ]; then
+                break
+            fi
+            sleep 30
+        done
+    '''
+    return myuuid
+}
+
+/**
+ * Remove lock file on localhost
+ * @param fileLocation - The location to store the lock file
+ * @param myuuid - The uuid to check that the file contains
+ * @return
+ */
+def releaseLock(String fileLocation, String myuuid) {
+    if (fileExists(fileLocation) {
+        def storeduuid = readFile(fileLocation)
+        if (storeduuid == myuuid) {
+            sh "rm -f ${fileLocation}"
+            return
+        } else {
+            // We were told to release a lock we didn't have
+            throw new Exception("Lock didn't belong to this build")
+        }
+    } else {
+        println "Lock file didn't exist: ${fileLocation}"
+        println "WARN: This build ran without a lock!"
+        throw new Exception("Ran without lock")
+    }
+}
+
+/**
  * Reads package test.log and return a map of test_name -> test_result
  * @param fileLocation
  * @return
