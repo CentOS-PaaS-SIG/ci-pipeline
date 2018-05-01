@@ -29,7 +29,7 @@ RUN yum -y install curl \
 
 COPY default.xml /etc/libvirt/qemu/networks/
 
-COPY cloud-image-compose.sh /tmp/cloud-image-compose.sh
+COPY cloud-image-compose.sh virt-customize.sh /tmp/
 
 VOLUME [ "/sys/fs/cgroup" ]
 
