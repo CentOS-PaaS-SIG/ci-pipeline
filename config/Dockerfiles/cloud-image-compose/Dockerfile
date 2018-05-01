@@ -25,6 +25,7 @@ RUN yum -y install curl \
         PyYAML \
         qemu-kvm \
         yum-utils \
+        wget \
         && yum clean all
 
 COPY default.xml /etc/libvirt/qemu/networks/
