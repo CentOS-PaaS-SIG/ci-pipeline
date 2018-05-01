@@ -61,7 +61,7 @@ virt-copy-in -a ${DOWNLOADED_IMAGE_LOCATION} ${rpm_repo}/*.rpm ${rpm_repo}/repod
 for pkg in $(repoquery --disablerepo=\* --enablerepo=${package} --repofrompath=${package},${rpm_repo} --all | egrep -v '\-debug\|\-devel|.src' | rev | cut -d '-' -f 3- | rev ) ; do
     RPM_LIST="${RPM_LIST} ${pkg}"
 done
-if ! virt-customize -a ${DOWNLOADED_IMAGE_LOCATION} --run-command "yum install -y --nogpgcheck ${REPO_LIST} ${RPM_LIST}" ; then
+if ! virt-customize -a ${DOWNLOADED_IMAGE_LOCATION} --run-command "yum install -y --nogpgcheck ${REPO_LIST} ${RPM_LIST} && yum clean all" ; then
     echo "failure installing rpms"
     exit 1
 fi
