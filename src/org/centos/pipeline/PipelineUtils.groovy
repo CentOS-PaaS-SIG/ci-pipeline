@@ -1156,17 +1156,27 @@ def watchForMessages(String msg_provider, String message) {
 
 /**
  * Test if $tag tests exist for $mypackage on $mybranch in fedora dist-git
- * For mybranch, use fXX or master
+ * For mybranch, use fXX or master, or PR number (digits only)
  * @param mypackage
- * @param mybranch
+ * @param mybranch - Fedora branch or PR number
  * @param tag
  * @return
  */
 def checkTests(String mypackage, String mybranch, String tag) {
     echo "Currently checking if package tests exist"
     sh "rm -rf ${mypackage}"
-    return sh (returnStatus: true, script: """
-    git clone -b ${mybranch} --single-branch https://src.fedoraproject.org/rpms/${mypackage}/ && grep -r '\\- '${tag}'\$' ${mypackage}/tests""") == 0
+    if (mybranch.isNumber()) {
+        sh "git clone https://src.fedoraproject.org/rpms/${mypackage}"
+        dir("${mypackage}") {
+            sh "git fetch -fu origin refs/pull/${mybranch}/head:pr"
+            sh "git checkout pr"
+            return sh (returnStatus: true, script: """
+            grep -r '\\- '${tag}'\$' tests""") == 0
+        }
+    } else {
+        return sh (returnStatus: true, script: """
+        git clone -b ${mybranch} --single-branch https://src.fedoraproject.org/rpms/${mypackage}/ && grep -r '\\- '${tag}'\$' ${mypackage}/tests""") == 0
+    }
 }
 
 /**
