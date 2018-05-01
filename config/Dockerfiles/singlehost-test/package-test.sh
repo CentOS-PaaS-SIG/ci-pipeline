@@ -56,8 +56,13 @@ fi
 pushd ${package}
 
 # Check out the appropriate branch and rev
-git checkout ${branch}
-git checkout ${rev}
+if [ -z ${build_pr_id} ]; then
+    git checkout ${branch}
+    git checkout ${rev}
+else
+    git fetch -fu origin refs/pull/${build_pr_id}/head:pr
+    git checkout pr
+fi
 
 # Check if there is a tests dir from dist-git, if not, exit
 if [ -d tests ]; then
