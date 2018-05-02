@@ -7,7 +7,7 @@ STABLE_LABEL = "stable"
 env.ghprbActualCommit = env.ghprbActualCommit ?: 'master'
 
 // Add new images here
-imageList = ["rpmbuild", "cloud-image-compose", "singlehost-test"]
+imageList = ["cloud-image-compose", "inquirer"]
 imageOperations = []
 
 library identifier: "ci-pipeline@master",
