@@ -13,6 +13,7 @@ DOCKER_REPO_URL = '172.30.254.79:5000'
 // Defaults for SCM operations
 env.ghprbGhRepository = env.ghprbGhRepository ?: 'CentOS-PaaS-SIG/ci-pipeline'
 env.ghprbActualCommit = env.ghprbActualCommit ?: 'master'
+env.relevant = 'false'
 
 // If this PR does not include an image change, then use this tag
 STABLE_LABEL = "stable"
@@ -100,7 +101,7 @@ pipeline {
         // Can't think of a better way to only run if a container of interest is touched
         stage("Skip if no containers changed") {
             when {
-                not {
+                anyOf {
                     // If none of workflow's containers are modified, no need to run
                     changeset "config/Dockerfiles/rpmbuild/**"
                     changeset "config/Dockerfiles/cloud-image-compose/**"
@@ -108,10 +109,15 @@ pipeline {
                 }
             }
             steps {
-                return
+                script {
+                    env.relevant = 'true'
+                }
             }
         }
         stage("Setup Container Templates") {
+            when {
+                environment name: 'relevant', value: 'true'
+            }
             steps {
                 script {
                     pipelineUtils.setupContainerTemplates(openshiftProject)
@@ -122,6 +128,7 @@ pipeline {
             when {
                 // Only build if we have related files in changeset
                 changeset "config/Dockerfiles/rpmbuild/**"
+                environment name: 'relevant', value: 'true'
             }
             steps {
                 script {
@@ -133,6 +140,7 @@ pipeline {
             when {
                 // Only build if we have related files in changeset
                 changeset "config/Dockerfiles/cloud-image-compose/**"
+                environment name: 'relevant', value: 'true'
             }
             steps {
                 script {
@@ -144,6 +152,7 @@ pipeline {
             when {
                 // Only build if we have related files in changeset
                 changeset "config/Dockerfiles/singlehost-test/**"
+                environment name: 'relevant', value: 'true'
             }
             steps {
                 script {
@@ -152,6 +161,9 @@ pipeline {
             }
         }
         stage("Image Tag Report") {
+            when {
+                environment name: 'relevant', value: 'true'
+            }
             steps {
                 script {
                     // Use tags derived from above image builds
@@ -161,6 +173,9 @@ pipeline {
             }
         }
         stage("Run Stage Jobs") {
+            when {
+                environment name: 'relevant', value: 'true'
+            }
             failFast true
             parallel {
                 //stage("f26 message watcher") {
