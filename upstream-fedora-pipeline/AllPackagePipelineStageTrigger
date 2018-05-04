@@ -101,10 +101,12 @@ pipeline {
         // Can't think of a better way to only run if a container of interest is touched
         stage("Skip if no containers changed") {
             when {
-                // If none of workflow's containers are modified, no need to run
-                changeset "config/Dockerfiles/rpmbuild/**"
-                changeset "config/Dockerfiles/cloud-image-compose/**"
-                changeset "config/Dockerfiles/singlehost-test/**"
+                anyOf {
+                    // If none of workflow's containers are modified, no need to run
+                    changeset "config/Dockerfiles/rpmbuild/**"
+                    changeset "config/Dockerfiles/cloud-image-compose/**"
+                    changeset "config/Dockerfiles/singlehost-test/**"
+                }
             }
             steps {
                 script {
