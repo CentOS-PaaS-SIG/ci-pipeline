@@ -180,10 +180,10 @@ pipeline {
             parallel {
                 //stage("f26 message watcher") {
                 //}
-                stage("rawhide pr message watcher") {
+                stage("placeholder") {
                     steps {
                         script {
-                            pipelineUtils.watchForMessages(MSG_PROVIDER, CANNED_CI_MESSAGES['rawhide-pr'])
+                            sh "echo todo"
                         }
                     }
                 }
