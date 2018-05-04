@@ -43,7 +43,7 @@ function clean_up {
   set +e
   pushd ${CURRENTDIR}/images
   cp ${DOWNLOADED_IMAGE_LOCATION} .
-  ln -sf $(find . -name "*.qcow2") test_subject.qcow2
+  ln -sf $(find . -name "*.qcow2" | head -1) test_subject.qcow2
   popd
   kill $(jobs -p)
 }
