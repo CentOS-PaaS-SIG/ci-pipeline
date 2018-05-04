@@ -2,7 +2,7 @@
 
 set -xeuo pipefail
 
-# A simple shell script to create a cloud image
+# A simfple shell script to create a cloud image
 # using Image Factory in a container.
 
 # Requires package and rpm_repo variables where package is the
