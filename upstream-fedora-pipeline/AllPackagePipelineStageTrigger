@@ -103,7 +103,11 @@ pipeline {
                 not {
                     // If none of workflow's containers are modified, no need to run
                     changeset "config/Dockerfiles/rpmbuild/**"
+                }
+                not {
                     changeset "config/Dockerfiles/cloud-image-compose/**"
+                }
+                not {
                     changeset "config/Dockerfiles/singlehost-test/**"
                 }
             }
