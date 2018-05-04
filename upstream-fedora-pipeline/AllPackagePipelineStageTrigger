@@ -1,0 +1,229 @@
+/**
+ * Fedora All Packages Stage Pipeline Trigger
+ *
+ * This is a declarative pipeline for the Fedora All Packages
+ * stage pipeline that includes the building of images based on PRs
+ *
+ */
+
+// Openshift project
+openshiftProject = "continuous-infra"
+DOCKER_REPO_URL = '172.30.254.79:5000'
+
+// Defaults for SCM operations
+env.ghprbGhRepository = env.ghprbGhRepository ?: 'CentOS-PaaS-SIG/ci-pipeline'
+env.ghprbActualCommit = env.ghprbActualCommit ?: 'master'
+
+// If this PR does not include an image change, then use this tag
+STABLE_LABEL = "stable"
+tagMap = [:]
+
+// Initialize
+tagMap['jenkins-continuous-infra-slave'] = STABLE_LABEL
+tagMap['rpmbuild'] = STABLE_LABEL
+tagMap['inquirer'] = STABLE_LABEL
+tagMap['cloud-image-compose'] = STABLE_LABEL
+tagMap['ostree-boot-image'] = STABLE_LABEL
+tagMap['singlehost-test'] = STABLE_LABEL
+
+// Fedora Fedmsg Message Provider for stage
+MSG_PROVIDER = "fedora-fedmsg-stage"
+
+// IRC properties
+IRC_NICK = "contra-bot"
+IRC_CHANNEL = "#contra-ci-cd"
+
+// CI_MESSAGES known to build successfully TODO
+CANNED_CI_MESSAGES = [:]
+CANNED_CI_MESSAGES['f26'] = '{"commit":{"username":"zdohnal","stats":{"files":{"README.patches":{"deletions":0,"additions":30,"lines":30},"sources":{"deletions":1,"additions":1,"lines":2},"vim.spec":{"deletions":7,"additions":19,"lines":26},".gitignore":{"deletions":0,"additions":1,"lines":1},"vim-8.0-rhbz1365258.patch":{"deletions":0,"additions":12,"lines":12}},"total":{"deletions":8,"files":5,"additions":63,"lines":71}},"name":"Zdenek Dohnal","rev":"3ff427e02625f810a2cedb754342be44d6161b39","namespace":"rpms","agent":"zdohnal","summary":"Merge branch f25 into f26","repo":"vim","branch":"f26","seen":false,"path":"/srv/git/repositories/rpms/vim.git","message":"Merge branch \'f25\' into f26\n","email":"zdohnal@redhat.com"},"topic":"org.fedoraproject.prod.git.receive"}'
+CANNED_CI_MESSAGES['f27'] = '{"commit":{"username":"adrian","stats":{"files":{"criu.spec":{"deletions":0,"additions":5,"lines":5}},"total":{"deletions":0,"files":1,"additions":5,"lines":5}},"name":"Adrian Reber","rev":"386bedee49cb887626140f2c60522751ec620f1d","namespace":"rpms","agent":"adrian","summary":"Adapt ExcludeArch depending on Fedora release","repo":"criu","branch":"f27","seen":false,"path":"/srv/git/repositories/rpms/criu.git","message":"Adapt ExcludeArch depending on Fedora release\\n","email":"adrian@lisas.de"},"topic":"org.fedoraproject.prod.git.receive"}'
+CANNED_CI_MESSAGES['rawhide-pr'] = '{"pullrequest":{"status":"Merged","last_updated":"1524659973","branch_from":"add-tests","uid":"b514cb3616f748e6a0be0d7f3b39ce92","commit_stop":"3b793699117e41a794904eeebf4face081300fe2","initial_comment":null,"title":"Add CI tests using the standard test interface","comments":[{"comment":"### Justification\\r\\nAdds tests according to the [CI wiki](https://fedoraproject.org/wiki/CI) specifically the standard test interface in the [spec](https://fedoraproject.org/wiki/Changes/InvokingTests).\\r\\n\\r\\nThe playbook includes Tier1 level test cases that have been tested in the following contexts and is passing reliably: **Classic** and **Container**. Test logs are stored in the artifacts directory.\\r\\n\\r\\nThe following steps are used to execute the tests using the standard test interface:\\r\\n<br><br>\\r\\n### Test environment\\r\\nMake sure you have installed packages from the [spec](https://fedoraproject.org/wiki/Changes/InvokingTests)\\r\\n```sh\\r\\n$ rpm -q ansible python2-dnf libselinux-python standard-test-roles\\r\\nansible-2.3.2.0-1.fc26.noarch\\r\\npython2-dnf-2.6.3-11.fc26.noarch\\r\\nlibselinux-python-2.6-7.fc26.x86_64\\r\\nstandard-test-roles-2.4-1.fc26.noarch\\r\\n```\\r\\n<br><br>\\r\\n#### Clone tests to your PC\\r\\n```sh\\r\\n$ git clone git://fedorapeople.org/~sturivny/chkconfig\\r\\n$ cd chkconfig/\\r\\n```\\r\\n<br><br>\\r\\n### Run tests for **Classic**\\r\\nAll test should be run under the __root__\\r\\n```sh\\r\\n# tests/\\r\\n# sudo ansible-playbook --tags=classic tests.yml\\r\\n```\\r\\n\\r\\nSnip of the example test run:\\r\\n```\\r\\nTASK [standard-test-beakerlib : Copy tests to test environment] ***********************************************************************************************************************\\r\\nchanged: [localhost]\\r\\n\\r\\nTASK [standard-test-beakerlib : Fix up beakerlib at tests environment] ****************************************************************************************************************\\r\\nchanged: [localhost]\\r\\n\\r\\nTASK [standard-test-beakerlib : Run beakerlib tests] **********************************************************************************************************************************\\r\\nchanged: [localhost] => (item=alternatives-doesn-t-update-slave-links-with)\\r\\nchanged: [localhost] => (item=backport-family-option-from-upstream)\\r\\nchanged: [localhost] => (item=chkconfig-prioritory-set-inconsistently)\\r\\n\\r\\nTASK [standard-test-beakerlib : Make the master tests summary log artifact] ***********************************************************************************************************\\r\\nchanged: [localhost] => (item=alternatives-doesn-t-update-slave-links-with)\\r\\nchanged: [localhost] => (item=backport-family-option-from-upstream)\\r\\nchanged: [localhost] => (item=chkconfig-prioritory-set-inconsistently)\\r\\n\\r\\nTASK [standard-test-beakerlib : include_role] *****************************************************************************************************************************************\\r\\n\\r\\nTASK [str-common : Pull out the logs from test environment to test runner] ************************************************************************************************************\\r\\nchanged: [localhost]\\r\\n\\r\\nTASK [standard-test-beakerlib : Check the results] ************************************************************************************************************************************\\r\\nchanged: [localhost]\\r\\n\\r\\nPLAY RECAP ****************************************************************************************************************************************************************************\\r\\nlocalhost                  : ok=27   changed=12   unreachable=0    failed=0  \\r\\n```\\r\\n<br><br>\\r\\n### Run tests for **Container**\\r\\nAll test should be run under the __root__\\r\\n```sh\\r\\n# export ANSIBLE_INVENTORY=$(test -e inventory && echo inventory || echo /usr/share/ansible/inventory)\\r\\n# export TEST_SUBJECTS=docker:docker.io/library/fedora:27\\r\\n# ansible-playbook --tags=container tests.yml\\r\\n\\r\\n```\\r\\n\\r\\nSnip of the example test run:\\r\\n```\\r\\nTASK [standard-test-beakerlib : Copy tests to test environment] ***********************************************************************************************************************\\r\\nchanged: [aa5577642fd241220d14038efebd9f50efb912bbcd77e217dc65c69074db4f57]\\r\\n\\r\\nTASK [standard-test-beakerlib : Fix up beakerlib at tests environment] ****************************************************************************************************************\\r\\nchanged: [aa5577642fd241220d14038efebd9f50efb912bbcd77e217dc65c69074db4f57]\\r\\n\\r\\nTASK [standard-test-beakerlib : Run beakerlib tests] **********************************************************************************************************************************\\r\\nchanged: [aa5577642fd241220d14038efebd9f50efb912bbcd77e217dc65c69074db4f57] => (item=alternatives-doesn-t-update-slave-links-with)\\r\\nchanged: [aa5577642fd241220d14038efebd9f50efb912bbcd77e217dc65c69074db4f57] => (item=backport-family-option-from-upstream)\\r\\nchanged: [aa5577642fd241220d14038efebd9f50efb912bbcd77e217dc65c69074db4f57] => (item=chkconfig-prioritory-set-inconsistently)\\r\\n\\r\\nTASK [standard-test-beakerlib : Make the master tests summary log artifact] ***********************************************************************************************************\\r\\nchanged: [aa5577642fd241220d14038efebd9f50efb912bbcd77e217dc65c69074db4f57] => (item=alternatives-doesn-t-update-slave-links-with)\\r\\nchanged: [aa5577642fd241220d14038efebd9f50efb912bbcd77e217dc65c69074db4f57] => (item=backport-family-option-from-upstream)\\r\\nchanged: [aa5577642fd241220d14038efebd9f50efb912bbcd77e217dc65c69074db4f57] => (item=chkconfig-prioritory-set-inconsistently)\\r\\n\\r\\nTASK [standard-test-beakerlib : include_role] *****************************************************************************************************************************************\\r\\n\\r\\nTASK [str-common : Pull out the logs from test environment to test runner] ************************************************************************************************************\\r\\nchanged: [aa5577642fd241220d14038efebd9f50efb912bbcd77e217dc65c69074db4f57]\\r\\n\\r\\nTASK [standard-test-beakerlib : Check the results] ************************************************************************************************************************************\\r\\nchanged: [aa5577642fd241220d14038efebd9f50efb912bbcd77e217dc65c69074db4f57]\\r\\n\\r\\nPLAY RECAP ****************************************************************************************************************************************************************************\\r\\naa5577642fd241220d14038efebd9f50efb912bbcd77e217dc65c69074db4f57 : ok=27   changed=16   unreachable=0    failed=0   \\r\\n```\\r\\n\\r\\n<br><br>\\r\\n### Notes\\r\\nTests will be enabled in CI, yet gating is currently disabled, so nothing will change. Tests will run on each dist-git commit, they are not triggered by koji builds and if you are using FMN, it should notify you of failures normally.\\r\\n\\r\\nThe RH QE maintainer contact in case you have questions: Martin Cermak <mcermak@redhat.com>\\r\\nThe idea is that these tests become yours just as you\'re maintaining the package, there will, of course, be people around if you have questions or troubles.","parent":null,"notification":false,"tree":null,"filename":null,"edited_on":null,"editor":null,"date_created":"1523014904","commit":null,"line":null,"id":8911,"user":{"fullname":"Serhii Turivnyi","name":"sturivny"}},{"comment":"Pull-Request has been merged by lnykryn","parent":null,"notification":true,"tree":null,"filename":null,"edited_on":null,"editor":null,"date_created":"1524659973","commit":null,"line":null,"id":9735,"user":{"fullname":"Lukáš Nykrýn","name":"lnykryn"}}],"id":2,"project":{"custom_keys":[],"description":"The chkconfig rpms","parent":null,"date_modified":"1507634625","access_users":{"admin":["jsynacek","msekleta"],"commit":[],"ticket":[],"owner":["lnykryn"]},"namespace":"rpms","url_path":"rpms/chkconfig","priorities":{},"id":1686,"access_groups":{"admin":[],"commit":[],"ticket":[]},"milestones":{},"user":{"fullname":"Lukáš Nykrýn","name":"lnykryn"},"date_created":"1501866676","fullname":"rpms/chkconfig","settings":{"issues_default_to_private":false,"Minimum_score_to_merge_pull-request":-1,"pull_request_access_only":false,"Web-hooks":null,"fedmsg_notifications":true,"always_merge":false,"project_documentation":false,"Enforce_signed-off_commits_in_pull-request":false,"pull_requests":true,"Only_assignee_can_merge_pull-request":false,"issue_tracker":true},"close_status":[],"tags":[],"name":"chkconfig"},"assignee":null,"repo_from":null,"updated_on":"1523014902","commit_start":"3b793699117e41a794904eeebf4face081300fe2","branch":"master","date_created":"1523014902","closed_at":"1524659973","remote_git":"git://fedorapeople.org/~sturivny/chkconfig","closed_by":{"fullname":"Lukáš Nykrýn","name":"lnykryn"},"user":{"fullname":"Serhii Turivnyi","name":"sturivny"}},"agent":"lnykryn","topic":"org.fedoraproject.prod.pagure.pull-request.comment.added"}'
+
+library identifier: "ci-pipeline@master",
+        retriever: modernSCM([$class: 'GitSCMSource',
+                              remote: "https://github.com/CentOS-Paas-SIG/ci-pipeline"])
+properties([
+  buildDiscarder(logRotator(artifactNumToKeepStr: '20', numToKeepStr: '20')),
+  [$class: 'GithubProjectProperty', displayName: '', projectUrlStr: 'https://github.com/CentOS-PaaS-SIG/ci-pipeline/'],
+  [$class: 'org.jenkinsci.plugins.workflow.job.properties.PipelineTriggersJobProperty', triggers:[
+    [
+      $class: 'org.jenkinsci.plugins.ghprb.GhprbTrigger',
+      orgslist: 'CentOS-PaaS-SIG',
+      cron: 'H/5 * * * *',
+      triggerPhrase: '.*\\[upstream-test\\].*',
+      onlyTriggerPhrase: false,
+      useGitHubHooks: true,
+      permitAll: true,
+      autoCloseFailedPullRequests: false,
+      displayBuildErrorsOnDownstreamBuilds: true,
+      extensions: [
+        [
+          $class: 'org.jenkinsci.plugins.ghprb.extensions.status.GhprbSimpleStatus',
+          commitStatusContext: 'Upstream Fedora Stage Pipeline Build',
+          showMatrixStatus: false,
+          triggeredStatus: 'Starting job...',
+          startedStatus: 'Building...',
+        ]
+      ]
+    ]
+  ]]
+])
+
+pipeline {
+    agent {
+        kubernetes {
+            cloud 'openshift'
+            label 'allpkgs-stage-trigger-' + env.ghprbActualCommit
+            containerTemplate {
+                name 'jnlp'
+                args '${computer.jnlpmac} ${computer.name}'
+                image DOCKER_REPO_URL + '/' + openshiftProject + '/jenkins-continuous-infra-slave:' + STABLE_LABEL
+                ttyEnabled false
+                command ''
+            }
+        }
+    }
+    stages {
+        stage("Get Changelog") {
+            steps {
+                node('master') {
+                    script {
+                        echo "PR number is: ${env.ghprbPullId}"
+                        env.changeLogStr = pipelineUtils.getChangeLogFromCurrentBuild()
+                        echo env.changeLogStr
+                    }
+                    writeFile file: 'changelog.txt', text: env.changeLogStr
+                    archiveArtifacts allowEmptyArchive: true, artifacts: 'changelog.txt'
+                }
+            }
+        }
+        // Can't think of a better way to only run if a container of interest is touched
+        stage("Skip if no containers changed") {
+            when {
+                // If none of workflow's containers are modified, no need to run
+                ! changeset "config/Dockerfiles/rpmbuild/**"
+                ! changeset "config/Dockerfiles/cloud-image-compose/**"
+                ! changeset "config/Dockerfiles/singlehost-test/**"
+            }
+            steps {
+                return
+            }
+        }
+        stage("Setup Container Templates") {
+            steps {
+                script {
+                    pipelineUtils.setupContainerTemplates(openshiftProject)
+                }
+            }
+        }
+        stage("rpmbuild image build") {
+            when {
+                // Only build if we have related files in changeset
+                changeset "config/Dockerfiles/rpmbuild/**"
+            }
+            steps {
+                script {
+                    tagMap['rpmbuild'] = pipelineUtils.buildImage(openshiftProject, "rpmbuild")
+                }
+            }
+        }
+        stage("cloud-image-compose image build") {
+            when {
+                // Only build if we have related files in changeset
+                changeset "config/Dockerfiles/cloud-image-compose/**"
+            }
+            steps {
+                script {
+                    tagMap['cloud-image-compose'] = pipelineUtils.buildImage(openshiftProject, "cloud-image-compose")
+                }
+            }
+        }
+        stage("singlehost-test image build") {
+            when {
+                // Only build if we have related files in changeset
+                changeset "config/Dockerfiles/singlehost-test/**"
+            }
+            steps {
+                script {
+                    tagMap['singlehost-test'] = pipelineUtils.buildImage(openshiftProject, "singlehost-test")
+                }
+            }
+        }
+        stage("Image Tag Report") {
+            steps {
+                script {
+                    // Use tags derived from above image builds
+                    //
+                    pipelineUtils.printLabelMap(tagMap)
+                }
+            }
+        }
+        stage("Run Stage Jobs") {
+            failFast true
+            parallel {
+                //stage("f26 message watcher") {
+                //}
+                stage("rawhide pr message watcher") {
+                    steps {
+                        script {
+                            pipelineUtils.watchForMessages(MSG_PROVIDER, CANNED_CI_MESSAGES['rawhide-pr'])
+                        }
+                    }
+                }
+                //stage("f26 stage job") {
+                //}
+                stage("rawhide stage job") {
+                    steps {
+                        sleep 30
+                        build job: 'fedora-rawhide-stage-pr-pipeline',
+                                parameters: [
+                                        string(name: 'CI_MESSAGE',
+                                               value: CANNED_CI_MESSAGES['rawhide-pr']),
+                                        string(name: 'ghprbActualCommit',
+                                                      value: "${env.ghprbActualCommit}"),
+                                        string(name: 'ghprbGhRepository',
+                                                      value: "${env.ghprbGhRepository}"),
+                                        string(name: 'ghprbPullAuthorLogin',
+                                                      value: "${env.ghprbPullAuthorLogin}"),
+                                        string(name: 'sha1',
+                                                      value: "${env.sha1}"),
+                                        string(name: 'ghprbPullId',
+                                                      value: "${env.ghprbPullId}"),
+                                        string(name: 'SLAVE_TAG',
+                                               value: tagMap['jenkins-continuous-infra-slave']),
+                                        string(name: 'RPMBUILD_TAG',
+                                               value: tagMap['rpmbuild']),
+                                        string(name: 'INQUIRER_TAG',
+                                               value: tagMap['inquirer']),
+                                        string(name: 'CLOUD_IMAGE_COMPOSE_TAG',
+                                               value: tagMap['cloud-image-compose']),
+                                        string(name: 'OSTREE_BOOT_IMAGE_TAG',
+                                               value: tagMap['ostree-boot-image']),
+                                        string(name: 'SINGLEHOST_TEST_TAG',
+                                               value: tagMap['singlehost-test'])
+                                ],
+                                wait: true
+                    }
+                }
+            }
+        }
+    }
+    post {
+        always {
+            script {
+                String prMsg = ""
+                if (env.ghprbActualCommit != null && env.ghprbActualCommit != "master") {
+                    prMsg = "(PR #${env.ghprbPullId} ${env.ghprbPullAuthorLogin})"
+                }
+                def message = "${JOB_NAME} ${prMsg} build #${BUILD_NUMBER}: ${currentBuild.currentResult}: ${BUILD_URL}"
+                pipelineUtils.sendIRCNotification("${IRC_NICK}-${UUID.randomUUID()}", IRC_CHANNEL, message)
+            }
+        }
+        success {
+            echo "yay!"
+        }
+        failure {
+            error "build failed!"
+        }
+    }
+}
