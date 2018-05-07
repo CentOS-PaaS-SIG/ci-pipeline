@@ -51,6 +51,8 @@ EXPOSE 9200 9300
 
 VOLUME /usr/share/elasticsearch/data
 
+USER 1000
+
 ENTRYPOINT ["/usr/local/bin/docker-entrypoint.sh"]
 # Dummy overridable parameter parsed by entrypoint
 CMD ["eswrapper"]
