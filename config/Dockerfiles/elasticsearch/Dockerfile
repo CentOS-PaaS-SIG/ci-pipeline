@@ -29,22 +29,22 @@ RUN set -ex && for esdirs in config data logs; do \
 RUN for PLUGIN in ingest-user-agent ingest-geoip; do \
       elasticsearch-plugin install --batch "$PLUGIN"; done
 
-COPY --chown=1000:0 elasticsearch.yml log4j2.properties config/
+COPY elasticsearch.yml log4j2.properties config/
+
+COPY bin/docker-entrypoint.sh /usr/local/bin/docker-entrypoint.sh
 
 USER 0
 
 RUN chown -R elasticsearch:0 . && \
+    chown -R elasticsearch:0 /usr/local/bin/docker-entrypoint.sh && \
     chmod -R g=u /usr/share/elasticsearch
 
 RUN chmod 0775 /usr/share/elasticsearch && \
     chgrp 0 /usr/share/elasticsearch
 
-COPY --chown=1000:0 bin/docker-entrypoint.sh /usr/local/bin/docker-entrypoint.sh
-
 # Openshift overrides USER and uses ones with randomly uid>1024 and gid=0
 # Allow ENTRYPOINT (and ES) to run even with a different user
-RUN chgrp 0 /usr/local/bin/docker-entrypoint.sh && \
-    chmod g=u /etc/passwd && \
+RUN chmod g=u /etc/passwd && \
     chmod 0775 /usr/local/bin/docker-entrypoint.sh
 
 EXPOSE 9200 9300
