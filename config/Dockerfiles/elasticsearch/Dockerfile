@@ -16,7 +16,7 @@ WORKDIR /usr/share/elasticsearch
 USER 1000
 
 # Download and extract defined ES version.
-RUN curl -fsSL https://artifacts.elastic.co/downloads/elasticsearch/elasticsearch-6.2.4.tar.gz | \ 
+RUN curl -fsSL https://artifacts.elastic.co/downloads/elasticsearch/elasticsearch-${ELASTICSEARCH_VERSION}.tar.gz | \ 
     tar zx --strip-components=1 && \
     for esdirs in config data logs; do \
         mkdir -p "$esdirs"; \
