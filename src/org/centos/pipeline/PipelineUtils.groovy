@@ -1210,7 +1210,7 @@ def obtainLock(String fileLocation, int duration) {
     echo "Currently in obtainLock function"
     def myuuid = sh (returnStdout: true, script: 'uuidgen').trim()
 
-    sh '''
+    sh """
         set -x
 
         (
@@ -1238,7 +1238,7 @@ def obtainLock(String fileLocation, int duration) {
             done
         # fileLocation.lck isn't important, but redirect somewhere
         ) 9>${fileLocation}.lck
-    '''
+    """
     return myuuid
 }
 
