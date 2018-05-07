@@ -18,16 +18,16 @@ parameters:
   value: 10Gi
   description: The size of the persistent storage for Elasticsearch
 - name: REPO_URL
-  value: https://github.com/joejstuart/ci-pipeline.git
+  value: https://github.com/CentOS-PaaS-SIG/ci-pipeline.git
   description: The dockerfile repo url
 - name: REPO_CONTEXTDIR
   description: The sub-directory inside the repository.
   value: config/Dockerfiles/elasticsearch
 - name: REPO_REF
   description: The git ref or tag to use for customization.
-  value: newes
+  value: master
 - name: ELASTICSEARCH_VERSION
-  value: 5.5.1
+  value: 6.2.4
   description: The es version
 objects:
 - apiVersion: v1
