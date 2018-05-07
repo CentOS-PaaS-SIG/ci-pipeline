@@ -10,9 +10,6 @@
 openshiftProject = "continuous-infra"
 DOCKER_REPO_URL = '172.30.254.79:5000'
 
-// Defaults for SCM operations
-env.ghprbGhRepository = env.ghprbGhRepository ?: 'CentOS-PaaS-SIG/ci-pipeline'
-env.ghprbActualCommit = env.ghprbActualCommit ?: 'master'
 env.relevant = 'false'
 
 // If this PR does not include an image change, then use this tag
@@ -106,6 +103,7 @@ pipeline {
                     changeset "config/Dockerfiles/rpmbuild/**"
                     changeset "config/Dockerfiles/cloud-image-compose/**"
                     changeset "config/Dockerfiles/singlehost-test/**"
+                    changeset "upstream-fedora-pipeline/**"
                 }
             }
             steps {
@@ -197,9 +195,9 @@ pipeline {
                                         string(name: 'CI_MESSAGE',
                                                value: CANNED_CI_MESSAGES['rawhide-pr']),
                                         string(name: 'ghprbActualCommit',
-                                                      value: "${env.ghprbActualCommit}"),
+                                                      value: "master"),
                                         string(name: 'ghprbGhRepository',
-                                                      value: "${env.ghprbGhRepository}"),
+                                                      value: "CentOS-PaaS-SIG/upstream-fedora-pipeline"),
                                         string(name: 'ghprbPullAuthorLogin',
                                                       value: "${env.ghprbPullAuthorLogin}"),
                                         string(name: 'sha1',
