@@ -1211,8 +1211,6 @@ def obtainLock(String fileLocation, int duration) {
     def myuuid = sh (returnStdout: true, script: 'uuidgen').trim()
 
     sh """
-        set -x
-
         (
         flock 9
         currentTime=\$(date +%s)
@@ -1220,18 +1218,20 @@ def obtainLock(String fileLocation, int duration) {
             # Check if lock file exists
             while [ -f "${fileLocation}" ] ; do
                 lockAge=\$(stat -c %Y "${fileLocation}")
-                ageDiff=\$((${currentTime} - ${lockAge}))
+                ageDiff=\$((\${currentTime} - \${lockAge}))
                 # Break if lock file is too old
-                if [ ${ageDiff} -ge "${duration}" ]; then
+                if [ \${ageDiff} -ge "${duration}" ]; then
                     break
                 fi
+                sleep 30
+                currentTime=\$(date +%s)
             done
             # Now, either lock file is older than duration
             # or the lock is gone, so proceed
-            echo ${myuuid} > "${fileLocation}"
+            echo "${myuuid}" > "${fileLocation}"
             testuuid=\$(cat "${fileLocation}")
             # If uuid matches, we got the lock
-            if [ ${testuuid} == ${myuuid} ]; then
+            if [ \${testuuid} == "${myuuid}" ]; then
                 break
             fi
             sleep 30
@@ -1250,7 +1250,7 @@ def obtainLock(String fileLocation, int duration) {
  */
 def releaseLock(String fileLocation, String myuuid) {
     if (fileExists(fileLocation)) {
-        def storeduuid = readFile(fileLocation)
+        def storeduuid = readFile(fileLocation).trim()
         if (storeduuid == myuuid) {
             sh "rm -f ${fileLocation}"
             return
