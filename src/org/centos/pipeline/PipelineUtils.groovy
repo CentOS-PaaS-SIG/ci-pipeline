@@ -1210,35 +1210,35 @@ def obtainLock(String fileLocation, int duration) {
     echo "Currently in obtainLock function"
     def myuuid = sh (returnStdout: true, script: 'uuidgen').trim()
 
-    sh '''
+    sh """
         set -x
 
         (
-            flock 9
-            currentTime=$(date +%s)
-            while true ; do
-                # Check if lock file exists
-                while [ -f ${fileLocation} ] ; do
-                    lockAge=$(stat -c %Y ${fileLocation})
-                    ageDiff=$(($currentTime - $lockAge))
-                    # Break if lock file is too old
-                    if [ $ageDiff -ge ${duration} ]; then
-                        break
-                    fi
-                done
-                # Now, either lock file is older than duration
-                # or the lock is gone, so proceed
-                echo ${myuuid} > ${fileLocation}
-                testuuid=$(cat ${fileLocation})
-                # If uuid matches, we got the lock
-                if [ $testuuid == $myuuid ]; then
+        flock 9
+        currentTime=\$(date +%s)
+        while true ; do
+            # Check if lock file exists
+            while [ -f "${fileLocation}" ] ; do
+                lockAge=\$(stat -c %Y "${fileLocation}")
+                ageDiff=\$((${currentTime} - ${lockAge}))
+                # Break if lock file is too old
+                if [ ${ageDiff} -ge "${duration}" ]; then
                     break
                 fi
-                sleep 30
             done
+            # Now, either lock file is older than duration
+            # or the lock is gone, so proceed
+            echo ${myuuid} > "${fileLocation}"
+            testuuid=\$(cat "${fileLocation}")
+            # If uuid matches, we got the lock
+            if [ ${testuuid} == ${myuuid} ]; then
+                break
+            fi
+            sleep 30
+        done
         # fileLocation.lck isn't important, but redirect somewhere
-        ) 9>${fileLocation}.lck
-    '''
+        ) 9>"${fileLocation}".lck
+    """
     return myuuid
 }
 
