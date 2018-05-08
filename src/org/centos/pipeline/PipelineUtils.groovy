@@ -1220,9 +1220,9 @@ def obtainLock(String fileLocation, int duration) {
             # Check if lock file exists
             while [ -f ${fileLocation} ] ; do
                 lockAge=$(stat -c %Y ${fileLocation})
-                ageDiff=$(($currentTime - $lockAge))
+                ageDiff=$((${currentTime} - ${lockAge}))
                 # Break if lock file is too old
-                if [ $ageDiff -ge ${duration} ]; then
+                if [ ${ageDiff} -ge ${duration} ]; then
                     break
                 fi
             done
@@ -1231,7 +1231,7 @@ def obtainLock(String fileLocation, int duration) {
             echo ${myuuid} > ${fileLocation}
             testuuid=$(cat ${fileLocation})
             # If uuid matches, we got the lock
-            if [ $testuuid == $myuuid ]; then
+            if [ ${testuuid} == ${myuuid} ]; then
                 break
             fi
             sleep 30
