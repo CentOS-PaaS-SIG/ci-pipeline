@@ -152,7 +152,6 @@ objects:
                 -Djava.security.egd=file:/dev/./urandom
                 -Djenkins.install.runSetupWizard=false
                 -Dhudson.DNSMultiCast.disabled=true
-                -Dhudson.model.ParametersAction.keepUndefinedParameters=true
           - name: JAVA_GC_OPTS
             value: >-
                 -XX:+UseParallelGC -XX:MaxPermSize=100m -XX:MinHeapFreeRatio=20
