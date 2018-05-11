@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<flow-definition plugin="workflow-job@2.17">
+   <actions>
+      <org.jenkinsci.plugins.workflow.multibranch.JobPropertyTrackerAction plugin="workflow-multibranch@2.17">
+         <jobPropertyDescriptors>
+            <string>hudson.model.ParametersDefinitionProperty</string>
+            <string>org.jenkinsci.plugins.workflow.job.properties.PipelineTriggersJobProperty</string>
+            <string>jenkins.model.BuildDiscarderProperty</string>
+         </jobPropertyDescriptors>
+      </org.jenkinsci.plugins.workflow.multibranch.JobPropertyTrackerAction>
+   </actions>
+   <description />
+   <keepDependencies>false</keepDependencies>
+   <properties>
+      <io.fabric8.jenkins.openshiftsync.BuildConfigProjectProperty plugin="openshift-sync@1.0.7">
+         <uid />
+         <namespace />
+         <name />
+         <resourceVersion />
+      </io.fabric8.jenkins.openshiftsync.BuildConfigProjectProperty>
+      <com.sonyericsson.rebuild.RebuildSettings plugin="rebuild@1.27">
+         <autoRebuild>false</autoRebuild>
+         <rebuildDisabled>false</rebuildDisabled>
+      </com.sonyericsson.rebuild.RebuildSettings>
+      <jenkins.model.BuildDiscarderProperty>
+         <strategy class="hudson.tasks.LogRotator">
+            <daysToKeep>-1</daysToKeep>
+            <numToKeep>500</numToKeep>
+            <artifactDaysToKeep>-1</artifactDaysToKeep>
+            <artifactNumToKeep>500</artifactNumToKeep>
+         </strategy>
+      </jenkins.model.BuildDiscarderProperty>
+      <hudson.model.ParametersDefinitionProperty>
+         <parameterDefinitions>
+            <hudson.model.StringParameterDefinition>
+               <name>CI_MESSAGE</name>
+               <description>fedora-fedmsg</description>
+               <defaultValue>{}</defaultValue>
+               <trim>false</trim>
+            </hudson.model.StringParameterDefinition>
+         </parameterDefinitions>
+      </hudson.model.ParametersDefinitionProperty>
+      <org.jenkinsci.plugins.workflow.job.properties.PipelineTriggersJobProperty>
+         <triggers>
+            <com.redhat.jenkins.plugins.ci.CIBuildTrigger plugin="jms-messaging@1.0.35">
+               <spec />
+               <selector>topic = "org.fedoraproject.prod.buildsys.build.state.change"</selector>
+               <providerName>fedora-fedmsg</providerName>
+               <checks>
+                  <com.redhat.jenkins.plugins.ci.messaging.checks.MsgCheck>
+                     <field>new</field>
+                     <expectedValue>1</expectedValue>
+                  </com.redhat.jenkins.plugins.ci.messaging.checks.MsgCheck>
+               </checks>
+            </com.redhat.jenkins.plugins.ci.CIBuildTrigger>
+         </triggers>
+      </org.jenkinsci.plugins.workflow.job.properties.PipelineTriggersJobProperty>
+   </properties>
+   <definition class="org.jenkinsci.plugins.workflow.cps.CpsScmFlowDefinition" plugin="workflow-cps@2.45">
+      <scm class="hudson.plugins.git.GitSCM" plugin="git@3.8.0">
+         <configVersion>2</configVersion>
+         <userRemoteConfigs>
+            <hudson.plugins.git.UserRemoteConfig>
+               <url>https://github.com/CentOS-PaaS-SIG/upstream-fedora-pipeline</url>
+            </hudson.plugins.git.UserRemoteConfig>
+         </userRemoteConfigs>
+         <branches>
+            <hudson.plugins.git.BranchSpec>
+               <name>*/master</name>
+            </hudson.plugins.git.BranchSpec>
+         </branches>
+         <doGenerateSubmoduleConfigurations>false</doGenerateSubmoduleConfigurations>
+         <submoduleCfg class="list" />
+         <extensions />
+      </scm>
+      <scriptPath>JenkinsfileBuildTrigger</scriptPath>
+      <lightweight>true</lightweight>
+   </definition>
+   <triggers />
+   <disabled>false</disabled>
+</flow-definition>
