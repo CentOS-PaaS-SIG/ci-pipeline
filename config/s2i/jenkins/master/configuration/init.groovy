@@ -51,39 +51,39 @@ def linchpinViewName = 'Linchpin'
 def allpkgsViewName = 'Fedora All Packages Pipeline'
 
 // Create CI Pipeline View
-View ciPipelineView = jenkins.getView(ciPipelineViewName)
+ciPipelineView = jenkins.getView(ciPipelineViewName)
 if (ciPipelineView == null) {
     // create the new view
     jenkins.addView(new ListView(ciPipelineViewName))
     // get the view
-    ciPipelineView = hudson.model.Hudson.instance.getView(ciPipelineViewName)
+    ciPipelineView = jenkins.getView(ciPipelineViewName)
     // add a job by its name
-    ciPipelineView.doAddJobToView('continuous-infra/ci-pipeline-f26')
-    ciPipelineView.doAddJobToView('continuous-infra/ci-pipeline-f27')
+    ciPipelineView.doAddJobToView('continuous-infra-ci-pipeline-f26')
+    ciPipelineView.doAddJobToView('continuous-infra-ci-pipeline-f27')
     ciPipelineView.setIncludeRegex('^ci-pipeline.*')
 }
 
 // Create the CI Stage Pipeline View
-View ciStagePipelineView = jenkins.getView(ciStagePipelineViewName)
+ciStagePipelineView = jenkins.getView(ciStagePipelineViewName)
 if (ciStagePipelineView == null) {
     jenkins.addView(new ListView(ciStagePipelineViewName))
-    ciStagePipelineView = hudson.model.Hudson.instance.getView(ciStagePipelineViewName)
+    ciStagePipelineView = jenkins.getView(ciStagePipelineViewName)
     ciStagePipelineView.setIncludeRegex('^ci-stage-pipeline.*')
 }
 
 // Create the Linchpin View
-View linchpinView = jenkins.getView(linchpinViewName)
+linchpinView = jenkins.getView(linchpinViewName)
 if (linchpinView == null) {
     jenkins.addView(new ListView(linchpinViewName))
-    linchpinView = hudson.model.Hudson.instance.getView(linchpinViewName)
+    linchpinView = jenkins.getView(linchpinViewName)
     linchpinView.setIncludeRegex('^ci-linchpin.*')
 }
 
 // Create the Fedora All Packages Pipeline View
-View allpkgsView = jenkins.getView(allpkgsViewName)
+allpkgsView = jenkins.getView(allpkgsViewName)
 if (allpkgsView == null) {
     jenkins.addView(new ListView(allpkgsViewName))
-    allpkgsView = hudson.model.Hudson.instance.getView(allpkgsViewName)
+    allpkgsView = jenkins.getView(allpkgsViewName)
     allpkgsView.doAddJobToView('upstream-fedora-pipeline-gc')
     allpkgsView.setIncludeRegex('^fedora-.*')
 }
