@@ -63,13 +63,8 @@ imgdir=/var/lib/imagefactory/storage/
 
 # Generate kickstart file from upstream - clone must be in here to get latest
 if [ ! -d "${base_dir}/fedora-kickstarts" ]; then
-    git clone https://pagure.io/fedora-kickstarts ${base_dir}/fedora-kickstarts
+    git clone -b ${fed_branch} --single-branch https://pagure.io/fedora-kickstarts ${base_dir}/fedora-kickstarts
 fi
-
-# Checkout proper branch of kickstarts
-pushd ${base_dir}/fedora-kickstarts
-git checkout ${fed_branch}
-popd
 
 # The centos7 pykickstart rpm doesnt support --noboot being in the .ks file
 noboot=no
