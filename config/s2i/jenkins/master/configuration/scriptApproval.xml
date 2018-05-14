@@ -3,42 +3,16 @@
   <approvedScriptHashes>
   </approvedScriptHashes>
   <approvedSignatures>
-    <string>method com.cloudbees.plugins.credentials.common.IdCredentials getId</string>
-    <string>method com.redhat.jenkins.plugins.ci.messaging.data.SendResult getMessageContent</string>
-    <string>method com.redhat.jenkins.plugins.ci.messaging.data.SendResult getMessageId</string>
-    <string>method hudson.plugins.git.GitSCM getBranches</string>
-    <string>method hudson.plugins.git.GitSCM getUserRemoteConfigs</string>
-    <string>method hudson.plugins.git.GitSCM isDoGenerateSubmoduleConfigurations</string>
-    <string>method hudson.plugins.git.GitSCMBackwardCompatibility getExtensions</string>
+    <string>method groovy.json.JsonSlurperClassic parseText java.lang.String</string>
     <string>method java.lang.Class isInstance java.lang.Object</string>
-    <string>method java.lang.Throwable printStackTrace</string>
-    <string>method java.net.HttpURLConnection setRequestMethod java.lang.String</string>
-    <string>method java.net.URL openConnection</string>
-    <string>method java.util.Calendar getTimeInMillis</string>
-    <string>method org.jenkinsci.plugins.plaincredentials.FileCredentials getFileName</string>
     <string>method org.jenkinsci.plugins.workflow.support.actions.EnvironmentAction getEnvironment</string>
-    <string>new java.io.File java.lang.String</string>
-    <string>new java.lang.Exception java.lang.String</string>
+    <string>new groovy.json.JsonSlurperClassic</string>
     <string>new java.lang.Exception java.lang.String java.lang.Throwable</string>
-    <string>new java.lang.String</string>
-    <string>new java.lang.StringBuilder</string>
-    <string>new org.jenkinsci.plugins.pipeline.modeldefinition.agent.DeclarativeAgentScript org.jenkinsci.plugins.workflow.cps.CpsScript org.jenkinsci.plugins.pipeline.modeldefinition.agent.DeclarativeAgent</string>
-    <string>staticMethod com.cloudbees.plugins.credentials.CredentialsProvider lookupCredentials java.lang.Class</string>
-    <string>staticMethod java.net.InetAddress getByName java.lang.String</string>
-    <string>staticMethod org.codehaus.groovy.runtime.DefaultGroovyMethods getAt java.lang.Object[] groovy.lang.IntRange</string>
+    <string>new java.lang.Exception java.lang.String</string>
+    <string>staticMethod org.codehaus.groovy.runtime.DefaultGroovyMethods contains java.lang.Object[] java.lang.Object</string>
     <string>staticMethod org.codehaus.groovy.runtime.DefaultGroovyMethods getAt java.util.List groovy.lang.Range</string>
     <string>staticMethod org.codehaus.groovy.runtime.DefaultGroovyMethods getAt java.util.List java.util.Collection</string>
-    <string>staticMethod org.codehaus.groovy.runtime.DefaultGroovyMethods getText java.io.File</string>
-    <string>staticMethod org.codehaus.groovy.runtime.DefaultGroovyMethods intersect java.util.List java.lang.Iterable</string>
-    <string>staticMethod org.codehaus.groovy.runtime.DefaultGroovyMethods invokeMethod java.lang.Object java.lang.String java.lang.Object</string>
-    <string>staticMethod org.codehaus.groovy.runtime.DefaultGroovyMethods last java.lang.Iterable</string>
-    <string>staticMethod org.codehaus.groovy.runtime.DefaultGroovyMethods sort java.util.Map</string>
-    <string>staticMethod org.codehaus.groovy.runtime.ScriptBytecodeAdapter unaryPlus java.lang.Object</string>
     <string>staticMethod org.jenkinsci.plugins.pipeline.modeldefinition.Utils markStageSkippedForConditional java.lang.String</string>
-    <string> staticMethod org.codehaus.groovy.runtime.DefaultGroovyMethods print java.lang.Object java.lang.Object</string>
-    <string>method groovy.lang.GroovyObject getProperty java.lang.String</string>
-    <string>method java.net.URL openConnection</string>
-    <string>new java.io.File java.lang.String</string>
   </approvedSignatures>
   <aclApprovedSignatures>
   </aclApprovedSignatures>
