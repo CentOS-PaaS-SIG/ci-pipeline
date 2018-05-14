@@ -1,6 +1,6 @@
 FROM fedora:27
 LABEL maintainer "https://github.com/CentOS-PaaS-SIG/ci-pipeline"
-LABEL description="This container is meant to \
+LABEL description="testThis container is meant to \
 use fedpkg mock to create rpms.  It also rsyncs \
 them to artifacts.ci.centos.org."
 USER root
