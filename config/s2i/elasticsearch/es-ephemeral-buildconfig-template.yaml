@@ -140,6 +140,13 @@ objects:
         labels:
           component: elasticsearch
       spec:
+        initContainers:
+        - name: init-sysctl
+          image: busybox
+          imagePullPolicy: IfNotPresent
+          command: ["sysctl", "-w", "vm.max_map_count=262144"]
+          securityContext:
+            privileged: true
         containers:
         - env:
           - name: NODE_NAME
@@ -181,7 +188,7 @@ objects:
               containerPort: 9300
               protocol: TCP
         securityContext:
-          privileged: true
+          privileged: false
           capabilities:
             add:
               - IPC_LOCK
