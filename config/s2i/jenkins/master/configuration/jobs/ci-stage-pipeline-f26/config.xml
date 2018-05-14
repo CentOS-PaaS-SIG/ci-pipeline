@@ -1,0 +1,236 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<flow-definition plugin="workflow-job@2.17">
+   <actions>
+      <io.jenkins.blueocean.service.embedded.BlueOceanUrlAction plugin="blueocean-rest-impl@1.4.2">
+         <blueOceanUrlObject class="io.jenkins.blueocean.service.embedded.BlueOceanUrlObjectImpl">
+            <mappedUrl>blue/organizations/jenkins/ci-stage-pipeline-f26</mappedUrl>
+         </blueOceanUrlObject>
+      </io.jenkins.blueocean.service.embedded.BlueOceanUrlAction>
+      <org.jenkinsci.plugins.workflow.multibranch.JobPropertyTrackerAction plugin="workflow-multibranch@2.17">
+         <jobPropertyDescriptors>
+            <string>org.jenkinsci.plugins.workflow.job.properties.DisableConcurrentBuildsJobProperty</string>
+            <string>hudson.model.ParametersDefinitionProperty</string>
+            <string>jenkins.model.BuildDiscarderProperty</string>
+         </jobPropertyDescriptors>
+      </org.jenkinsci.plugins.workflow.multibranch.JobPropertyTrackerAction>
+   </actions>
+   <description />
+   <keepDependencies>false</keepDependencies>
+   <properties>
+      <io.fabric8.jenkins.openshiftsync.BuildConfigProjectProperty plugin="openshift-sync@1.0.7">
+         <uid />
+         <namespace />
+         <name />
+         <resourceVersion />
+      </io.fabric8.jenkins.openshiftsync.BuildConfigProjectProperty>
+      <com.sonyericsson.rebuild.RebuildSettings plugin="rebuild@1.27">
+         <autoRebuild>false</autoRebuild>
+         <rebuildDisabled>false</rebuildDisabled>
+      </com.sonyericsson.rebuild.RebuildSettings>
+      <org.jenkinsci.plugins.workflow.job.properties.PipelineTriggersJobProperty>
+         <triggers />
+      </org.jenkinsci.plugins.workflow.job.properties.PipelineTriggersJobProperty>
+      <jenkins.model.BuildDiscarderProperty>
+         <strategy class="hudson.tasks.LogRotator">
+            <daysToKeep>90</daysToKeep>
+            <numToKeep>-1</numToKeep>
+            <artifactDaysToKeep>30</artifactDaysToKeep>
+            <artifactNumToKeep>-1</artifactNumToKeep>
+         </strategy>
+      </jenkins.model.BuildDiscarderProperty>
+      <org.jenkinsci.plugins.workflow.job.properties.DisableConcurrentBuildsJobProperty />
+      <hudson.model.ParametersDefinitionProperty>
+         <parameterDefinitions>
+            <hudson.model.StringParameterDefinition>
+               <name>CI_MESSAGE</name>
+               <description>CI Message that triggered the pipeline</description>
+               <trim>false</trim>
+            </hudson.model.StringParameterDefinition>
+            <hudson.model.StringParameterDefinition>
+               <name>TARGET_BRANCH</name>
+               <description>Fedora target branch</description>
+               <defaultValue>f26</defaultValue>
+               <trim>false</trim>
+            </hudson.model.StringParameterDefinition>
+            <hudson.model.StringParameterDefinition>
+               <name>HTTP_SERVER</name>
+               <description>HTTP Server</description>
+               <defaultValue />
+               <trim>false</trim>
+            </hudson.model.StringParameterDefinition>
+            <hudson.model.StringParameterDefinition>
+               <name>HTTP_DIR</name>
+               <description>HTTP dir</description>
+               <defaultValue />
+               <trim>false</trim>
+            </hudson.model.StringParameterDefinition>
+            <hudson.model.StringParameterDefinition>
+               <name>RSYNC_USER</name>
+               <description>RSync User</description>
+               <defaultValue />
+               <trim>false</trim>
+            </hudson.model.StringParameterDefinition>
+            <hudson.model.StringParameterDefinition>
+               <name>RSYNC_SERVER</name>
+               <description>RSync Server</description>
+               <defaultValue />
+               <trim>false</trim>
+            </hudson.model.StringParameterDefinition>
+            <hudson.model.StringParameterDefinition>
+               <name>RSYNC_DIR</name>
+               <description>RSync Dir</description>
+               <defaultValue />
+               <trim>false</trim>
+            </hudson.model.StringParameterDefinition>
+            <hudson.model.StringParameterDefinition>
+               <name>PROJECT_REPO</name>
+               <description>Main project repo</description>
+               <defaultValue>ci-pipeline</defaultValue>
+               <trim>false</trim>
+            </hudson.model.StringParameterDefinition>
+            <hudson.model.StringParameterDefinition>
+               <name>MAIN_TOPIC</name>
+               <description>Main topic to publish on</description>
+               <defaultValue />
+               <trim>false</trim>
+            </hudson.model.StringParameterDefinition>
+            <hudson.model.StringParameterDefinition>
+               <name>MSG_PROVIDER</name>
+               <description>Main provider to send messages on</description>
+               <defaultValue>fedora-fedmsg</defaultValue>
+               <trim>false</trim>
+            </hudson.model.StringParameterDefinition>
+            <hudson.model.StringParameterDefinition>
+               <name>FEDORA_PRINCIPAL</name>
+               <description>Principal for authenticating with fedora build system</description>
+               <defaultValue />
+               <trim>false</trim>
+            </hudson.model.StringParameterDefinition>
+            <hudson.model.StringParameterDefinition>
+               <name>ghprbActualCommit</name>
+               <description />
+               <defaultValue>master</defaultValue>
+               <trim>false</trim>
+            </hudson.model.StringParameterDefinition>
+            <hudson.model.StringParameterDefinition>
+               <name>ghprbGhRepository</name>
+               <description />
+               <defaultValue>CentOS-PaaS-SIG/ci-pipeline</defaultValue>
+               <trim>false</trim>
+            </hudson.model.StringParameterDefinition>
+            <hudson.model.StringParameterDefinition>
+               <name>sha1</name>
+               <description />
+               <defaultValue />
+               <trim>false</trim>
+            </hudson.model.StringParameterDefinition>
+            <hudson.model.StringParameterDefinition>
+               <name>ghprbPullId</name>
+               <description />
+               <defaultValue />
+               <trim>false</trim>
+            </hudson.model.StringParameterDefinition>
+            <hudson.model.StringParameterDefinition>
+               <name>ghprbPullAuthorLogin</name>
+               <description />
+               <defaultValue />
+               <trim>false</trim>
+            </hudson.model.StringParameterDefinition>
+            <hudson.model.StringParameterDefinition>
+               <name>SLAVE_TAG</name>
+               <description>Tag for slave image</description>
+               <defaultValue>stable</defaultValue>
+               <trim>false</trim>
+            </hudson.model.StringParameterDefinition>
+            <hudson.model.StringParameterDefinition>
+               <name>OSTREE_BOOT_IMAGE_TAG</name>
+               <description>Tag for ostree boot image</description>
+               <defaultValue>stable</defaultValue>
+               <trim>false</trim>
+            </hudson.model.StringParameterDefinition>
+            <hudson.model.StringParameterDefinition>
+               <name>RPMBUILD_TAG</name>
+               <description>Tag for rpmbuild image</description>
+               <defaultValue>stable</defaultValue>
+               <trim>false</trim>
+            </hudson.model.StringParameterDefinition>
+            <hudson.model.StringParameterDefinition>
+               <name>RSYNC_TAG</name>
+               <description>Tag for rsync image</description>
+               <defaultValue>stable</defaultValue>
+               <trim>false</trim>
+            </hudson.model.StringParameterDefinition>
+            <hudson.model.StringParameterDefinition>
+               <name>OSTREE_COMPOSE_TAG</name>
+               <description>Tag for ostree-compose image</description>
+               <defaultValue>stable</defaultValue>
+               <trim>false</trim>
+            </hudson.model.StringParameterDefinition>
+            <hudson.model.StringParameterDefinition>
+               <name>OSTREE_IMAGE_COMPOSE_TAG</name>
+               <description>Tag for ostree-image-compose image</description>
+               <defaultValue>stable</defaultValue>
+               <trim>false</trim>
+            </hudson.model.StringParameterDefinition>
+            <hudson.model.StringParameterDefinition>
+               <name>SINGLEHOST_TEST_TAG</name>
+               <description>Tag for singlehost test image</description>
+               <defaultValue>stable</defaultValue>
+               <trim>false</trim>
+            </hudson.model.StringParameterDefinition>
+            <hudson.model.StringParameterDefinition>
+               <name>LINCHPIN_LIBVIRT_TAG</name>
+               <description>Tag for linchpin-libvirt image</description>
+               <defaultValue>stable</defaultValue>
+               <trim>false</trim>
+            </hudson.model.StringParameterDefinition>
+            <hudson.model.StringParameterDefinition>
+               <name>DOCKER_REPO_URL</name>
+               <description>Docker repo url for Openshift instance</description>
+               <defaultValue>172.30.254.79:5000</defaultValue>
+               <trim>false</trim>
+            </hudson.model.StringParameterDefinition>
+            <hudson.model.StringParameterDefinition>
+               <name>OPENSHIFT_NAMESPACE</name>
+               <description>Project namespace for Openshift operations</description>
+               <defaultValue>continuous-infra</defaultValue>
+               <trim>false</trim>
+            </hudson.model.StringParameterDefinition>
+            <hudson.model.StringParameterDefinition>
+               <name>OPENSHIFT_SERVICE_ACCOUNT</name>
+               <description>Service Account for Openshift operations</description>
+               <defaultValue>jenkins</defaultValue>
+               <trim>false</trim>
+            </hudson.model.StringParameterDefinition>
+            <hudson.model.BooleanParameterDefinition>
+               <name>GENERATE_IMAGE</name>
+               <description>Force generation of the image</description>
+               <defaultValue>false</defaultValue>
+            </hudson.model.BooleanParameterDefinition>
+         </parameterDefinitions>
+      </hudson.model.ParametersDefinitionProperty>
+   </properties>
+   <definition class="org.jenkinsci.plugins.workflow.cps.CpsScmFlowDefinition" plugin="workflow-cps@2.45">
+      <scm class="hudson.plugins.git.GitSCM" plugin="git@3.8.0">
+         <configVersion>2</configVersion>
+         <userRemoteConfigs>
+            <hudson.plugins.git.UserRemoteConfig>
+               <refspec>+refs/heads/*:refs/remotes/origin/* +refs/pull/*:refs/remotes/origin/pr/*</refspec>
+               <url>https://github.com/CentOS-PaaS-SIG/ci-pipeline</url>
+            </hudson.plugins.git.UserRemoteConfig>
+         </userRemoteConfigs>
+         <branches>
+            <hudson.plugins.git.BranchSpec>
+               <name>${ghprbActualCommit}</name>
+            </hudson.plugins.git.BranchSpec>
+         </branches>
+         <doGenerateSubmoduleConfigurations>false</doGenerateSubmoduleConfigurations>
+         <submoduleCfg class="list" />
+         <extensions />
+      </scm>
+      <scriptPath>Jenkinsfile</scriptPath>
+      <lightweight>false</lightweight>
+   </definition>
+   <triggers />
+   <disabled>false</disabled>
+</flow-definition>
