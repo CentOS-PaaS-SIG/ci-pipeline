@@ -19,6 +19,7 @@ Jenkins.instance.save()
 def strategy = Jenkins.instance.getAuthorizationStrategy()
 strategy.add(hudson.model.Hudson.READ,'anonymous')
 strategy.add(hudson.model.Item.READ,'anonymous')
+strategy.add(hudson.model.View.READ,'anonymous')
 Jenkins.instance.setAuthorizationStrategy(strategy)
 // Set Markup Formatter to Safe HTML so PR hyperlinks work
 Jenkins.instance.setMarkupFormatter(new RawHtmlMarkupFormatter(false))
@@ -49,29 +50,46 @@ def ciStagePipelineViewName = 'CI Stage Pipeline'
 def linchpinViewName = 'Linchpin'
 def allpkgsViewName = 'Fedora All Packages Pipeline'
 
-// create the new view
-jenkins.addView(new ListView(ciPipelineViewName))
-jenkins.addView(new ListView(ciStagePipelineViewName))
-jenkins.addView(new ListView(linchpinViewName))
-jenkins.addView(new ListView(allpkgsViewName))
+// Create CI Pipeline View
+View ciPipelineView = jenkins.getView(ciPipelineViewName)
+if (ciPipelineView == null) {
+    // create the new view
+    jenkins.addView(new ListView(ciPipelineViewName))
+    // get the view
+    ciPipelineView = hudson.model.Hudson.instance.getView(ciPipelineViewName)
+    // add a job by its name
+    ciPipelineView.doAddJobToView('continuous-infra/ci-pipeline-f26')
+    ciPipelineView.doAddJobToView('continuous-infra/ci-pipeline-f27')
+    ciPipelineView.setIncludeRegex('^ci-pipeline.*')
+}
 
-// get the view
-ciPipelineView = hudson.model.Hudson.instance.getView(ciPipelineViewName)
-ciStagePipelineView = hudson.model.Hudson.instance.getView(ciStagePipelineViewName)
-linchpinView = hudson.model.Hudson.instance.getView(linchpinViewName)
-allpkgsView = hudson.model.Hudson.instance.getView(allpkgsViewName)
+// Create the CI Stage Pipeline View
+View ciStagePipelineView = jenkins.getView(ciStagePipelineViewName)
+if (ciStagePipelineView == null) {
+    jenkins.addView(new ListView(ciStagePipelineViewName))
+    ciStagePipelineView = hudson.model.Hudson.instance.getView(ciStagePipelineViewName)
+    ciStagePipelineView.setIncludeRegex('^ci-stage-pipeline.*')
+}
 
-// add a job by its name
-ciPipelineView.doAddJobToView('continuous-infra/ci-pipeline-f26')
-ciPipelineView.doAddJobToView('continuous-infra/ci-pipeline-f27')
-ciPipelineView.setIncludeRegex('^ci-pipeline.*')
+// Create the Linchpin View
+View linchpinView = jenkins.getView(linchpinViewName)
+if (linchpinView == null) {
+    jenkins.addView(new ListView(linchpinViewName))
+    linchpinView = hudson.model.Hudson.instance.getView(linchpinViewName)
+    linchpinView.setIncludeRegex('^ci-linchpin.*')
+}
 
-ciStagePipelineView.setIncludeRegex('^ci-stage-pipeline.*')
+// Create the Fedora All Packages Pipeline View
+View allpkgsView = jenkins.getView(allpkgsViewName)
+if (allpkgsView == null) {
+    jenkins.addView(new ListView(allpkgsViewName))
+    allpkgsView = hudson.model.Hudson.instance.getView(allpkgsViewName)
+    allpkgsView.doAddJobToView('upstream-fedora-pipeline-gc')
+    allpkgsView.setIncludeRegex('^fedora-.*')
+}
 
-linchpinView.setIncludeRegex('^ci-linchpin.*')
-
-allpkgsView.doAddJobToView('upstream-fedora-pipeline-gc')
-allpkgsView.setIncludeRegex('^fedora-.*')
+// Set primary view
+jenkins.setPrimaryView(ciPipelineView)
 
 // save current Jenkins state to disk
 jenkins.save()
