@@ -189,10 +189,6 @@ objects:
               protocol: TCP
         securityContext:
           privileged: false
-          capabilities:
-            add:
-              - IPC_LOCK
-              - SYS_RESOURCE
         restartPolicy: Always
   status: {}
 labels:
