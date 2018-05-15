@@ -10,8 +10,8 @@ node:
 
 network.host: ${NETWORK_HOST}
 
-bootstrap:
-  memory_lock: true
+#bootstrap:
+#  memory_lock: true
 
 http:
   enabled: ${HTTP_ENABLE}
