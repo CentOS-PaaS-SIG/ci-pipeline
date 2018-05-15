@@ -110,9 +110,8 @@ node('master') {
 
                                 # Get the upstream package list
                                 rm -rf fedora-atomic
-                                git clone http://pagure.io/fedora-atomic
+                                git clone -b ${fed_branch} --single-branch http://pagure.io/fedora-atomic
                                 pushd fedora-atomic
-                                git checkout ${fed_branch}
                                 popd
 
                                 python ${PROJECT_REPO}/utils/package_checker.py ${fed_repo}
