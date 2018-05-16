@@ -1398,7 +1398,7 @@ def injectArray(String prefix, def message) {
 def repoFromRequest(String request, String prefix) {
 
     try {
-        def gitMatcher = request =~ /git.+?\/([a-z0-9A-Z_\-\+\.]+?)(\.git|\?|#).*/
+        def gitMatcher = request =~ /git.+?\/([a-z0-9A-Z_\-\+\.]+?)(?:\.git|\?|#).*/
         def buildMatcher = request =~ /(?:koji-shadow|cli-build).+?\/([a-zA-Z0-9\-_\+\.]+)-.*/
         def pkgMatcher = request =~ /^([a-zA-Z0-9\-_\+\.]+$)/
 
