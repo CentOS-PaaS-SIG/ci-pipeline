@@ -69,7 +69,7 @@ rm -rf ${RPMDIR}
 mkdir -p ${RPMDIR}
 # Create repo
 pushd ${RPMDIR}
-koji download-task ${SCRATCHID} --logs
+koji download-build --arch=x86_64 --arch=src --arch=noarch --debuginfo --task-id ${SCRATCHID} || koji download-task --arch=x86_64 --arch=src --arch=noarch --logs ${SCRATCHID}
 createrepo .
 popd
 
