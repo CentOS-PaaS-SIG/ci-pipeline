@@ -4,6 +4,7 @@ FROM centos:7
 ENV PATH /usr/share/elasticsearch/bin:$PATH
 ENV JAVA_HOME /usr/lib/jvm/jre-1.8.0-openjdk
 ENV ELASTICSEARCH_VERSION 6.2.4
+ENV TAKE_FILE_OWNERSHIP true
 
 RUN set -ex && \
 	yum -y install nc epel-release wget java-1.8.0-openjdk-headless unzip which && \
