@@ -29,6 +29,9 @@ parameters:
 - name: ELASTICSEARCH_VERSION
   value: 6.2.4
   description: The es version
+- name: ES_SERVICEACCOUNT
+  value: elasticsearch
+  description: The account to run with
 objects:
 - apiVersion: v1
   kind: ImageStream
@@ -140,7 +143,7 @@ objects:
           command: ["sysctl", "-w", "vm.max_map_count=262144"]
           securityContext:
             privileged: true
-        serviceAccount: elasticsearch
+        serviceAccount: ${ES_SERVICEACCOUNT}
         containers:
         - env:
           - name: NODE_NAME
