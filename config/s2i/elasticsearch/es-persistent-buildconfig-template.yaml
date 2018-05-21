@@ -124,7 +124,7 @@ objects:
         from:
           kind: ImageStreamTag
           name: elasticsearch:latest
-          namespace: elasticsearch
+          namespace: continuous-infra
           lastTriggeredImage: ''
     - type: ConfigChange
     replicas: 1
