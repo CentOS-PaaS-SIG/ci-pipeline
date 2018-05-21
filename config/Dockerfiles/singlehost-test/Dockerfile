@@ -33,10 +33,8 @@ RUN for i in {1..5} ; do dnf -y install ansible \
 #        --enablerepo=updates-testing \
 #        && dnf clean all
 
-# Copy the build script to the container
-COPY package-test.sh /tmp/package-test.sh
-COPY integration-test.sh /tmp/integration-test.sh
-COPY upstreamfirst-test.sh /tmp/upstreamfirst-test.sh
+# Copy the build scripts to the container
+COPY package-test.sh integration-test.sh upstreamfirst-test.sh verify-rpm.sh rpm-verify.yml /tmp/
 
 ENV ANSIBLE_INVENTORY=/usr/share/ansible/inventory/standard-inventory-qcow2
 

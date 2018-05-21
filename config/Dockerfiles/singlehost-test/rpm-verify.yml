@@ -1,8 +1,5 @@
 ---
-- hosts: '{{ hosts | default("all") }}'
-  become: '{{ become | default("no") }}'
-  become_user: '{{ become_user | default("root") }}'
-  remote_user: '{{ remote_user | default("root") }}'
+- hosts: localhost
   tasks:
     - name: Get nvr of running rpm
       command: "rpm -q {{ package }}"
