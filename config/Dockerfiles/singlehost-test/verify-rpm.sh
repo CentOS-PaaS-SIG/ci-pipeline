@@ -22,5 +22,5 @@ set -u
 ansible-playbook -v --inventory=${ANSIBLE_INVENTORY} ${PYTHON_INTERPRETER} \
 	--extra-vars "subjects=${TEST_SUBJECTS}" \
 	--extra-vars "package=${package}" \
-        --extra-vars "expected=${expected}.x86_64" \
+	--extra-vars "expected=${expected}.x86_64" \
 	/tmp/rpm-verify.yml
