@@ -23,6 +23,6 @@ http:
 discovery:
   zen:
     ping.unicast.hosts: ${DISCOVERY_SERVICE}
-    minimum_master_nodes: 2
+    minimum_master_nodes: ${MIN_MASTERS}
     ping_timeout: 15s
 
