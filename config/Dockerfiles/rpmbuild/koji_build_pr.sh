@@ -77,6 +77,6 @@ popd
 set +e
 RPM_TO_CHECK=$(find ${RPMDIR}/ -name "${fed_repo}-${VERSION}*" | grep -v src)
 RPM_NAME=$(basename $RPM_TO_CHECK)
-NVR=$(rpm --queryformat "%{NAME} %{VERSION} %{RELEASE}\n" -qp $RPM_TO_CHECK)
+NVR=$(rpm --queryformat "%{NAME}-%{VERSION}-%{RELEASE}\n" -qp $RPM_TO_CHECK)
 echo "nvr=${NVR}" >> ${LOGDIR}/job.props
 exit 0
