@@ -89,20 +89,8 @@
                <trim>false</trim>
             </hudson.model.StringParameterDefinition>
             <hudson.model.StringParameterDefinition>
-               <name>INQUIRER_TAG</name>
-               <description>Tag for inquirer image</description>
-               <defaultValue>stable</defaultValue>
-               <trim>false</trim>
-            </hudson.model.StringParameterDefinition>
-            <hudson.model.StringParameterDefinition>
                <name>CLOUD_IMAGE_COMPOSE_TAG</name>
                <description>Tag for cloud-image-compose image</description>
-               <defaultValue>stable</defaultValue>
-               <trim>false</trim>
-            </hudson.model.StringParameterDefinition>
-            <hudson.model.StringParameterDefinition>
-               <name>OSTREE_BOOT_IMAGE_TAG</name>
-               <description>Tag for ostree boot image</description>
                <defaultValue>stable</defaultValue>
                <trim>false</trim>
             </hudson.model.StringParameterDefinition>
@@ -143,6 +131,9 @@
       <scm class="hudson.plugins.git.GitSCM" plugin="git@3.8.0">
          <configVersion>2</configVersion>
          <userRemoteConfigs>
+            <refspec>
+                +refs/heads/*:refs/remotes/origin/* +refs/pull/*:refs/remotes/origin/pr/*
+            </refspec>
             <hudson.plugins.git.UserRemoteConfig>
                <url>https://github.com/CentOS-PaaS-SIG/upstream-fedora-pipeline.git</url>
             </hudson.plugins.git.UserRemoteConfig>
