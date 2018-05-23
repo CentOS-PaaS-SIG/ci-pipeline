@@ -1,11 +1,28 @@
 ---
 - hosts: localhost
   tasks:
-    - name: Get nvr of running rpm
-      command: "rpm -q {{ package }}"
-      register: running
-
-    - name: Fail if nvr's do not match
+    - name: Get list of rpms
+      find:
+        paths: "{{ rpm_repo }}"
+        patterns: '*.rpm'
+      register: rpmlist
+    - name: Check which rpms are installed
+      dnf:
+        name: "{{ item.path }}"
+        state: present
+      register: rpmoutput
+      check_mode: yes
+      ignore_errors: yes
+      no_log: yes
+      with_items:
+        - "{{ rpmlist.files }}"
+    - name: See if at least one rpm is installed
+      set_fact:
+        myresult: pass
+      when: item.changed == false and item.failed == false
+      no_log: yes
+      with_items:
+        - "{{ rpmoutput.results }}"
+    - name: Fail if none were installed
       fail:
-        msg: "{{ running.stdout }} is running and does not match {{ expected }}"
-      when: running.stdout != expected
+      when: myresult is not defined
