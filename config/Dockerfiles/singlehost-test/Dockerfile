@@ -21,6 +21,7 @@ RUN for i in {1..5} ; do dnf -y install ansible \
         git \
         libselinux-python \
         python2-dnf \
+        qemu-kvm \
         restraint-rhts \
         rsync \
         standard-test-roles \
