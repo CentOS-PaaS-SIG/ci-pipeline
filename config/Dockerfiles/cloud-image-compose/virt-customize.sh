@@ -54,13 +54,13 @@ trap clean_up EXIT SIGHUP SIGINT SIGTERM
 mkdir -p ${CURRENTDIR}/images
 
 # Make dir for just rpm content
-mkdir ${CURRENTDIR}/testrepo
-cp -rp ${rpm_repo}/*.rpm ${rpm_repo}/repodata ${CURRENTDIR}/testrepo
+mkdir -p ${CURRENTDIR}/testrepo/${package}
+cp -rp ${rpm_repo}/*.rpm ${rpm_repo}/repodata ${CURRENTDIR}/testrepo/${package}
 
 RPM_LIST=""
 REPO_LIST="--repofrompath=${package},file:///etc/yum.repos.d/${package}"
 # Add custom rpms to image
-virt-copy-in -a ${DOWNLOADED_IMAGE_LOCATION} ${CURRENTDIR}/testrepo /etc/yum.repos.d/${package}/
+virt-copy-in -a ${DOWNLOADED_IMAGE_LOCATION} ${CURRENTDIR}/testrepo/${package} /etc/yum.repos.d/
 
 for pkg in $(repoquery --disablerepo=\* --enablerepo=${package} --repofrompath=${package},${rpm_repo} --all | grep -v '\-debug\|\-devel\|.src' | rev | cut -d '-' -f 3- | rev ) ; do
     RPM_LIST="${RPM_LIST} ${pkg}"
