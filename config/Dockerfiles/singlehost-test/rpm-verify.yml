@@ -13,14 +13,12 @@
       register: rpmoutput
       check_mode: yes
       ignore_errors: yes
-      no_log: yes
       with_items:
         - "{{ rpmlist.files }}"
     - name: See if at least one rpm is installed
       set_fact:
         myresult: pass
       when: item.changed == false and item.failed == false
-      no_log: yes
       with_items:
         - "{{ rpmoutput.results }}"
     - name: Fail if none were installed
