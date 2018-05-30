@@ -1256,7 +1256,7 @@ def releaseLock(String fileLocation, String myuuid) {
     if (fileExists(fileLocation)) {
         def storeduuid = readFile(fileLocation).trim()
         if (storeduuid == myuuid) {
-            sh "rm -f ${fileLocation}"
+            sh "rm -f ${fileLocation} ${fileLocation}.lck"
             return
         } else {
             // We were told to release a lock we didn't have
