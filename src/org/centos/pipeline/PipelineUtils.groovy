@@ -472,7 +472,7 @@ def checkUpdatedPR(String message, String keyword) {
 
     if (ci_data['pullrequest']['comments']) {
         // Check if this comment is a merge notification
-        if (ci_data['pullrequest']['status'] == 'Merged') {
+        if (ci_data['pullrequest']['status'] != 'Open') {
             return false
         }
         if (ci_data['pullrequest']['comments'].last()['notification'] || ci_data['pullrequest']['comments'].last()['comment'].contains(keyword)) {
