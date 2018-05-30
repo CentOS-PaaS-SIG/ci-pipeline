@@ -3,7 +3,6 @@ package org.centos.pipeline
 
 import org.centos.*
 
-import groovy.json.JsonSlurper
 import org.jenkinsci.plugins.pipeline.modeldefinition.Utils
 
 /**
@@ -382,7 +381,7 @@ def trackMessage(String messageID, int retryCount) {
 def injectFedmsgVars(String message) {
 
     // Parse the message into a Map
-    def ci_data = new JsonSlurper().parseText(message)
+    def ci_data = readJSON text: message
 
     // If we have a 'commit' key in the CI_MESSAGE, for each key under 'commit', we
     // * prepend the key name with fed_
@@ -412,7 +411,7 @@ def injectFedmsgVars(String message) {
 def injectPRVars(String prefix, String message) {
 
     // Parse the message into a Map
-    def ci_data = new JsonSlurper().parseText(message)
+    def ci_data = readJSON text: message
 
     // If we have a 'pullrequest' key in the CI_MESSAGE, for each key under 'pullrequest', we
     // * prepend the key name with prefix_
@@ -468,7 +467,7 @@ def injectPRVars(String prefix, String message) {
 def checkUpdatedPR(String message, String keyword) {
 
     // Parse the message into a Map
-    def ci_data = new JsonSlurper().parseText(message)
+    def ci_data = readJSON text: message
 
     if (ci_data['pullrequest']['comments']) {
         // Check if this comment is a merge notification
@@ -1070,7 +1069,7 @@ def getVariablesFromMessage(String message) {
     messageVars = [:]
 
     // Parse the message into a Map
-    def ci_data = new JsonSlurper().parseText(message)
+    def ci_data = readJSON text: message
     if (ci_data['commit']) {
         ci_data.commit.each { key, value ->
             String varKey = key.toString().replaceAll('-', '_')
@@ -1130,7 +1129,7 @@ def watchForMessages(String msg_provider, String message) {
                 ],
                 overrides: [topic: 'org.centos.stage']
         echo msg
-        def msg_data = new JsonSlurper().parseText(msg)
+        def msg_data = readJSON text: msg
         allFound = true
 
         def errorMsg = ""
@@ -1190,7 +1189,7 @@ def checkTests(String mypackage, String mybranch, String tag) {
  * @return boolean
  */
 def checkIfFork(String message) {
-    def ciMessage = new JsonSlurper().parseText(message)
+    def ciMessage = readJSON text: message
     def request = ciMessage['commit']['path']
     return request.contains('repositories/forks')
 }
@@ -1330,7 +1329,7 @@ def checkTestResults(Map testResults) {
  * @return
  */
 def flattenJSON(String prefix, String message) {
-    def ciMessage = new JsonSlurper().parseText(message)
+    def ciMessage = readJSON text: message
     injectCIMessage(prefix, ciMessage)
 }
 
@@ -1369,9 +1368,11 @@ def injectCIMessage(String prefix, def ciMessage) {
 
     ciMessage.each { key, value ->
         def new_key = key.replaceAll('-', '_')
-        if (value instanceof groovy.json.internal.LazyMap) {
+        // readJSON uses JSON* and slurper uses LazyMap and ArrayList
+        if (value instanceof groovy.json.internal.LazyMap || value instanceof net.sf.json.JSONObject) {
             injectCIMessage("${prefix}_${new_key}", value)
-        } else if (value instanceof  java.util.ArrayList) {
+        } else if (value instanceof java.util.ArrayList || value instanceof net.sf.json.JSONArray) {
+            // value was an array itself
             injectArray("${prefix}_${new_key}", value)
         } else {
             env."${prefix}_${new_key}" =
