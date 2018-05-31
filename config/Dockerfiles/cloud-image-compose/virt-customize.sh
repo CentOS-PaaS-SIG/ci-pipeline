@@ -30,7 +30,11 @@ fi
 if [[ $(curl -q https://dl.fedoraproject.org/pub/fedora/linux/development/ | grep "${branch}/") != "" ]]; then
     INSTALL_URL="https://dl.fedoraproject.org/pub/fedora/linux/development/${branch}/Cloud/x86_64/images/"
 elif [[ $(curl -q https://dl.fedoraproject.org/pub/fedora/linux/releases/ | grep "${branch}/") != "" ]]; then
-    INSTALL_URL="https://dl.fedoraproject.org/pub/fedora/linux/releases/${branch}/CloudImages/x86_64/images/"
+    if [ "${branch}" -lt 28 ]; then
+        INSTALL_URL="https://dl.fedoraproject.org/pub/fedora/linux/releases/${branch}/CloudImages/x86_64/images/"
+    else
+        INSTALL_URL="https://dl.fedoraproject.org/pub/fedora/linux/releases/${branch}/Cloud/x86_64/images/"
+    fi
 else
     echo "Could not find installation source! Exiting..."
     exit 1
