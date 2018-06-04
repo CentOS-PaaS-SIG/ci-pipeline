@@ -481,7 +481,8 @@ def checkUpdatedPR(String message, String keyword) {
             return false
         }
     }
-    return false
+    // Default to return true because this is called for pr.new messages as well
+    return true
 }
 
 /**
