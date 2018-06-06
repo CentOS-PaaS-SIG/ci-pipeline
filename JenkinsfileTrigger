@@ -114,25 +114,20 @@ node('master') {
                                 pushd fedora-atomic
                                 popd
 
-                                # Check all rpms created from this distgit repo
-                                # If rawhide is turned on for the atomic pipeline, the branch logic in this command will need to be fixed
-                                for packagename in $(koji buildinfo $(koji -q list-tagged --latest ${fed_branch} ${fed_repo} | awk '{print $1}') | egrep '\.rpm$' | rev | cut -d '/' -f 1 | cut -d '-' -f 3- | rev | sort | uniq) ; do
-                                    python ${PROJECT_REPO}/utils/package_checker.py ${packagename}
-                                    CHKR_RC=$?
-                                    # If $? -eq 0, we care about package
-                                    if [ $CHKR_RC -eq 0 ]; then
-                                        valid=1
-                                        break
-                                    # If $? -eq 2, upstream package list didn't exist so use legacy method to check
-                                    elif [ $CHKR_RC -eq 2 ]; then
-                                        for package in $(cat ${PROJECT_REPO}/config/package_list); do
-                                            if [ "${package}" = "${packagename}" ]; then
-                                                valid=1
-                                                break
-                                            fi
-                                        done
-                                    fi
-                                done
+                                python ${PROJECT_REPO}/utils/package_checker.py ${fed_repo}
+                                CHKR_RC=$?
+                                # If $? -eq 0, we care about package
+                                if [ $CHKR_RC -eq 0 ]; then
+                                    valid=1
+                                # If $? -eq 2, upstream package list didn't exist so use legacy method to check
+                                elif [ $CHKR_RC -eq 2 ]; then
+                                    for package in $(cat ${PROJECT_REPO}/config/package_list); do
+                                        if [ "${package}" = "${fed_repo}" ]; then
+                                            valid=1
+                                            break
+                                        fi
+                                    done
+                                fi
 
                                 if [ $valid -eq 0 ]; then
                                     echo "Not a package we are interested in"
