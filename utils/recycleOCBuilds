@@ -23,7 +23,7 @@ node() {
             }
         } catch (Throwable err) {
                         currentBuild.description = "Delete Failure"
-                        error "Find and deletion of completed oc builds failed!"
+                        print("Find and deletion of completed oc builds failed!")
                         currentBuild.result = 'FAILURE'
         }
     }
