@@ -1,0 +1,30 @@
+#!groovy
+
+properties(
+        [
+                buildDiscarder(logRotator(artifactDaysToKeepStr: '', artifactNumToKeepStr: '15', daysToKeepStr: '', numToKeepStr: '15')),
+                disableConcurrentBuilds(),
+                pipelineTriggers([cron('0 8 * * *')])
+        ]
+)
+
+def stepName = null
+
+node() {
+
+    timeout(time: 30, unit: 'MINUTES') {
+
+        try {
+            stepName = 'Remove Completed Builds'
+            stage(stepName) {
+                // Garbage collect all completed oc builds with -build in their name
+                sh 'oc delete pod $(oc get pods | grep \' Completed \' | grep \'\\-build\' | awk \'{print $1}\')'
+                currentBuild.result = 'SUCCESS'
+            }
+        } catch (Throwable err) {
+                        currentBuild.description = "Delete Failure"
+                        error "Find and deletion of completed oc builds failed!"
+                        currentBuild.result = 'FAILURE'
+        }
+    }
+}
