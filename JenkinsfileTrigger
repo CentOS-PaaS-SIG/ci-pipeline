@@ -114,7 +114,7 @@ node('master') {
                                 pushd fedora-atomic
                                 popd
 
-                                python ${PROJECT_REPO}/utils/package_checker.py ${fed_repo}
+                                python ${PROJECT_REPO}/utils/package_checker.py ${fed_repo} ${branch}
                                 CHKR_RC=$?
                                 # If $? -eq 0, we care about package
                                 if [ $CHKR_RC -eq 0 ]; then
