@@ -1409,6 +1409,7 @@ def repoFromRequest(String request, String prefix) {
         def gitMatcher = request =~ /git.+?\/([a-z0-9A-Z_\-\+\.]+?)(?:\.git|\?|#).*/
         def buildMatcher = request =~ /(?:koji-shadow|cli-build).+?\/([a-zA-Z0-9\-_\+\.]+)-.*/
         def pkgMatcher = request =~ /^([a-zA-Z0-9\-_\+\.]+$)/
+        def pathMatcher = request =~ /..\/packages.+?\/([a-zA-Z0-9\-_\+]+?)-[0-9\.]+-.+.src.rpm/
 
 
         if (gitMatcher.matches()) {
@@ -1417,6 +1418,8 @@ def repoFromRequest(String request, String prefix) {
             env."${prefix}_repo" = buildMatcher[0][1]
         } else if (pkgMatcher.matches()) {
             env."${prefix}_repo" = pkgMatcher[0][1]
+        } else if (pathMatcher.matches()) {
+            env."${prefix}_repo" = pathMatcher[0][1]
         } else {
             throw new Exception("Invalid request url: ${request}")
         }
