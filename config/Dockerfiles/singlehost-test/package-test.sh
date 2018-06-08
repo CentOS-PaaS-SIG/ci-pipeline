@@ -103,7 +103,7 @@ set -u
 set -x
 for playbook in tests*.yml; do
 	if [ -f ${playbook} ]; then
-		timeout 4h ansible-playbook --inventory=$ANSIBLE_INVENTORY $PYTHON_INTERPRETER \
+		timeout 4h ansible-playbook -v --inventory=$ANSIBLE_INVENTORY $PYTHON_INTERPRETER \
 			--extra-vars "subjects=$TEST_SUBJECTS" \
 			--extra-vars "artifacts=$TEST_ARTIFACTS" \
 			--tags ${TAG} ${playbook}
