@@ -64,8 +64,8 @@ cp -rp ${rpm_repo}/*.rpm ${rpm_repo}/repodata ${CURRENTDIR}/testrepo/${package}
 RPM_LIST=""
 REPO_LIST="--repofrompath=${package},file:///etc/yum.repos.d/${package}"
 # Add custom rpms to image
-cat <<EOF > ${CURRENTDIR}/test.repo
-[Local-Test-Package]
+cat <<EOF > ${CURRENTDIR}/test-${package}.repo
+[test-${package}]
 name=Packages for testing
 baseurl=file:///etc/yum.repos.d/${package}
 enabled=1
