@@ -1409,7 +1409,7 @@ def repoFromRequest(String request, String prefix) {
         def gitMatcher = request =~ /git.+?\/([a-z0-9A-Z_\-\+\.]+?)(?:\.git|\?|#).*/
         def buildMatcher = request =~ /(?:koji-shadow|cli-build).+?\/([a-zA-Z0-9\-_\+\.]+)-.*/
         def pkgMatcher = request =~ /^([a-zA-Z0-9\-_\+\.]+$)/
-        def srpmMatcher = request =~ /.+?\/([a-zA-Z0-9\-_\+]+?)-[0-9a-zA-Z\.]+-.+.src.rpm/
+        def srpmMatcher = request =~ /.+?\/([a-zA-Z0-9\-_\+]+)-[0-9a-zA-Z\.]+-[0-9\.].+.src.rpm/
 
 
         if (gitMatcher.matches()) {
