@@ -66,7 +66,7 @@ REPO_LIST="--repofrompath=${package},file:///etc/yum.repos.d/${package}"
 # Add custom rpms to image
 cat <<EOF > ${CURRENTDIR}/test-${package}.repo
 [test-${package}]
-name=Packages for testing
+name=test-${package}
 baseurl=file:///etc/yum.repos.d/${package}
 enabled=1
 gpgcheck=0
