@@ -27,7 +27,7 @@ try:
         mypackage = sys.argv[1]
         mybranch = sys.argv[2]
         
-        resultPage = "/mdapi/" + mybranch + "/pkg/" + mypackage
+        resultPage = "/mdapi/" + mybranch + "/srcpkg/" + mypackage
         mdapi_server.request("GET",resultPage)
         res = mdapi_server.getresponse()
         if res.status != 200:
