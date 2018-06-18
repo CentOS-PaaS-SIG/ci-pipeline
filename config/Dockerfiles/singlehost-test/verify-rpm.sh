@@ -14,15 +14,7 @@ fi
 dnf update -y standard-test-roles
 rpm -q standard-test-roles
 
-set +u
-PYTHON_INTERPRETER=""
-
-if [[ ! -z "${python3}" && "${python3}" == "yes" ]] ; then
-    PYTHON_INTERPRETER='--extra-vars ansible_python_interpreter=/usr/bin/python3'
-fi
-set -u
-
-ansible-playbook -v --inventory=${ANSIBLE_INVENTORY} ${PYTHON_INTERPRETER} \
+ansible-playbook -v --inventory=${ANSIBLE_INVENTORY} \
 	--extra-vars "subjects=${TEST_SUBJECTS}" \
 	--extra-vars "rpm_repo=${rpm_repo}" \
 	/tmp/rpm-verify.yml
