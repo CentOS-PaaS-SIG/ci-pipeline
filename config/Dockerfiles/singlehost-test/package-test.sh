@@ -91,19 +91,11 @@ if [ -e inventory ] ; then
     export ANSIBLE_INVENTORY
 fi
 
-set +u
-PYTHON_INTERPRETER=""
-
-if [[ ! -z "${python3}" && "${python3}" == "yes" ]] ; then
-    PYTHON_INTERPRETER='--extra-vars ansible_python_interpreter=/usr/bin/python3'
-fi
-set -u
-
 # Invoke each playbook according to the specification
 set -x
 for playbook in tests*.yml; do
 	if [ -f ${playbook} ]; then
-		timeout 4h ansible-playbook -v --inventory=$ANSIBLE_INVENTORY $PYTHON_INTERPRETER \
+		timeout 4h ansible-playbook -v --inventory=$ANSIBLE_INVENTORY \
 			--extra-vars "subjects=$TEST_SUBJECTS" \
 			--extra-vars "artifacts=$TEST_ARTIFACTS" \
 			--tags ${TAG} ${playbook} | tee playbook_run.txt
