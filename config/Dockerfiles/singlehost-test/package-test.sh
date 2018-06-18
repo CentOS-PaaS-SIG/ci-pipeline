@@ -77,6 +77,7 @@ function clean_up {
     rm -rf tests/package
     mkdir -p tests/package
     cp ${TEST_ARTIFACTS}/* tests/package/
+    cat ${TEST_ARTIFACTS}/test.log
     set +u
     if [[ ! -z "${RSYNC_USER}" && ! -z "${RSYNC_SERVER}" && ! -z "${RSYNC_DIR}" && ! -z "${RSYNC_PASSWORD}"  && ! -z "${RSYNC_BRANCH}" ]]; then
         RSYNC_LOCATION="${RSYNC_USER}@${RSYNC_SERVER}::${RSYNC_DIR}/${RSYNC_BRANCH}"
@@ -91,22 +92,14 @@ if [ -e inventory ] ; then
     export ANSIBLE_INVENTORY
 fi
 
-set +u
-PYTHON_INTERPRETER=""
-
-if [[ ! -z "${python3}" && "${python3}" == "yes" ]] ; then
-    PYTHON_INTERPRETER='--extra-vars ansible_python_interpreter=/usr/bin/python3'
-fi
-set -u
-
 # Invoke each playbook according to the specification
 set -x
 for playbook in tests*.yml; do
 	if [ -f ${playbook} ]; then
-		timeout 4h ansible-playbook -v --inventory=$ANSIBLE_INVENTORY $PYTHON_INTERPRETER \
+		timeout 4h ansible-playbook -v --inventory=$ANSIBLE_INVENTORY \
 			--extra-vars "subjects=$TEST_SUBJECTS" \
 			--extra-vars "artifacts=$TEST_ARTIFACTS" \
-			--tags ${TAG} ${playbook}
+			--tags ${TAG} ${playbook} | tee playbook_run.txt
 	fi
 done
 popd

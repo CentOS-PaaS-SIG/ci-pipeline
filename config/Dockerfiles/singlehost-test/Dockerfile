@@ -20,7 +20,7 @@ RUN for i in {1..5} ; do dnf -y install ansible \
         findutils \
         git \
         libselinux-python \
-        python2-dnf \
+        python-dnf \
         qemu-kvm \
         restraint-rhts \
         rsync \
