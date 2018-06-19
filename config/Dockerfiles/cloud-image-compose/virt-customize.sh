@@ -25,10 +25,11 @@ chmod 666 /dev/kvm
 if [ $branch != "rawhide" ]; then
     branch=${branch:1}
 fi
-
+#https://kojipkgs.fedoraproject.org/compose/rawhide/Fedora-Rawhide-20180616.n.0/compose/Cloud/x86_64/images/Fedora-Cloud-Base-Rawhide-20180616.n.0.x86_64.qcow2
 # Define proper install url
 if [[ $(curl -q https://dl.fedoraproject.org/pub/fedora/linux/development/ | grep "${branch}/") != "" ]]; then
-    INSTALL_URL="https://dl.fedoraproject.org/pub/fedora/linux/development/${branch}/Cloud/x86_64/images/"
+    #INSTALL_URL="https://dl.fedoraproject.org/pub/fedora/linux/development/${branch}/Cloud/x86_64/images/"
+    INSTALL_URL="https://kojipkgs.fedoraproject.org/compose/rawhide/Fedora-Rawhide-20180616.n.0/compose/Cloud/x86_64/images"
 elif [[ $(curl -q https://dl.fedoraproject.org/pub/fedora/linux/releases/ | grep "${branch}/") != "" ]]; then
     if [ "${branch}" -lt 28 ]; then
         INSTALL_URL="https://dl.fedoraproject.org/pub/fedora/linux/releases/${branch}/CloudImages/x86_64/images/"
@@ -40,8 +41,10 @@ else
     exit 1
 fi
 
+# test comment
 wget --quiet -r --no-parent -A 'Fedora-Cloud-Base*.qcow2' ${INSTALL_URL}
-DOWNLOADED_IMAGE_LOCATION=$(pwd)/$(find dl.fedoraproject.org -name "*.qcow2" | head -1)
+DOWNLOADED_IMAGE_LOCATION=$(pwd)/$(find kojipkgs.fedoraproject.org -name "*.qcow2" | head -1)
+
 
 function clean_up {
   set +e

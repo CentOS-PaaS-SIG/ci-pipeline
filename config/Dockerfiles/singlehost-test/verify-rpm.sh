@@ -22,6 +22,9 @@ if [[ ! -z "${python3}" && "${python3}" == "yes" ]] ; then
 fi
 set -u
 
+echo "printing TEST_SUBJECTS"
+ls -l ${TEST_SUBJECTS}
+
 ansible-playbook -v --inventory=${ANSIBLE_INVENTORY} ${PYTHON_INTERPRETER} \
 	--extra-vars "subjects=${TEST_SUBJECTS}" \
 	--extra-vars "rpm_repo=${rpm_repo}" \
