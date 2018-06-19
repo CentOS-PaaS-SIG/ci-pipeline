@@ -41,6 +41,7 @@ else
     exit 1
 fi
 
+# test comment
 wget --quiet -r --no-parent -A 'Fedora-Cloud-Base*.qcow2' ${INSTALL_URL}
 DOWNLOADED_IMAGE_LOCATION=$(pwd)/$(find kojipkgs.fedoraproject.org -name "*.qcow2" | head -1)
 
