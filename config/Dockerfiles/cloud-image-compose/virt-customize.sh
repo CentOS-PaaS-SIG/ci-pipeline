@@ -29,7 +29,7 @@ fi
 # Define proper install url
 if [[ $(curl -q https://dl.fedoraproject.org/pub/fedora/linux/development/ | grep "${branch}/") != "" ]]; then
     #INSTALL_URL="https://dl.fedoraproject.org/pub/fedora/linux/development/${branch}/Cloud/x86_64/images/"
-    INSTALL_URL="https://kojipkgs.fedoraproject.org/compose/rawhide/Fedora-Rawhide-20180616.n.0/compose/Cloud/x86_64/images"
+    INSTALL_URL="https://kojipkgs.fedoraproject.org/compose/rawhide/Fedora-Rawhide-20180614.n.0/compose/Cloud/x86_64/images/"
 elif [[ $(curl -q https://dl.fedoraproject.org/pub/fedora/linux/releases/ | grep "${branch}/") != "" ]]; then
     if [ "${branch}" -lt 28 ]; then
         INSTALL_URL="https://dl.fedoraproject.org/pub/fedora/linux/releases/${branch}/CloudImages/x86_64/images/"
