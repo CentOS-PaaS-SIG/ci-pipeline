@@ -107,7 +107,7 @@ for playbook in tests*.yml; do
 		timeout 4h ansible-playbook -v --inventory=$ANSIBLE_INVENTORY $PYTHON_INTERPRETER \
 			--extra-vars "subjects=$TEST_SUBJECTS" \
 			--extra-vars "artifacts=$TEST_ARTIFACTS" \
-			--tags ${TAG} ${playbook}
+			--tags ${TAG} ${playbook} | tee ${TEST_ARTIFACTS}/${playbook}-run.txt
 	fi
 done
 popd
