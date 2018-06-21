@@ -14,4 +14,4 @@ echo `whoami` > /var/tmp/run_user
 
 generate_passwd_file
 
-exec "@"
+exec "$@"
