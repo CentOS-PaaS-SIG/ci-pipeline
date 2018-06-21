@@ -14,5 +14,5 @@ WORKDIR /opt/openshift
 
 RUN git clone https://github.com/joejstuart/pipeline-reporting.git
 
-#CMD ["/usr/libexec/s2i/run", "ps"]
-CMD ["ps"]
+ENTRYPOINT ["/usr/bin/dumb-init", "--"]
+CMD ["/usr/libexec/s2i/run", "ps"]
