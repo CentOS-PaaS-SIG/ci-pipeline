@@ -6,7 +6,7 @@ RUN dnf -y install cronie-anacron git
 
 RUN mkdir /opt/openshift \
     && chown -R 1001:0 /opt/openshift \
-    && chown 664 /etc/passwd
+    && chmod 664 /etc/passwd
 
 ADD ./s2i /usr/libexec/s2i
 
@@ -16,4 +16,4 @@ WORKDIR /opt/openshift
 
 RUN git clone https://github.com/joejstuart/pipeline-reporting.git
 
-CMD ["/usr/libexec/s2i/run", "ps"]
+CMD ["/usr/libexec/s2i/run", "ls"]
