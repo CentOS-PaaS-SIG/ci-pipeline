@@ -1,5 +1,7 @@
 FROM fedora:27
 
+LABEL io.openshift.s2i.scripts-url=image:///usr/libexec/s2i
+
 RUN dnf -y install cronie-anacron git
 
 RUN mkdir /opt/openshift \
