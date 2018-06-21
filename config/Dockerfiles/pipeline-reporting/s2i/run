@@ -1,3 +1,5 @@
+#!/bin/bash
+
 # Generate passwd file based on current uid
 function generate_passwd_file() {
   USER_ID=$(id -u)
