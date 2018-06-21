@@ -14,4 +14,4 @@ WORKDIR /opt/openshift
 
 RUN git clone https://github.com/joejstuart/pipeline-reporting.git
 
-CMD ["/usr/libexec/s2i/run"]
+CMD ["/usr/libexec/s2i/run", "ps"]
