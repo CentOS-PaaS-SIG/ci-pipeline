@@ -1,5 +1,13 @@
 FROM fedora:27
 
+RUN dnf -y install cronie-anacron
+
+RUN mkdir /opt/openshift \
+    && chown -R 1001:0 /opt/openshift \
+    && chown 664 /etc/passwd
+
+ADD ./s2i /usr/libexec/s2i
+
 USER 1001
 
-CMD ["ps"]
+CMD ["/usr/libexec/s2i/run"]

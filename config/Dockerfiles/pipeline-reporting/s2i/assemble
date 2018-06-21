@@ -1,0 +1,4 @@
+shopt -s dotglob
+
+echo "---> Copying repository files ..."
+cp -Rf /tmp/src/. /opt/openshift
