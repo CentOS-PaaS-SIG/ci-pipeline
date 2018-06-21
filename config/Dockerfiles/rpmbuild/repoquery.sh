@@ -15,7 +15,7 @@ if [[ -z "${rpm_repo}" ]]; then
 fi
 
 # Get output to see if any rpms exist
-output=$(repoquery --disablerepo=\* --enablerepo=${fed_repo} --repofrompath=${fed_repo},${rpm_repo} --nvr ${fed_repo})
+output=$(dnf repoquery --disablerepo=\* --enablerepo=${fed_repo} --repofrompath=${fed_repo},${rpm_repo} --nvr ${fed_repo})
 
 if [ ${output} == "" ]; then
     echo "No installable rpms found! Failing"
