@@ -12,8 +12,6 @@ function generate_passwd_file() {
   fi  
 }
 
-echo `whoami` > /var/tmp/run_user
-
 generate_passwd_file
 
 exec "$@"
