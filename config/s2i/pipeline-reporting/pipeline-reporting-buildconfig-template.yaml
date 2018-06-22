@@ -1,0 +1,93 @@
+apiVersion: v1
+kind: Template
+metadata:
+  creationTimestamp: null
+  name: pipeline-reporting
+  annotations:
+    openshift.io/display-name: pipeline-reporting
+    description: |-
+              contra pipeline-reporting template
+    iconClass: icon-jenkins
+    tags: instant-app,pipeline-reporting
+    template.openshift.io/long-description: pipeline reporting container
+    template.openshift.io/provider-display-name: Red Hat, Inc.
+    template.openshift.io/documentation-url: https://docs.openshift.org/latest
+    template.openshift.io/support-url: https://access.redhat.com
+message: A data collector for jenkins metrics.
+  Usage oc new-app -f pipeline-reporting-template.yaml -p JENKINS_API_KEY=jenkins_api_key
+parameters:
+- name: INFLUXDB_ENDPOINT
+  value: https://influxdb-continuous-infra.apps.ci.centos.org
+  description: The hostname of the influxdb instance
+- name: INFLUXDB_USER
+  value: DEFAULT_USER
+  description: The username for influxdb
+- name: INFLUXDB_PASSWORD
+  value: DEFAULT_PASSWORD
+  description: The passwor for influxdb
+- name: INFLUXDB_DATABASE
+  value: db0
+  description: The influxdb to use
+- name: REPO_URL
+  value: https://github.com/joejstuart/pipeline-reporting.git
+  description: The dockerfile repo url
+- name: REPO_REF
+  description: The git ref or tag to use for customization.
+  value: reporting
+- name: IMAGE
+  value: docker-registry.default.svc:5000/continuous-infra/pipeline-reporting:latest
+  description: The location of the container to use
+objects:
+- apiVersion: v1
+  kind: ImageStream
+  metadata:
+    annotations:
+    labels:
+    name: pipeline-reporting
+  spec: {}
+- apiVersion: v1
+  kind: BuildConfig
+  metadata:
+    name: pipeline-reporting
+  spec:
+    output:
+      to:
+        kind: ImageStreamTag
+        name: pipeline-reporting:latest
+    resources: {}
+    source:
+      contextDir: config/Dockerfiles/pipeline-reporting
+      git:
+        ref: reporting
+        uri: https://github.com/joejstuart/ci-pipeline.git
+      type: Git
+    strategy:
+      dockerStrategy:
+      type: Docker
+    triggers:
+    - type: ConfigChange
+- apiVersion: batch/v2alpha1
+  kind: ScheduledJob
+  metadata:
+    name: pipeline-reporting
+  spec:
+    schedule: "*/5 * * * *"
+    jobTemplate:             
+      spec:
+        template:
+          metadata:
+            labels:
+              job: pipeline-reporting
+          spec:
+            containers:
+            - name: pipeline-reporting
+              image: ${IMAGE}
+              command: ["/opt/openshift/pipeline-reporting/print_output.py"]
+              env:
+                - name: INFLUXDB_USER
+                  value: "${INFLUXDB_USER}"
+                - name: INFLUXDB_PASSWORD
+                  value: "${INFLUXDB_PASSWORD}"
+            restartPolicy: Never
+labels:
+  template: pipeline-reporting
