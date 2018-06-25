@@ -2,6 +2,8 @@ FROM fedora:27
 
 LABEL io.openshift.s2i.scripts-url=image:///usr/libexec/s2i
 
+ENV REPORTING_REPO=https://github.com/joejstuart/pipeline-reporting.git
+
 RUN dnf -y install cronie-anacron git python3
 
 RUN pip-3 install influxdb
@@ -14,4 +16,4 @@ USER 1001
 
 WORKDIR /opt/openshift
 
-RUN git clone https://github.com/joejstuart/pipeline-reporting.git
+RUN git clone $REPORTING_REPO
