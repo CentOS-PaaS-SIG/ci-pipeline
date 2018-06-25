@@ -25,6 +25,15 @@ parameters:
 - name: INFLUXDB_PASSWORD
   value: DEFAULT_PASSWORD
   description: The passwor for influxdb
+- name: CONFLUENCE_PASSWORD
+  value: DEFAULT_PASSWORD
+  description: The passwor for confluence
+- name: CONFLUENCE_USER
+  value: DEFAULT_PASSWORD
+  description: The user for confluence
+- name: PIPELINE
+  value: Fedora
+  description: The name of the pipeline to collect data
 - name: INFLUXDB_DATABASE
   value: db0
   description: The influxdb to use
@@ -37,6 +46,21 @@ parameters:
 - name: IMAGE
   value: docker-registry.default.svc:5000/continuous-infra/pipeline-reporting:latest
   description: The location of the container to use
+- name: SCHEDULE
+  value: "0 12 * * 1"
+  description: The schedule to run on
+- name: COMMAND
+  value: /opt/openshift/pipeline-reporting/print_output.py
+  description: The command to run on a schedule
+- name: GIT_REF
+  value: master
+  description: The branch of the git repo
+- name: GIT_URL
+  value: https://github.com/CentOS-PaaS-SIG/ci-pipeline.git
+  description: Git repo where the dockerfile is
+- name: CONTEXT_DIR
+  value: config/Dockerfiles/pipeline-reporting
+  description: Dockerfile location
 objects:
 - apiVersion: v1
   kind: ImageStream
@@ -56,10 +80,10 @@ objects:
         name: pipeline-reporting:latest
     resources: {}
     source:
-      contextDir: config/Dockerfiles/pipeline-reporting
+      contextDir: ${CONTEXT_DIR}
       git:
-        ref: reporting
-        uri: https://github.com/joejstuart/ci-pipeline.git
+        ref: ${GIT_REF}
+        uri: ${GIT_URL}
       type: Git
     strategy:
       dockerStrategy:
@@ -71,7 +95,9 @@ objects:
   metadata:
     name: pipeline-reporting
   spec:
-    schedule: "*/5 * * * *"
+    schedule: "${SCHEDULE}"
+    failedJobsHistoryLimit: 1
+    successfulJobsHistoryLimit: 3
     jobTemplate:             
       spec:
         template:
@@ -82,12 +108,18 @@ objects:
             containers:
             - name: pipeline-reporting
               image: ${IMAGE}
-              command: ["/opt/openshift/pipeline-reporting/print_output.py"]
+              command: ["${COMMAND}"]
               env:
                 - name: INFLUXDB_USER
                   value: "${INFLUXDB_USER}"
                 - name: INFLUXDB_PASSWORD
                   value: "${INFLUXDB_PASSWORD}"
+                - name: CONFLUENCE_USER
+                  value: "${CONFLUENCE_USER}"
+                - name: CONFLUENCE_PASSWORD
+                  value: "${CONFLUENCE_PASSWORD}"
+                - name: PIPELINE
+                  value: "${PIPELINE}"
             restartPolicy: Never
 labels:
   template: pipeline-reporting
