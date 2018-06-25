@@ -2,6 +2,7 @@ FROM fedora:27
 
 LABEL io.openshift.s2i.scripts-url=image:///usr/libexec/s2i
 
+# be able to override from s2i
 ENV REPORTING_REPO=https://github.com/joejstuart/pipeline-reporting.git
 
 RUN dnf -y install cronie-anacron git python3
