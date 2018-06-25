@@ -16,9 +16,6 @@ metadata:
 message: A data collector for jenkins metrics.
   Usage oc new-app -f pipeline-reporting-template.yaml -p JENKINS_API_KEY=jenkins_api_key
 parameters:
-- name: INFLUXDB_ENDPOINT
-  value: https://influxdb-continuous-infra.apps.ci.centos.org
-  description: The hostname of the influxdb instance
 - name: INFLUXDB_USER
   value: DEFAULT_USER
   description: The username for influxdb
@@ -34,17 +31,8 @@ parameters:
 - name: PIPELINE
   value: Fedora
   description: The name of the pipeline to collect data
-- name: INFLUXDB_DATABASE
-  value: db0
-  description: The influxdb to use
-- name: REPO_URL
-  value: https://github.com/joejstuart/pipeline-reporting.git
-  description: The dockerfile repo url
-- name: REPO_REF
-  description: The git ref or tag to use for customization.
-  value: reporting
 - name: IMAGE
-  value: docker-registry.default.svc:5000/continuous-infra/pipeline-reporting:latest
+  value: 172.0.0.1/namespace/pipeline-reporting:latest
   description: The location of the container to use
 - name: SCHEDULE
   value: "0 12 * * 1"
