@@ -10,8 +10,6 @@ RUN mkdir /opt/openshift \
     && chown -R 1001:0 /opt/openshift \
     && chmod 664 /etc/passwd
 
-ADD ./s2i /usr/libexec/s2i
-
 USER 1001
 
 WORKDIR /opt/openshift
