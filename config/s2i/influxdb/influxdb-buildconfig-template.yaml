@@ -25,7 +25,7 @@ parameters:
   value: config/Dockerfiles/influxdb
 - name: REPO_REF
   description: The git ref or tag to use for customization.
-  value: containers
+  value: master
 - name: INFLUXDB_BINARY
   value: influxdb-1.5.0.x86_64.rpm
   description: The influx rpm
@@ -153,6 +153,8 @@ objects:
             value: :8087
           - name: INFLUXDB_UDP_DATABASE
             value: udp
+          - name: INFLUXDB_HTTP_AUTH_ENABLED
+            value: "true"
           image: influxdb:stable
           imagePullPolicy: Always
           name: influxdb
