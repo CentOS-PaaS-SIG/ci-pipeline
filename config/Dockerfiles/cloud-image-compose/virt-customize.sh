@@ -40,14 +40,8 @@ else
     exit 1
 fi
 
-# Temporary work around for broken rawhide image
-if [ $branch == "rawhide" ]; then
-    wget https://kojipkgs.fedoraproject.org/compose/rawhide/Fedora-Rawhide-20180615.n.0/compose/Cloud/x86_64/images/Fedora-Cloud-Base-Rawhide-20180615.n.0.x86_64.qcow2
-    DOWNLOADED_IMAGE_LOCATION=$(pwd)/Fedora-Cloud-Base-Rawhide-20180615.n.0.x86_64.qcow2
-else
-    wget --quiet -r --no-parent -A 'Fedora-Cloud-Base*.qcow2' ${INSTALL_URL}
-    DOWNLOADED_IMAGE_LOCATION=$(pwd)/$(find dl.fedoraproject.org -name "*.qcow2" | head -1)
-fi
+wget --quiet -r --no-parent -A 'Fedora-Cloud-Base*.qcow2' ${INSTALL_URL}
+DOWNLOADED_IMAGE_LOCATION=$(pwd)/$(find dl.fedoraproject.org -name "*.qcow2" | head -1)
 
 function clean_up {
   set +e
