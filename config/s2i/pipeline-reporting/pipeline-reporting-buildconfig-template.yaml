@@ -28,6 +28,9 @@ parameters:
 - name: CONFLUENCE_USER
   value: DEFAULT_PASSWORD
   description: The user for confluence
+- name: CONFLUENCE_URL
+  value: http://confluence-url
+  description: The confluence url
 - name: PIPELINE
   value: Fedora
   description: The name of the pipeline to collect data
@@ -108,6 +111,8 @@ objects:
                   value: "${CONFLUENCE_PASSWORD}"
                 - name: PIPELINE
                   value: "${PIPELINE}"
+                - name: CONFLUENCE_URL
+                  value: "${CONFLUENCE_URL}"
             restartPolicy: Never
 labels:
   template: pipeline-reporting
