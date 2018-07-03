@@ -21,7 +21,7 @@ rm -rf ${TEST_ARTIFACTS}
 mkdir -p ${TEST_ARTIFACTS}
 
 # It was requested that these tests be run with latest rpm of standard-test-roles
-dnf update -y standard-test-roles
+yum update -y standard-test-roles
 rpm -q standard-test-roles
 
 # Invoke tests according to section 1.7.2 here:

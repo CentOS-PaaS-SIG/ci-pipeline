@@ -11,7 +11,7 @@ if [ -z "${TEST_SUBJECTS}" ]; then
     exit 1
 fi
 
-dnf update -y standard-test-roles
+yum update -y standard-test-roles
 rpm -q standard-test-roles
 
 set +u

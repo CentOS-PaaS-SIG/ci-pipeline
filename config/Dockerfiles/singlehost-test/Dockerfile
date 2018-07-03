@@ -1,4 +1,4 @@
-FROM fedora:27
+FROM centos:7
 LABEL maintainer "https://github.com/CentOS-PaaS-SIG/ci-pipeline"
 LABEL description="This container is meant to \
 use dist-git tests to test packages, \
@@ -8,11 +8,14 @@ upstreamfirst.fedorainfracloud.org. It also can run \
 integration tests from the projectatomic repo by calling \
 the integration-test.sh script."
 
+# Install epel
+RUN yum -y install epel-release && yum clean all
+
 # Copy restraint repo into container
-RUN curl -o /etc/yum.repos.d/bpeck-restraint-fedora-27.repo https://copr.fedorainfracloud.org/coprs/bpeck/restraint/repo/fedora-27/bpeck-restraint-fedora-27.repo
+RUN curl -o /etc/yum.repos.d/bpeck-restraint-el7.repo https://bpeck.fedorapeople.org/restraint/el7.repo
 
 # Install all package requirements
-RUN for i in {1..5} ; do dnf -y install ansible \
+RUN yum -y install ansible \
         beakerlib \
         curl \
         dnf-plugins-core \
@@ -20,15 +23,14 @@ RUN for i in {1..5} ; do dnf -y install ansible \
         findutils \
         git \
         libselinux-python \
-        python2-dnf \
+        python-dnf \
         qemu-kvm \
         restraint-rhts \
         rsync \
         standard-test-roles \
         sudo \
         wget \
-        && dnf clean all \
-        && break || sleep 10 ; done
+        && yum clean all
 
 #Run dnf -y install standard-test-roles \
 #        --enablerepo=updates-testing \
