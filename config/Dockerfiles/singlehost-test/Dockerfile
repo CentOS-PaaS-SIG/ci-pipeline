@@ -12,7 +12,7 @@ the integration-test.sh script."
 RUN curl -o /etc/yum.repos.d/bpeck-restraint-fedora-27.repo https://copr.fedorainfracloud.org/coprs/bpeck/restraint/repo/fedora-27/bpeck-restraint-fedora-27.repo
 
 # Install all package requirements
-RUN for i in {1..5} ; do dnf -y install ansible \
+RUN for i in {1..5} ; do dnf -y install --refresh ansible \
         beakerlib \
         curl \
         dnf-plugins-core \
