@@ -11,7 +11,8 @@ if [ -z "${TEST_SUBJECTS}" ]; then
     exit 1
 fi
 
-mkdir -p $(pwd)/logs
+export TEST_ARTIFACTS=$(pwd)/logs
+mkdir -p ${TEST_ARTIFACTS}
 
 dnf update -y standard-test-roles
 rpm -q standard-test-roles
@@ -26,5 +27,6 @@ set -u
 
 ansible-playbook -v --inventory=${ANSIBLE_INVENTORY} ${PYTHON_INTERPRETER} \
 	--extra-vars "subjects=${TEST_SUBJECTS}" \
+	--extra-vars "artifacts=$TEST_ARTIFACTS" \
 	--extra-vars "rpm_repo=${rpm_repo}" \
 	/tmp/rpm-verify.yml | tee $(pwd)/logs/rpm-verify-out.txt
