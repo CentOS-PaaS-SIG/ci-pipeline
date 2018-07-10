@@ -11,6 +11,8 @@ if [ -z "${TEST_SUBJECTS}" ]; then
     exit 1
 fi
 
+mkdir -p $(pwd)/logs
+
 dnf update -y standard-test-roles
 rpm -q standard-test-roles
 
