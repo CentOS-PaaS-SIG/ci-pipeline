@@ -14,7 +14,7 @@ fi
 export TEST_ARTIFACTS=$(pwd)/logs
 mkdir -p ${TEST_ARTIFACTS}
 
-dnf update -y standard-test-roles
+yum update -y standard-test-roles
 rpm -q standard-test-roles
 
 set +u
