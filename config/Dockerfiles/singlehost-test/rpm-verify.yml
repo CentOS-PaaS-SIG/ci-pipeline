@@ -6,8 +6,10 @@
         paths: "{{ rpm_repo }}"
         patterns: '*.rpm'
       register: rpmlist
+    - debug:
+        msg: "{{ansible_distribution}} {{ansible_distribution_version|int}}"
     - name: Check which rpms are installed
-      package:
+      dnf:
         name: "{{ item.path }}"
         state: present
       register: rpmoutput
@@ -15,6 +17,16 @@
       ignore_errors: yes
       with_items:
         - "{{ rpmlist.files }}"
+    - name: Check which rpms are installed
+      yum:
+        name: "{{ item.path }}"
+        state: present
+      register: rpmoutput
+      check_mode: yes
+      ignore_errors: yes
+      with_items:
+        - "{{ rpmlist.files }}"
+      when: ((ansible_distribution == 'RedHat' or ansible_distribution == 'CentOS') and ansible_distribution_version|int < 8)
     - name: See if at least one rpm is installed
       set_fact:
         myresult: pass
