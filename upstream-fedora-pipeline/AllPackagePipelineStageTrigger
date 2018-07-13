@@ -19,9 +19,7 @@ tagMap = [:]
 // Initialize
 tagMap['jenkins-continuous-infra-slave'] = STABLE_LABEL
 tagMap['rpmbuild'] = STABLE_LABEL
-tagMap['inquirer'] = STABLE_LABEL
 tagMap['cloud-image-compose'] = STABLE_LABEL
-tagMap['ostree-boot-image'] = STABLE_LABEL
 tagMap['singlehost-test'] = STABLE_LABEL
 
 // Fedora Fedmsg Message Provider for stage
@@ -208,12 +206,8 @@ pipeline {
                                                value: tagMap['jenkins-continuous-infra-slave']),
                                         string(name: 'RPMBUILD_TAG',
                                                value: tagMap['rpmbuild']),
-                                        string(name: 'INQUIRER_TAG',
-                                               value: tagMap['inquirer']),
                                         string(name: 'CLOUD_IMAGE_COMPOSE_TAG',
                                                value: tagMap['cloud-image-compose']),
-                                        string(name: 'OSTREE_BOOT_IMAGE_TAG',
-                                               value: tagMap['ostree-boot-image']),
                                         string(name: 'SINGLEHOST_TEST_TAG',
                                                value: tagMap['singlehost-test'])
                                 ],
