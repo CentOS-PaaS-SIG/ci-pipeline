@@ -7,7 +7,7 @@
         patterns: '*.rpm'
       register: rpmlist
     - name: Check which rpms are installed
-      dnf:
+      package:
         name: "{{ item.path }}"
         state: present
       register: rpmoutput
