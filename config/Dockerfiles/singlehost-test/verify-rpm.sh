@@ -25,8 +25,9 @@ if [[ ! -z "${python3}" && "${python3}" == "yes" ]] ; then
 fi
 set -u
 
+set -xo pipefail
 ansible-playbook -v --inventory=${ANSIBLE_INVENTORY} ${PYTHON_INTERPRETER} \
 	--extra-vars "subjects=${TEST_SUBJECTS}" \
 	--extra-vars "artifacts=$TEST_ARTIFACTS" \
 	--extra-vars "rpm_repo=${rpm_repo}" \
-	/tmp/rpm-verify.yml | tee $(pwd)/logs/rpm-verify-out.txt
+	/tmp/rpm-verify.yml $@ | tee $(pwd)/logs/rpm-verify-out.txt
