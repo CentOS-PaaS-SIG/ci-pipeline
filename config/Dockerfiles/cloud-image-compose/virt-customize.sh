@@ -80,7 +80,7 @@ EOF
 
 virt-copy-in -a ${DOWNLOADED_IMAGE_LOCATION} ${CURRENTDIR}/testrepo/${package} ${CURRENTDIR}/test-${package}.repo /etc/yum.repos.d/
 
-for pkg in $(repoquery -q --disablerepo=\* --enablerepo=${package} --repofrompath=${package},${rpm_repo} --all | grep -v '\.src$' | sed 's|-[^-]*-[^-]*$||' | grep -v '\-debuginfo$\|\-debugsource$' ) ; do
+for pkg in $(repoquery -q --repo=${package} --available | grep -v '\.src$' | sed 's|-[^-]*-[^-]*$||' | grep -v '\-debuginfo$\|\-debugsource$') ; do
     RPM_LIST="${RPM_LIST} ${pkg}"
 done
 if ! virt-customize -v --selinux-relabel --memsize 4096 -a ${DOWNLOADED_IMAGE_LOCATION} --run-command "yum install -y --best --allowerasing --nogpgcheck ${REPO_LIST} ${RPM_LIST} && yum clean all" ; then
