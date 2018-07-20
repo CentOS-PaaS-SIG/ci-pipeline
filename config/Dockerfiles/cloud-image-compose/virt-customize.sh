@@ -83,7 +83,7 @@ virt-copy-in -a ${DOWNLOADED_IMAGE_LOCATION} ${CURRENTDIR}/testrepo/${package} $
 for pkg in $(repoquery -q --disablerepo=\* --enablerepo=${package} --repofrompath=${package},${rpm_repo} --all | grep -v '\.src$' | sed 's|-[^-]*-[^-]*$||' | grep -v '\-debuginfo$\|\-debugsource$' ) ; do
     RPM_LIST="${RPM_LIST} ${pkg}"
 done
-if ! virt-customize -v --selinux-relabel --memsize 4096 -a ${DOWNLOADED_IMAGE_LOCATION} --run-command "yum install -y --best --allowerasing --nogpgcheck ${REPO_LIST} ${RPM_LIST} && yum clean all" ; then
+if ! virt-customize -v --selinux-relabel --memsize 8192 -a ${DOWNLOADED_IMAGE_LOCATION} --run-command "yum install -y --best --allowerasing --nogpgcheck ${REPO_LIST} ${RPM_LIST} && yum clean all" ; then
     echo "failure installing rpms"
     exit 1
 fi
