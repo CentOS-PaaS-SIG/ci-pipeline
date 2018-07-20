@@ -3,7 +3,7 @@
 set -xeuo pipefail
 
 # A shell script that pulls the latest Fedora cloud build
-# and uses virt-customize to inject rpms into it. It 
+# and uses virt-customize to inject rpms into it. It
 # outputs a new qcow2 image for you to use.
 
 CURRENTDIR=$(pwd)
@@ -42,8 +42,8 @@ fi
 
 # Temporary work around for broken rawhide image
 if [ $branch == "rawhide" ]; then
-    wget http://artifacts.ci.centos.org/artifacts/fedora-atomic/pipeline/rawhide/images/Fedora-Cloud-Base-Rawhide-20180701.n.0.x86_64.qcow2
-    DOWNLOADED_IMAGE_LOCATION=$(pwd)/Fedora-Cloud-Base-Rawhide-20180701.n.0.x86_64.qcow2
+    wget --quiet -r --no-parent -A 'Fedora-Cloud-Base-Rawhide*.qcow2' http://artifacts.ci.centos.org/artifacts/fedora-atomic/pipeline/rawhide/images/
+    DOWNLOADED_IMAGE_LOCATION=$(pwd)/$(find artifacts.ci.centos.org -name "*.qcow2" | head -1)
 else
     wget --quiet -r --no-parent -A 'Fedora-Cloud-Base*.qcow2' ${INSTALL_URL}
     DOWNLOADED_IMAGE_LOCATION=$(pwd)/$(find dl.fedoraproject.org -name "*.qcow2" | head -1)
