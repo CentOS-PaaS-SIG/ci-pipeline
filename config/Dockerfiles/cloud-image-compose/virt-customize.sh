@@ -68,7 +68,6 @@ mkdir -p ${CURRENTDIR}/testrepo/${package}
 cp -rp ${rpm_repo}/*.rpm ${rpm_repo}/repodata ${CURRENTDIR}/testrepo/${package}
 
 RPM_LIST=""
-REPO_LIST="--repofrompath=${package},file:///etc/yum.repos.d/${package}"
 # Add custom rpms to image
 cat <<EOF > ${CURRENTDIR}/test-${package}.repo
 [test-${package}]
@@ -83,7 +82,7 @@ virt-copy-in -a ${DOWNLOADED_IMAGE_LOCATION} ${CURRENTDIR}/testrepo/${package} $
 for pkg in $(repoquery -q --disablerepo=\* --enablerepo=${package} --repofrompath=${package},${rpm_repo} --all | grep -v '\.src$' | sed 's|-[^-]*-[^-]*$||' | grep -v '\-debuginfo$\|\-debugsource$' ) ; do
     RPM_LIST="${RPM_LIST} ${pkg}"
 done
-if ! virt-customize -v --selinux-relabel --memsize 4096 -a ${DOWNLOADED_IMAGE_LOCATION} --run-command "yum install -y --best --allowerasing --nogpgcheck ${REPO_LIST} ${RPM_LIST} && yum clean all" ; then
+if ! virt-customize -v --selinux-relabel --memsize 4096 -a ${DOWNLOADED_IMAGE_LOCATION} --run-command "yum install -y --best --allowerasing --nogpgcheck ${RPM_LIST} && yum clean all" ; then
     echo "failure installing rpms"
     exit 1
 fi
