@@ -73,6 +73,7 @@ cat <<EOF > ${CURRENTDIR}/test-${package}.repo
 [test-${package}]
 name=test-${package}
 baseurl=file:///etc/yum.repos.d/${package}
+priority=0
 enabled=1
 gpgcheck=0
 EOF
