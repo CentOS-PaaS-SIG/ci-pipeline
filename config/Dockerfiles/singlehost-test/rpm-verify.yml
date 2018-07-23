@@ -1,6 +1,11 @@
 ---
 - hosts: localhost
   tasks:
+    - name: Ensure python2-dnf is present on SUT when necessary
+      package:
+        name: python2-dnf
+        state: present
+      when: ansible_pkg_mgr == "dnf"
     - name: Get list of rpms
       find:
         paths: "{{ rpm_repo }}"
