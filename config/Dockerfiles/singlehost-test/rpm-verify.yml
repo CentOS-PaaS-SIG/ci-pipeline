@@ -3,7 +3,7 @@
   tasks:
     - name: Ensure python2-dnf is present on SUT when necessary
       shell: "yum -y install python2-dnf"
-      when: ansible_pkg_mgr == "dnf"
+      when: (ansible_pkg_mgr == "dnf" and ansible_distribution == "Fedora")
     - name: Get list of rpms
       find:
         paths: "{{ rpm_repo }}"
