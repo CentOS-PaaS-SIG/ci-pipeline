@@ -8,6 +8,8 @@ properties(
         ]
 )
 
+// Because the age of a tag is reported in hours until at least 47 hours,
+// this should not touch tags < ~2 days old, but will delete the rest.
 def recycleOldTags() {
     sh '''
         for imagestream in $(oc describe imagestream | grep "^Name:" | awk '{print $2}') ; do
