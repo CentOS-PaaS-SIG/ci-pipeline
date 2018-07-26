@@ -8,6 +8,19 @@ properties(
         ]
 )
 
+def recycleOldTags() {
+    sh '''
+        for imagestream in $(oc describe imagestream | grep "^Name:" | awk '{print $2}') ; do
+            for prTag in $(oc describe imagestream $imagestream | grep 'PR-') ; do
+                age=$(oc describe imagestreamtag/$imagestream:$prTag | grep "^Created:")
+                if [[ $age == *"month"* || $age == *"day"* || $age == *"week"* ]]; then
+                    oc tag -d $imagestream:$prTag
+                fi
+            done
+        done
+    '''
+}
+
 def stepName = null
 
 node() {
@@ -19,6 +32,8 @@ node() {
             stage(stepName) {
                 // Garbage collect all completed oc builds with -build in their name
                 sh 'oc delete pod $(oc get pods | grep \' Completed \' | grep \'\\-build\' | awk \'{print $1}\')'
+                // Delete old PR- tags for images
+                recycleOldTags()
                 currentBuild.result = 'SUCCESS'
             }
         } catch (Throwable err) {
