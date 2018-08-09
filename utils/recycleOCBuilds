@@ -23,6 +23,24 @@ def recycleOldTags() {
     '''
 }
 
+// Delete all pods in Error or Evicted state older than 6 hours
+def recycleErrorPods() {
+    sh '''
+        oc get pods | egrep "Error|Evicted" | while read podname ; do
+            if [[ $(echo $podname | awk '{print $5}') == *"d"* ]] ; then
+                # Pod is days old
+                oc delete pod $(echo $podname | awk '{print $1}')
+            elif [[ $(echo $podname | awk '{print $5}') == *"h"* ]] ; then
+                # Pod is hours old
+                echo $podname | awk '{print $5}' | sed 's/[^0-9]//g' | awk '$1>6' | while read hourPod ; do
+                    # Pod is older than 6 hours
+                    oc delete pod $(echo $podname | awk '{print $1}')
+                done
+            fi
+        done
+    '''
+}
+
 def stepName = null
 
 node() {
