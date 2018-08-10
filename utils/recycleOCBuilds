@@ -54,6 +54,7 @@ node() {
                 sh 'oc delete pod $(oc get pods | grep \' Completed \' | grep \'\\-build\' | awk \'{print $1}\')'
                 // Delete old PR- tags for images
                 recycleOldTags()
+                recycleErrorPods()
                 currentBuild.result = 'SUCCESS'
             }
         } catch (Throwable err) {
