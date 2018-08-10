@@ -1209,11 +1209,11 @@ def skip(String stageName) {
  * Lock a directory on localhost
  * @param fileLocation - The location to store the lock file
  * @param duration - The number of seconds that if lock is this age, overwrite it
+ * @param myuuid - The pod uuid that is taking the lock
  * @return myuuid - Generate uuid
  */
-def obtainLock(String fileLocation, int duration) {
+def obtainLock(String fileLocation, int duration, String myuuid) {
     echo "Currently in obtainLock function"
-    def myuuid = sh (returnStdout: true, script: 'uuidgen').trim()
     sh """ mkdir -p \$(dirname "${fileLocation}") """
 
     sh """
@@ -1227,6 +1227,11 @@ def obtainLock(String fileLocation, int duration) {
                 ageDiff=\$((\${currentTime} - \${lockAge}))
                 # Break if lock file is too old
                 if [ \${ageDiff} -ge "${duration}" ]; then
+                    break
+                fi
+                storeduuid=\$(cat "${fileLocation}")
+                # Break if stored uuid pod is no longer running
+                if [ $(oc get pods | grep \${storeduuid} | grep Running) == "" ]; then
                     break
                 fi
                 sleep 30
