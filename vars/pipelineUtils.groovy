@@ -335,10 +335,11 @@ class pipelineUtils implements Serializable {
      * Lock a directory on localhost
      * @param fileLocation - The location to store the lock file
      * @param duration - The number of seconds that if lock is this age, overwrite it
+     * @param myuuid - The pod uuid that is taking the lock
      * @return myuuid - Generate uuid
      */
-    def obtainLock(String fileLocation, int duration) {
-        return pipelineUtils.obtainLock(fileLocation, duration)
+    def obtainLock(String fileLocation, int duration, String myuuid) {
+        return pipelineUtils.obtainLock(fileLocation, duration, String myuuid)
     }
 
     /**
