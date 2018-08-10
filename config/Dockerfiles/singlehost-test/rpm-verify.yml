@@ -4,6 +4,9 @@
     - name: Ensure python2-dnf is present on SUT when necessary
       shell: "yum -y install python2-dnf"
       when: (ansible_pkg_mgr == "dnf" and ansible_distribution == "Fedora")
+    - name: Ensure python3-dnf is present on SUT when necessary
+      shell: "dnf -y install python3-dnf"
+      when: (ansible_pkg_mgr == "dnf" and ansible_python_interpreter == "/usr/bin/python3")
     - name: Get list of rpms
       find:
         paths: "{{ rpm_repo }}"
