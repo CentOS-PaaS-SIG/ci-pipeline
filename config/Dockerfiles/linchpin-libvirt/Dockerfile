@@ -46,7 +46,7 @@ WORKDIR "/tmp/"
 #RUN git clone -b file_module_patch https://github.com/samvarankashyap/linchpin
 RUN git clone -b develop https://github.com/samvarankashyap/linchpin
 WORKDIR "/tmp/linchpin"
-RUN "$PWD/install.sh"
+#RUN "$PWD/install.sh"
 RUN cd /tmp/linchpin && python /tmp/linchpin/setup.py install
 WORKDIR "/root/linchpin_workspace/"
 #END: Linchpin specific workspace installations
