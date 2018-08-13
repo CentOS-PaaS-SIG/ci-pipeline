@@ -27,10 +27,10 @@ if [ $branch != "rawhide" ]; then
 fi
 
 if [ "${branch}" == "rawhide" ]; then
-    curl -L -k -O "https://jenkins-continuous-infra.apps.ci.centos.org/view/Fedora%20All%20Packages%20Pipeline/job/fedora-rawhide-image-test/lastSuccessfulBuild/artifact/Fedora-Rawhide.qcow2"
+    curl -L -k -O "https://jenkins-continuous-infra.apps.ci.centos.org/job/fedora-rawhide-image-test/lastSuccessfulBuild/artifact/Fedora-Rawhide.qcow2"
     DOWNLOADED_IMAGE_LOCATION="$(pwd)/Fedora-Rawhide.qcow2"
 elif [ "${branch}" -eq 28 ]; then
-    curl -L -k -O "https://jenkins-continuous-infra.apps.ci.centos.org/view/Fedora%20All%20Packages%20Pipeline/job/fedora-f28-image-test/lastSuccessfulBuild/artifact/Fedora-28.qcow2"
+    curl -L -k -O "https://jenkins-continuous-infra.apps.ci.centos.org/job/fedora-f28-image-test/lastSuccessfulBuild/artifact/Fedora-28.qcow2"
     DOWNLOADED_IMAGE_LOCATION="$(pwd)/Fedora-28.qcow2"
 else
     INSTALL_URL="https://dl.fedoraproject.org/pub/fedora/linux/releases/${branch}/CloudImages/x86_64/images/"
