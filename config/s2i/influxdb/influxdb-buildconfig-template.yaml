@@ -18,14 +18,14 @@ parameters:
   value: 10Gi
   description: The size of the persistent storage for Influxdb
 - name: REPO_URL
-  value: https://github.com/CentOS-PaaS-SIG/ci-pipeline.git
+  value: https://github.com/joejstuart/ci-pipeline.git
   description: The dockerfile repo url
 - name: REPO_CONTEXTDIR
   description: The sub-directory inside the repository.
   value: config/Dockerfiles/influxdb
 - name: REPO_REF
   description: The git ref or tag to use for customization.
-  value: master
+  value: influxdbUpdate
 - name: INFLUXDB_BINARY
   value: influxdb-1.5.0.x86_64.rpm
   description: The influx rpm
@@ -164,6 +164,12 @@ objects:
             value: udp
           - name: INFLUXDB_HTTP_AUTH_ENABLED
             value: "true"
+          - name: INFLUXDB_ADMIN_USER
+            value: ${INFLUXDB_ADMIN_USER}
+          - name: INFLUXDB_ADMIN_PASSWORD
+            value: ${INFLUXDB_ADMIN_PASSWORD}
+          - name: INFLUXDB_DB
+            value: ${INFLUXDB_DB}
           image: influxdb:stable
           imagePullPolicy: Always
           name: influxdb
