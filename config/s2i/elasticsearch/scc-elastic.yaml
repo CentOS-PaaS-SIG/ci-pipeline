@@ -1,0 +1,16 @@
+kind: SecurityContextConstraints
+apiVersion: v1
+metadata:
+  name: scc-elasticsearch
+allowPrivilegedContainer: true
+runAsUser:
+  type: RunAsAny
+seLinuxContext:
+  type: RunAsAny
+fsGroup:
+  type: RunAsAny
+supplementalGroups:
+  type: RunAsAny
+allowedCapabilities:
+  - IPC_LOCK
+  - SYS_RESOURCE

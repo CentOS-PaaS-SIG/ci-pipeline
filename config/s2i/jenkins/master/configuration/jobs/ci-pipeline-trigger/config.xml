@@ -1,0 +1,103 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<flow-definition plugin="workflow-job@2.17">
+   <actions>
+      <io.jenkins.blueocean.service.embedded.BlueOceanUrlAction plugin="blueocean-rest-impl@1.4.2">
+         <blueOceanUrlObject class="io.jenkins.blueocean.service.embedded.BlueOceanUrlObjectImpl">
+            <mappedUrl>blue/organizations/jenkins/ci-pipeline-trigger</mappedUrl>
+         </blueOceanUrlObject>
+      </io.jenkins.blueocean.service.embedded.BlueOceanUrlAction>
+      <org.jenkinsci.plugins.workflow.multibranch.JobPropertyTrackerAction plugin="workflow-multibranch@2.17">
+         <jobPropertyDescriptors>
+            <string>hudson.model.ParametersDefinitionProperty</string>
+            <string>org.jenkinsci.plugins.workflow.job.properties.PipelineTriggersJobProperty</string>
+            <string>jenkins.model.BuildDiscarderProperty</string>
+         </jobPropertyDescriptors>
+      </org.jenkinsci.plugins.workflow.multibranch.JobPropertyTrackerAction>
+   </actions>
+   <description />
+   <keepDependencies>false</keepDependencies>
+   <properties>
+      <io.fabric8.jenkins.openshiftsync.BuildConfigProjectProperty plugin="openshift-sync@1.0.7">
+         <uid />
+         <namespace />
+         <name />
+         <resourceVersion />
+      </io.fabric8.jenkins.openshiftsync.BuildConfigProjectProperty>
+      <com.sonyericsson.rebuild.RebuildSettings plugin="rebuild@1.27">
+         <autoRebuild>false</autoRebuild>
+         <rebuildDisabled>false</rebuildDisabled>
+      </com.sonyericsson.rebuild.RebuildSettings>
+      <jenkins.branch.RateLimitBranchProperty_-JobPropertyImpl plugin="branch-api@2.0.18">
+         <durationName>hour</durationName>
+         <count>600</count>
+         <userBoost>false</userBoost>
+      </jenkins.branch.RateLimitBranchProperty_-JobPropertyImpl>
+      <jenkins.model.BuildDiscarderProperty>
+         <strategy class="hudson.tasks.LogRotator">
+            <daysToKeep>-1</daysToKeep>
+            <numToKeep>100</numToKeep>
+            <artifactDaysToKeep>-1</artifactDaysToKeep>
+            <artifactNumToKeep>50</artifactNumToKeep>
+         </strategy>
+      </jenkins.model.BuildDiscarderProperty>
+      <hudson.model.ParametersDefinitionProperty>
+         <parameterDefinitions>
+            <hudson.model.StringParameterDefinition>
+               <name>CI_MESSAGE</name>
+               <description>fedmsg msg</description>
+               <trim>false</trim>
+            </hudson.model.StringParameterDefinition>
+            <hudson.model.StringParameterDefinition>
+               <name>TARGETS</name>
+               <description>fedora branch targets</description>
+               <defaultValue>^(f26|f27)$</defaultValue>
+               <trim>false</trim>
+            </hudson.model.StringParameterDefinition>
+            <hudson.model.StringParameterDefinition>
+               <name>PROJECT_REPO</name>
+               <description>Main project repo</description>
+               <defaultValue>ci-pipeline</defaultValue>
+               <trim>false</trim>
+            </hudson.model.StringParameterDefinition>
+            <hudson.model.StringParameterDefinition>
+               <name>MAIN_TOPIC</name>
+               <description>main topic to publish on</description>
+               <defaultValue>org.centos.prod</defaultValue>
+               <trim>false</trim>
+            </hudson.model.StringParameterDefinition>
+         </parameterDefinitions>
+      </hudson.model.ParametersDefinitionProperty>
+      <org.jenkinsci.plugins.workflow.job.properties.PipelineTriggersJobProperty>
+         <triggers>
+            <com.redhat.jenkins.plugins.ci.CIBuildTrigger plugin="jms-messaging@1.0.35">
+               <spec />
+               <selector>topic = "org.fedoraproject.prod.git.receive"</selector>
+               <providerName>fedora-fedmsg</providerName>
+               <checks />
+            </com.redhat.jenkins.plugins.ci.CIBuildTrigger>
+         </triggers>
+      </org.jenkinsci.plugins.workflow.job.properties.PipelineTriggersJobProperty>
+   </properties>
+   <definition class="org.jenkinsci.plugins.workflow.cps.CpsScmFlowDefinition" plugin="workflow-cps@2.45">
+      <scm class="hudson.plugins.git.GitSCM" plugin="git@3.8.0">
+         <configVersion>2</configVersion>
+         <userRemoteConfigs>
+            <hudson.plugins.git.UserRemoteConfig>
+               <url>https://github.com/CentOS-PaaS-SIG/ci-pipeline</url>
+            </hudson.plugins.git.UserRemoteConfig>
+         </userRemoteConfigs>
+         <branches>
+            <hudson.plugins.git.BranchSpec>
+               <name>*/master</name>
+            </hudson.plugins.git.BranchSpec>
+         </branches>
+         <doGenerateSubmoduleConfigurations>false</doGenerateSubmoduleConfigurations>
+         <submoduleCfg class="list" />
+         <extensions />
+      </scm>
+      <scriptPath>JenkinsfileTrigger</scriptPath>
+      <lightweight>true</lightweight>
+   </definition>
+   <triggers />
+   <disabled>false</disabled>
+</flow-definition>

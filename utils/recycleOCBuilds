@@ -1,0 +1,66 @@
+#!groovy
+
+properties(
+        [
+                buildDiscarder(logRotator(artifactDaysToKeepStr: '', artifactNumToKeepStr: '15', daysToKeepStr: '', numToKeepStr: '15')),
+                disableConcurrentBuilds(),
+                pipelineTriggers([cron('0 8 * * *')])
+        ]
+)
+
+// Because the age of a tag is reported in hours until at least 47 hours,
+// this should not touch tags < ~2 days old, but will delete the rest.
+def recycleOldTags() {
+    sh '''
+        for imagestream in $(oc describe imagestream | grep "^Name:" | awk '{print $2}') ; do
+            for prTag in $(oc describe imagestream $imagestream | grep 'PR-') ; do
+                age=$(oc describe imagestreamtag/$imagestream:$prTag | grep "^Created:")
+                if [[ $age == *"month"* || $age == *"day"* || $age == *"week"* ]]; then
+                    oc tag -d $imagestream:$prTag
+                fi
+            done
+        done
+    '''
+}
+
+// Delete all pods in Error or Evicted state older than 1 hour
+def recycleErrorPods() {
+    sh '''
+        oc get pods | egrep "Error|Evicted" | while read podname ; do
+            if [[ $(echo $podname | awk '{print $5}') == *"d"* ]] ; then
+                # Pod is days old
+                oc delete pod $(echo $podname | awk '{print $1}')
+            elif [[ $(echo $podname | awk '{print $5}') == *"h"* ]] ; then
+                # Pod is hours old
+                echo $podname | awk '{print $5}' | sed 's/[^0-9]//g' | awk '$1>1' | while read hourPod ; do
+                    # Pod is older than 1 hour
+                    oc delete pod $(echo $podname | awk '{print $1}')
+                done
+            fi
+        done
+    '''
+}
+
+def stepName = null
+
+node() {
+
+    timeout(time: 30, unit: 'MINUTES') {
+
+        try {
+            stepName = 'Remove Completed Builds'
+            stage(stepName) {
+                // Garbage collect all completed oc builds with -build in their name
+                sh 'oc delete pod $(oc get pods | grep \' Completed \' | grep \'\\-build\' | awk \'{print $1}\')'
+                // Delete old PR- tags for images
+                recycleOldTags()
+                recycleErrorPods()
+                currentBuild.result = 'SUCCESS'
+            }
+        } catch (Throwable err) {
+                        currentBuild.description = "Delete Failure"
+                        print("Find and deletion of completed oc builds failed!")
+                        currentBuild.result = 'FAILURE'
+        }
+    }
+}

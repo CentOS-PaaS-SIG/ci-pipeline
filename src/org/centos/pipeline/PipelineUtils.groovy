@@ -3,7 +3,6 @@ package org.centos.pipeline
 
 import org.centos.*
 
-import groovy.json.JsonSlurper
 import org.jenkinsci.plugins.pipeline.modeldefinition.Utils
 
 /**
@@ -319,7 +318,7 @@ def sendMessage(String msgTopic, String msgProps, String msgContent) {
  */
 def sendMessageWithAudit(String msgTopic, String msgProps, String msgContent, String msgAuditFile, fedmsgRetryCount) {
     // Get contents of auditFile
-    auditContent = readJSON file: msgAuditFile
+    auditContent = readJSON file: msgAuditFile.replace("\n", "\\n")
 
     // Send message and get handle on SendResult
     sendResult = sendMessage(msgTopic, msgProps, msgContent)
@@ -382,7 +381,7 @@ def trackMessage(String messageID, int retryCount) {
 def injectFedmsgVars(String message) {
 
     // Parse the message into a Map
-    def ci_data = new JsonSlurper().parseText(message)
+    def ci_data = readJSON text: message.replace("\n", "\\n")
 
     // If we have a 'commit' key in the CI_MESSAGE, for each key under 'commit', we
     // * prepend the key name with fed_
@@ -412,7 +411,7 @@ def injectFedmsgVars(String message) {
 def injectPRVars(String prefix, String message) {
 
     // Parse the message into a Map
-    def ci_data = new JsonSlurper().parseText(message)
+    def ci_data = readJSON text: message.replace("\n", "\\n")
 
     // If we have a 'pullrequest' key in the CI_MESSAGE, for each key under 'pullrequest', we
     // * prepend the key name with prefix_
@@ -447,9 +446,10 @@ def injectPRVars(String prefix, String message) {
         // Create a bogus rev value to use in build descriptions
         if (env."${prefix}_id") {
             env."${prefix}_rev" = "PR-" + env."${prefix}_id"
+            env."${prefix}_pr_id" = env."${prefix}_id"
         }
         // Get the last comment id as it was requested
-        if (ci_data['pullrequest']['comments'].last()['id']) {
+        if (ci_data['pullrequest']['comments']) {
             env."${prefix}_lastcid" = ci_data['pullrequest']['comments'].last()['id']
         }
     }
@@ -467,8 +467,13 @@ def injectPRVars(String prefix, String message) {
 def checkUpdatedPR(String message, String keyword) {
 
     // Parse the message into a Map
-    def ci_data = new JsonSlurper().parseText(message)
+    def ci_data = readJSON text: message.replace("\n", "\\n")
 
+    if (ci_data['pullrequest']['status']) {
+        if (ci_data['pullrequest']['status'] != 'Open') {
+            return false
+        }
+    }
     if (ci_data['pullrequest']['comments']) {
         if (ci_data['pullrequest']['comments'].last()['notification'] || ci_data['pullrequest']['comments'].last()['comment'].contains(keyword)) {
             return true
@@ -476,6 +481,7 @@ def checkUpdatedPR(String message, String keyword) {
             return false
         }
     }
+    // Default to return true because this is called for pr.new messages as well
     return true
 }
 
@@ -1065,7 +1071,7 @@ def getVariablesFromMessage(String message) {
     messageVars = [:]
 
     // Parse the message into a Map
-    def ci_data = new JsonSlurper().parseText(message)
+    def ci_data = readJSON text: message.replace("\n", "\\n")
     if (ci_data['commit']) {
         ci_data.commit.each { key, value ->
             String varKey = key.toString().replaceAll('-', '_')
@@ -1125,7 +1131,7 @@ def watchForMessages(String msg_provider, String message) {
                 ],
                 overrides: [topic: 'org.centos.stage']
         echo msg
-        def msg_data = new JsonSlurper().parseText(msg)
+        def msg_data = readJSON text: msg.replace("\n", "\\n")
         allFound = true
 
         def errorMsg = ""
@@ -1156,16 +1162,27 @@ def watchForMessages(String msg_provider, String message) {
 
 /**
  * Test if $tag tests exist for $mypackage on $mybranch in fedora dist-git
- * For mybranch, use fXX or master
+ * For mybranch, use fXX or master, or PR number (digits only)
  * @param mypackage
- * @param mybranch
+ * @param mybranch - Fedora branch or PR number
  * @param tag
  * @return
  */
 def checkTests(String mypackage, String mybranch, String tag) {
     echo "Currently checking if package tests exist"
-    return sh (returnStatus: true, script: """
-    git clone -b ${mybranch} --single-branch https://src.fedoraproject.org/rpms/${mypackage}/ && grep -r '\\- '${tag}'\$' ${mypackage}/tests""") == 0
+    sh "rm -rf ${mypackage}"
+    if (mybranch.isNumber()) {
+        sh "git clone https://src.fedoraproject.org/rpms/${mypackage}"
+        dir("${mypackage}") {
+            sh "git fetch -fu origin refs/pull/${mybranch}/head:pr"
+            sh "git checkout pr"
+            return sh (returnStatus: true, script: """
+            grep -r '\\- '${tag}'\$' tests""") == 0
+        }
+    } else {
+        return sh (returnStatus: true, script: """
+        git clone -b ${mybranch} --single-branch https://src.fedoraproject.org/rpms/${mypackage}/ && grep -r '\\- '${tag}'\$' ${mypackage}/tests""") == 0
+    }
 }
 
 /**
@@ -1174,7 +1191,7 @@ def checkTests(String mypackage, String mybranch, String tag) {
  * @return boolean
  */
 def checkIfFork(String message) {
-    def ciMessage = new JsonSlurper().parseText(message)
+    def ciMessage = readJSON text: message.replace("\n", "\\n")
     def request = ciMessage['commit']['path']
     return request.contains('repositories/forks')
 }
@@ -1186,6 +1203,77 @@ def checkIfFork(String message) {
  */
 def skip(String stageName) {
     Utils.markStageSkippedForConditional(stageName)
+}
+
+/**
+ * Lock a directory on localhost
+ * @param fileLocation - The location to store the lock file
+ * @param duration - The number of seconds that if lock is this age, overwrite it
+ * @param myuuid - The pod uuid that is taking the lock
+ * @return myuuid - Generate uuid
+ */
+def obtainLock(String fileLocation, int duration, String myuuid) {
+    echo "Currently in obtainLock function"
+    sh """ mkdir -p \$(dirname "${fileLocation}") """
+
+    sh """
+        (
+        flock 9
+        currentTime=\$(date +%s)
+        while true ; do
+            # Check if lock file exists
+            while [ -f "${fileLocation}" ] ; do
+                lockAge=\$(stat -c %Y "${fileLocation}")
+                ageDiff=\$((\${currentTime} - \${lockAge}))
+                # Break if lock file is too old
+                if [ \${ageDiff} -ge "${duration}" ]; then
+                    break
+                fi
+                storeduuid=\$(cat "${fileLocation}")
+                # Break if stored uuid pod is no longer running
+                if [ \$(oc get pods | grep \${storeduuid} | grep Running | sed 's/ //g') == "" ]; then
+                    break
+                fi
+                sleep 30
+                currentTime=\$(date +%s)
+            done
+            # Now, either lock file is older than duration
+            # or the lock is gone, so proceed
+            echo "${myuuid}" > "${fileLocation}"
+            testuuid=\$(cat "${fileLocation}")
+            # If uuid matches, we got the lock
+            if [ \${testuuid} == "${myuuid}" ]; then
+                break
+            fi
+            sleep 30
+        done
+        # fileLocation.lck isn't important, but redirect somewhere
+        ) 9>"${fileLocation}".lck
+    """
+    return myuuid
+}
+
+/**
+ * Remove lock file on localhost
+ * @param fileLocation - The location to store the lock file
+ * @param myuuid - The uuid to check that the file contains
+ * @return
+ */
+def releaseLock(String fileLocation, String myuuid) {
+    if (fileExists(fileLocation)) {
+        def storeduuid = readFile(fileLocation).trim()
+        if (storeduuid == myuuid) {
+            sh "rm -f ${fileLocation} ${fileLocation}.lck"
+            return
+        } else {
+            // We were told to release a lock we didn't have
+            throw new Exception("Lock didn't belong to this build")
+        }
+    } else {
+        println "Lock file didn't exist: ${fileLocation}"
+        println "WARN: This build ran without a lock!"
+        throw new Exception("Ran without lock")
+    }
 }
 
 /**
@@ -1249,8 +1337,33 @@ def checkTestResults(Map testResults) {
  * @return
  */
 def flattenJSON(String prefix, String message) {
-    def ciMessage = new JsonSlurper().parseText(message)
+    def ciMessage = readJSON text: message.replace("\n", "\\n")
     injectCIMessage(prefix, ciMessage)
+}
+
+/**
+ * Set branch and $prefix_branch based on the candidate branch
+ * This is meant to be run with a CI_MESSAGE from a build task
+ * You should call flattenJSON on the CI_MESSAGE before using
+ * this function
+ * @param tag - The tag from the request field e.g. f27-candidate
+ * @param prefix - The prefix to add to the keys e.g. fed
+ * @return
+ */
+def setBuildBranch(String tag, String prefix) {
+    try {
+        if (tag.toLowerCase() == 'rawhide') {
+            env.branch = tag
+            env."${prefix}_branch" = 'master'
+        } else {
+            // assume that tag is branch-candidate
+            tokentag = tag.tokenize('-')
+            env."${prefix}_branch" = tokentag[0..tokentag.size()-2].join('-')
+            env.branch = env."${prefix}_branch"
+        }
+    } catch(e) {
+        throw new Exception('Something went wrong parsing branch', e)
+    }
 }
 
 /**
@@ -1263,9 +1376,11 @@ def injectCIMessage(String prefix, def ciMessage) {
 
     ciMessage.each { key, value ->
         def new_key = key.replaceAll('-', '_')
-        if (value instanceof groovy.json.internal.LazyMap) {
+        // readJSON uses JSON* and slurper uses LazyMap and ArrayList
+        if (value instanceof groovy.json.internal.LazyMap || value instanceof net.sf.json.JSONObject) {
             injectCIMessage("${prefix}_${new_key}", value)
-        } else if (value instanceof  java.util.ArrayList) {
+        } else if (value instanceof java.util.ArrayList || value instanceof net.sf.json.JSONArray) {
+            // value was an array itself
             injectArray("${prefix}_${new_key}", value)
         } else {
             env."${prefix}_${new_key}" =
@@ -1288,4 +1403,32 @@ def injectArray(String prefix, def message) {
     }
 }
 
+/**
+ * @param request - the url that refers to the package
+ * @param prefix - env prefix
+ * @return
+ */
+def repoFromRequest(String request, String prefix) {
 
+    try {
+        def gitMatcher = request =~ /git.+?\/([a-z0-9A-Z_\-\+\.]+?)(?:\.git|\?|#).*/
+        def buildMatcher = request =~ /(?:koji-shadow|cli-build).+?\/([a-zA-Z0-9\-_\+\.]+)-.*/
+        def pkgMatcher = request =~ /^([a-zA-Z0-9\-_\+\.]+$)/
+        def srpmMatcher = request =~ /.+?\/([a-zA-Z0-9\.\-_\+]+)-[0-9a-zA-Z\.\_]+-[0-9\.].+.src.rpm/
+
+
+        if (gitMatcher.matches()) {
+            env."${prefix}_repo" = gitMatcher[0][1]
+        } else if (srpmMatcher.matches()) {
+            env."${prefix}_repo" = srpmMatcher[0][1]
+        } else if (buildMatcher.matches()) {
+            env."${prefix}_repo" = buildMatcher[0][1]
+        } else if (pkgMatcher.matches()) {
+            env."${prefix}_repo" = pkgMatcher[0][1]
+        } else {
+            throw new Exception("Invalid request url: ${request}")
+        }
+    } catch(e) {
+        throw e
+    }
+}

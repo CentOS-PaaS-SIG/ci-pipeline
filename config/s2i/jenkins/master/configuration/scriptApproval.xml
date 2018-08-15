@@ -1,0 +1,23 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<scriptApproval plugin="script-security@1.15">
+  <approvedScriptHashes>
+  </approvedScriptHashes>
+  <approvedSignatures>
+    <string>method groovy.json.JsonSlurperClassic parseText java.lang.String</string>
+    <string>method java.lang.Class isInstance java.lang.Object</string>
+    <string>method org.jenkinsci.plugins.workflow.support.actions.EnvironmentAction getEnvironment</string>
+    <string>new groovy.json.JsonSlurperClassic</string>
+    <string>new java.lang.Exception java.lang.String java.lang.Throwable</string>
+    <string>new java.lang.Exception java.lang.String</string>
+    <string>staticMethod org.codehaus.groovy.runtime.DefaultGroovyMethods contains java.lang.Object[] java.lang.Object</string>
+    <string>staticMethod org.codehaus.groovy.runtime.DefaultGroovyMethods getAt java.util.List groovy.lang.Range</string>
+    <string>staticMethod org.codehaus.groovy.runtime.DefaultGroovyMethods getAt java.util.List java.util.Collection</string>
+    <string>staticMethod org.jenkinsci.plugins.pipeline.modeldefinition.Utils markStageSkippedForConditional java.lang.String</string>
+  </approvedSignatures>
+  <aclApprovedSignatures>
+  </aclApprovedSignatures>
+  <approvedClasspathEntries/>
+  <pendingScripts/>
+  <pendingSignatures/>
+  <pendingClasspathEntries/>
+</scriptApproval>

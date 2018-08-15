@@ -21,7 +21,7 @@ rm -rf ${TEST_ARTIFACTS}
 mkdir -p ${TEST_ARTIFACTS}
 
 # It was requested that these tests be run with latest rpm of standard-test-roles
-dnf update -y standard-test-roles
+yum update -y standard-test-roles
 rpm -q standard-test-roles
 
 # Invoke tests according to section 1.7.2 here:
@@ -56,8 +56,13 @@ fi
 pushd ${package}
 
 # Check out the appropriate branch and rev
-git checkout ${branch}
-git checkout ${rev}
+if [ -z ${build_pr_id} ]; then
+    git checkout ${branch}
+    git checkout ${rev}
+else
+    git fetch -fu origin refs/pull/${build_pr_id}/head:pr
+    git checkout pr
+fi
 
 # Check if there is a tests dir from dist-git, if not, exit
 if [ -d tests ]; then
@@ -72,6 +77,7 @@ function clean_up {
     rm -rf tests/package
     mkdir -p tests/package
     cp ${TEST_ARTIFACTS}/* tests/package/
+    cat ${TEST_ARTIFACTS}/test.log
     set +u
     if [[ ! -z "${RSYNC_USER}" && ! -z "${RSYNC_SERVER}" && ! -z "${RSYNC_DIR}" && ! -z "${RSYNC_PASSWORD}"  && ! -z "${RSYNC_BRANCH}" ]]; then
         RSYNC_LOCATION="${RSYNC_USER}@${RSYNC_SERVER}::${RSYNC_DIR}/${RSYNC_BRANCH}"
@@ -95,13 +101,15 @@ fi
 set -u
 
 # Invoke each playbook according to the specification
-set -x
+set -xo pipefail
 for playbook in tests*.yml; do
 	if [ -f ${playbook} ]; then
-		ansible-playbook --inventory=$ANSIBLE_INVENTORY $PYTHON_INTERPRETER \
+		# TODO: nvr needs to be standardized later in STR
+		timeout 4h ansible-playbook -v --inventory=$ANSIBLE_INVENTORY $PYTHON_INTERPRETER \
 			--extra-vars "subjects=$TEST_SUBJECTS" \
 			--extra-vars "artifacts=$TEST_ARTIFACTS" \
-			--tags ${TAG} ${playbook}
+			--extra-vars "nvr=$nvr" \
+			--tags ${TAG} ${playbook} $@ | tee ${TEST_ARTIFACTS}/${playbook}-run.txt
 	fi
 done
 popd

@@ -1,0 +1,238 @@
+/**
+ * Fedora All Packages Stage Pipeline Trigger
+ *
+ * This is a declarative pipeline for the Fedora All Packages
+ * stage pipeline that includes the building of images based on PRs
+ *
+ */
+
+// Openshift project
+openshiftProject = "continuous-infra"
+DOCKER_REPO_URL = '172.30.254.79:5000'
+
+env.relevant = 'false'
+
+// If this PR does not include an image change, then use this tag
+STABLE_LABEL = "stable"
+tagMap = [:]
+
+// Initialize
+tagMap['jenkins-continuous-infra-slave'] = STABLE_LABEL
+tagMap['rpmbuild'] = STABLE_LABEL
+tagMap['cloud-image-compose'] = STABLE_LABEL
+tagMap['singlehost-test'] = STABLE_LABEL
+
+// Fedora Fedmsg Message Provider for stage
+MSG_PROVIDER = "fedora-fedmsg-stage"
+
+// IRC properties
+IRC_NICK = "contra-bot"
+IRC_CHANNEL = "#contra-ci-cd"
+
+// CI_MESSAGES known to build successfully TODO
+CANNED_CI_MESSAGES = [:]
+CANNED_CI_MESSAGES['f26'] = '{"commit":{"username":"zdohnal","stats":{"files":{"README.patches":{"deletions":0,"additions":30,"lines":30},"sources":{"deletions":1,"additions":1,"lines":2},"vim.spec":{"deletions":7,"additions":19,"lines":26},".gitignore":{"deletions":0,"additions":1,"lines":1},"vim-8.0-rhbz1365258.patch":{"deletions":0,"additions":12,"lines":12}},"total":{"deletions":8,"files":5,"additions":63,"lines":71}},"name":"Zdenek Dohnal","rev":"3ff427e02625f810a2cedb754342be44d6161b39","namespace":"rpms","agent":"zdohnal","summary":"Merge branch f25 into f26","repo":"vim","branch":"f26","seen":false,"path":"/srv/git/repositories/rpms/vim.git","message":"Merge branch \'f25\' into f26\n","email":"zdohnal@redhat.com"},"topic":"org.fedoraproject.prod.git.receive"}'
+CANNED_CI_MESSAGES['f27'] = '{"commit":{"username":"adrian","stats":{"files":{"criu.spec":{"deletions":0,"additions":5,"lines":5}},"total":{"deletions":0,"files":1,"additions":5,"lines":5}},"name":"Adrian Reber","rev":"386bedee49cb887626140f2c60522751ec620f1d","namespace":"rpms","agent":"adrian","summary":"Adapt ExcludeArch depending on Fedora release","repo":"criu","branch":"f27","seen":false,"path":"/srv/git/repositories/rpms/criu.git","message":"Adapt ExcludeArch depending on Fedora release\\n","email":"adrian@lisas.de"},"topic":"org.fedoraproject.prod.git.receive"}'
+CANNED_CI_MESSAGES['rawhide-pr'] = '{"pullrequest":{"status":"Open","last_updated":"1531483094","branch_from":"gcc_BR","uid":"adb2aaa172674bd29321354977efb087","commit_stop":"d7dd0e70d82ce7cfc0b32436454655001141a615","initial_comment":"https://fedoraproject.org/wiki/Changes/Remove_GCC_from_BuildRoot","title":"Add gcc to Buildroot","comments":[],"id":3,"project":{"custom_keys":[],"description":"The chkconfig rpms","parent":null,"date_modified":"1507634625","access_users":{"admin":["jsynacek","msekleta"],"commit":[],"ticket":[],"owner":["lnykryn"]},"namespace":"rpms","url_path":"rpms/chkconfig","priorities":{},"id":1686,"access_groups":{"admin":[],"commit":[],"ticket":[]},"milestones":{},"user":{"fullname":"Lukáš Nykrýn","name":"lnykryn"},"date_created":"1501866676","fullname":"rpms/chkconfig","settings":{"issues_default_to_private":false,"Minimum_score_to_merge_pull-request":-1,"pull_request_access_only":false,"stomp_notifications":true,"Web-hooks":null,"fedmsg_notifications":true,"always_merge":false,"project_documentation":false,"Enforce_signed-off_commits_in_pull-request":false,"notify_on_commit_flag":false,"notify_on_pull-request_flag":false,"roadmap_on_issues_page":false,"pull_requests":true,"Only_assignee_can_merge_pull-request":false,"issue_tracker":true},"close_status":[],"tags":[],"name":"chkconfig"},"assignee":null,"repo_from":{"custom_keys":[],"description":"The chkconfig rpms","parent":{"custom_keys":[],"description":"The chkconfig rpms","parent":null,"date_modified":"1507634625","access_users":{"admin":["jsynacek","msekleta"],"commit":[],"ticket":[],"owner":["lnykryn"]},"namespace":"rpms","url_path":"rpms/chkconfig","priorities":{},"id":1686,"access_groups":{"admin":[],"commit":[],"ticket":[]},"milestones":{},"user":{"fullname":"Lukáš Nykrýn","name":"lnykryn"},"date_created":"1501866676","fullname":"rpms/chkconfig","settings":{"issues_default_to_private":false,"Minimum_score_to_merge_pull-request":-1,"pull_request_access_only":false,"stomp_notifications":true,"Web-hooks":null,"fedmsg_notifications":true,"always_merge":false,"project_documentation":false,"Enforce_signed-off_commits_in_pull-request":false,"notify_on_commit_flag":false,"notify_on_pull-request_flag":false,"roadmap_on_issues_page":false,"pull_requests":true,"Only_assignee_can_merge_pull-request":false,"issue_tracker":true},"close_status":[],"tags":[],"name":"chkconfig"},"date_modified":"1531482379","access_users":{"admin":[],"commit":[],"ticket":[],"owner":["lslebodn"]},"namespace":"rpms","url_path":"fork/lslebodn/rpms/chkconfig","priorities":{},"id":31393,"access_groups":{"admin":[],"commit":[],"ticket":[]},"milestones":{},"user":{"fullname":"Lukas Slebodnik","name":"lslebodn"},"date_created":"1531482379","fullname":"forks/lslebodn/rpms/chkconfig","settings":{"issues_default_to_private":false,"Minimum_score_to_merge_pull-request":-1,"pull_request_access_only":false,"stomp_notifications":true,"Web-hooks":null,"fedmsg_notifications":true,"always_merge":false,"project_documentation":false,"Enforce_signed-off_commits_in_pull-request":false,"notify_on_commit_flag":false,"notify_on_pull-request_flag":false,"roadmap_on_issues_page":false,"pull_requests":false,"Only_assignee_can_merge_pull-request":false,"issue_tracker":false},"close_status":[],"tags":[],"name":"chkconfig"},"cached_merge_status":"unknown","updated_on":"1531483094","commit_start":"d7dd0e70d82ce7cfc0b32436454655001141a615","branch":"master","date_created":"1531483094","closed_at":null,"remote_git":null,"closed_by":null,"user":{"fullname":"Lukas Slebodnik","name":"lslebodn"}},"agent":"lslebodn","topic":"org.fedoraproject.prod.pagure.pull-request.new"}'
+
+library identifier: "ci-pipeline@master",
+        retriever: modernSCM([$class: 'GitSCMSource',
+                              remote: "https://github.com/CentOS-Paas-SIG/ci-pipeline"])
+properties([
+  buildDiscarder(logRotator(artifactNumToKeepStr: '20', numToKeepStr: '20')),
+  [$class: 'GithubProjectProperty', displayName: '', projectUrlStr: 'https://github.com/CentOS-PaaS-SIG/ci-pipeline/'],
+  [$class: 'org.jenkinsci.plugins.workflow.job.properties.PipelineTriggersJobProperty', triggers:[
+    [
+      $class: 'org.jenkinsci.plugins.ghprb.GhprbTrigger',
+      orgslist: 'CentOS-PaaS-SIG',
+      cron: 'H/5 * * * *',
+      triggerPhrase: '.*\\[upstream-test\\].*',
+      onlyTriggerPhrase: false,
+      useGitHubHooks: true,
+      permitAll: true,
+      autoCloseFailedPullRequests: false,
+      displayBuildErrorsOnDownstreamBuilds: true,
+      extensions: [
+        [
+          $class: 'org.jenkinsci.plugins.ghprb.extensions.status.GhprbSimpleStatus',
+          commitStatusContext: 'Upstream Fedora Stage Pipeline Build',
+          showMatrixStatus: false,
+          triggeredStatus: 'Starting job...',
+          startedStatus: 'Building...',
+        ]
+      ]
+    ]
+  ]]
+])
+
+pipeline {
+    agent {
+        kubernetes {
+            cloud 'openshift'
+            label 'allpkgs-stage-trigger-' + env.ghprbActualCommit
+            containerTemplate {
+                name 'jnlp'
+                args '${computer.jnlpmac} ${computer.name}'
+                image DOCKER_REPO_URL + '/' + openshiftProject + '/jenkins-continuous-infra-slave:' + STABLE_LABEL
+                ttyEnabled false
+                command ''
+            }
+        }
+    }
+    stages {
+        stage("Get Changelog") {
+            steps {
+                node('master') {
+                    script {
+                        echo "PR number is: ${env.ghprbPullId}"
+                        env.changeLogStr = pipelineUtils.getChangeLogFromCurrentBuild()
+                        echo env.changeLogStr
+                    }
+                    writeFile file: 'changelog.txt', text: env.changeLogStr
+                    archiveArtifacts allowEmptyArchive: true, artifacts: 'changelog.txt'
+                }
+            }
+        }
+        // Can't think of a better way to only run if a container of interest is touched
+        stage("Skip if no containers changed") {
+            when {
+                anyOf {
+                    // If none of workflow's containers are modified, no need to run
+                    changeset "config/Dockerfiles/rpmbuild/**"
+                    changeset "config/Dockerfiles/cloud-image-compose/**"
+                    changeset "config/Dockerfiles/singlehost-test/**"
+                    changeset "upstream-fedora-pipeline/**"
+                }
+            }
+            steps {
+                script {
+                    env.relevant = 'true'
+                }
+            }
+        }
+        stage("Setup Container Templates") {
+            when {
+                environment name: 'relevant', value: 'true'
+            }
+            steps {
+                script {
+                    pipelineUtils.setupContainerTemplates(openshiftProject)
+                }
+            }
+        }
+        stage("rpmbuild image build") {
+            when {
+                // Only build if we have related files in changeset
+                changeset "config/Dockerfiles/rpmbuild/**"
+                environment name: 'relevant', value: 'true'
+            }
+            steps {
+                script {
+                    tagMap['rpmbuild'] = pipelineUtils.buildImage(openshiftProject, "rpmbuild")
+                }
+            }
+        }
+        stage("cloud-image-compose image build") {
+            when {
+                // Only build if we have related files in changeset
+                changeset "config/Dockerfiles/cloud-image-compose/**"
+                environment name: 'relevant', value: 'true'
+            }
+            steps {
+                script {
+                    tagMap['cloud-image-compose'] = pipelineUtils.buildImage(openshiftProject, "cloud-image-compose")
+                }
+            }
+        }
+        stage("singlehost-test image build") {
+            when {
+                // Only build if we have related files in changeset
+                changeset "config/Dockerfiles/singlehost-test/**"
+                environment name: 'relevant', value: 'true'
+            }
+            steps {
+                script {
+                    tagMap['singlehost-test'] = pipelineUtils.buildImage(openshiftProject, "singlehost-test")
+                }
+            }
+        }
+        stage("Image Tag Report") {
+            when {
+                environment name: 'relevant', value: 'true'
+            }
+            steps {
+                script {
+                    // Use tags derived from above image builds
+                    //
+                    pipelineUtils.printLabelMap(tagMap)
+                }
+            }
+        }
+        stage("Run Stage Jobs") {
+            when {
+                environment name: 'relevant', value: 'true'
+            }
+            failFast true
+            parallel {
+                //stage("f26 message watcher") {
+                //}
+                stage("placeholder") {
+                    steps {
+                        script {
+                            sh "echo todo"
+                        }
+                    }
+                }
+                //stage("f26 stage job") {
+                //}
+                stage("rawhide stage job") {
+                    steps {
+                        sleep 30
+                        build job: 'fedora-rawhide-stage-pr-pipeline',
+                                parameters: [
+                                        string(name: 'CI_MESSAGE',
+                                               value: CANNED_CI_MESSAGES['rawhide-pr']),
+                                        string(name: 'ghprbActualCommit',
+                                                      value: "master"),
+                                        string(name: 'ghprbGhRepository',
+                                                      value: "CentOS-PaaS-SIG/upstream-fedora-pipeline"),
+                                        string(name: 'ghprbPullAuthorLogin',
+                                                      value: "${env.ghprbPullAuthorLogin}"),
+                                        string(name: 'sha1',
+                                                      value: "${env.sha1}"),
+                                        string(name: 'ghprbPullId',
+                                                      value: "${env.ghprbPullId}"),
+                                        string(name: 'SLAVE_TAG',
+                                               value: tagMap['jenkins-continuous-infra-slave']),
+                                        string(name: 'RPMBUILD_TAG',
+                                               value: tagMap['rpmbuild']),
+                                        string(name: 'CLOUD_IMAGE_COMPOSE_TAG',
+                                               value: tagMap['cloud-image-compose']),
+                                        string(name: 'SINGLEHOST_TEST_TAG',
+                                               value: tagMap['singlehost-test'])
+                                ],
+                                wait: true
+                    }
+                }
+            }
+        }
+    }
+    post {
+        always {
+            script {
+                String prMsg = ""
+                if (env.ghprbActualCommit != null && env.ghprbActualCommit != "master") {
+                    prMsg = "(PR #${env.ghprbPullId} ${env.ghprbPullAuthorLogin})"
+                }
+                def message = "${JOB_NAME} ${prMsg} build #${BUILD_NUMBER}: ${currentBuild.currentResult}: ${BUILD_URL}"
+                pipelineUtils.sendIRCNotification("${IRC_NICK}-${UUID.randomUUID()}", IRC_CHANNEL, message)
+            }
+        }
+        success {
+            echo "yay!"
+        }
+        failure {
+            error "build failed!"
+        }
+    }
+}

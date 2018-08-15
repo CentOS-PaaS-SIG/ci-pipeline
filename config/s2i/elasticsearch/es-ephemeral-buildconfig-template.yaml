@@ -1,0 +1,195 @@
+apiVersion: v1
+kind: Template
+metadata:
+  creationTimestamp: null
+  name: elasticsearch
+  annotations:
+    openshift.io/display-name: elasticsearch
+    description: |-
+              contra elasticsearch template
+    iconClass: icon-jenkins
+    tags: instant-app,elasticsearch
+    template.openshift.io/long-description: Elasticsearch container
+    template.openshift.io/provider-display-name: Red Hat, Inc.
+    template.openshift.io/documentation-url: https://docs.openshift.org/latest
+    template.openshift.io/support-url: https://access.redhat.com
+parameters:
+- name: STORAGE_SIZE
+  value: 10Gi
+  description: The size of the persistent storage for Elasticsearch
+- name: REPO_URL
+  value: https://github.com/CentOS-PaaS-SIG/ci-pipeline.git
+  description: The dockerfile repo url
+- name: REPO_CONTEXTDIR
+  description: The sub-directory inside the repository.
+  value: config/Dockerfiles/elasticsearch
+- name: REPO_REF
+  description: The git ref or tag to use for customization.
+  value: master
+- name: ELASTICSEARCH_VERSION
+  value: 6.2.4
+  description: The es version
+objects:
+- apiVersion: v1
+  kind: ImageStream
+  metadata:
+    annotations:
+    labels:
+      component: elasticsearch
+    name: elasticsearch
+  spec: {}
+- apiVersion: v1
+  kind: BuildConfig
+  metadata:
+    name: elasticsearch
+    labels: 
+      component: elasticsearch
+  spec:
+    output:
+      to:
+        kind: ImageStreamTag
+        name: elasticsearch:latest
+    resources: {}
+    source:
+      contextDir: ${REPO_CONTEXTDIR}
+      git:
+        ref: ${REPO_REF}
+        uri: ${REPO_URL}
+      type: Git
+    strategy:
+      dockerStrategy:
+        env:
+          - name: ELASTICSEARCH_VERSION
+            value: ${ELASTICSEARCH_VERSION}
+      type: Docker
+    triggers:
+    - type: ConfigChange
+- apiVersion: v1
+  kind: Service
+  metadata:
+    name: elasticsearch-discovery
+    labels:
+      component: elasticsearch
+  spec:
+    selector:
+      component: elasticsearch
+    ports:
+    - name: transport
+      port: 9300
+      protocol: TCP
+      targetPort: 9300
+    clusterIP: None
+- apiVersion: v1
+  kind: Service
+  metadata:
+    name: elasticsearch-api
+    labels:
+      component: elasticsearch
+  spec:
+    selector:
+      component: elasticsearch
+    ports:
+    - name: api-http
+      port: 9200
+      protocol: TCP
+- kind: Route
+  apiVersion: v1
+  metadata:
+    labels:
+      route: elasticsearch
+      component: elasticsearch
+    name: elasticsearch-api
+    creationTimestamp:
+  spec:
+    port:
+      targetPort: api-http
+    to:
+      kind: Service
+      name: elasticsearch-api
+    tls:
+      termination: edge
+      insecureEdgeTerminationPolicy: Redirect
+- apiVersion: v1
+  kind: DeploymentConfig
+  metadata:
+    creationTimestamp: null
+    labels:
+      component: elasticsearch
+    name: elasticsearch
+  spec:
+    strategy:
+        type: Recreate
+    triggers:
+    - type: ImageChange
+      imageChangeParams:
+        automatic: true
+        containerNames:
+        - elasticsearch
+        from:
+          kind: ImageStreamTag
+          name: elasticsearch:latest
+          namespace: continuous-infra
+          lastTriggeredImage: ''
+    - type: ConfigChange
+    replicas: 3
+    selector:
+      component: elasticsearch
+    template:
+      metadata:
+        creationTimestamp: null
+        labels:
+          component: elasticsearch
+      spec:
+        initContainers:
+        - name: init-sysctl
+          image: busybox
+          imagePullPolicy: IfNotPresent
+          command: ["sysctl", "-w", "vm.max_map_count=262144"]
+          securityContext:
+            privileged: true
+        containers:
+        - env:
+          - name: NODE_NAME
+            valueFrom:
+              fieldRef:
+                fieldPath: metadata.name
+          - name: ELASTICSEARCH_VERSION
+            value: ${ELASTICSEARCH_VERSION}
+          - name: CLUSTER_NAME
+            value: "elasticsearch"
+          - name: NUMBER_OF_MASTERS
+            value: "2" 
+          - name: NODE_MASTER
+            value: "true"
+          - name: NODE_DATA
+            value: "true"
+          - name: HTTP_ENABLE
+            value: "true"
+          - name: ES_JAVA_OPTS
+            value: "-Xms1024m -Xmx1024m"
+          - name: DISCOVERY_SERVICE
+            value: "elasticsearch-discovery"
+          - name: NETWORK_HOST
+            value: "_site_"
+          - name: NODE_INGEST
+            value: "true"
+          - name: HTTP_CORS_ENABLE
+            value: "true"
+          - name: HTTP_CORS_ALLOW_ORIGIN
+            value: "*"
+          image: elasticsearch:latest
+          imagePullPolicy: Always
+          name: elasticsearch
+          ports:
+            - name: http
+              containerPort: 9200
+              protocol: TCP
+            - name: transport
+              containerPort: 9300
+              protocol: TCP
+        securityContext:
+          privileged: false
+        restartPolicy: Always
+  status: {}
+labels:
+  template: elasticsearch

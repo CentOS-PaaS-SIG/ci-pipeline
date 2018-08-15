@@ -303,9 +303,9 @@ class pipelineUtils implements Serializable {
 
     /**
      * Test if $tag tests exist for $mypackage on $mybranch in fedora dist-git
-     * For mybranch, use fXX or master
+     * For mybranch, use fXX or master or PR number (digits only)
      * @param mypackage
-     * @param mybranch
+     * @param mybranch - Fedora branch or PR number
      * @param tag
      * @return
      */
@@ -329,6 +329,27 @@ class pipelineUtils implements Serializable {
      */
     def skip(String stageName) {
         return pipelineUtils.skip(stageName)
+    }
+
+    /**
+     * Lock a directory on localhost
+     * @param fileLocation - The location to store the lock file
+     * @param duration - The number of seconds that if lock is this age, overwrite it
+     * @param myuuid - The pod uuid that is taking the lock
+     * @return myuuid - Generate uuid
+     */
+    def obtainLock(String fileLocation, int duration, String myuuid) {
+        return pipelineUtils.obtainLock(fileLocation, duration, myuuid)
+    }
+
+    /**
+     * Remove lock file on localhost
+     * @param fileLocation - The location to store the lock file
+     * @param myuuid - The uuid to check that the file contains
+     * @return
+     */
+    def releaseLock(String fileLocation, String myuuid) {
+        return pipelineUtils.releaseLock(fileLocation, myuuid)
     }
 
     /**
@@ -366,6 +387,28 @@ class pipelineUtils implements Serializable {
      */
     def flattenJSON(String prefix, String message) {
         pipelineUtils.flattenJSON(prefix, message)
+    }
+
+    /**
+     * Set branch and $prefix_branch based on the candidate branch
+     * This is meant to be run with a CI_MESSAGE from a build task
+     * You should call flattenJSON on the CI_MESSAGE before using
+     * this function
+     * @param tag - The tag from the request field e.g. f27-candidate
+     * @param prefix - The prefix to add to the keys e.g. fed
+     * @return
+     */
+    def setBuildBranch(String tag, String prefix) {
+        pipelineUtils.setBuildBranch(tag, prefix)
+    }
+
+    /**
+     * @param request - the url that refers to the package
+     * @param prefix - env prefix
+     * @return
+     */
+    def repoFromRequest(String request, String prefix) {
+        pipelineUtils.repoFromRequest(request, prefix)
     }
 
 }

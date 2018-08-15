@@ -69,14 +69,14 @@ rm -rf ${RPMDIR}
 mkdir -p ${RPMDIR}
 # Create repo
 pushd ${RPMDIR}
-koji download-task ${SCRATCHID} --logs
+koji download-build --arch=x86_64 --arch=src --arch=noarch --debuginfo --task-id ${SCRATCHID} || koji download-task --arch=x86_64 --arch=src --arch=noarch --logs ${SCRATCHID}
 createrepo .
 popd
 
 # Store modified nvr as well
 set +e
-RPM_TO_CHECK=$(find ${RPMDIR}/ -name "${fed_repo}-${VERSION}*" | grep -v src)
+RPM_TO_CHECK=$(find ${RPMDIR}/ -name "${fed_repo}-${VERSION}*" | head -n 1)
 RPM_NAME=$(basename $RPM_TO_CHECK)
-NVR=$(rpm --queryformat "%{NAME} %{VERSION} %{RELEASE}\n" -qp $RPM_TO_CHECK)
+NVR=$(rpm --queryformat "%{NAME}-%{VERSION}-%{RELEASE}\n" -qp $RPM_TO_CHECK)
 echo "nvr=${NVR}" >> ${LOGDIR}/job.props
 exit 0
