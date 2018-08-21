@@ -9,7 +9,11 @@ integration tests from the projectatomic repo by calling \
 the integration-test.sh script."
 
 # Install epel
-RUN yum -y install epel-release && yum clean all
+RUN yum -y install epel-release yum-utils && yum clean all
+
+# Disable ansible 2.6+ from epel, centos extras seems to be more conservative
+# Workaround for https://github.com/ansible/ansible/issues/43884
+RUN yum-config-manager --save --setopt=epel.exclude=ansible*;
 
 # Copy restraint repo into container
 RUN curl -o /etc/yum.repos.d/bpeck-restraint-el7.repo https://bpeck.fedorapeople.org/restraint/el7.repo
