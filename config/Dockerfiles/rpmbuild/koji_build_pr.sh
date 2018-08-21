@@ -28,9 +28,10 @@ rm -rf ${fed_repo}
 fedpkg clone -a ${fed_repo}
 if [ "$?" != 0 ]; then echo -e "ERROR: FEDPKG CLONE\nSTATUS: $?"; exit 1; fi
 pushd ${fed_repo}
-# Checkout the PR
-git fetch -fu origin refs/pull/${fed_id}/head:pr
-git checkout pr
+# Checkout the branch and apply the patch to HEAD of branch
+git checkout ${fed_branch}
+curl -L https://src.fedoraproject.org/rpms/${fed_repo}/pull-request/${fed_id}.patch > pr_${fed_id}.patch
+git apply pr_${fed_id}.patch
 # Get current NVR
 truenvr=$(rpm -q --define "dist .$DIST_BRANCH" --queryformat '%{name}-%{version}-%{release}\n' --specfile ${fed_repo}.spec | head -n 1)
 echo "original_spec_nvr=${truenvr}" >> ${LOGDIR}/job.props
