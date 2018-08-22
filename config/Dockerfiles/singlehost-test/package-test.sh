@@ -60,8 +60,9 @@ if [ -z ${build_pr_id} ]; then
     git checkout ${branch}
     git checkout ${rev}
 else
-    git fetch -fu origin refs/pull/${build_pr_id}/head:pr
-    git checkout pr
+    git checkout ${branch}
+    curl -L https://src.fedoraproject.org/rpms/${package}/pull-request/${build_pr_id}.patch > pr_${build_pr_id}.patch
+    git apply pr_${build_pr_id}.patch
 fi
 
 # Check if there is a tests dir from dist-git, if not, exit
