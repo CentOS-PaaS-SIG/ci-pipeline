@@ -61,7 +61,7 @@ if [ -z ${build_pr_id} ]; then
     git checkout ${rev}
 else
     git checkout ${branch}
-    curl -L ${TEST_LOCATION}/pull-request/${build_pr_id}.patch > pr_${build_pr_id}.patch
+    curl --insecure -L ${TEST_LOCATION}/pull-request/${build_pr_id}.patch > pr_${build_pr_id}.patch
     git apply pr_${build_pr_id}.patch
 fi
 
