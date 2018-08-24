@@ -21,7 +21,15 @@ rm -rf ${TEST_ARTIFACTS}
 mkdir -p ${TEST_ARTIFACTS}
 
 # It was requested that these tests be run with latest rpm of standard-test-roles
-yum update -y standard-test-roles
+# Try to update for few times, if for some reason could not update,
+# continue test with installed STR version
+str_attempts=1
+while [ $str_attempts -le 5 ]; do
+    if yum update -y standard-test-roles; then
+        break
+    fi
+  ((str_attempts++))
+done
 rpm -q standard-test-roles
 
 # Invoke tests according to section 1.7.2 here:
