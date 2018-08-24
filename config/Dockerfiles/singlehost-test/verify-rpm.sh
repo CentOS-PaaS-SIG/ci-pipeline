@@ -14,7 +14,15 @@ fi
 export TEST_ARTIFACTS=$(pwd)/logs
 mkdir -p ${TEST_ARTIFACTS}
 
-yum update -y standard-test-roles
+# Try to update for few times, if for some reason could not update,
+# continue test with installed STR version
+str_attempts=1
+while [ $str_attempts -le 5 ]; do
+    if yum update -y standard-test-roles; then
+        break
+    fi
+  ((str_attempts++))
+done
 rpm -q standard-test-roles
 
 set +u
