@@ -261,6 +261,13 @@ class pipelineUtils implements Serializable {
         pipelineUtils.setCustomBuildNameAndDescription(buildName, buildDesc)
     }
 
+    /**
+     * Clears previous pod template's name to avoid implied nesting
+     */
+    def clearTemplateNames() {
+        pipelineUtils.clearTemplateNames()
+    }
+
 /**
  * Check data grepper for presence of a message
  * @param messageID message ID to track.
