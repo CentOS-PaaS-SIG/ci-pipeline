@@ -4,6 +4,7 @@ package org.centos.pipeline
 import org.centos.*
 
 import org.jenkinsci.plugins.pipeline.modeldefinition.Utils
+import org.csanchez.jenkins.plugins.kubernetes.pipeline.PodTemplateAction
 
 /**
  * Library to setup and configure the host the way ci-pipeline requires
@@ -1058,6 +1059,13 @@ def setCustomBuildNameAndDescription(String buildName, String buildDesc) {
     if (buildDesc?.trim()) {
         currentBuild.description = buildDesc
     }
+}
+
+/**
+ * Clears previous pod template's name to avoid implied nesting
+ */
+def clearTemplateNames() {
+  currentBuild.rawBuild.getAction( PodTemplateAction.class )?.stack?.clear()
 }
 
 /**
