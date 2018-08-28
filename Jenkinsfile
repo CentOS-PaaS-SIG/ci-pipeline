@@ -189,6 +189,13 @@ podTemplate(name: podName,
                         image: DOCKER_REPO_URL + '/' + OPENSHIFT_NAMESPACE + '/singlehost-test:' + SINGLEHOST_TEST_TAG,
                         ttyEnabled: true,
                         command: 'cat',
+                        // Request - minimum required, Limit - maximum possible (hard quota)
+                        // https://kubernetes.io/docs/concepts/configuration/manage-compute-resources-container/#meaning-of-cpu
+                        // https://blog.openshift.com/managing-compute-resources-openshiftkubernetes/
+                        resourceRequestCpu: '500m',
+                        resourceLimitCpu: '1',
+                        resourceRequestMemory: '2Gi',
+                        resourceLimitMemory: '4Gi',
                         privileged: true,
                         workingDir: '/workDir'),
                 // This adds the ostree boot image container to the pod.
