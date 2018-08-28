@@ -812,7 +812,7 @@ def getContainerLogsFromPod(String openshiftProject, String nodeName) {
     sh 'mkdir -p podInfo'
     openshift.withCluster() {
         openshift.withProject(openshiftProject) {
-            names       = openshift.raw("get", "pod",  "${env.NODE_NAME}", '-o=jsonpath="{.status.containerStatuses[*].name}"')
+            names       = openshift.raw("get", "pod",  "${nodeName}", '-o=jsonpath="{.status.containerStatuses[*].name}"')
             String containerNames = names.out.trim()
 
             containerNames.split().each {
