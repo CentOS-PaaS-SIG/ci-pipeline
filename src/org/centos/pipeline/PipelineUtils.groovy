@@ -718,19 +718,30 @@ def provisionResources(String stage){
 }
 
 /**
- * Library to execute script in container
+ * Function to execute script in container
  * Container must have been defined in a podTemplate
  *
+ * @param stageName Name of the stage
  * @param containerName Name of the container for script execution
  * @param script Complete path to the script to execute
+ * @param vars Optional list of key=values to add to env
  * @return
  */
-def executeInContainer(String stageName, String containerName, String script) {
+def executeInContainer(String stageName,
+                       String containerName,
+                       String script,
+                       ArrayList<String> vars=null) {
     //
     // Kubernetes plugin does not let containers inherit
     // env vars from host. We force them in.
     //
-    containerEnv = env.getEnvironment().collect { key, value -> return key+'='+value }
+    def containerEnv = env.getEnvironment().collect { key, value -> return "${key}=${value}" }
+    if (vars){
+        vars.each {x->
+            containerEnv.add(x)
+        }
+    }
+
     sh "mkdir -p ${stageName}"
     try {
         withEnv(containerEnv) {

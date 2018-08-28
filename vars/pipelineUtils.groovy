@@ -165,8 +165,19 @@ class pipelineUtils implements Serializable {
         pipelineUtils.prepareCredentials()
     }
 
-    def executeInContainer(stageName, containerName, script) {
-        pipelineUtils.executeInContainer(stageName, containerName, script)
+    /*
+     * Wrapper method to execute a specified script in a specified container
+     * @param stageName
+     * @param containerName
+     * @param script
+     * @param vars (optional)
+     * @return
+     */
+    def executeInContainer(String stageName,
+                           String containerName,
+                           String  script,
+                           ArrayList<String> vars=null) {
+        pipelineUtils.executeInContainer(stageName, containerName, script, vars)
     }
 
     /**
