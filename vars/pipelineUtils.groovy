@@ -157,6 +157,14 @@ class pipelineUtils implements Serializable {
         pipelineUtils.getContainerLogsFromPod(openshiftProject, nodeName)
     }
 
+    def ocGetContainerLogsFromPod(String nodeName) {
+        pipelineUtils.ocGetContainerLogsFromPod(nodeName)
+    }
+
+    def ocVerifyPod(nodeName) {
+        pipelineUtils.ocVerifyPod(nodeName)
+    }
+
     def verifyPod(openshiftProject, nodeName) {
         pipelineUtils.verifyPod(openshiftProject, nodeName)
     }
