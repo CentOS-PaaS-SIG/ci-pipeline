@@ -33,7 +33,15 @@ trap archive_variables EXIT SIGHUP SIGINT SIGTERM
 mkdir somewhere
 pushd somewhere
 # Download koji build so we can archive it
-koji download-build --arch=x86_64 --arch=src --arch=noarch --debuginfo --task-id ${PROVIDED_KOJI_TASKID} || koji download-task --arch=x86_64 --arch=src --arch=noarch --logs ${PROVIDED_KOJI_TASKID}
+for i in {1..5}; do
+    koji download-build --arch=x86_64 --arch=src --arch=noarch --debuginfo --task-id ${PROVIDED_KOJI_TASKID} || koji download-task --arch=x86_64 --arch=src --arch=noarch --logs ${PROVIDED_KOJI_TASKID} && break
+    echo "koji build download failed, attempt: $i/5"
+    if [[ $i -lt 5 ]]; then
+        sleep 10
+    else
+        exit 1
+    fi
+done
 createrepo .
 PACKAGE=$(rpm --queryformat "%{NAME}\n" -qp *.src.rpm)
 NVR=$(rpm --queryformat "%{NAME}-%{VERSION}-%{RELEASE}\n" -qp *.src.rpm)

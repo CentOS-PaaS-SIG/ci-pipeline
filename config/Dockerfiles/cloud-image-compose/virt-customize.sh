@@ -27,14 +27,16 @@ if [ $branch != "rawhide" ]; then
 fi
 
 if [ "${branch}" == "rawhide" ]; then
-    curl -L -k -O "https://jenkins-continuous-infra.apps.ci.centos.org/job/fedora-rawhide-image-test/lastSuccessfulBuild/artifact/Fedora-Rawhide.qcow2"
+    curl --connect-timeout 5 --retry 5 --retry-delay 0 --retry-max-time 60 \
+         -L -k -O "https://jenkins-continuous-infra.apps.ci.centos.org/job/fedora-rawhide-image-test/lastSuccessfulBuild/artifact/Fedora-Rawhide.qcow2"
     DOWNLOADED_IMAGE_LOCATION="$(pwd)/Fedora-Rawhide.qcow2"
 elif [ "${branch}" -ge 28 ]; then
-    curl -L -k -O "https://jenkins-continuous-infra.apps.ci.centos.org/job/fedora-f${branch}-image-test/lastSuccessfulBuild/artifact/Fedora-${branch}.qcow2"
+    curl --connect-timeout 5 --retry 5 --retry-delay 0 --retry-max-time 60 \
+         -L -k -O "https://jenkins-continuous-infra.apps.ci.centos.org/job/fedora-f${branch}-image-test/lastSuccessfulBuild/artifact/Fedora-${branch}.qcow2"
     DOWNLOADED_IMAGE_LOCATION="$(pwd)/Fedora-${branch}.qcow2"
 else
     INSTALL_URL="https://dl.fedoraproject.org/pub/fedora/linux/releases/${branch}/CloudImages/x86_64/images/"
-    wget --quiet -r --no-parent -A 'Fedora-Cloud-Base*.qcow2' ${INSTALL_URL}
+    wget --retry-connrefused --waitretry=1 --read-timeout=20 --timeout=15 --tries 5 --quiet -r --no-parent -A 'Fedora-Cloud-Base*.qcow2' ${INSTALL_URL}
     DOWNLOADED_IMAGE_LOCATION=$(pwd)/$(find dl.fedoraproject.org -name "*.qcow2" | head -1)
 fi
 
