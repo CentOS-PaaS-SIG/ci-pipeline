@@ -4,6 +4,8 @@
 # default location for minishift
 minishift_dest_dir: "{{ ansible_env.HOME }}/minishift"
 
+minishift_version: v1.23.0
+
 # default minishift profile name
 profile: minishift
 
