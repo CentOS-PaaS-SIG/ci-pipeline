@@ -13,7 +13,7 @@
   with_items: "{{(release.stdout | from_json).assets}}"
   when: (item.name | regex_search('linux-amd64.tgz$')) and (minishift_bin.stat.exists == false or force_minishift_install|bool == true)
 
-- name: Set minishift version
+- name: Set minishift asset version
   set_fact:
     download_version: "{{ minishift_version | regex_replace('^v(.+)', '\\1') }}"
 
