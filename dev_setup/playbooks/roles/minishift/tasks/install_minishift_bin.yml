@@ -2,7 +2,10 @@
 # Install minishift
 
 - name: Query for minishift compressed binary
-  shell: curl "https://api.github.com/repos/minishift/minishift/releases/tags/{{minishift_version}}"
+  uri:
+    url: "https://api.github.com/repos/minishift/minishift/releases/tags/{{minishift_version}}"
+    return_content: yes
+    body_format: json
   register: release
 
 - name: "Pull down and extract minishift binary to {{ ansible_env.HOME }}"
@@ -10,7 +13,7 @@
     src: "{{ item.browser_download_url }}"
     dest: "{{ ansible_env.HOME }}"
     remote_src: yes
-  with_items: "{{(release.stdout | from_json).assets}}"
+  with_items: "{{release.json.assets}}"
   when: (item.name | regex_search('linux-amd64.tgz$')) and (minishift_bin.stat.exists == false or force_minishift_install|bool == true)
 
 - name: Set minishift asset version
