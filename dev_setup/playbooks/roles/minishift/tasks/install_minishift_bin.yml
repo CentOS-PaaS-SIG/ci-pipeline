@@ -8,21 +8,23 @@
     body_format: json
   register: release
 
+- name: filter for the particular release
+  set_fact:
+      linux_release: "{{ release.json.assets | selectattr('name', 'search', 'linux-amd64.tgz$') | map(attribute='browser_download_url') | list }}" 
+
 - name: "Pull down and extract minishift binary to {{ ansible_env.HOME }}"
   unarchive:
-    src: "{{ item.browser_download_url }}"
+    src: "{{ item }}"
     dest: "{{ ansible_env.HOME }}"
     remote_src: yes
-  with_items: "{{release.json.assets}}"
-  when: (item.name | regex_search('linux-amd64.tgz$')) and (minishift_bin.stat.exists == false or force_minishift_install|bool == true)
-
-- name: Set minishift asset version
-  set_fact:
-    download_version: "{{ minishift_version | regex_replace('^v(.+)', '\\1') }}"
+    list_files: yes
+  with_items: "{{linux_release}}"
+  when: minishift_bin.stat.exists == false or force_minishift_install|bool == true
+  register: archive_contents
 
 - name: minishift source dir
   set_fact:
-      minishift_src_dir: "minishift-{{download_version}}-linux-amd64"
+      minishift_src_dir: "{{ archive_contents.results[0].files[0] }}"
 
 - name: "Create a new {{ minishift_dest_dir }} if it doesn't exist"
   file:
