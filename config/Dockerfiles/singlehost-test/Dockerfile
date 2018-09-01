@@ -9,7 +9,11 @@ integration tests from the projectatomic repo by calling \
 the integration-test.sh script."
 
 # Install epel
-RUN yum -y install epel-release && yum clean all
+RUN yum -y install epel-release yum-utils && yum clean all
+
+# Disable ansible 2.6+ from epel, centos extras seems to be more conservative
+# Workaround for https://github.com/ansible/ansible/issues/43884
+RUN yum-config-manager --save --setopt=epel.exclude=ansible*;
 
 # Copy restraint repo into container
 RUN curl -o /etc/yum.repos.d/bpeck-restraint-el7.repo https://bpeck.fedorapeople.org/restraint/el7.repo
@@ -24,6 +28,7 @@ RUN yum -y install ansible \
         git \
         libselinux-python \
         python-dnf \
+        python-pip \
         qemu-kvm \
         restraint-rhts \
         rsync \
@@ -32,9 +37,13 @@ RUN yum -y install ansible \
         wget \
         && yum clean all
 
-#Run dnf -y install standard-test-roles \
-#        --enablerepo=updates-testing \
-#        && dnf clean all
+# WORKAROUND: use str from updatest-testing repo in case you cannot wait for a stable build
+# RUN yum -y update standard-test-roles --enablerepo=updates-testing && \
+#     yum clean all
+
+# WORKAROUND: use str from pip
+# Official STR does is not ansible 2.4 compatible, ansible 2.5 has no repo
+RUN pip install ansible==2.5.8
 
 # Copy the build scripts to the container
 COPY package-test.sh integration-test.sh upstreamfirst-test.sh verify-rpm.sh rpm-verify.yml /tmp/

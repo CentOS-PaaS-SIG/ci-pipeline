@@ -4,6 +4,7 @@ package org.centos.pipeline
 import org.centos.*
 
 import org.jenkinsci.plugins.pipeline.modeldefinition.Utils
+import org.csanchez.jenkins.plugins.kubernetes.pipeline.PodTemplateAction
 
 /**
  * Library to setup and configure the host the way ci-pipeline requires
@@ -717,19 +718,30 @@ def provisionResources(String stage){
 }
 
 /**
- * Library to execute script in container
+ * Function to execute script in container
  * Container must have been defined in a podTemplate
  *
+ * @param stageName Name of the stage
  * @param containerName Name of the container for script execution
  * @param script Complete path to the script to execute
+ * @param vars Optional list of key=values to add to env
  * @return
  */
-def executeInContainer(String stageName, String containerName, String script) {
+def executeInContainer(String stageName,
+                       String containerName,
+                       String script,
+                       ArrayList<String> vars=null) {
     //
     // Kubernetes plugin does not let containers inherit
     // env vars from host. We force them in.
     //
-    containerEnv = env.getEnvironment().collect { key, value -> return key+'='+value }
+    def containerEnv = env.getEnvironment().collect { key, value -> return "${key}=${value}" }
+    if (vars){
+        vars.each {x->
+            containerEnv.add(x)
+        }
+    }
+
     sh "mkdir -p ${stageName}"
     try {
         withEnv(containerEnv) {
@@ -746,6 +758,46 @@ def executeInContainer(String stageName, String containerName, String script) {
 
 /**
  *
+ * @param nodeName podName we are going to verify.
+ * @return
+ */
+def ocVerifyPod(String nodeName) {
+    def describeStr = openshift.selector("pods", nodeName).describe()
+    out = describeStr.out.trim()
+
+    sh 'mkdir -p podInfo'
+
+    writeFile file: 'podInfo/node-pod-description-' + nodeName + '.txt',
+                text: out
+    archiveArtifacts 'podInfo/node-pod-description-' + nodeName + '.txt'
+
+    timeout(60) {
+        echo "Ensuring all containers are running in pod: ${env.NODE_NAME}"
+        echo "Container names in pod ${env.NODE_NAME}: "
+        names       = openshift.raw("get", "pod",  "${env.NODE_NAME}", '-o=jsonpath="{.status.containerStatuses[*].name}"')
+        containerNames = names.out.trim()
+        echo containerNames
+
+        waitUntil {
+            def readyStates = openshift.raw("get", "pod",  "${env.NODE_NAME}", '-o=jsonpath="{.status.containerStatuses[*].ready}"')
+
+            echo "Container statuses: "
+            echo containerNames
+            echo readyStates.out.trim().toUpperCase()
+            def anyNotReady = readyStates.out.trim().contains("false")
+            if (anyNotReady) {
+                echo "One or more containers not ready...see above message ^^"
+                return false
+            } else {
+                echo "All containers ready!"
+                return true
+            }
+        }
+    }
+}
+
+/**
+ *
  * @param openshiftProject name of openshift namespace/project.
  * @param nodeName podName we are going to verify.
  * @return
@@ -753,40 +805,28 @@ def executeInContainer(String stageName, String containerName, String script) {
 def verifyPod(String openshiftProject, String nodeName) {
     openshift.withCluster() {
         openshift.withProject(openshiftProject) {
-            def describeStr = openshift.selector("pods", nodeName).describe()
-            out = describeStr.out.trim()
-
-            sh 'mkdir -p podInfo'
-
-            writeFile file: 'podInfo/node-pod-description-' + nodeName + '.txt',
-                        text: out
-            archiveArtifacts 'podInfo/node-pod-description-' + nodeName + '.txt'
-
-            timeout(60) {
-                echo "Ensuring all containers are running in pod: ${env.NODE_NAME}"
-                echo "Container names in pod ${env.NODE_NAME}: "
-                names       = openshift.raw("get", "pod",  "${env.NODE_NAME}", '-o=jsonpath="{.status.containerStatuses[*].name}"')
-                containerNames = names.out.trim()
-                echo containerNames
-
-                waitUntil {
-                    def readyStates = openshift.raw("get", "pod",  "${env.NODE_NAME}", '-o=jsonpath="{.status.containerStatuses[*].ready}"')
-
-                    echo "Container statuses: "
-                    echo containerNames
-                    echo readyStates.out.trim().toUpperCase()
-                    def anyNotReady = readyStates.out.trim().contains("false")
-                    if (anyNotReady) {
-                        echo "One or more containers not ready...see above message ^^"
-                        return false
-                    } else {
-                        echo "All containers ready!"
-                        return true
-                    }
-                }
-            }
+            return ocVerifyPod(nodeName)
         }
     }
+}
+
+/**
+ *
+ * @param nodeName podName we are going to get container logs from.
+ * @return
+ */
+@NonCPS
+def ocGetContainerLogsFromPod(String nodeName) {
+    sh 'mkdir -p podInfo'
+    names       = openshift.raw("get", "pod",  "${env.NODE_NAME}", '-o=jsonpath="{.status.containerStatuses[*].name}"')
+    String containerNames = names.out.trim()
+
+    containerNames.split().each {
+        String log = containerLog name: it, returnLog: true
+        writeFile file: "podInfo/containerLog-${it}-${nodeName}.txt",
+                    text: log
+    }
+    archiveArtifacts "podInfo/containerLog-*.txt"
 }
 
 /**
@@ -797,18 +837,9 @@ def verifyPod(String openshiftProject, String nodeName) {
  */
 @NonCPS
 def getContainerLogsFromPod(String openshiftProject, String nodeName) {
-    sh 'mkdir -p podInfo'
     openshift.withCluster() {
         openshift.withProject(openshiftProject) {
-            names       = openshift.raw("get", "pod",  "${env.NODE_NAME}", '-o=jsonpath="{.status.containerStatuses[*].name}"')
-            String containerNames = names.out.trim()
-
-            containerNames.split().each {
-                String log = containerLog name: it, returnLog: true
-                writeFile file: "podInfo/containerLog-${it}-${nodeName}.txt",
-                            text: log
-            }
-            archiveArtifacts "podInfo/containerLog-*.txt"
+            ocGetContainerLogsFromPod(nodeName)
         }
     }
 }
@@ -1058,6 +1089,13 @@ def setCustomBuildNameAndDescription(String buildName, String buildDesc) {
     if (buildDesc?.trim()) {
         currentBuild.description = buildDesc
     }
+}
+
+/**
+ * Clears previous pod template's name to avoid implied nesting
+ */
+def clearTemplateNames() {
+  currentBuild.rawBuild.getAction( PodTemplateAction.class )?.stack?.clear()
 }
 
 /**

@@ -21,7 +21,15 @@ rm -rf ${TEST_ARTIFACTS}
 mkdir -p ${TEST_ARTIFACTS}
 
 # It was requested that these tests be run with latest rpm of standard-test-roles
-yum update -y standard-test-roles
+# Try to update for few times, if for some reason could not update,
+# continue test with installed STR version
+str_attempts=1
+while [ $str_attempts -le 5 ]; do
+    if yum update -y standard-test-roles; then
+        break
+    fi
+  ((str_attempts++))
+done
 rpm -q standard-test-roles
 
 # Invoke tests according to section 1.7.2 here:
@@ -60,8 +68,9 @@ if [ -z ${build_pr_id} ]; then
     git checkout ${branch}
     git checkout ${rev}
 else
-    git fetch -fu origin refs/pull/${build_pr_id}/head:pr
-    git checkout pr
+    git checkout ${branch}
+    curl --insecure -L ${TEST_LOCATION}/pull-request/${build_pr_id}.patch > pr_${build_pr_id}.patch
+    git apply pr_${build_pr_id}.patch
 fi
 
 # Check if there is a tests dir from dist-git, if not, exit
@@ -76,7 +85,7 @@ fi
 function clean_up {
     rm -rf tests/package
     mkdir -p tests/package
-    cp ${TEST_ARTIFACTS}/* tests/package/
+    cp -rp ${TEST_ARTIFACTS}/* tests/package/
     cat ${TEST_ARTIFACTS}/test.log
     set +u
     if [[ ! -z "${RSYNC_USER}" && ! -z "${RSYNC_SERVER}" && ! -z "${RSYNC_DIR}" && ! -z "${RSYNC_PASSWORD}"  && ! -z "${RSYNC_BRANCH}" ]]; then

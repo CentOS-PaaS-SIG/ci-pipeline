@@ -157,6 +157,14 @@ class pipelineUtils implements Serializable {
         pipelineUtils.getContainerLogsFromPod(openshiftProject, nodeName)
     }
 
+    def ocGetContainerLogsFromPod(String nodeName) {
+        pipelineUtils.ocGetContainerLogsFromPod(nodeName)
+    }
+
+    def ocVerifyPod(nodeName) {
+        pipelineUtils.ocVerifyPod(nodeName)
+    }
+
     def verifyPod(openshiftProject, nodeName) {
         pipelineUtils.verifyPod(openshiftProject, nodeName)
     }
@@ -165,8 +173,19 @@ class pipelineUtils implements Serializable {
         pipelineUtils.prepareCredentials()
     }
 
-    def executeInContainer(stageName, containerName, script) {
-        pipelineUtils.executeInContainer(stageName, containerName, script)
+    /*
+     * Wrapper method to execute a specified script in a specified container
+     * @param stageName
+     * @param containerName
+     * @param script
+     * @param vars (optional)
+     * @return
+     */
+    def executeInContainer(String stageName,
+                           String containerName,
+                           String  script,
+                           ArrayList<String> vars=null) {
+        pipelineUtils.executeInContainer(stageName, containerName, script, vars)
     }
 
     /**
@@ -259,6 +278,13 @@ class pipelineUtils implements Serializable {
      */
     def setCustomBuildNameAndDescription(String buildName, String buildDesc) {
         pipelineUtils.setCustomBuildNameAndDescription(buildName, buildDesc)
+    }
+
+    /**
+     * Clears previous pod template's name to avoid implied nesting
+     */
+    def clearTemplateNames() {
+        pipelineUtils.clearTemplateNames()
     }
 
 /**
