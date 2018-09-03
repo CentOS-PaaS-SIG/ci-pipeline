@@ -1269,7 +1269,7 @@ def obtainLock(String fileLocation, int duration, String myuuid) {
                 fi
                 storeduuid=\$(cat "${fileLocation}")
                 # Break if stored uuid pod is no longer running
-                if [ \$(oc get pods | grep \${storeduuid} | grep Running | sed 's/ //g') == "" ]; then
+                if [ "\$(oc get pods | grep \${storeduuid} | grep Running | sed 's/ //g')" == "" ]; then
                     break
                 fi
                 sleep 30
