@@ -1,32 +1,24 @@
 ---
 - hosts: localhost
   tasks:
-    - name: Ensure python2-dnf is present on SUT when necessary
-      shell: "yum -y install python2-dnf"
-      when: (ansible_pkg_mgr == "dnf" and ansible_distribution == "Fedora")
-    - name: Ensure python3-dnf is present on SUT when necessary
-      shell: "dnf -y install python3-dnf"
-      when: (ansible_pkg_mgr == "dnf" and ansible_python_interpreter == "/usr/bin/python3")
-    - name: Get list of rpms
-      find:
-        paths: "{{ rpm_repo }}"
-        patterns: '*.rpm'
-      register: rpmlist
-    - name: Check which rpms are installed
-      package:
-        name: "{{ item.path }}"
-        state: present
-      register: rpmoutput
-      check_mode: yes
-      ignore_errors: yes
-      with_items:
-        - "{{ rpmlist.files }}"
-    - name: See if at least one rpm is installed
-      set_fact:
-        myresult: pass
-      when: item.changed == false and item.failed == false
-      with_items:
-        - "{{ rpmoutput.results }}"
-    - name: Fail if none were installed
-      fail:
-      when: myresult is not defined
+    - name: Save list of installed rpms
+      shell: "rpm -qa | sort > installed_rpms.txt"
+      args:
+        warn: false
+    - name: Fetch installed rpms file to {{ artifacts }}
+      fetch:
+        src: installed_rpms.txt
+        dest: "{{ artifacts }}/installed_rpms.txt"
+        flat: yes
+    - name: Check if rpm from repo is installed
+      shell: |
+        # Get list of packages from rpm repo
+        rpmlist_repo=$(ls {{ rpm_repo }} | grep -e "\.rpm$" | sed 's/\.rpm$//')
+        # if at least one package from repo is installed NVR check passes
+        for rpm in ${rpmlist_repo}; do
+            if grep $rpm installed_rpms.txt; then
+                exit 0
+            fi
+        done
+        echo "FAIL: didn't find correct package installed."
+        exit 1
