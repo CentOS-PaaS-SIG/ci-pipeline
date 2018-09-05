@@ -453,6 +453,12 @@ def injectPRVars(String prefix, String message) {
         if (ci_data['pullrequest']['comments']) {
             env."${prefix}_lastcid" = ci_data['pullrequest']['comments'].last()['id']
         }
+        if (ci_data['pullrequest']['uid']) {
+            env."${prefix}_pr_uid" = ci_data['pullrequest']['uid']
+        }
+        if (ci_data['pullrequest']['commit_stop']) {
+            env."${prefix}_last_commit_hash" = ci_data['pullrequest']['commit_stop']
+        }
     }
 }
 
