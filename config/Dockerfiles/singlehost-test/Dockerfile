@@ -1,4 +1,4 @@
-FROM centos:7
+FROM fedora:latest
 LABEL maintainer "https://github.com/CentOS-PaaS-SIG/ci-pipeline"
 LABEL description="This container is meant to \
 use dist-git tests to test packages, \
@@ -8,18 +8,11 @@ upstreamfirst.fedorainfracloud.org. It also can run \
 integration tests from the projectatomic repo by calling \
 the integration-test.sh script."
 
-# Install epel
-RUN yum -y install epel-release yum-utils && yum clean all
-
-# Disable ansible 2.6+ from epel, centos extras seems to be more conservative
-# Workaround for https://github.com/ansible/ansible/issues/43884
-RUN yum-config-manager --save --setopt=epel.exclude=ansible*;
-
 # Copy restraint repo into container
-RUN curl -o /etc/yum.repos.d/bpeck-restraint-el7.repo https://bpeck.fedorapeople.org/restraint/el7.repo
+RUN curl -o /etc/yum.repos.d/bpeck-restraint-fedora.repo https://bpeck.fedorapeople.org/restraint/fedora.repo
 
 # Install all package requirements
-RUN yum -y install ansible \
+RUN dnf -y install ansible \
         beakerlib \
         curl \
         dnf-plugins-core \
@@ -35,11 +28,11 @@ RUN yum -y install ansible \
         standard-test-roles \
         sudo \
         wget \
-        && yum clean all
+        && dnf clean all
 
 # WORKAROUND: use str from updatest-testing repo in case you cannot wait for a stable build
-# RUN yum -y update standard-test-roles --enablerepo=updates-testing && \
-#     yum clean all
+# RUN dnf -y update standard-test-roles --enablerepo=updates-testing && \
+#     dnf clean all
 
 # WORKAROUND: use str from pip
 # Official STR does is not ansible 2.4 compatible, ansible 2.5 has no repo
