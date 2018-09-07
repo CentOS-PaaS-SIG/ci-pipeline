@@ -31,6 +31,8 @@ parameters:
   description: The grafana rpm
 - name: NAMESPACE
   value: contra-sample-project
+- name: GF_AUTH_ANONYMOUS_ENABLED
+  value: "true"
 objects:
 - apiVersion: v1
   kind: ImageStream
@@ -148,7 +150,7 @@ objects:
           - name: GF_USERS_ALLOW_SIGN_UP
             value: "true"
           - name: GF_AUTH_ANONYMOUS_ENABLED
-            value: "true"
+            value: ${GF_AUTH_ANONYMOUS_ENABLED}
           - name: GF_AUTH_ANONYMOUS_ORG_NAME
             value: "Main Org."
           - name: GF_AUTH_ANONYMOUS_ORG_ROLE
