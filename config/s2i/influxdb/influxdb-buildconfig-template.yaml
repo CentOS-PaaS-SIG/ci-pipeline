@@ -27,7 +27,7 @@ parameters:
   description: The git ref or tag to use for customization.
   value: master
 - name: INFLUXDB_BINARY
-  value: influxdb-1.5.0.x86_64.rpm
+  value: influxdb-1.6.2.x86_64.rpm
   description: The influx rpm
 - name: INFLUXDB_ADMIN_USER
   value: contra
