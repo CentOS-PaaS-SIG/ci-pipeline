@@ -38,6 +38,9 @@ parameters:
 - name: INFLUXDB_DB
   value: db0
   description: The initial db that will be created
+- name: NAMESPACE
+  value: contra-sample-project
+  description: The imageStream namespace
 objects:
 - apiVersion: v1
   kind: ImageStream
@@ -142,7 +145,7 @@ objects:
         from:
           kind: ImageStreamTag
           name: influxdb:latest
-          namespace: continuous-infra
+          namespace: ${NAMESPACE}
           lastTriggeredImage: ''
     - type: ConfigChange
     replicas: 1

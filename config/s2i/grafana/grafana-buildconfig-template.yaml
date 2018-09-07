@@ -25,10 +25,12 @@ parameters:
   value: config/Dockerfiles/grafana
 - name: REPO_REF
   description: The git ref or tag to use for customization.
-  value: containers
+  value: master
 - name: GRAFANA_INSTALL
   value: grafana-5.2.3-1.x86_64.rpm
   description: The grafana rpm
+- name: NAMESPACE
+  value: contra-sample-project
 objects:
 - apiVersion: v1
   kind: ImageStream
@@ -119,7 +121,7 @@ objects:
         from:
           kind: ImageStreamTag
           name: grafana:latest
-          namespace: continuous-infra
+          namespace: ${NAMESPACE}
           lastTriggeredImage: ''
     - type: ConfigChange
     replicas: 1
@@ -144,9 +146,9 @@ objects:
           - name: GF_PATHS_PLUGINS
             value: /var/lib/grafana/plugins
           - name: GF_USERS_ALLOW_SIGN_UP
-            value: true
+            value: "true"
           - name: GF_AUTH_ANONYMOUS_ENABLED
-            value: true
+            value: "true"
           - name: GF_AUTH_ANONYMOUS_ORG_NAME
             value: "Main Org."
           - name: GF_AUTH_ANONYMOUS_ORG_ROLE
