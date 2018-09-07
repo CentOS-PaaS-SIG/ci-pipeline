@@ -29,6 +29,15 @@ parameters:
 - name: INFLUXDB_BINARY
   value: influxdb-1.5.0.x86_64.rpm
   description: The influx rpm
+- name: INFLUXDB_ADMIN_USER
+  value: contra
+  description: The influxdb admin user
+- name: INFLUXDB_ADMIN_PASSWORD
+  value: ""
+  description: The admin password. Leave empty for a random password
+- name: INFLUXDB_DB
+  value: db0
+  description: The initial db that will be created
 objects:
 - apiVersion: v1
   kind: ImageStream
@@ -155,6 +164,12 @@ objects:
             value: udp
           - name: INFLUXDB_HTTP_AUTH_ENABLED
             value: "true"
+          - name: INFLUXDB_ADMIN_USER
+            value: ${INFLUXDB_ADMIN_USER}
+          - name: INFLUXDB_ADMIN_PASSWORD
+            value: ${INFLUXDB_ADMIN_PASSWORD}
+          - name: INFLUXDB_DB
+            value: ${INFLUXDB_DB}
           image: influxdb:stable
           imagePullPolicy: Always
           name: influxdb
