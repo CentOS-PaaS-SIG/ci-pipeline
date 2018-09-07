@@ -1,7 +1,7 @@
 FROM centos:7
 
-ENV INFLUXDB_BINARY=influxdb-1.5.0.x86_64.rpm
-ENV HOME=/var/lib/influxdb
+ENV INFLUXDB_BINARY influxdb-1.5.0.x86_64.rpm
+ENV HOME /var/lib/influxdb
 
 RUN curl https://dl.influxdata.com/influxdb/releases/${INFLUXDB_BINARY} > /${INFLUXDB_BINARY} && \
     yum -y localinstall /${INFLUXDB_BINARY} && \
