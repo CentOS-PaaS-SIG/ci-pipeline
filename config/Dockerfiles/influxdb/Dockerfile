@@ -1,13 +1,13 @@
 FROM centos:7
 
-ENV INFLUXDB_BINARY=influxdb-1.5.0.x86_64.rpm
 ENV HOME=/var/lib/influxdb
+ENV INFLUX_BINARY=${INFLUXDB_BINARY:-influxdb-1.6.2.x86_64.rpm}
 
-RUN curl https://dl.influxdata.com/influxdb/releases/${INFLUXDB_BINARY} > /${INFLUXDB_BINARY} && \
-    yum -y localinstall /${INFLUXDB_BINARY} && \
+RUN curl https://dl.influxdata.com/influxdb/releases/${INFLUX_BINARY} > /${INFLUX_BINARY} && \
+    yum -y localinstall /${INFLUX_BINARY} && \
     yum -y clean all && \
     rm -rf /var/cache/yum && \
-    rm -f /${INFLUXDB_BINARY} && \
+    rm -f /${INFLUX_BINARY} && \
     chmod 664 /etc/passwd
 
 COPY influxdb.conf /etc/influxdb/influxdb.conf

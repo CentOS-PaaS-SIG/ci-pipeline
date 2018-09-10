@@ -27,7 +27,7 @@ parameters:
   description: The git ref or tag to use for customization.
   value: master
 - name: INFLUXDB_BINARY
-  value: influxdb-1.5.0.x86_64.rpm
+  value: influxdb-1.6.2.x86_64.rpm
   description: The influx rpm
 - name: INFLUXDB_ADMIN_USER
   value: contra
@@ -38,6 +38,9 @@ parameters:
 - name: INFLUXDB_DB
   value: db0
   description: The initial db that will be created
+- name: NAMESPACE
+  value: contra-sample-project
+  description: The imageStream namespace
 objects:
 - apiVersion: v1
   kind: ImageStream
@@ -142,7 +145,7 @@ objects:
         from:
           kind: ImageStreamTag
           name: influxdb:latest
-          namespace: continuous-infra
+          namespace: ${NAMESPACE}
           lastTriggeredImage: ''
     - type: ConfigChange
     replicas: 1
