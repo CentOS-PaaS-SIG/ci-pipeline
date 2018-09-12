@@ -72,7 +72,10 @@ EOF
 koji_repo=${branch}
 if [ "${branch}" != "rawhide" ]; then
     koji_repo="f${branch}-build"
-    dnf config-manager --set-enable updates-testing updates-testing-debuginfo
+    if ! virt-customize --selinux-relabel --memsize 4096 -a ${DOWNLOADED_IMAGE_LOCATION} --run-command "dnf config-manager --set-enable updates-testing updates-testing-debuginfo" ; then
+        echo "failure enabling updates-testing repo"
+        exit 1
+    fi
 fi
 # Add repo from latest packages built in koji
 cat <<EOF > ${CURRENTDIR}/koji-latest.repo
