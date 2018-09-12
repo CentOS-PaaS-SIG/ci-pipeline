@@ -299,13 +299,14 @@ def setMessageFields(String messageType) {
  */
 def sendMessage(String msgTopic, String msgProps, String msgContent) {
 
-    // Send message and return SendResult
-    sendResult = sendCIMessage messageContent: msgContent,
-            messageProperties: msgProps,
-            messageType: 'Custom',
-            overrides: [topic: msgTopic],
-            providerName: "${MSG_PROVIDER}"
-
+    retry(10) {
+        // Send message and return SendResult
+        sendResult = sendCIMessage messageContent: msgContent,
+                messageProperties: msgProps,
+                messageType: 'Custom',
+                overrides: [topic: msgTopic],
+                providerName: "${MSG_PROVIDER}"
+    }
     return sendResult
 }
 
