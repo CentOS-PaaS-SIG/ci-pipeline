@@ -69,7 +69,22 @@ enabled=1
 gpgcheck=0
 EOF
 
-virt-copy-in -a ${DOWNLOADED_IMAGE_LOCATION} ${CURRENTDIR}/testrepo/${package} ${CURRENTDIR}/test-${package}.repo /etc/yum.repos.d/
+koji_repo=${branch}
+if [ "${branch}" != "rawhide" ]; then
+    koji_repo="f${branch}-build"
+    dnf config-manager --set-enable updates-testing updates-testing-debuginfo
+fi
+# Add repo from latest packages built in koji
+cat <<EOF > ${CURRENTDIR}/koji-latest.repo
+[koji-${branch}]
+name=koji-${branch}
+baseurl=https://kojipkgs.fedoraproject.org/repos/${koji_repo}/latest/x86_64/
+priority=999
+enabled=1
+gpgcheck=1
+EOF
+
+virt-copy-in -a ${DOWNLOADED_IMAGE_LOCATION} ${CURRENTDIR}/testrepo/${package} ${CURRENTDIR}/test-${package}.repo ${CURRENTDIR}/koji-latest.repo /etc/yum.repos.d/
 
 for pkg in $(repoquery -q --disablerepo=\* --enablerepo=${package} --repofrompath=${package},${rpm_repo} --all --qf="%{ARCH}:%{NAME}" | sed -e "/^src:/d;/-debug\(info\|source\)\$/d;s/.\+://" | sort -u) ; do
     RPM_LIST="${RPM_LIST} ${pkg}"
