@@ -11,11 +11,16 @@ if [ -z "${increase}" ]; then
     exit 1
 fi
 
+if [ -z "${partition}" ]; then
+    # Resize the partition with biggest filesystem
+    partition=$(LIBGUESTFS_BACKEND=direct virt-filesystems --partitions --long -a ${imageName} | grep partition | sort -nk4 | tail -n 1 | awk '{print$1}')
+fi
+
 qemu-img resize ${imageName} +${increase}
 
 cp ${imageName} orig_${imageName}
 
-LIBGUESTFS_BACKEND=direct virt-resize --expand /dev/sda1 orig_${imageName} ${imageName}
+LIBGUESTFS_BACKEND=direct virt-resize --expand ${partition} orig_${imageName} ${imageName}
 
 qemu-img check ${imageName}
 
