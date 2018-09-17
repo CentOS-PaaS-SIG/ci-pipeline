@@ -300,14 +300,19 @@ def setMessageFields(String messageType) {
 def sendMessage(String msgTopic, String msgProps, String msgContent) {
 
     retry(10) {
-        // Send message and return SendResult
-        sendResult = sendCIMessage messageContent: msgContent,
-                messageProperties: msgProps,
-                messageType: 'Custom',
-                overrides: [topic: msgTopic],
-                providerName: "${MSG_PROVIDER}"
+        try {
+            // Send message and return SendResult
+            sendResult = sendCIMessage messageContent: msgContent,
+                    messageProperties: msgProps,
+                    messageType: 'Custom',
+                    overrides: [topic: msgTopic],
+                    providerName: "${MSG_PROVIDER}"
+            return sendResult
+        } catch(e) {
+            echo "FAIL: Could not send message to ${MSG_PROVIDER}"
+            echo e.getMessage()
+        }
     }
-    return sendResult
 }
 
 /**
