@@ -955,7 +955,7 @@ def setupContainerTemplates(String openshiftProject) {
     openshift.withCluster() {
         openshift.withProject(openshiftProject) {
             dir('config/s2i') {
-                sh './create-containers.sh'
+                sh 'bash -x ./create-containers.sh'
             }
         }
     }
