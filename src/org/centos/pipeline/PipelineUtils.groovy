@@ -1212,27 +1212,25 @@ def watchForMessages(String msg_provider, String message) {
 
 /**
  * Test if $tag tests exist for $mypackage on $mybranch in fedora dist-git
- * For mybranch, use fXX or master, or PR number (digits only)
+ * For mybranch, use fXX or master and pr_id is PR number (digits only)
  * @param mypackage
- * @param mybranch - Fedora branch or PR number
+ * @param mybranch - Fedora branch
  * @param tag
+ * @param pr_id    - PR number
  * @return
  */
-def checkTests(String mypackage, String mybranch, String tag) {
+def checkTests(String mypackage, String mybranch, String tag, String pr_id=null) {
     echo "Currently checking if package tests exist"
     sh "rm -rf ${mypackage}"
-    if (mybranch.isNumber()) {
-        sh "git clone https://src.fedoraproject.org/rpms/${mypackage}"
+    def repo_url = "https://src.fedoraproject.org/rpms/${mypackage}/"
+    sh "git clone -b ${mybranch} --single-branch --depth 1 ${repo_url}"
+    if (pr_id != null) {
         dir("${mypackage}") {
-            sh "git fetch -fu origin refs/pull/${mybranch}/head:pr"
-            sh "git checkout pr"
-            return sh (returnStatus: true, script: """
-            grep -r '\\- '${tag}'\$' tests""") == 0
+            sh "curl --insecure -L ${repo_url}/pull-request/${pr_id}.patch > pr_${pr_id}.patch"
+            sh "git apply pr_${pr_id}.patch"
         }
-    } else {
-        return sh (returnStatus: true, script: """
-        git clone -b ${mybranch} --single-branch https://src.fedoraproject.org/rpms/${mypackage}/ && grep -r '\\- '${tag}'\$' ${mypackage}/tests""") == 0
     }
+    return sh (returnStatus: true, script: """grep -r '\\- '${tag}'\$' ${mypackage}/tests""") == 0
 }
 
 /**
