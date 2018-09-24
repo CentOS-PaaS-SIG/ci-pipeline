@@ -335,7 +335,7 @@ class pipelineUtils implements Serializable {
      * @param tag
      * @return
      */
-    def checkTests(String mypackage, String mybranch, String tag, String pr_id) {
+    def checkTests(String mypackage, String mybranch, String tag, String pr_id=null) {
         return pipelineUtils.checkTests(mypackage, mybranch, tag, pr_id)
     }
 
