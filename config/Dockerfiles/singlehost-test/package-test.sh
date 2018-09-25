@@ -97,6 +97,10 @@ trap clean_up EXIT SIGHUP SIGINT SIGTERM
 
 # The inventory must be from the test if present (file or directory) or defaults
 if [ -e inventory ] ; then
+    if [ ! -x inventory ] ; then
+        echo "FAIL: tests/inventory file must be executable"
+        exit 1
+    fi
     ANSIBLE_INVENTORY=$(pwd)/inventory
     export ANSIBLE_INVENTORY
 fi
