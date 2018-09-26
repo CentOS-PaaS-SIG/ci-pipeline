@@ -93,7 +93,6 @@ set -u
 set -xo pipefail
 for playbook in tests*.yml; do
 	if [ -f ${playbook} ]; then
-		# TODO: nvr needs to be standardized later in STR
 		timeout 4h ansible-playbook -v --inventory=$ANSIBLE_INVENTORY $PYTHON_INTERPRETER \
 			--extra-vars "artifacts=$TEST_ARTIFACTS" \
 			--tags ${TAG} ${playbook} $@ | tee ${TEST_ARTIFACTS}/${playbook}-run.txt

@@ -39,7 +39,7 @@ RUN dnf -y install ansible \
 RUN pip install ansible==2.5.8
 
 # Copy the build scripts to the container
-COPY package-test.sh integration-test.sh upstreamfirst-test.sh verify-rpm.sh rpm-verify.yml container-test.sh /tmp/
+COPY package-test.sh integration-test.sh upstreamfirst-test.sh verify-rpm.sh rpm-verify.yml /tmp/
 
 ENV ANSIBLE_INVENTORY=/usr/share/ansible/inventory/standard-inventory-qcow2
 
