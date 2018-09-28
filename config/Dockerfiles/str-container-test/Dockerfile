@@ -48,4 +48,5 @@ ENV ANSIBLE_INVENTORY=/usr/share/ansible/inventory
 # Copy the build scripts to the container
 COPY container-test.sh /tmp/
 
-CMD ["/usr/sbin/init"]
+ENTRYPOINT ["bash", "/tmp/container-test.sh"]
+#CMD ["/usr/sbin/init"]
