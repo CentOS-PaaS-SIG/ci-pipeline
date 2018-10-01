@@ -1,5 +1,5 @@
 #!/bin/bash
-set -e
+set -ex
 
 CURRENTDIR=$(pwd)
 if [ ${CURRENTDIR} == "/" ] ; then
@@ -7,20 +7,17 @@ if [ ${CURRENTDIR} == "/" ] ; then
     CURRENTDIR=/home
 fi
 export TEST_ARTIFACTS=${CURRENTDIR}/logs
-if [ -z "${TEST_SUBJECTS:-}" ]; then
-    export TEST_SUBJECTS=${CURRENTDIR}/untested-atomic.qcow2
-fi
 if [ -z "${TEST_LOCATION:-}" ]; then
-    export TEST_LOCATION=https://src.fedoraproject.org/rpms/${package}
+    export TEST_LOCATION=https://src.fedoraproject.org/container/${container}
 fi
+
 if [ -z "${TAG:-}" ]; then
-    export TAG=atomic
+    export TAG=container
 fi
 # The test artifacts must be an empty directory
 rm -rf ${TEST_ARTIFACTS}
 mkdir -p ${TEST_ARTIFACTS}
 
-# It was requested that these tests be run with latest rpm of standard-test-roles
 # Try to update for few times, if for some reason could not update,
 # continue test with installed STR version
 str_attempts=1
@@ -35,33 +32,24 @@ rpm -q standard-test-roles
 # Invoke tests according to section 1.7.2 here:
 # https://fedoraproject.org/wiki/Changes/InvokingTests
 
-if [ -z "${package:-}" ]; then
+if [ -z "${container:-}" ]; then
 	if [ $# -lt 1 ]; then
-		echo "No package defined"
+		echo "No container defined"
 		exit 2
 	else
-		package="$1"
+		container="$1"
 	fi
 fi
 
-# Make sure we have or have downloaded the test subject
-if [ -z "${TEST_SUBJECTS:-}" ]; then
-	echo "No subject defined"
-	exit 2
-elif ! file ${TEST_SUBJECTS:-}; then
-	wget -q -O testimage.qcow2 ${TEST_SUBJECTS}
-	export TEST_SUBJECTS=${PWD}/testimage.qcow2
-fi
-
-# Check out the dist-git repository for this package
-rm -rf ${package}
+# Check out the dist-git repository for this container
+rm -rf ${container}
 if ! git clone ${TEST_LOCATION}; then
-	echo "No dist-git repo for this package! Exiting..."
+	echo "No dist-git repo for this container! Exiting..."
 	exit 0
 fi
 
 # The specification requires us to invoke the tests in the checkout directory
-pushd ${package}
+pushd ${container}
 
 # Check out the appropriate branch and rev
 if [ -z ${build_pr_id} ]; then
@@ -77,30 +65,18 @@ fi
 if [ -d tests ]; then
      pushd tests
 else
-     echo "No tests for this package! Exiting..."
+     echo "No tests for this container! Exiting..."
      exit 0
 fi
 
 # This will introduce a problem with concurrency as it has no locks
 function clean_up {
-    rm -rf tests/package
-    mkdir -p tests/package
-    cp -rp ${TEST_ARTIFACTS}/* tests/package/
     cat ${TEST_ARTIFACTS}/test.log
-    set +u
-    if [[ ! -z "${RSYNC_USER}" && ! -z "${RSYNC_SERVER}" && ! -z "${RSYNC_DIR}" && ! -z "${RSYNC_PASSWORD}"  && ! -z "${RSYNC_BRANCH}" ]]; then
-        RSYNC_LOCATION="${RSYNC_USER}@${RSYNC_SERVER}::${RSYNC_DIR}/${RSYNC_BRANCH}"
-        rsync --stats -arv tests ${RSYNC_LOCATION}/repo/${package}_repo/logs
-    fi
 }
 trap clean_up EXIT SIGHUP SIGINT SIGTERM
 
 # The inventory must be from the test if present (file or directory) or defaults
 if [ -e inventory ] ; then
-    if [ ! -x inventory ] ; then
-        echo "FAIL: tests/inventory file must be executable"
-        exit 1
-    fi
     ANSIBLE_INVENTORY=$(pwd)/inventory
     export ANSIBLE_INVENTORY
 fi
@@ -117,11 +93,8 @@ set -u
 set -xo pipefail
 for playbook in tests*.yml; do
 	if [ -f ${playbook} ]; then
-		# TODO: nvr needs to be standardized later in STR
 		timeout 4h ansible-playbook -v --inventory=$ANSIBLE_INVENTORY $PYTHON_INTERPRETER \
-			--extra-vars "subjects=$TEST_SUBJECTS" \
 			--extra-vars "artifacts=$TEST_ARTIFACTS" \
-			--extra-vars "nvr=$nvr" \
 			--tags ${TAG} ${playbook} $@ | tee ${TEST_ARTIFACTS}/${playbook}-run.txt
 	fi
 done
