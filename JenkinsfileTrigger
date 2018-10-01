@@ -6,7 +6,7 @@ properties(
                         string(name: 'CI_MESSAGE',
                                description: 'fedmsg msg'),
                         string(name: 'TARGETS',
-                               defaultValue: '^(f26|f27)$',
+                               defaultValue: '^(f26|f27|f28)$',
                                description: 'fedora branch targets'),
                         string(name: 'PROJECT_REPO',
                                defaultValue: 'ci-pipeline',

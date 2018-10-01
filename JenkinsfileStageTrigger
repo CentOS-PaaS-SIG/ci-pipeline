@@ -39,9 +39,11 @@ IRC_CHANNEL = "#contra-ci-cd"
 CANNED_CI_MESSAGES = [:]
 CANNED_CI_MESSAGES['f26'] = '{"commit":{"username":"zdohnal","stats":{"files":{"README.patches":{"deletions":0,"additions":30,"lines":30},"sources":{"deletions":1,"additions":1,"lines":2},"vim.spec":{"deletions":7,"additions":19,"lines":26},".gitignore":{"deletions":0,"additions":1,"lines":1},"vim-8.0-rhbz1365258.patch":{"deletions":0,"additions":12,"lines":12}},"total":{"deletions":8,"files":5,"additions":63,"lines":71}},"name":"Zdenek Dohnal","rev":"3ff427e02625f810a2cedb754342be44d6161b39","namespace":"rpms","agent":"zdohnal","summary":"Merge branch f25 into f26","repo":"vim","branch":"f26","seen":false,"path":"/srv/git/repositories/rpms/vim.git","message":"Merge branch \'f25\' into f26\\n","email":"zdohnal@redhat.com"},"topic":"org.fedoraproject.prod.git.receive"}'
 CANNED_CI_MESSAGES['f27'] = '{"commit":{"username":"adrian","stats":{"files":{"criu.spec":{"deletions":0,"additions":5,"lines":5}},"total":{"deletions":0,"files":1,"additions":5,"lines":5}},"name":"Adrian Reber","rev":"386bedee49cb887626140f2c60522751ec620f1d","namespace":"rpms","agent":"adrian","summary":"Adapt ExcludeArch depending on Fedora release","repo":"criu","branch":"f27","seen":false,"path":"/srv/git/repositories/rpms/criu.git","message":"Adapt ExcludeArch depending on Fedora release\\n","email":"adrian@lisas.de"},"topic":"org.fedoraproject.prod.git.receive"}'
+CANNED_CI_MESSAGES['f28'] = '{"commit":{"username":"decathorpe","stats":{"files":{"wingpanel-indicator-sound.spec":{"deletions":1,"additions":4,"lines":5},"sources":{"deletions":1,"additions":1,"lines":2},".gitignore":{"deletions":0,"additions":3,"lines":3}},"total":{"deletions":2,"files":3,"additions":8,"lines":10}},"name":"Fabio Valentini","rev":"b35cc325e7bafb2ab7c4f4f226b07a2d4178f7b2","namespace":"rpms","agent":"decathorpe","summary":"update to version 2.1.1","repo":"wingpanel-indicator-sound","branch":"f28","seen":false,"path":"/srv/git/repositories/rpms/wingpanel-indicator-sound.git","message":"update to version 2.1.1\n","email":"decathorpe@gmail.com"}}'
 // Specific canned messages
 CANNED_CI_MESSAGES['f26-singlehost-test'] = '{"commit":{"username":"kdudka","stats":{"files":{"curl.spec":{"deletions":1,"additions":8,"lines":9},"0005-curl-7.53.1-CVE-2017-1000254.patch":{"deletions":0,"additions":136,"lines":136}},"total":{"deletions":1,"files":2,"additions":144,"lines":145}},"name":"Kamil Dudka","rev":"d1d232206aed8ef12596ec3939b72a6476845149","namespace":"rpms","agent":"kdudka","summary":"Resolves: CVE-2017-1000254 - fix out of bounds read in FTP PWD response parser","repo":"curl","branch":"f26","seen":false,"path":"/srv/git/repositories/rpms/curl.git","message":"Resolves: CVE-2017-1000254 - fix out of bounds read in FTP PWD response parser\\n","email":"kdudka@redhat.com"},"topic":"org.fedoraproject.prod.git.receive"}'
 CANNED_CI_MESSAGES['f27-singlehost-test'] = '{"commit":{"username":"kdudka","stats":{"files":{"curl.spec":{"deletions":4,"additions":11,"lines":15},"0005-curl-7.55.1-CVE-2017-1000254.patch":{"deletions":0,"additions":136,"lines":136}},"total":{"deletions":4,"files":2,"additions":147,"lines":151}},"name":"Kamil Dudka","rev":"9765ef0484ffde44a0104d919799f461b3cb802d","namespace":"rpms","agent":"kdudka","summary":"Resolves: CVE-2017-1000254 - fix out of bounds read in FTP PWD response parser","repo":"curl","branch":"f27","seen":false,"path":"/srv/git/repositories/rpms/curl.git","message":"Resolves: CVE-2017-1000254 - fix out of bounds read in FTP PWD response parser\\n","email":"kdudka@redhat.com"},"topic":"org.fedoraproject.prod.git.receive"}'
+CANNED_CI_MESSAGES['f28-singlehost-test'] = '{"commit":{"username":"kdudka","stats":{"files":{"0008-curl-7.59.0-CVE-2018-14618.patch":{"deletions":0,"additions":72,"lines":72},"curl.spec":{"deletions":0,"additions":5,"lines":5}},"total":{"deletions":0,"files":2,"additions":77,"lines":77}},"name":"Kamil Dudka","rev":"5f4e92def348a7733bdce0d2aeb7d57b2a42000e","namespace":"rpms","agent":"kdudka","summary":"Resolves: CVE-2018-14618 - fix NTLM password overflow via integer overflow","repo":"curl","branch":"f28","seen":false,"path":"/srv/git/repositories/rpms/curl.git","message":"Resolves: CVE-2018-14618 - fix NTLM password overflow via integer overflow\n","email":"kdudka@redhat.com"}}'
 
 library identifier: "ci-pipeline@${env.ghprbActualCommit}",
         retriever: modernSCM([$class: 'GitSCMSource',
@@ -179,6 +181,7 @@ pipeline {
                     // Map canned message to proper one for testing
                     CANNED_CI_MESSAGES['f26'] = CANNED_CI_MESSAGES['f26-singlehost-test']
                     CANNED_CI_MESSAGES['f27'] = CANNED_CI_MESSAGES['f27-singlehost-test']
+                    CANNED_CI_MESSAGES['f28'] = CANNED_CI_MESSAGES['f28-singlehost-test']
                 }
             }
         }
@@ -223,10 +226,17 @@ pipeline {
                         //}
                     //}
                 //}
-                stage("f27 message watcher") {
+                // stage("f27 message watcher") {
+                //     steps {
+                //         script {
+                //             pipelineUtils.watchForMessages(MSG_PROVIDER, CANNED_CI_MESSAGES['f27'])
+                //         }
+                //     }
+                // }
+                stage("f28 message watcher") {
                     steps {
                         script {
-                            pipelineUtils.watchForMessages(MSG_PROVIDER, CANNED_CI_MESSAGES['f27'])
+                            pipelineUtils.watchForMessages(MSG_PROVIDER, CANNED_CI_MESSAGES['f28'])
                         }
                     }
                 }
@@ -271,45 +281,54 @@ pipeline {
                                 //wait: true
                     //}
                 //}
-                stage("f27 stage job") {
+                // stage("f27 stage job") {
+                //     steps {
+                //         sleep 30
+                //         build job: 'ci-stage-pipeline-f27',
+                //         parameters: [
+                //             string(name: 'CI_MESSAGE', value: CANNED_CI_MESSAGES['f27']),
+                //             string(name: 'ghprbActualCommit', value: "${env.ghprbActualCommit}"),
+                //             string(name: 'ghprbGhRepository', value: "${env.ghprbGhRepository}"),
+                //             string(name: 'ghprbPullAuthorLogin', value: "${env.ghprbPullAuthorLogin}"),
+                //             string(name: 'TARGET_BRANCH', value: "f27"),
+                //             string(name: 'sha1', value: "${env.sha1}"),
+                //             string(name: 'ghprbPullId', value: "${env.ghprbPullId}"),
+                //             string(name: 'GENERATE_IMAGE', value: "true"),
+                //             string(name: 'SLAVE_TAG', value: tagMap['jenkins-continuous-infra-slave']),
+                //             string(name: 'RPMBUILD_TAG', value: tagMap['rpmbuild']),
+                //             string(name: 'RSYNC_TAG', value: tagMap['rsync']),
+                //             string(name: 'OSTREE_COMPOSE_TAG', value: tagMap['ostree-compose']),
+                //             string(name: 'OSTREE_IMAGE_COMPOSE_TAG', value: tagMap['ostree-image-compose']),
+                //             string(name: 'SINGLEHOST_TEST_TAG', value: tagMap['singlehost-test']),
+                //             string(name: 'OSTREE_BOOT_IMAGE_TAG', value: tagMap['ostree-boot-image']),
+                //             string(name: 'LINCHPIN_LIBVIRT_TAG', value: tagMap['linchpin-libvirt'])
+                //         ],
+                //         wait: true
+                //     }
+                // }
+                stage("f28 stage job") {
                     steps {
                         sleep 30
-                        build job: 'ci-stage-pipeline-f27',
-                                parameters: [
-                                        string(name: 'CI_MESSAGE',
-                                               value: CANNED_CI_MESSAGES['f27']),
-                                        string(name: 'ghprbActualCommit',
-                                               value: "${env.ghprbActualCommit}"),
-                                        string(name: 'ghprbGhRepository',
-                                               value: "${env.ghprbGhRepository}"),
-                                        string(name: 'ghprbPullAuthorLogin',
-                                               value: "${env.ghprbPullAuthorLogin}"),
-                                        string(name: 'TARGET_BRANCH',
-                                               value: "f27"),
-                                        string(name: 'sha1',
-                                               value: "${env.sha1}"),
-                                        string(name: 'ghprbPullId',
-                                               value: "${env.ghprbPullId}"),
-                                        string(name: 'GENERATE_IMAGE',
-                                               value: "true"),
-                                        string(name: 'SLAVE_TAG',
-                                               value: tagMap['jenkins-continuous-infra-slave']),
-                                        string(name: 'RPMBUILD_TAG',
-                                               value: tagMap['rpmbuild']),
-                                        string(name: 'RSYNC_TAG',
-                                               value: tagMap['rsync']),
-                                        string(name: 'OSTREE_COMPOSE_TAG',
-                                               value: tagMap['ostree-compose']),
-                                        string(name: 'OSTREE_IMAGE_COMPOSE_TAG',
-                                               value: tagMap['ostree-image-compose']),
-                                        string(name: 'SINGLEHOST_TEST_TAG',
-                                               value: tagMap['singlehost-test']),
-                                        string(name: 'OSTREE_BOOT_IMAGE_TAG',
-                                               value: tagMap['ostree-boot-image']),
-                                        string(name: 'LINCHPIN_LIBVIRT_TAG',
-                                               value: tagMap['linchpin-libvirt'])
-                                ],
-                                wait: true
+                        build job: 'ci-stage-pipeline-f28',
+                        parameters: [
+                            string(name: 'CI_MESSAGE', value: CANNED_CI_MESSAGES['f28']),
+                            string(name: 'ghprbActualCommit', value: "${env.ghprbActualCommit}"),
+                            string(name: 'ghprbGhRepository', value: "${env.ghprbGhRepository}"),
+                            string(name: 'ghprbPullAuthorLogin', value: "${env.ghprbPullAuthorLogin}"),
+                            string(name: 'TARGET_BRANCH', value: "f28"),
+                            string(name: 'sha1', value: "${env.sha1}"),
+                            string(name: 'ghprbPullId', value: "${env.ghprbPullId}"),
+                            string(name: 'GENERATE_IMAGE', value: "true"),
+                            string(name: 'SLAVE_TAG', value: tagMap['jenkins-continuous-infra-slave']),
+                            string(name: 'RPMBUILD_TAG', value: tagMap['rpmbuild']),
+                            string(name: 'RSYNC_TAG', value: tagMap['rsync']),
+                            string(name: 'OSTREE_COMPOSE_TAG', value: tagMap['ostree-compose']),
+                            string(name: 'OSTREE_IMAGE_COMPOSE_TAG', value: tagMap['ostree-image-compose']),
+                            string(name: 'SINGLEHOST_TEST_TAG', value: tagMap['singlehost-test']),
+                            string(name: 'OSTREE_BOOT_IMAGE_TAG', value: tagMap['ostree-boot-image']),
+                            string(name: 'LINCHPIN_LIBVIRT_TAG', value: tagMap['linchpin-libvirt'])
+                        ],
+                        wait: true
                     }
                 }
             }
