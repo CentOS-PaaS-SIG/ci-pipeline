@@ -333,10 +333,12 @@ class pipelineUtils implements Serializable {
      * @param mypackage
      * @param mybranch - Fedora branch or PR number
      * @param tag
+     * @param pr_id    - PR number
+     * @param namespace - rpms (default) or container
      * @return
      */
-    def checkTests(String mypackage, String mybranch, String tag, String pr_id=null) {
-        return pipelineUtils.checkTests(mypackage, mybranch, tag, pr_id)
+    def checkTests(String mypackage, String mybranch, String tag, String pr_id=null, String namespace='rpms') {
+        return pipelineUtils.checkTests(mypackage, mybranch, tag, pr_id, namespace)
     }
 
     /**

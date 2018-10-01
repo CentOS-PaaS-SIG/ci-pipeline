@@ -1217,12 +1217,13 @@ def watchForMessages(String msg_provider, String message) {
  * @param mybranch - Fedora branch
  * @param tag
  * @param pr_id    - PR number
+ * @param namespace - rpms (default) or container
  * @return
  */
-def checkTests(String mypackage, String mybranch, String tag, String pr_id=null) {
+def checkTests(String mypackage, String mybranch, String tag, String pr_id=null, String namespace='rpms') {
     echo "Currently checking if package tests exist"
     sh "rm -rf ${mypackage}"
-    def repo_url = "https://src.fedoraproject.org/rpms/${mypackage}/"
+    def repo_url = "https://src.fedoraproject.org/${namespace}/${mypackage}/"
     sh "git clone -b ${mybranch} --single-branch --depth 1 ${repo_url}"
     if (pr_id != null) {
         dir("${mypackage}") {
