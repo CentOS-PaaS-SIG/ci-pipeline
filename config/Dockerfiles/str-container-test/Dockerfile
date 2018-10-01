@@ -46,7 +46,6 @@ systemctl enable docker
 ENV ANSIBLE_INVENTORY=/usr/share/ansible/inventory
 
 # Copy the build scripts to the container
-COPY container-test.sh /tmp/
+COPY container-test.sh /home/
 
-ENTRYPOINT ["bash", "/tmp/container-test.sh"]
-#CMD ["/usr/sbin/init"]
+CMD ["/usr/sbin/init"]
