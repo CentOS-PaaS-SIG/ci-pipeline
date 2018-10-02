@@ -135,16 +135,17 @@ EOF
 
 # Cleanup older qcow2 images
 pushd ${base_dir}/images || exit 1
-latest=""
+
 if [ -e "latest-atomic.qcow2" ]; then
     latest=$(readlink latest-atomic.qcow2)
     latest_logdir=$(echo $latest | sed -e 's/.qcow2$//')
+
+    # delete images and logs over 7 days old
+    # but don't delete what our latest link points to
+    find . -maxdepth 1 -type f -mtime +7 ! -name "$latest" -exec rm -v {} \;
+    find . -maxdepth 1 -type d -mtime +7 ! -name "$latest_logdir" -exec rm -rv {} \;
 fi
 
-# delete images and logs over 7 days old
-# but don't delete what our latest link points to
-find . -maxdepth 1 -type f -mtime +7 ! -name "$latest" -exec rm -v {} \;
-find . -maxdepth 1 -type d -mtime +7 ! -name "$latest_logdir" -exec rm -rv {} \;
 popd
 
 } 2>&1 | tee ${base_dir}/logs/console.log #group for tee
