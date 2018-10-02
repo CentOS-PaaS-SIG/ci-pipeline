@@ -28,12 +28,12 @@ def setupStage(String stage, String sshKey) {
             cp ${FEDORA_ATOMIC_PUB_KEY} ~/.ssh/id_rsa.pub
             chmod 600 ~/.ssh/id_rsa
             chmod 644 ~/.ssh/id_rsa.pub
-            
+
             # Keep compatibility with earlier cciskel-duffy
             if test -f ${ORIGIN_WORKSPACE}/inventory.${ORIGIN_BUILD_TAG}; then
                 ln -fs ${ORIGIN_WORKSPACE}/inventory.${ORIGIN_BUILD_TAG} ${WORKSPACE}/inventory
             fi
-    
+
             if test -n "${playbook:-}"; then
                 ansible-playbook --private-key=${FEDORA_ATOMIC_KEY} -u root -i ${WORKSPACE}/inventory "${playbook}"
             else
@@ -60,10 +60,10 @@ def runTaskAndReturnLogs(String stage, String duffyKey) {
             set -xeuo pipefail
 
             echo $HOME
-                
+
             cp ${DUFFY_KEY} ~/duffy.key
             chmod 600 ~/duffy.key
-    
+
             cp ${FEDORA_KEYTAB} fedora.keytab
             chmod 0600 fedora.keytab
 
@@ -71,22 +71,22 @@ def runTaskAndReturnLogs(String stage, String duffyKey) {
             echo "    StrictHostKeyChecking no" >> ~/.ssh/config
             echo "    UserKnownHostsFile /dev/null" >> ~/.ssh/config
             chmod 600 ~/.ssh/config
-            
+
             source ${ORIGIN_WORKSPACE}/task.env
             (echo -n "export RSYNC_PASSWORD=" && cat ~/duffy.key | cut -c '-13') > rsync-password.sh
-            
+
             rsync -Hrlptv --stats -e ssh ${ORIGIN_WORKSPACE}/task.env rsync-password.sh fedora.keytab builder@${DUFFY_HOST}:${JENKINS_JOB_NAME}
             for repo in ci-pipeline sig-atomic-buildscripts; do
                 rsync -Hrlptv --stats --delete -e ssh ${repo}/ builder@${DUFFY_HOST}:${JENKINS_JOB_NAME}/${repo}
             done
-            
+
             # Use the following in ${task} to authenticate.
             #kinit -k -t ${FEDORA_KEYTAB} ${FEDORA_PRINCIPAL}
             build_success=true
             if ! ssh -tt builder@${DUFFY_HOST} "pushd ${JENKINS_JOB_NAME} && . rsync-password.sh && . task.env && ${task}"; then
                 build_success=false
             fi
-            
+
             rsync -Hrlptv --stats -e ssh builder@${DUFFY_HOST}:${JENKINS_JOB_NAME}/logs/ ${ORIGIN_WORKSPACE}/logs || true
             # Exit with code from the build
             if test "${build_success}" = "false"; then
@@ -107,7 +107,7 @@ def checkLastImage(String stage) {
 
     sh '''
         set +e
-                
+
         header=$(curl -sI "${HTTP_BASE}/${branch}/images/latest-atomic.qcow2"|grep -i '^Last-Modified:')
         curl_rc=$?
         if [ ${curl_rc} -eq 0 ]; then
@@ -117,14 +117,14 @@ def checkLastImage(String stage) {
             if [ $((cur - prev)) -gt 86400 ]; then
                 echo "New atomic image needed. Existing atomic image is more than 24 hours old"
                 touch ${WORKSPACE}/NeedNewImage.txt
-        
+
             else
                 echo "No new atomic image need. Existing atomic image is less than 24 hours old"
             fi
         else
             echo "New atomic image needed. Unable to find existing atomic image"
             touch ${WORKSPACE}/NeedNewImage.txt
-        
+
         fi
     '''
 }
@@ -507,10 +507,10 @@ def prepareCredentials() {
         sh '''
             #!/bin/bash
             set -xeuo pipefail
-    
+
             cp ${FEDORA_KEYTAB} fedora.keytab
             chmod 0600 fedora.keytab
-            
+
             mkdir -p ~/.ssh
 
             echo "Host *.ci.centos.org" > ~/.ssh/config
@@ -779,10 +779,12 @@ def ocVerifyPod(String nodeName) {
 
     sh 'mkdir -p podInfo'
 
-    writeFile file: 'podInfo/node-pod-description-' + nodeName + '.txt',
-                text: out
+    echo "write file"
+    echo nodeName
+    writeFile file: 'podInfo/node-pod-description-' + nodeName + '.txt', text: out
+    echo "Archive"
     archiveArtifacts 'podInfo/node-pod-description-' + nodeName + '.txt'
-
+    echo "Timeout"
     timeout(60) {
         echo "Ensuring all containers are running in pod: ${env.NODE_NAME}"
         echo "Container names in pod ${env.NODE_NAME}: "
