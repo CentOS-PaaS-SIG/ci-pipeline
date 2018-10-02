@@ -774,19 +774,14 @@ def executeInContainer(String stageName,
  * @return
  */
 def ocVerifyPod(String nodeName) {
-    echo "OC verify Pod"
     def describeStr = openshift.selector("pods", nodeName).describe()
     out = describeStr.out.trim()
 
-    echo nodeName
     sh "mkdir -p podInfo"
 
-    echo "write file"
-    echo nodeName
     writeFile file: 'podInfo/node-pod-description-' + nodeName + '.txt', text: out
-    echo "Archive"
     archiveArtifacts 'podInfo/node-pod-description-' + nodeName + '.txt'
-    echo "Timeout"
+    
     timeout(60) {
         echo "Ensuring all containers are running in pod: ${env.NODE_NAME}"
         echo "Container names in pod ${env.NODE_NAME}: "
@@ -819,11 +814,8 @@ def ocVerifyPod(String nodeName) {
  * @return
  */
 def verifyPod(String openshiftProject, String nodeName) {
-    echo "verify Pod"
     openshift.withCluster() {
-        echo "with cluster"
         openshift.withProject(openshiftProject) {
-            echo "calling ocVerify Pod"
             return ocVerifyPod(nodeName)
         }
     }
