@@ -74,12 +74,12 @@ curl -o ${base_dir}/logs/fedora-atomic.ks https://pagure.io/fedora-kickstarts/ra
 # Put new url into the kickstart file
 sed -i "s|^ostreesetup.*|ostreesetup --nogpg --osname=fedora-atomic --remote=fedora-atomic --url=http://$(ip -o a s eth0 | awk '/inet / { print $4 }' | cut -d '/' -f 1):8000/ --ref=$REF|" ${base_dir}/logs/fedora-atomic.ks
 
-# point to upstream
-sed -i "s|\(%end.*$\)|ostree remote delete fedora-atomic\nostree remote add --set=gpg-verify=false fedora-atomic ${HTTP_BASE}/${branch}/ostree\n\1|" ${base_dir}/logs/fedora-atomic.ks
-
-# Remove ostree refs create form upstream kickstart
-sed -i "s|^ostree refs.*||" ${base_dir}/logs/fedora-atomic.ks
-sed -i "s|^ostree admin set-origin.*||" ${base_dir}/logs/fedora-atomic.ks
+# # point to upstream
+# sed -i "s|\(%end.*$\)|ostree remote delete fedora-atomic\nostree remote add --set=gpg-verify=false fedora-atomic ${HTTP_BASE}/${branch}/ostree\n\1|" ${base_dir}/logs/fedora-atomic.ks
+#
+# # Remove ostree refs create form upstream kickstart
+# sed -i "s|^ostree refs.*||" ${base_dir}/logs/fedora-atomic.ks
+# sed -i "s|^ostree admin set-origin.*||" ${base_dir}/logs/fedora-atomic.ks
 
 # Pull down Fedora net install image if needed
 if [ ! -e "${base_dir}/netinst" ]; then
