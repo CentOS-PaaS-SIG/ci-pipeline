@@ -249,7 +249,7 @@ podTemplate(name: podName,
                         // Decorate our build
                         pipelineUtils.updateBuildDisplayAndDescription()
                         // Gather some info about the node we are running on for diagnostics
-                        pipelineUtils.verifyPod(OPENSHIFT_NAMESPACE, env.NODE_NAME)
+                        //pipelineUtils.verifyPod(OPENSHIFT_NAMESPACE, env.NODE_NAME)
                         // create audit message file
                         pipelineUtils.initializeAuditFile(msgAuditFile)
                     }
