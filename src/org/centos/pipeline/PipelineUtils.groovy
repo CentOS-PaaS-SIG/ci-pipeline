@@ -774,6 +774,7 @@ def executeInContainer(String stageName,
  * @return
  */
 def ocVerifyPod(String nodeName) {
+    echo "OC verify Pod"
     def describeStr = openshift.selector("pods", nodeName).describe()
     out = describeStr.out.trim()
 
@@ -818,8 +819,11 @@ def ocVerifyPod(String nodeName) {
  * @return
  */
 def verifyPod(String openshiftProject, String nodeName) {
+    echo "verify Pod"
     openshift.withCluster() {
+        echo "with cluster"
         openshift.withProject(openshiftProject) {
+            echo "calling ocVerify Pod"
             return ocVerifyPod(nodeName)
         }
     }
