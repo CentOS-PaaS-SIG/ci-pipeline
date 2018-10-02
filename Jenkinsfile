@@ -244,6 +244,8 @@ podTemplate(name: podName,
                         pipelineUtils.prepareCredentials()
                         // Parse the CI_MESSAGE and inject it as env vars
                         pipelineUtils.injectFedmsgVars(env.CI_MESSAGE)
+                        // Print environment
+                        echo sh(returnStdout: true, script: 'env')
                         // Set RSYNC_BRANCH for rsync'ing to artifacts store
                         env.RSYNC_BRANCH = pipelineUtils.getRsyncBranch()
                         // Decorate our build
