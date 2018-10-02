@@ -777,7 +777,7 @@ def ocVerifyPod(String nodeName) {
     def describeStr = openshift.selector("pods", nodeName).describe()
     out = describeStr.out.trim()
 
-    sh 'mkdir -p podInfo'
+    sh "mkdir -p podInfo"
 
     echo "write file"
     echo nodeName
