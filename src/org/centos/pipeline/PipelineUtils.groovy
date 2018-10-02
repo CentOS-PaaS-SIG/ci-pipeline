@@ -1228,7 +1228,13 @@ def checkTests(String mypackage, String mybranch, String tag, String pr_id=null,
     if (pr_id != null) {
         dir("${mypackage}") {
             sh "curl --insecure -L ${repo_url}/pull-request/${pr_id}.patch > pr_${pr_id}.patch"
-            sh "git apply pr_${pr_id}.patch"
+            // If fail to apply patch do not exit with error, but instead ignore the patch
+            // this should avoid the pipeline to exit here without sending any topic to fedmsg
+            try {
+                sh "git apply pr_${pr_id}.patch"
+            } catch (err) {
+                echo "FAIL to apply patch from PR, ignoring it..."
+            }
         }
     }
     return sh (returnStatus: true, script: """grep -r '\\- '${tag}'\$' ${mypackage}/tests""") == 0
