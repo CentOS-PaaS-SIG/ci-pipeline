@@ -776,12 +776,13 @@ def executeInContainer(String stageName,
 def ocVerifyPod(String nodeName) {
     def describeStr = openshift.selector("pods", nodeName).describe()
     out = describeStr.out.trim()
-
+    echo "here"
     sh 'mkdir -p podInfo'
-
+    echo "there"
     writeFile file: 'podInfo/node-pod-description-' + nodeName + '.txt',
                 text: out
     archiveArtifacts 'podInfo/node-pod-description-' + nodeName + '.txt'
+    echo "foo"
 
     timeout(60) {
         echo "Ensuring all containers are running in pod: ${env.NODE_NAME}"
