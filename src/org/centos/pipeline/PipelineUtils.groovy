@@ -1459,6 +1459,33 @@ def injectArray(String prefix, def message) {
 }
 
 /**
+ * Find the node name of the Jenkins pod
+ * @param podName - name of Jenkins Master pod
+ * e.g. jenkins, jenkins-myservice, not the full pod name with build #-uuid
+ * @return
+ */
+def getMasterNode(String podName) {
+    openshift.withCluster() {
+        // Get Jenkins Pod description
+        def longPodDesc = openshift.raw(
+            "describe pod -l name=${podName}")
+        def nodeLine = longPodDesc['actions']['out'] =~ /(?m)(?<=^Node:).*/
+        // Strip all the extra spaces to make splitting cleaner
+        def niceNodeLine = nodeLine[0].replaceAll("\\s","")
+        String nodeName = niceNodeLine.split('/')
+        // There should be both a hostname and an ip address
+        if (nodeName.length != 2) {
+            throw new IllegalStateException(
+                "Something went wrong determining Jenkins master node " +
+                "Expected the node variable to be a hostname and " +
+                "IP separated by a /, but it was not.")
+        }
+
+        return nodeName[0]
+    }
+}
+
+/**
  * @param request - the url that refers to the package
  * @param prefix - env prefix
  * @return

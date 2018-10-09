@@ -431,6 +431,16 @@ class pipelineUtils implements Serializable {
     }
 
     /**
+     * Find the node name of the Jenkins pod
+     * @param podName - name of Jenkins Master pod
+     * e.g. jenkins, jenkins-myservice, not the full pod name with build #-uuid
+     * @return
+     */
+    def getMasterNode(String podName) {
+        pipelineUtils.getMasterNode(podName)
+    }
+
+    /**
      * @param request - the url that refers to the package
      * @param prefix - env prefix
      * @return
