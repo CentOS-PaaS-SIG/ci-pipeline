@@ -1460,14 +1460,15 @@ def injectArray(String prefix, def message) {
 
 /**
  * Find the node name of the Jenkins pod
- * This function could be parameterized to accept other pod names.
+ * @param podName - name of Jenkins Master pod
+ * e.g. jenkins, jenkins-myservice, not the full pod name with build #-uuid
  * @return
  */
-def getMasterNode() {
+def getMasterNode(String podName) {
     openshift.withCluster() {
         // Get Jenkins Pod description
         def longPodDesc = openshift.raw(
-            "describe pod -l name=jenkins")
+            "describe pod -l name=${podName}")
         def nodeLine = longPodDesc['actions']['out'] =~ /(?m)(?<=^Node:).*/
         // Strip all the extra spaces to make splitting cleaner
         def niceNodeLine = nodeLine[0].replaceAll("\\s","")
