@@ -1472,7 +1472,7 @@ def getMasterNode(String podName) {
         def nodeLine = longPodDesc['actions']['out'] =~ /(?m)(?<=^Node:).*/
         // Strip all the extra spaces to make splitting cleaner
         def niceNodeLine = nodeLine[0].replaceAll("\\s","")
-        String nodeName = niceNodeLine.split('/')
+        String[] nodeName = niceNodeLine.split('/')
         // There should be both a hostname and an ip address
         if (nodeName.length != 2) {
             throw new IllegalStateException(
