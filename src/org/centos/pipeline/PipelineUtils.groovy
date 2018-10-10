@@ -301,16 +301,20 @@ def sendMessage(String msgTopic, String msgProps, String msgContent) {
 
     retry(10) {
         try {
-            // Send message and return SendResult
-            sendResult = sendCIMessage messageContent: msgContent,
-                    messageProperties: msgProps,
-                    messageType: 'Custom',
-                    overrides: [topic: msgTopic],
-                    providerName: "${MSG_PROVIDER}"
-            return sendResult
+            // 1 minute should be more than enough time to send the topic msg
+            timeout(1) {
+                // Send message and return SendResult
+                sendResult = sendCIMessage messageContent: msgContent,
+                        messageProperties: msgProps,
+                        messageType: 'Custom',
+                        overrides: [topic: msgTopic],
+                        providerName: "${MSG_PROVIDER}"
+                return sendResult
+            }
         } catch(e) {
             echo "FAIL: Could not send message to ${MSG_PROVIDER}"
             echo e.getMessage()
+            error e.getMessage()
         }
     }
 }
