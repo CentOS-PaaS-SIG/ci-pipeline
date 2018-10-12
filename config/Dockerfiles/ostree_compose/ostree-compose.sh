@@ -51,32 +51,35 @@ else
     fedora_repo="fedora-$VERSION"
 fi
 
-cat << EOF > $base_dir/ci-pipeline/config/ostree/fedora-${VERSION}.repo
-[fedora-${VERSION}]
-name=Fedora ${branch}
-failovermethod=priority
-metalink=https://mirrors.fedoraproject.org/metalink?repo=${fedora_repo}&arch=x86_64
-enabled=1
-metadata_expire=7d
-gpgcheck=0
-skip_if_unavailable=False
-EOF
+# cat << EOF > $base_dir/ci-pipeline/config/ostree/fedora-${VERSION}.repo
+# [fedora-${VERSION}]
+# name=Fedora ${branch}
+# failovermethod=priority
+# metalink=https://mirrors.fedoraproject.org/metalink?repo=${fedora_repo}&arch=x86_64
+# enabled=1
+# metadata_expire=7d
+# gpgcheck=0
+# skip_if_unavailable=False
+# EOF
+#
+#
+# if [ "$branch" != "rawhide" ]; then
+#     fedora_updates_repo="updates-released-${branch}"
+#
+# cat << EOF > $base_dir/ci-pipeline/config/ostree/fedora-${VERSION}-updates.repo
+# [fedora-${VERSION}-updates]
+# name=Fedora ${VERSION} Updates
+# failovermethod=priority
+# metalink=https://mirrors.fedoraproject.org/metalink?repo=${fedora_updates_repo}&arch=x86_64
+# enabled=1
+# metadata_expire=7d
+# gpgcheck=0
+# skip_if_unavailable=False
+# EOF
+# fi
 
-
-if [ "$branch" != "rawhide" ]; then
-    fedora_updates_repo="updates-released-${branch}"
-
-cat << EOF > $base_dir/ci-pipeline/config/ostree/fedora-${VERSION}-updates.repo
-[fedora-${VERSION}-updates]
-name=Fedora ${VERSION} Updates
-failovermethod=priority
-metalink=https://mirrors.fedoraproject.org/metalink?repo=${fedora_updates_repo}&arch=x86_64
-enabled=1
-metadata_expire=7d
-gpgcheck=0
-skip_if_unavailable=False
-EOF
-fi
+# Pull upstream fedora repo
+curl -o $base_dir/ci-pipeline/config/ostree/fedora-${VERSION}.repo https://pagure.io/fedora-atomic/raw/${branch}/f/fedora-28.repo
 
 # Get our latest fedora-atomic-testing.json and fedora-atomic-host-base file and write it to $base_dir/logs/
 curl -o $base_dir/logs/fedora-atomic-host.json https://pagure.io/fedora-atomic/raw/${branch}/f/fedora-atomic-host.json
