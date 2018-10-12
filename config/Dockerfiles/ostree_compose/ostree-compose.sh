@@ -92,7 +92,7 @@ cat << EOF > $base_dir/ci-pipeline/config/ostree/fedora-atomic-testing.json
 }
 EOF
 
-rpm-ostree compose tree --force-nocache --repo=$base_dir/ostree $base_dir/ci-pipeline/config/ostree/fedora-atomic-testing.json || exit 1
+rpm-ostree compose tree --force-nocache --repo=$base_dir/ostree ${base_dir}/logs/fedora-atomic-host.json || exit 1
 
 ostree --repo=$base_dir/ostree summary -u
 
