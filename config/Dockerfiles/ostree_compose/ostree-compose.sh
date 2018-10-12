@@ -86,7 +86,7 @@ cat << EOF > $base_dir/ci-pipeline/config/ostree/fedora-atomic-testing.json
 {
     "include": "${base_dir}/logs/fedora-atomic-host.json",
     "ref": "fedora/${branch}/\${basearch}/atomic-host",
-    "repos": ["fedora-${VERSION}", $f_repos],
+    "repos": ["fedora-${VERSION}"],
     "automatic_version_prefix": "${VERSION}",
     "mutate-os-release": "${VERSION}"
 }
