@@ -5,10 +5,19 @@
       shell: "rpm -qa | sort > installed_rpms.txt"
       args:
         warn: false
+    - name: Save kernel version
+      shell: "uname -r > kernel_version.txt"
+      args:
+        warn: false
     - name: Fetch installed rpms file to {{ artifacts }}
       fetch:
         src: installed_rpms.txt
         dest: "{{ artifacts }}/installed_rpms.txt"
+        flat: yes
+    - name: Fetch kernel version file to {{ artifacts }}
+      fetch:
+        src: kernel_version.txt
+        dest: "{{ artifacts }}/kernel_version.txt"
         flat: yes
     - name: Check if rpm from repo is installed
       shell: |
@@ -22,3 +31,19 @@
         done
         echo "FAIL: didn't find correct package installed."
         exit 1
+    - name: Get package source name
+      shell: "dnf repoquery --disablerepo=* --enablerepo=test --repofrompath=test,{{ rpm_repo }} --qf '%{source_name}' | tail -n 1"
+      args:
+        warn: false
+      register: source_name
+    # If repo is for kernel or kernel-rt, make sure system is using correct version
+    # For kernel, release is limited to 64 characters, see: https://src.fedoraproject.org/rpms/kernel/pull-request/18#comment-14378
+    - name: Check kernel version
+      shell: |
+        version=$(dnf repoquery --arch=x86_64 --disablerepo=* --enablerepo=test --repofrompath=test,{{ rpm_repo }} --qf '%{version}' | tail -n 1)
+        release=$(dnf repoquery --arch=x86_64 --disablerepo=* --enablerepo=test --repofrompath=test,{{ rpm_repo }} --qf '%{release}' | tail -n 1)
+        echo ${version}-${release:0:64}.x86_64 > repo_nvra.txt
+        diff kernel_version.txt repo_nvra.txt
+      args:
+        warn: false
+      when: (source_name.stdout == "kernel") or (source_name.stdout == "kernel-rt")
