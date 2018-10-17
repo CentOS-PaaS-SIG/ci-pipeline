@@ -547,14 +547,14 @@ podTemplate(name: podName,
                     // Set build result
                     currentBuild.result = 'FAILURE'
 
+                    // Report the exception
+                    echo "Error: Exception from " + currentStage + ":"
+                    echo e.getMessage()
+
                     // Send message org.centos.prod.ci.pipeline.<stage>.complete on fedmsg if stage failed
                     // as the execution of stage would have stopped with executeInContainer call
                     messageFields = packagepipelineUtils.setMessageFields(messageStage)
                     pipelineUtils.sendMessageWithAudit(messageFields['topic'], messageFields['properties'], messageFields['content'], msgAuditFile, fedmsgRetryCount)
-
-                    // Report the exception
-                    echo "Error: Exception from " + currentStage + ":"
-                    echo e.getMessage()
 
                     // Throw the error
                     throw e
