@@ -57,11 +57,11 @@ name=Fedora ${branch}
 failovermethod=priority
 metalink=https://mirrors.fedoraproject.org/metalink?repo=${fedora_repo}&arch=x86_64
 enabled=1
-repo_gpgcheck=0
-type=rpm
+metadata_expire=7d
 gpgcheck=0
 skip_if_unavailable=False
 EOF
+
 
 if [ "$branch" != "rawhide" ]; then
     fedora_updates_repo="updates-released-${branch}"
@@ -72,8 +72,7 @@ name=Fedora ${VERSION} Updates
 failovermethod=priority
 metalink=https://mirrors.fedoraproject.org/metalink?repo=${fedora_updates_repo}&arch=x86_64
 enabled=1
-repo_gpgcheck=0
-type=rpm
+metadata_expire=7d
 gpgcheck=0
 skip_if_unavailable=False
 EOF
@@ -87,13 +86,13 @@ cat << EOF > $base_dir/ci-pipeline/config/ostree/fedora-atomic-testing.json
 {
     "include": "${base_dir}/logs/fedora-atomic-host.json",
     "ref": "fedora/${branch}/\${basearch}/atomic-host",
-    "repos": ["fedora-${VERSION}", "fedora-${VERSION}-updates"],
+    "repos": ["fedora-${VERSION}", $f_repos],
     "automatic_version_prefix": "${VERSION}",
     "mutate-os-release": "${VERSION}"
 }
 EOF
 
-rpm-ostree compose tree --force-nocache --repo=$base_dir/ostree $base_dir/ci-pipeline/config/ostree/fedora-atomic-testing.json || exit 1
+rpm-ostree compose tree --repo=$base_dir/ostree $base_dir/ci-pipeline/config/ostree/fedora-atomic-testing.json || exit 1
 
 ostree --repo=$base_dir/ostree summary -u
 
