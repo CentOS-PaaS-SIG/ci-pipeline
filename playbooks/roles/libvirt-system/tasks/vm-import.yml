@@ -100,7 +100,7 @@
   when: item.value.virt_customize is not defined
 
 - name: Give host time to boot
-  pause: seconds=10
+  pause: seconds=60
 
 - name: Register hosts ip address
   shell: arp -na | grep $(virsh dumpxml {{ item.key }} | xmllint --xpath 'string(//mac/@address)' -) | awk '{ print $2}' | sed 's/[\(\)]//g'
