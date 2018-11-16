@@ -309,6 +309,7 @@ def sendMessage(String msgTopic, String msgProps, String msgContent) {
                             messageProperties: msgProps,
                             messageType: 'Custom',
                             overrides: [topic: msgTopic],
+                            failOnError: true,
                             providerName: "${MSG_PROVIDER}"
                     return sendResult
                 } catch(e) {
