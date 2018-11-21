@@ -4,9 +4,6 @@ LABEL description="This container is meant to \
 run standard-test-roles defined tests targeting \
 the container namespace instead of the rpms namespace."
 
-# Copy restraint repo into container
-RUN curl -o /etc/yum.repos.d/bpeck-restraint-fedora.repo https://bpeck.fedorapeople.org/restraint/fedora.repo
-
 # Install all package requirements
 RUN dnf -y install ansible \
         beakerlib \
@@ -20,7 +17,6 @@ RUN dnf -y install ansible \
         python-dnf \
         python-pip \
         qemu-kvm \
-        restraint-rhts \
         rsync \
         standard-test-roles \
         sudo \
