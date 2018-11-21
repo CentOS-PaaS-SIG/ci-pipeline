@@ -8,9 +8,6 @@ upstreamfirst.fedorainfracloud.org. It also can run \
 integration tests from the projectatomic repo by calling \
 the integration-test.sh script."
 
-# Copy restraint repo into container
-RUN curl -o /etc/yum.repos.d/bpeck-restraint-fedora.repo https://bpeck.fedorapeople.org/restraint/fedora.repo
-
 # Install all package requirements
 RUN dnf -y install ansible \
         beakerlib \
@@ -25,7 +22,6 @@ RUN dnf -y install ansible \
         python-pip \
         qemu-img \
         qemu-kvm \
-        restraint-rhts \
         rsync \
         standard-test-roles \
         sudo \
