@@ -44,6 +44,13 @@ if [ -z "${package:-}" ]; then
 	fi
 fi
 
+namespace=${namespace:-"rpms"}
+
+tests_path="tests"
+if [ "${namespace}" == "tests" ]; then
+    tests_path="."
+fi
+
 # Make sure we have or have downloaded the test subject
 if [ -z "${TEST_SUBJECTS:-}" ]; then
 	echo "No subject defined"
@@ -74,8 +81,8 @@ else
 fi
 
 # Check if there is a tests dir from dist-git, if not, exit
-if [ -d tests ]; then
-     pushd tests
+if [ -d ${tests_path} ]; then
+     pushd ${tests_path}
 else
      echo "No tests for this package! Exiting..."
      exit 0

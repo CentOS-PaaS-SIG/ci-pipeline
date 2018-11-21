@@ -22,6 +22,8 @@ virtlogd &
 
 chmod 666 /dev/kvm
 
+namespace=${namespace:-"rpms"}
+
 if [ $branch != "rawhide" ]; then
     branch=${branch:1}
 fi
@@ -87,14 +89,23 @@ enabled=1
 gpgcheck=1
 EOF
 
-virt-copy-in -a ${DOWNLOADED_IMAGE_LOCATION} ${CURRENTDIR}/testrepo/${package} ${CURRENTDIR}/test-${package}.repo ${CURRENTDIR}/koji-latest.repo /etc/yum.repos.d/
+virt_copy_files="${CURRENTDIR}/testrepo/${package} ${CURRENTDIR}/test-${package}.repo ${CURRENTDIR}/koji-latest.repo /etc/yum.repos.d/"
+# If virt-customize.sh is running as part of PR on tests namespace there is no package built, therefore /testrepo/${package} does not exist
+if [ "${namespace}" == "tests" ]; then
+    virt_copy_files="${CURRENTDIR}/koji-latest.repo /etc/yum.repos.d/"
+fi
 
-for pkg in $(repoquery -q --disablerepo=\* --enablerepo=${package} --repofrompath=${package},${rpm_repo} --all --qf="%{ARCH}:%{NAME}" | sed -e "/^src:/d;/-debug\(info\|source\)\$/d;s/.\+://" | sort -u) ; do
-    RPM_LIST="${RPM_LIST} ${pkg}"
-done
-if ! virt-customize -v --selinux-relabel --memsize 4096 -a ${DOWNLOADED_IMAGE_LOCATION} --run-command "yum install -y --best --allowerasing --nogpgcheck ${RPM_LIST} && yum clean all" ; then
-    echo "failure installing rpms"
-    exit 1
+virt-copy-in -a ${DOWNLOADED_IMAGE_LOCATION} ${virt_copy_files} /etc/yum.repos.d/
+
+# Do install any package if it is tests namespace
+if [ "${namespace}" != "tests" ]; then
+    for pkg in $(repoquery -q --disablerepo=\* --enablerepo=${package} --repofrompath=${package},${rpm_repo} --all --qf="%{ARCH}:%{NAME}" | sed -e "/^src:/d;/-debug\(info\|source\)\$/d;s/.\+://" | sort -u) ; do
+        RPM_LIST="${RPM_LIST} ${pkg}"
+    done
+    if ! virt-customize -v --selinux-relabel --memsize 4096 -a ${DOWNLOADED_IMAGE_LOCATION} --run-command "yum install -y --best --allowerasing --nogpgcheck ${RPM_LIST} && yum clean all" ; then
+        echo "failure installing rpms"
+        exit 1
+    fi
 fi
 
 } 2>&1 | tee ${CURRENTDIR}/logs/console.log #group for tee
