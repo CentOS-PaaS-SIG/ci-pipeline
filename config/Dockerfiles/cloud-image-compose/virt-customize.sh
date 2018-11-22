@@ -58,7 +58,10 @@ mkdir -p ${CURRENTDIR}/images
 
 # Make dir for just rpm content
 mkdir -p ${CURRENTDIR}/testrepo/${package}
-cp -rp ${rpm_repo}/*.rpm ${rpm_repo}/repodata ${CURRENTDIR}/testrepo/${package}
+# Do there is no packages to copy when running for tests namespace
+if [ "${namespace}" != "tests" ]; then
+    cp -rp ${rpm_repo}/*.rpm ${rpm_repo}/repodata ${CURRENTDIR}/testrepo/${package}
+fi
 
 RPM_LIST=""
 # Add custom rpms to image
