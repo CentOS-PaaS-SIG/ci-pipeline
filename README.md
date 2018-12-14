@@ -60,7 +60,7 @@
 
 ## What Does CI/CD Mean in the Context of the CI-Pipeline Project?
 
-True CI starts at gating developers before code is integrated into the general code base to find bugs sooner. 
+aaTrue CI starts at gating developers before code is integrated into the general code base to find bugs sooner. 
 It is less costly for the developer that changed the code to fix their own issues before the code is merged into the repo.
 Obviously there is a certain balance of what testing/validation is run and time to get feedback to the developer and this may vary among projects.
 
