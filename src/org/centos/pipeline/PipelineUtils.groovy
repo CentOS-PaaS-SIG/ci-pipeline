@@ -319,6 +319,7 @@ def sendMessage(String msgTopic, String msgProps, String msgContent) {
         } catch(e) {
             echo "FAIL: Could not send message to ${MSG_PROVIDER}"
             echo e.getMessage()
+            sleep 30
             error e.getMessage()
         }
     }
