@@ -81,6 +81,8 @@ if [ "${branch}" != "rawhide" ]; then
         echo "failure enabling updates-testing repo"
         exit 1
     fi
+else
+    virt-customize -a ${DOWNLOADED_IMAGE_LOCATION} --run-command "source /etc/os-release; rpm --import /etc/pki/rpm-gpg/RPM-GPG-KEY-\$VERSION_ID-fedora"
 fi
 # Add repo from latest packages built in koji
 cat <<EOF > ${CURRENTDIR}/koji-latest.repo
