@@ -17,7 +17,17 @@ properties(
                     ]
                 ),
                 pipelineTriggers(
-                        [[$class: 'CIBuildTrigger', checks: [], providerName: 'fedora-fedmsg', selector: 'topic = "org.fedoraproject.prod.git.receive"']]
+                        [[$class: 'CIBuildTrigger',
+                          noSquash: true,
+                          providerData: [
+                              $class: 'FedMsgSubscriberProviderData',
+                              name: 'fedora-fedmsg',
+                              overrides: [
+                                  topic: 'org.fedoraproject.prod.git.receive'
+                              ],
+                              checks: []
+                          ]
+                        ]]
                 )
         ]
 )
