@@ -24,6 +24,7 @@ RUN dnf -y install ansible \
         qemu-kvm \
         rsync \
         standard-test-roles \
+        standard-test-roles-inventory-qemu \
         sudo \
         wget \
         && dnf clean all
