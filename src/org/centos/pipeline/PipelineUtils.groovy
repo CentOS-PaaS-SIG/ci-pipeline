@@ -1248,9 +1248,9 @@ def checkTests(String mypackage, String mybranch, String tag, String pr_id=null,
         }
     }
     if (namespace != "tests") {
-        return sh (returnStatus: true, script: "ansible-playbook --list-tags ${mypackage}/tests/tests*.yml 2> /dev/null | grep -e \"TASK TAGS: \[.*\\<${tag}\\>.*\]\"") == 0
+        return sh (returnStatus: true, script: "ansible-playbook --list-tags ${mypackage}/tests/tests*.yml 2> /dev/null | grep -e \"TASK TAGS: \\[.*\\<${tag}\\>.*\\]\\"") == 0
     } else {
-        return sh (returnStatus: true, script: "ansible-playbook --list-tags ${mypackage}/tests*.yml 2> /dev/null | grep -e \"TASK TAGS: \[.*\\<${tag}\\>.*\]\"") == 0
+        return sh (returnStatus: true, script: "ansible-playbook --list-tags ${mypackage}/tests*.yml 2> /dev/null | grep -e \"TASK TAGS: \\[.*\\<${tag}\\>.*\\]\\"") == 0
     }
 }
 
