@@ -19,6 +19,7 @@ RUN dnf -y install ansible \
         qemu-kvm \
         rsync \
         standard-test-roles \
+        standard-test-roles-inventory-docker \
         sudo \
         systemd \
         wget \
