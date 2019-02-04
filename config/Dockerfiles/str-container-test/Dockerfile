@@ -1,4 +1,4 @@
-FROM fedora:27
+FROM fedora:latest
 LABEL maintainer "https://github.com/CentOS-PaaS-SIG/ci-pipeline"
 LABEL description="This container is meant to \
 run standard-test-roles defined tests targeting \
