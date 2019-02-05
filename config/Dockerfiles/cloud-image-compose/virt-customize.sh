@@ -105,6 +105,22 @@ virt-copy-in -a ${DOWNLOADED_IMAGE_LOCATION} ${virt_copy_files} /etc/yum.repos.d
 # Do install any package if it is tests namespace
 if [ "${namespace}" != "tests" ]; then
     for pkg in $(repoquery -q --disablerepo=\* --enablerepo=${package} --repofrompath=${package},${rpm_repo} --all --qf="%{ARCH}:%{NAME}" | sed -e "/^src:/d;/-debug\(info\|source\)\$/d;s/.\+://" | sort -u) ; do
+        # check if this package conflicts with any other package from RPM_LIST
+        conflict=$(repoquery -q --disablerepo=\* --enablerepo=${package} --repofrompath=${package},${rpm_repo} --conflict $pkg | awk '{print$1}')
+        found_conflict=0
+        if [ ! -z "${conflict}" ] && [ ! -z "${RPM_LIST}" ]; then
+            for rpm_pkg in ${RPM_LIST} ; do
+                if [ "${conflict}" == "$rpm_pkg" ]; then
+                    # this pkg conflicts with a package already in RPM_LIST
+                    found_conflict=1
+                    continue
+                fi
+            done
+            if [ ${found_conflict} ]; then
+                echo "INFO: will not install $pkg as it conflicts with $conflict."
+                continue
+            fi
+        fi
         RPM_LIST="${RPM_LIST} ${pkg}"
     done
     if ! virt-customize -v --selinux-relabel --memsize 4096 -a ${DOWNLOADED_IMAGE_LOCATION} --run-command "yum install -y --best --allowerasing --nogpgcheck ${RPM_LIST} && yum clean all" ; then
