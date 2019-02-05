@@ -553,7 +553,7 @@ podTemplate(name: podName,
 
                     // Send message org.centos.prod.ci.pipeline.<stage>.complete on fedmsg if stage failed
                     // as the execution of stage would have stopped with executeInContainer call
-                    messageFields = packagepipelineUtils.setMessageFields(messageStage)
+                    messageFields = pipelineUtils.setMessageFields(currentStage)
                     pipelineUtils.sendMessageWithAudit(messageFields['topic'], messageFields['properties'], messageFields['content'], msgAuditFile, fedmsgRetryCount)
 
                     // Throw the error
