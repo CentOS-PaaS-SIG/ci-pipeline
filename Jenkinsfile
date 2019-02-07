@@ -409,7 +409,9 @@ podTemplate(name: podName,
 
                     currentStage = "ci-pipeline-ostree-image-boot-sanity"
                     stage(currentStage) {
-                        if (fileExists("${env.WORKSPACE}/NeedNewImage.txt") || ("${env.GENERATE_IMAGE}" == "true")) {
+                        // Turning stage off since this pipeline is deprecated and want functionality of stage pipeline
+                        //if (fileExists("${env.WORKSPACE}/NeedNewImage.txt") || ("${env.GENERATE_IMAGE}" == "true")) {
+                        if (false) {
                             pipelineUtils.setStageEnvVars(currentStage)
 
                             // Set our message topic, properties, and content
@@ -444,14 +446,15 @@ podTemplate(name: podName,
 
                     }
 
-                    currentStage = "ci-pipeline-ostree-boot-sanity"
-                    stage(currentStage) {
-                        pipelineUtils.setStageEnvVars(currentStage)
+                    // Turning stage off since this pipeline is deprecated and want functionality of stage pipeline
+                    //currentStage = "ci-pipeline-ostree-boot-sanity"
+                    //stage(currentStage) {
+                    //    pipelineUtils.setStageEnvVars(currentStage)
 
-                        // Run ostree boot sanity
-                        pipelineUtils.executeInContainer(currentStage, "ostree-boot-image", "/home/ostree-boot-image.sh")
+                    //    // Run ostree boot sanity
+                    //    pipelineUtils.executeInContainer(currentStage, "ostree-boot-image", "/home/ostree-boot-image.sh")
 
-                    }
+                    //}
 
                     currentStage = "ci-pipeline-functional-tests"
                     stage(currentStage) {
@@ -526,22 +529,23 @@ podTemplate(name: podName,
                         pipelineUtils.sendMessageWithAudit(messageFields['topic'], messageFields['properties'], messageFields['content'], msgAuditFile, fedmsgRetryCount)
 
                     }
-                    currentStage = "openshift-e2e-tests"
-                    stage(currentStage) {
-                        // run linchpin up and other steps
-                        // note: need to be updated
+                    // Turning stage off since this pipeline is deprecated and want functionality of stage pipeline
+                    //currentStage = "openshift-e2e-tests"
+                    //stage(currentStage) {
+                    //    // run linchpin up and other steps
+                    //    // note: need to be updated
 
-                        // Set stage specific vars
-                        pipelineUtils.setStageEnvVars(currentStage)
+                    //    // Set stage specific vars
+                    //    pipelineUtils.setStageEnvVars(currentStage)
 
-                        // run linchpin workspace for e2e tests
-                        try {
-                            pipelineUtils.executeInContainer(currentStage, "linchpin-libvirt", "/root/linchpin_workspace/run_e2e_tests.sh")
-                        } catch (e) {
-                            // Should improve to actually parse result files, but for now if the script failed, call it a test failure
-                            currentBuild.result = 'UNSTABLE'
-                        }
-                    }
+                    //    // run linchpin workspace for e2e tests
+                    //    try {
+                    //        pipelineUtils.executeInContainer(currentStage, "linchpin-libvirt", "/root/linchpin_workspace/run_e2e_tests.sh")
+                    //    } catch (e) {
+                    //        // Should improve to actually parse result files, but for now if the script failed, call it a test failure
+                    //        currentBuild.result = 'UNSTABLE'
+                    //    }
+                    //}
 
                 } catch (e) {
                     // Set build result
