@@ -1,5 +1,7 @@
 #!/bin/bash
 
+# KOJI NO LONGER SUPPORTS F27 TARGET SO ALL KOJI PARTS COMMENTED OUT
+
 set +e
 set -x
 # Check to make sure we have all required vars
@@ -75,7 +77,7 @@ cp -rp ../${fed_repo}/** ~/rpmbuild/SOURCES
 rpmbuild -bs --define "dist .$fed_branch" ${fed_repo}.spec
 ls
 # Set up koji creds
-kinit -k -t "${CURRENTDIR}/fedora.keytab" $FEDORA_PRINCIPAL
+# KOJICOMMENT kinit -k -t "${CURRENTDIR}/fedora.keytab" $FEDORA_PRINCIPAL
 
 # Want to archive build logs if mock build exits uncleanly
 function archive_logs {
@@ -88,7 +90,7 @@ trap archive_logs EXIT SIGHUP SIGINT SIGTERM
 
 # Build the package into ./results_${fed_repo}/$VERSION/$RELEASE/ and concurrently do a koji build
 { time fedpkg --release ${fed_branch} mockbuild ; } 2> ${LOGDIR}/mockbuild.txt &
-{ time python2 /usr/bin/koji build --wait --arch-override=x86_64 --scratch $RSYNC_BRANCH ~/rpmbuild/SRPMS/${fed_repo}*.src.rpm ; } 2> ${LOGDIR}/kojibuildtime.txt &
+# KOJICOMMENT { time python2 /usr/bin/koji build --wait --arch-override=x86_64 --scratch $RSYNC_BRANCH ~/rpmbuild/SRPMS/${fed_repo}*.src.rpm ; } 2> ${LOGDIR}/kojibuildtime.txt &
 # Set status if either job fails to build the rpm
 MOCKBUILD_RC=0
 for job in `jobs -p`; do
