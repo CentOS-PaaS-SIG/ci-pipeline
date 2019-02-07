@@ -101,6 +101,7 @@ pipeline {
                     changeset "config/Dockerfiles/rpmbuild/**"
                     changeset "config/Dockerfiles/cloud-image-compose/**"
                     changeset "config/Dockerfiles/singlehost-test/**"
+                    changeset "config/s2i/jenkins/slave/**"
                     changeset "upstream-fedora-pipeline/**"
                 }
             }
@@ -117,6 +118,18 @@ pipeline {
             steps {
                 script {
                     pipelineUtils.setupContainerTemplates(openshiftProject)
+                }
+            }
+        }
+        stage("jenkins-continuous-infra-slave image build") {
+            when {
+                // Only build if we have related files in changeset
+                changeset "config/s2i/jenkins/slave/**"
+                environment name: 'relevant', value: 'true'
+            }
+            steps {
+                script {
+                    tagMap['jenkins-continuous-infra-slave'] = pipelineUtils.buildImage(openshiftProject, "jenkins-continuous-infra-slave")
                 }
             }
         }
