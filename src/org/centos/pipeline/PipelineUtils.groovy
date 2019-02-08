@@ -1247,10 +1247,19 @@ def checkTests(String mypackage, String mybranch, String tag, String pr_id=null,
             }
         }
     }
-    if (namespace != "tests") {
-        return sh (returnStatus: true, script: """grep -r '\\- '${tag}'\$' ${mypackage}/tests""") == 0
+    // if STR is installed use it to check for tags as it is more reliable
+    if (sh(returnStatus: true, script: """rpm -q standard-test-roles""") == 0) {
+        if (namespace != "tests") {
+            return sh (returnStatus: true, script: "ansible-playbook --list-tags ${mypackage}/tests/tests*.yml | grep -e \"TASK TAGS: \\[.*\\<${tag}\\>.*\\]\"") == 0
+        } else {
+            return sh (returnStatus: true, script: "ansible-playbook --list-tags ${mypackage}/tests*.yml | grep -e \"TASK TAGS: \\[.*\\<${tag}\\>.*\\]\"") == 0
+        }
     } else {
-        return sh (returnStatus: true, script: """grep -r '\\- '${tag}'\$' ${mypackage}""") == 0
+        if (namespace != "tests") {
+            return sh (returnStatus: true, script: """grep -r '\\- '${tag}'\$' ${mypackage}/tests""") == 0
+        } else {
+            return sh (returnStatus: true, script: """grep -r '\\- '${tag}'\$' ${mypackage}""") == 0
+        }
     }
 }
 
