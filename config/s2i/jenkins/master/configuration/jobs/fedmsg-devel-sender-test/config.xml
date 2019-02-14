@@ -17,7 +17,7 @@
     <triggers/>
     <concurrentBuild>false</concurrentBuild>
     <builders>
-        <com.redhat.jenkins.plugins.ci.CIMessageBuilder plugin="jms-messaging@1.1.1">
+        <com.redhat.jenkins.plugins.ci.CIMessageBuilder plugin="jms-messaging@1.1.2">
           <providerData class="com.redhat.jenkins.plugins.ci.provider.data.FedMsgPublisherProviderData">
             <name>fedora-fedmsg-devel</name>
             <!--<messageProperties>scott=true</messageProperties>-->

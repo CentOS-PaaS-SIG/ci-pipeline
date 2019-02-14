@@ -16,7 +16,7 @@
     <blockBuildWhenDownstreamBuilding>false</blockBuildWhenDownstreamBuilding>
     <blockBuildWhenUpstreamBuilding>false</blockBuildWhenUpstreamBuilding>
     <triggers>
-       <com.redhat.jenkins.plugins.ci.CIBuildTrigger plugin="jms-messaging@1.1.1">
+       <com.redhat.jenkins.plugins.ci.CIBuildTrigger plugin="jms-messaging@1.1.2">
           <spec />
           <noSquash>true</noSquash>
           <providerData class="com.redhat.jenkins.plugins.ci.provider.data.FedMsgSubscriberProviderData">
