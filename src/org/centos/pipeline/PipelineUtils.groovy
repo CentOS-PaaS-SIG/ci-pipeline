@@ -247,7 +247,6 @@ def setMessageFields(String messageType) {
             rev              : env.fed_rev,
             status           : currentBuild.currentResult,
             test_guidance    : "''",
-            topic            : topic,
             username         : env.RSYNC_USER,
     ]
 
