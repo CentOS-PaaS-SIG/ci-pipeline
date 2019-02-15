@@ -69,16 +69,11 @@
       </hudson.model.ParametersDefinitionProperty>
       <org.jenkinsci.plugins.workflow.job.properties.PipelineTriggersJobProperty>
          <triggers>
-            <com.redhat.jenkins.plugins.ci.CIBuildTrigger plugin="jms-messaging@1.1.2">
+            <com.redhat.jenkins.plugins.ci.CIBuildTrigger plugin="jms-messaging@1.0.35">
                <spec />
-               <noSquash>true</noSquash>
-               <providerData class="com.redhat.jenkins.plugins.ci.provider.data.FedMsgSubscriberProviderData">
-                  <name>fedora-fedmsg</name>
-                  <overrides>
-                     <topic>org.fedoraproject.prod.git.receive</topic>
-                  </overrides>
-                  <checks />
-               </providerData>
+               <selector>topic = "org.fedoraproject.prod.git.receive"</selector>
+               <providerName>fedora-fedmsg</providerName>
+               <checks />
             </com.redhat.jenkins.plugins.ci.CIBuildTrigger>
          </triggers>
       </org.jenkinsci.plugins.workflow.job.properties.PipelineTriggersJobProperty>

@@ -1,5 +1,3 @@
-import groovy.json.JsonOutput
-
 properties(
         [
                 buildDiscarder(logRotator(artifactDaysToKeepStr: '', artifactNumToKeepStr: '50', daysToKeepStr: '', numToKeepStr: '100')),
@@ -19,17 +17,7 @@ properties(
                     ]
                 ),
                 pipelineTriggers(
-                        [[$class: 'CIBuildTrigger',
-                          noSquash: true,
-                          providerData: [
-                              $class: 'FedMsgSubscriberProviderData',
-                              name: 'fedora-fedmsg',
-                              overrides: [
-                                  topic: 'org.fedoraproject.prod.git.receive'
-                              ],
-                              checks: []
-                          ]
-                        ]]
+                        [[$class: 'CIBuildTrigger', checks: [], providerName: 'fedora-fedmsg', selector: 'topic = "org.fedoraproject.prod.git.receive"']]
                 )
         ]
 )
@@ -155,25 +143,22 @@ node('master') {
                         def jobproperties_map = readProperties file: "${env.WORKSPACE}/job.properties"
                         job_properties = jobproperties_map.collect { key, value -> return key+'='+value }
                         withEnv(job_properties) {
-                            messageProperties = ''
-                            // Populate message content
-                            messageContent = [
-                                    topic: env.topic,
-                                    build_url: BUILD_URL,
-                                    build_id: BUILD_ID,
-                                    branch: env.branch,
-                                    ref: 'fedora/' + env.branch + '/x86_64/atomic-host',
-                                    rev: env.fed_rev,
-                                    repo: env.fed_repo,
-                                    namespace: env.fed_namespace,
-                                    username: 'fedora-atomic',
-                                    test_guidance: '',
-                                    status: currentBuild.currentResult
-                            ]
-                            messageContentString = JsonOutput.toJson(messageContent)
+                            // Populate message Properties
+                            messageProperties = "topic=${env.topic}\n" +
+                                    "build_url=${BUILD_URL}\n" +
+                                    "build_id=${BUILD_ID}\n" +
+                                    "branch=${env.branch}\n" +
+                                    "ref=fedora/${env.branch}/x86_64/atomic-host\n" +
+                                    "rev=${env.fed_rev}\n" +
+                                    "repo=${env.fed_repo}\n" +
+                                    "namespace=${env.fed_namespace}\n" +
+                                    "username=fedora-atomic\n" +
+                                    "test_guidance=''\n" +
+                                    "status=${currentBuild.currentResult}"
+                            messageContent = ''
 
                             // Send message org.centos.prod.ci.pipeline.package.queued or .ignore on fedmsg
-                            sendMessage(messageProperties, messageContentString)
+                            sendMessage(messageProperties, messageContent)
                         }
                     }
                 }
