@@ -16,12 +16,20 @@
     <blockBuildWhenDownstreamBuilding>false</blockBuildWhenDownstreamBuilding>
     <blockBuildWhenUpstreamBuilding>false</blockBuildWhenUpstreamBuilding>
     <triggers>
-        <com.redhat.jenkins.plugins.ci.CIBuildTrigger plugin="jms-messaging@1.0.20">
-            <spec></spec>
-            <selector>scott = &quot;true&quot;</selector>
-            <providerName>fedora-fedmsg-devel</providerName>
-            <checks/>
-        </com.redhat.jenkins.plugins.ci.CIBuildTrigger>
+       <com.redhat.jenkins.plugins.ci.CIBuildTrigger plugin="jms-messaging@1.1.2">
+          <spec />
+          <noSquash>true</noSquash>
+          <providerData class="com.redhat.jenkins.plugins.ci.provider.data.FedMsgSubscriberProviderData">
+             <name>fedora-fedmsg-devel</name>
+             <overrides />
+             <checks>
+                <com.redhat.jenkins.plugins.ci.messaging.checks.MsgCheck>
+                   <field>scott</field>
+                   <expectedValue>true</expectedValue>
+                </com.redhat.jenkins.plugins.ci.messaging.checks.MsgCheck>
+             </checks>
+          </providerData>
+       </com.redhat.jenkins.plugins.ci.CIBuildTrigger>
     </triggers>
     <concurrentBuild>false</concurrentBuild>
     <builders>
