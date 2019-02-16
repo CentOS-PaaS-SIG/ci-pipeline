@@ -34,16 +34,21 @@
       <org.jenkinsci.plugins.workflow.job.properties.DisableConcurrentBuildsJobProperty />
       <org.jenkinsci.plugins.workflow.job.properties.PipelineTriggersJobProperty>
          <triggers>
-            <com.redhat.jenkins.plugins.ci.CIBuildTrigger plugin="jms-messaging@1.0.35">
+            <com.redhat.jenkins.plugins.ci.CIBuildTrigger plugin="jms-messaging@1.1.3">
                <spec />
-               <selector>topic = "org.fedoraproject.prod.pagure.pull-request.new" OR topic = "org.fedoraproject.prod.pagure.pull-request.comment.added"</selector>
-               <providerName>fedora-fedmsg</providerName>
-               <checks>
-                  <com.redhat.jenkins.plugins.ci.messaging.checks.MsgCheck>
-                     <field>$.pullrequest.project.namespace</field>
-                     <expectedValue>rpms</expectedValue>
-                  </com.redhat.jenkins.plugins.ci.messaging.checks.MsgCheck>
-               </checks>
+               <noSquash>true</noSquash>
+               <providerData class="com.redhat.jenkins.plugins.ci.provider.data.FedMsgSubscriberProviderData">
+                  <name>fedora-fedmsg</name>
+                  <overrides>
+                     <topic>org.fedoraproject.prod.pagure.pull-request.new</topic>
+                  </overrides>
+                  <checks>
+                     <com.redhat.jenkins.plugins.ci.messaging.checks.MsgCheck>
+                        <field>$.pullrequest.project.namespace</field>
+                        <expectedValue>rpms</expectedValue>
+                     </com.redhat.jenkins.plugins.ci.messaging.checks.MsgCheck>
+                  </checks>
+               </providerData>
             </com.redhat.jenkins.plugins.ci.CIBuildTrigger>
          </triggers>
       </org.jenkinsci.plugins.workflow.job.properties.PipelineTriggersJobProperty>

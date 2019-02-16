@@ -1,13 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <flow-definition plugin="workflow-job@2.17">
    <actions>
-      <io.jenkins.blueocean.service.embedded.BlueOceanUrlAction plugin="blueocean-rest-impl@1.4.2">
-         <blueOceanUrlObject class="io.jenkins.blueocean.service.embedded.BlueOceanUrlObjectImpl">
-            <mappedUrl>blue/organizations/jenkins/ci-pipeline-trigger</mappedUrl>
-         </blueOceanUrlObject>
-      </io.jenkins.blueocean.service.embedded.BlueOceanUrlAction>
       <org.jenkinsci.plugins.workflow.multibranch.JobPropertyTrackerAction plugin="workflow-multibranch@2.17">
          <jobPropertyDescriptors>
+            <string>org.jenkinsci.plugins.workflow.job.properties.DisableConcurrentBuildsJobProperty</string>
             <string>hudson.model.ParametersDefinitionProperty</string>
             <string>org.jenkinsci.plugins.workflow.job.properties.PipelineTriggersJobProperty</string>
             <string>jenkins.model.BuildDiscarderProperty</string>
@@ -27,46 +23,15 @@
          <autoRebuild>false</autoRebuild>
          <rebuildDisabled>false</rebuildDisabled>
       </com.sonyericsson.rebuild.RebuildSettings>
-      <jenkins.branch.RateLimitBranchProperty_-JobPropertyImpl plugin="branch-api@2.0.18">
-         <durationName>hour</durationName>
-         <count>600</count>
-         <userBoost>false</userBoost>
-      </jenkins.branch.RateLimitBranchProperty_-JobPropertyImpl>
       <jenkins.model.BuildDiscarderProperty>
          <strategy class="hudson.tasks.LogRotator">
             <daysToKeep>-1</daysToKeep>
             <numToKeep>100</numToKeep>
             <artifactDaysToKeep>-1</artifactDaysToKeep>
-            <artifactNumToKeep>50</artifactNumToKeep>
+            <artifactNumToKeep>100</artifactNumToKeep>
          </strategy>
       </jenkins.model.BuildDiscarderProperty>
-      <hudson.model.ParametersDefinitionProperty>
-         <parameterDefinitions>
-            <hudson.model.StringParameterDefinition>
-               <name>CI_MESSAGE</name>
-               <description>fedmsg msg</description>
-               <trim>false</trim>
-            </hudson.model.StringParameterDefinition>
-            <hudson.model.StringParameterDefinition>
-               <name>TARGETS</name>
-               <description>fedora branch targets</description>
-               <defaultValue>^(f26|f27)$</defaultValue>
-               <trim>false</trim>
-            </hudson.model.StringParameterDefinition>
-            <hudson.model.StringParameterDefinition>
-               <name>PROJECT_REPO</name>
-               <description>Main project repo</description>
-               <defaultValue>ci-pipeline</defaultValue>
-               <trim>false</trim>
-            </hudson.model.StringParameterDefinition>
-            <hudson.model.StringParameterDefinition>
-               <name>MAIN_TOPIC</name>
-               <description>main topic to publish on</description>
-               <defaultValue>org.centos.prod</defaultValue>
-               <trim>false</trim>
-            </hudson.model.StringParameterDefinition>
-         </parameterDefinitions>
-      </hudson.model.ParametersDefinitionProperty>
+      <org.jenkinsci.plugins.workflow.job.properties.DisableConcurrentBuildsJobProperty />
       <org.jenkinsci.plugins.workflow.job.properties.PipelineTriggersJobProperty>
          <triggers>
             <com.redhat.jenkins.plugins.ci.CIBuildTrigger plugin="jms-messaging@1.1.3">
@@ -75,20 +40,35 @@
                <providerData class="com.redhat.jenkins.plugins.ci.provider.data.FedMsgSubscriberProviderData">
                   <name>fedora-fedmsg</name>
                   <overrides>
-                     <topic>org.fedoraproject.prod.git.receive</topic>
+                     <topic>org.fedoraproject.prod.pagure.pull-request.comment.added</topic>
                   </overrides>
-                  <checks />
+                  <checks>
+                     <com.redhat.jenkins.plugins.ci.messaging.checks.MsgCheck>
+                        <field>$.pullrequest.project.namespace</field>
+                        <expectedValue>rpms</expectedValue>
+                     </com.redhat.jenkins.plugins.ci.messaging.checks.MsgCheck>
+                  </checks>
                </providerData>
             </com.redhat.jenkins.plugins.ci.CIBuildTrigger>
          </triggers>
       </org.jenkinsci.plugins.workflow.job.properties.PipelineTriggersJobProperty>
+      <hudson.model.ParametersDefinitionProperty>
+         <parameterDefinitions>
+            <hudson.model.StringParameterDefinition>
+               <name>CI_MESSAGE</name>
+               <description>CI_MESSAGE</description>
+               <defaultValue>{"commit":{"username":"zdohnal","stats":{"files":{"README.patches":{"deletions":0,"additions":30,"lines":30},"sources":{"deletions":1,"additions":1,"lines":2},"vim.spec":{"deletions":7,"additions":19,"lines":26},".gitignore":{"deletions":0,"additions":1,"lines":1},"vim-8.0-rhbz1365258.patch":{"deletions":0,"additions":12,"lines":12}},"total":{"deletions":8,"files":5,"additions":63,"lines":71}},"name":"Zdenek Dohnal","rev":"3ff427e02625f810a2cedb754342be44d6161b39","namespace":"rpms","agent":"zdohnal","summary":"Merge branch f25 into f26","repo":"vim","branch":"f26","seen":false,"path":"/srv/git/repositories/rpms/vim.git","message":"Merge branch 'f25' into f26 ","email":"zdohnal@redhat.com"},"topic":"org.fedoraproject.prod.git.receive"}</defaultValue>
+               <trim>false</trim>
+            </hudson.model.StringParameterDefinition>
+         </parameterDefinitions>
+      </hudson.model.ParametersDefinitionProperty>
    </properties>
    <definition class="org.jenkinsci.plugins.workflow.cps.CpsScmFlowDefinition" plugin="workflow-cps@2.45">
       <scm class="hudson.plugins.git.GitSCM" plugin="git@3.8.0">
          <configVersion>2</configVersion>
          <userRemoteConfigs>
             <hudson.plugins.git.UserRemoteConfig>
-               <url>https://github.com/CentOS-PaaS-SIG/ci-pipeline</url>
+               <url>https://github.com/CentOS-PaaS-SIG/upstream-fedora-pipeline.git</url>
             </hudson.plugins.git.UserRemoteConfig>
          </userRemoteConfigs>
          <branches>
@@ -100,8 +80,8 @@
          <submoduleCfg class="list" />
          <extensions />
       </scm>
-      <scriptPath>JenkinsfileTrigger</scriptPath>
-      <lightweight>true</lightweight>
+      <scriptPath>JenkinsfilePRTrigger</scriptPath>
+      <lightweight>false</lightweight>
    </definition>
    <triggers />
    <disabled>false</disabled>

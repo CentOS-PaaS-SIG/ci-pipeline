@@ -5,6 +5,7 @@ import org.centos.*
 
 import org.jenkinsci.plugins.pipeline.modeldefinition.Utils
 import org.csanchez.jenkins.plugins.kubernetes.pipeline.PodTemplateAction
+import groovy.json.JsonOutput
 
 /**
  * Library to setup and configure the host the way ci-pipeline requires
@@ -228,12 +229,12 @@ def getRsyncBranch() {
 def setMessageFields(String messageType) {
     topic = "${MAIN_TOPIC}.ci.pipeline.${messageType}"
 
-    // Create a HashMap of default message property keys and values
+    // Create a HashMap of default message content keys and values
     // These properties should be applicable to ALL message types.
     // If something is applicable to only some subset of messages,
     // add it below per the existing examples.
 
-    def messageProperties = [
+    def messageContent = [
             branch           : env.branch,
             build_id         : env.BUILD_ID,
             build_url        : env.JENKINS_URL + 'blue/organizations/jenkins/' + env.JOB_NAME + '/detail/' + env.JOB_NAME + '/' + env.BUILD_NUMBER + '/pipeline/',
@@ -246,7 +247,6 @@ def setMessageFields(String messageType) {
             rev              : env.fed_rev,
             status           : currentBuild.currentResult,
             test_guidance    : "''",
-            topic            : topic,
             username         : env.RSYNC_USER,
     ]
 
@@ -255,46 +255,37 @@ def setMessageFields(String messageType) {
                         'compose.test.integration.running', 'compose.test.integration.complete', 'image.running', 'image.complete',
                         'image.test.smoke.running', 'image.test.smoke.complete'
     ]) {
-        messageProperties.compose_url = "${env.HTTP_BASE}/${env.branch}/ostree"
+        messageContent.compose_url = "${env.HTTP_BASE}/${env.branch}/ostree"
     }
 
     // Add image type to appropriate message types
     if (messageType in ['image.running', 'image.complete', 'image.test.smoke.running', 'image.test.smoke.complete'
     ]) {
-        messageProperties.type = messageType == 'image.running' ? "''" : 'qcow2'
+        messageContent.type = messageType == 'image.running' ? "''" : 'qcow2'
     }
 
     // Add image_url to appropriate message types
     if (messageType in ['image.complete', 'image.test.smoke.running', 'image.test.smoke.complete']) {
-        messageProperties.image_url = messageType == 'image.running' ? "''" : env.image2boot
+        messageContent.image_url = messageType == 'image.running' ? "''" : env.image2boot
     }
 
     // Add image_name to appropriate message types
     if (messageType in ['image.complete', 'image.test.smoke.running', 'image.test.smoke.complete']) {
-        messageProperties.image_name = messageType == 'image.running' ? "''" : env.image_name
+        messageContent.image_name = messageType == 'image.running' ? "''" : env.image_name
     }
 
-    // Create a string to hold the data from the messageProperties hash map
-    String messagePropertiesString = ''
+    // Create a string to hold the data from the messageContent hash map
+    String messageContentString = JsonOutput.toJson(messageContent)
 
-    messageProperties.each { k,v ->
-        // Don't add a new line to the last item in the hash map when adding it to the messagePropertiesString
-        if ( k == messageProperties.keySet().last()){
-            messagePropertiesString += "${k}=${v}"
-        } else {
-            messagePropertiesString += "${k}=${v}\n"
-        }
-    }
-
-    def messageContentString = ''
+    def messagePropertiesString = ''
 
     return [ 'topic': topic, 'properties': messagePropertiesString, 'content': messageContentString ]
 }
 
 /**
  * Library to send message
- * @param msgProps - The message properties in key=value form, one key/value per line ending in '\n'
- * @param msgContent - Message content.
+ * @param msgProps - Message Properties - empty string for fedmsg
+ * @param msgContent - Message content in map form
  * @return
  */
 def sendMessage(String msgTopic, String msgProps, String msgContent) {
@@ -327,8 +318,8 @@ def sendMessage(String msgTopic, String msgProps, String msgContent) {
 
 /**
  * Library to send message
- * @param msgProps - The message properties in key=value form, one key/value per line ending in '\n'
- * @param msgContent - Message content.
+ * @param msgProps - Message Properties - empty string for fedmsg
+ * @param msgContent - Message content in map form
  * @param msgAuditFile - File containing all past messages. It will get appended to.
  * @param fedmsgRetryCount number of times to keep trying.
  * @return

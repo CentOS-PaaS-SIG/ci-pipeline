@@ -17,12 +17,13 @@
     <triggers/>
     <concurrentBuild>false</concurrentBuild>
     <builders>
-        <com.redhat.jenkins.plugins.ci.CIMessageBuilder plugin="jms-messaging@1.0.20">
-            <providerName>fedora-fedmsg-devel</providerName>
-            <messageType>Custom</messageType>
-            <messageProperties>scott=true</messageProperties>
-            <messageContent></messageContent>
+        <com.redhat.jenkins.plugins.ci.CIMessageBuilder plugin="jms-messaging@1.1.3">
+          <providerData class="com.redhat.jenkins.plugins.ci.provider.data.FedMsgPublisherProviderData">
+            <name>fedora-fedmsg-devel</name>
+            <!--<messageProperties>scott=true</messageProperties>-->
+            <messageContent/>
             <failOnError>false</failOnError>
+          </providerData>
         </com.redhat.jenkins.plugins.ci.CIMessageBuilder>
     </builders>
     <publishers/>
