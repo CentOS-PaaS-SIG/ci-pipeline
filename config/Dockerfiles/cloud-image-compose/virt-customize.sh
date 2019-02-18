@@ -74,9 +74,7 @@ enabled=1
 gpgcheck=0
 EOF
 
-koji_repo=${branch}
 if [ "${branch}" != "rawhide" ]; then
-    koji_repo="f${branch}-build"
     if ! virt-customize --selinux-relabel --memsize 4096 -a ${DOWNLOADED_IMAGE_LOCATION} --run-command "dnf config-manager --set-enable updates-testing updates-testing-debuginfo" ; then
         echo "failure enabling updates-testing repo"
         exit 1
@@ -84,10 +82,12 @@ if [ "${branch}" != "rawhide" ]; then
 else
     virt-customize -a ${DOWNLOADED_IMAGE_LOCATION} --run-command "source /etc/os-release; rpm --import /etc/pki/rpm-gpg/RPM-GPG-KEY-\$VERSION_ID-fedora"
 fi
+
+koji_repo=$(echo ${DIST_BRANCH}-build | sed -e s'/fc/f/')
 # Add repo from latest packages built in koji
 cat <<EOF > ${CURRENTDIR}/koji-latest.repo
-[koji-${branch}]
-name=koji-${branch}
+[koji-${koji_repo}]
+name=koji-${koji_repo}
 baseurl=https://kojipkgs.fedoraproject.org/repos/${koji_repo}/latest/x86_64/
 priority=999
 enabled=1
