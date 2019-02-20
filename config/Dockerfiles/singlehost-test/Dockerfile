@@ -33,9 +33,8 @@ RUN dnf -y install ansible \
 # RUN dnf -y update standard-test-roles --enablerepo=updates-testing && \
 #     dnf clean all
 
-# WORKAROUND: use str from pip
-# Official STR does is not ansible 2.4 compatible, ansible 2.5 has no repo
-RUN pip install ansible==2.5.8
+# Use Ansible version we know it works
+RUN pip install ansible==2.7.7
 
 # Copy the build scripts to the container
 COPY package-test.sh integration-test.sh upstreamfirst-test.sh verify-rpm.sh rpm-verify.yml resize-qcow2.sh /tmp/
