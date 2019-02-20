@@ -9,6 +9,7 @@ integration tests from the projectatomic repo by calling \
 the integration-test.sh script."
 
 # Install all package requirements
+# rpm-build is required by standard-test-source role
 RUN dnf -y install ansible \
         beakerlib \
         curl \
@@ -22,6 +23,7 @@ RUN dnf -y install ansible \
         python-pip \
         qemu-img \
         qemu-kvm \
+        rpm-build \
         rsync \
         standard-test-roles \
         standard-test-roles-inventory-qemu \
