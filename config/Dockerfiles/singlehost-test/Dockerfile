@@ -37,6 +37,8 @@ RUN dnf -y install ansible \
 
 # Use Ansible version we know it works
 RUN pip install ansible==2.7.7
+# Workaround until STR with fix from https://pagure.io/standard-test-roles/pull-request/303 is avaialble
+RUN dnf install -y https://copr-be.cloud.fedoraproject.org/results/@osci/standard-test-roles/fedora-29-x86_64/00862246-standard-test-roles/standard-test-roles-3.1-1.fc29.4e4ecce.1.noarch.rpm https://copr-be.cloud.fedoraproject.org/results/@osci/standard-test-roles/fedora-29-x86_64/00862246-standard-test-roles/standard-test-roles-inventory-qemu-3.1-1.fc29.4e4ecce.1.noarch.rpm
 
 # Copy the build scripts to the container
 COPY package-test.sh integration-test.sh upstreamfirst-test.sh verify-rpm.sh rpm-verify.yml resize-qcow2.sh /tmp/
