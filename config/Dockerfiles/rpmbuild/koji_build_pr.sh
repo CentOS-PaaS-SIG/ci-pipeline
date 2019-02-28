@@ -30,8 +30,9 @@ if [ "$?" != 0 ]; then echo -e "ERROR: FEDPKG CLONE\nSTATUS: $?"; exit 1; fi
 pushd ${fed_repo}
 # Checkout the branch and apply the patch to HEAD of branch
 git checkout ${fed_branch}
-curl -L https://src.fedoraproject.org/rpms/${fed_repo}/pull-request/${fed_id}.patch > pr_${fed_id}.patch
-git apply pr_${fed_id}.patch
+git fetch -fu origin refs/pull/${fed_id}/head:pr
+# Setting git config and merge message in case we try to merge a closed PR, like it is done on stage instance
+git -c "user.name=Fedora CI" -c "user.email=ci@lists.fedoraproject.org"  merge pr -m "Fedora CI pipeline"
 # Get current NVR
 truenvr=$(rpm -q --define "dist .$DIST_BRANCH" --queryformat '%{name}-%{version}-%{release}\n' --specfile ${fed_repo}.spec | head -n 1)
 echo "original_spec_nvr=${truenvr}" >> ${LOGDIR}/job.props
