@@ -13,7 +13,7 @@ properties(
 def recycleOldTags() {
     sh '''
         for imagestream in $(oc describe imagestream | grep "^Name:" | awk '{print $2}') ; do
-            for prTag in $(oc describe imagestream $imagestream | grep 'PR-') ; do
+            for prTag in $(oc describe imagestream $imagestream | grep '^PR-') ; do
                 age=$(oc describe imagestreamtag/$imagestream:$prTag | grep "^Created:")
                 if [[ $age == *"month"* || $age == *"day"* || $age == *"week"* ]]; then
                     oc tag -d $imagestream:$prTag
