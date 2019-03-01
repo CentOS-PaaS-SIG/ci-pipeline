@@ -57,8 +57,9 @@ if [ -z ${build_pr_id} ]; then
     git checkout ${rev}
 else
     git checkout ${branch}
-    curl --insecure -L ${TEST_LOCATION}/pull-request/${build_pr_id}.patch > pr_${build_pr_id}.patch
-    git apply pr_${build_pr_id}.patch
+    git fetch -fu origin refs/pull/${build_pr_id}/head:pr
+    # Setting git config and merge message in case we try to merge a closed PR, like it is done on stage instance
+    git -c "user.name=Fedora CI" -c "user.email=ci@lists.fedoraproject.org"  merge pr -m "Fedora CI pipeline"
 fi
 
 # Check if there is a tests dir from dist-git, if not, exit
