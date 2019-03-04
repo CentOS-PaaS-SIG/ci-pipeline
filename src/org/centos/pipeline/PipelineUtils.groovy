@@ -1239,18 +1239,24 @@ def checkTests(String mypackage, String mybranch, String tag, String pr_id=null,
             }
         }
     }
+
+    def tests_path = "${mypackage}/tests"
+    if (namespace == "tests") {
+        tests_path = "${mypackage}"
+    }
+
+    if (sh(returnStatus: true, script: "ls -allh ${tests_path}/tests*.yml") != 0) {
+        return false
+    }
+
     // if STR is installed use it to check for tags as it is more reliable
     if (sh(returnStatus: true, script: """rpm -q standard-test-roles""") == 0) {
-        if (namespace != "tests") {
-            return sh (returnStatus: true, script: "ansible-playbook --list-tags ${mypackage}/tests/tests*.yml | grep -e \"TASK TAGS: \\[.*\\<${tag}\\>.*\\]\"") == 0
-        } else {
-            return sh (returnStatus: true, script: "ansible-playbook --list-tags ${mypackage}/tests*.yml | grep -e \"TASK TAGS: \\[.*\\<${tag}\\>.*\\]\"") == 0
+        // It should leave with exception if playbook is invalid
+        sh("ansible-playbook --list-tags ${tests_path}/tests*.yml > playbook-tags.txt")
+        return sh (returnStatus: true, script: "grep -e \"TASK TAGS: \\[.*\\<${tag}\\>.*\\]\" playbook-tags.txt") == 0
         }
     } else {
-        if (namespace != "tests") {
-            return sh (returnStatus: true, script: """grep -r '\\- '${tag}'\$' ${mypackage}/tests""") == 0
-        } else {
-            return sh (returnStatus: true, script: """grep -r '\\- '${tag}'\$' ${mypackage}""") == 0
+        return sh (returnStatus: true, script: """grep -r '\\- '${tag}'\$' ${tests_path}""") == 0
         }
     }
 }
