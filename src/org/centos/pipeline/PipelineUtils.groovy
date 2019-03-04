@@ -1254,10 +1254,8 @@ def checkTests(String mypackage, String mybranch, String tag, String pr_id=null,
         // It should leave with exception if playbook is invalid
         sh("ansible-playbook --list-tags ${tests_path}/tests*.yml > playbook-tags.txt")
         return sh (returnStatus: true, script: "grep -e \"TASK TAGS: \\[.*\\<${tag}\\>.*\\]\" playbook-tags.txt") == 0
-        }
     } else {
         return sh (returnStatus: true, script: """grep -r '\\- '${tag}'\$' ${tests_path}""") == 0
-        }
     }
 }
 
