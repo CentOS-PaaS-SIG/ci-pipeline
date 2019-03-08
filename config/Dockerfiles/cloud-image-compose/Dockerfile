@@ -1,6 +1,6 @@
 FROM centos:7
 LABEL maintainer "https://github.com/CentOS-PaaS-SIG/ci-pipeline"
-LABEL description="This container is meant to generate a fedora image \
+LABEL description="This container is meant to generate a fedora  image \
 with a custom rpm, specified with $package, located at $rpm_repo."
 
 RUN yum -y install epel-release
