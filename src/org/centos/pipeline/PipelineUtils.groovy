@@ -974,7 +974,7 @@ def buildImage(String openshiftProject, String buildConfig) {
             def result = openshift.startBuild(buildConfig,
                     "--commit",
                     "refs/pull/" + env.ghprbPullId + "/head",
-                    "--wait")
+                    "--wait=true")
             def out = result.out.trim()
             echo "Resulting Build: " + out
 
