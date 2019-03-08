@@ -200,6 +200,8 @@ pipeline {
                 //}
                 stage("rawhide stage job") {
                     steps {
+                        println("tagMap is " + tagMap)
+                        exit 1
                         sleep 30
                         build job: 'fedora-rawhide-stage-pr-pipeline',
                                 parameters: [
