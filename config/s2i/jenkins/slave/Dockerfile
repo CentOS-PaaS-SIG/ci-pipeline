@@ -1,4 +1,4 @@
-FROM openshift/jenkins-slave-base-centos7:v3.11
+FROM openshift/jenkins-slave-base-centos7:v3.6
 ##
 ## ------------------------------------->  ^^ this is needed
 ## since the centosCI openshift cluster
