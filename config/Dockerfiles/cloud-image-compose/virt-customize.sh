@@ -80,7 +80,8 @@ if [ "${branch}" != "rawhide" ]; then
         exit 1
     fi
 else
-    virt-customize -a ${DOWNLOADED_IMAGE_LOCATION} --run-command "source /etc/os-release; rpm --import /etc/pki/rpm-gpg/RPM-GPG-KEY-\$VERSION_ID-fedora"
+    # Don't check GPG key when testing on Rawhide
+    virt-customize -a ${DOWNLOADED_IMAGE_LOCATION} --run-command "sed -i s/gpgcheck=.*/gpgcheck=0/ /etc/yum.repos.d/*.repo"
 fi
 
 koji_repo=$(echo ${DIST_BRANCH}-build | sed -e s'/fc/f/')
