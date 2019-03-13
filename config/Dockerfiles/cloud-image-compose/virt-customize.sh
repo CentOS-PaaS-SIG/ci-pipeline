@@ -74,6 +74,7 @@ enabled=1
 gpgcheck=0
 EOF
 
+gpgcheck=1
 if [ "${branch}" != "rawhide" ]; then
     if ! virt-customize --selinux-relabel --memsize 4096 -a ${DOWNLOADED_IMAGE_LOCATION} --run-command "dnf config-manager --set-enable updates-testing updates-testing-debuginfo" ; then
         echo "failure enabling updates-testing repo"
@@ -82,6 +83,7 @@ if [ "${branch}" != "rawhide" ]; then
 else
     # Don't check GPG key when testing on Rawhide
     virt-customize -a ${DOWNLOADED_IMAGE_LOCATION} --run-command "sed -i s/gpgcheck=.*/gpgcheck=0/ /etc/yum.repos.d/*.repo"
+    gpgcheck=0
 fi
 
 koji_repo=$(echo ${DIST_BRANCH}-build | sed -e s'/fc/f/')
@@ -92,7 +94,7 @@ name=koji-${koji_repo}
 baseurl=https://kojipkgs.fedoraproject.org/repos/${koji_repo}/latest/x86_64/
 priority=999
 enabled=1
-gpgcheck=1
+gpgcheck=${gpgcheck}
 EOF
 
 virt_copy_files="${CURRENTDIR}/testrepo/${package} ${CURRENTDIR}/test-${package}.repo ${CURRENTDIR}/koji-latest.repo /etc/yum.repos.d/"
