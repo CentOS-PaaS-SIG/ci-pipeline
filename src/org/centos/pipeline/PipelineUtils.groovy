@@ -1012,7 +1012,7 @@ def buildImage(String openshiftProject, String buildConfig) {
  * @param buildConfig
  * @return
  */
-def buildStableImage(String openshiftProject, String buildConfig) {
+def buildStableImage(String openshiftProject, String buildConfig, String buildTag = 'stable') {
     // - build in Openshift
     // - startBuild using ref in openshift
     // - Get result Build and get imagestream manifest
@@ -1042,10 +1042,10 @@ def buildStableImage(String openshiftProject, String buildConfig) {
             ).trim()
             echo "imageHash: ${imageHash}"
 
-            echo "Creating stable tag for ${openshiftProject}/${buildConfig}: ${buildConfig}:stable"
+            echo "Creating stable tag for ${openshiftProject}/${buildConfig}: ${buildConfig}:${buildTag}"
 
             openshift.tag("${openshiftProject}/${buildConfig}@${imageHash}",
-                        "${openshiftProject}/${buildConfig}:stable")
+                        "${openshiftProject}/${buildConfig}:${buildTag}")
 
         }
     }
