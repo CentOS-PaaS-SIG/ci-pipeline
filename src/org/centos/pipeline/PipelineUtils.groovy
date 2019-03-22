@@ -765,7 +765,13 @@ def executeInContainer(String stageName,
     } catch (err) {
         throw err
     } finally {
-        sh "mv -vf logs ${stageName}/logs || true"
+        sh """
+        if [ -d "logs" ]; then
+            mv -vf logs ${stageName}/logs || true
+        else
+            echo "No logs for executeInContainer(). Ignoring this." >&2
+        fi
+        """
     }
 }
 
