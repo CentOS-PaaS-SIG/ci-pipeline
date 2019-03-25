@@ -240,8 +240,8 @@ class pipelineUtils implements Serializable {
      * @param buildConfig
      * @return
      */
-    def buildStableImage(String openshiftProject, String buildConfig) {
-        return pipelineUtils.buildStableImage(openshiftProject, buildConfig)
+    def buildStableImage(String openshiftProject, String buildConfig, String buildTag="stable") {
+        return pipelineUtils.buildStableImage(openshiftProject, buildConfig, buildTag)
     }
 
     /**
