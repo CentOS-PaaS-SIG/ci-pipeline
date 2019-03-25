@@ -77,8 +77,6 @@ set -u
 for playbook in tests*.yml; do
 	if [ -f ${playbook} ]; then
 		ansible-playbook --inventory=$ANSIBLE_INVENTORY $PYTHON_INTERPRETER \
-			--extra-vars "subjects=$TEST_SUBJECTS" \
-			--extra-vars "artifacts=$TEST_ARTIFACTS" \
 			--tags classic ${playbook}
 	fi
 done
