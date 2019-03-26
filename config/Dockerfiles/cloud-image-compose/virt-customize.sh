@@ -109,7 +109,8 @@ virt-copy-in -a ${DOWNLOADED_IMAGE_LOCATION} ${virt_copy_files} /etc/yum.repos.d
 if [ "${namespace}" != "tests" ]; then
     for pkg in $(repoquery -q --disablerepo=\* --enablerepo=${package} --repofrompath=${package},${rpm_repo} --all --qf="%{ARCH}:%{NAME}" | sed -e "/^src:/d;/-debug\(info\|source\)\$/d;s/.\+://" | sort -u) ; do
         # check if this package conflicts with any other package from RPM_LIST
-        conflict=$(repoquery -q --disablerepo=\* --enablerepo=${package} --repofrompath=${package},${rpm_repo} --conflict $pkg | awk '{print$1}')
+        conflict_capability=$(repoquery -q --disablerepo=\* --enablerepo=${package} --repofrompath=${package},${rpm_repo} --conflict $pkg)
+        conflict=$(repoquery -q --disablerepo=\* --enablerepo=${package} --repofrompath=${package},${rpm_repo} --whatprovides "$conflict_capability" | awk '{print$1}')
         found_conflict=0
         if [ ! -z "${conflict}" ] && [ ! -z "${RPM_LIST}" ]; then
             for rpm_pkg in ${RPM_LIST} ; do
