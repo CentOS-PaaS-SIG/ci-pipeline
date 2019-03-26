@@ -110,7 +110,7 @@ if [ "${namespace}" != "tests" ]; then
     for pkg in $(repoquery -q --disablerepo=\* --enablerepo=${package} --repofrompath=${package},${rpm_repo} --all --qf="%{ARCH}:%{NAME}" | sed -e "/^src:/d;/-debug\(info\|source\)\$/d;s/.\+://" | sort -u) ; do
         # check if this package conflicts with any other package from RPM_LIST
         conflict_capability=$(repoquery -q --disablerepo=\* --enablerepo=${package} --repofrompath=${package},${rpm_repo} --conflict $pkg)
-        conflict=$(repoquery -q --disablerepo=\* --enablerepo=${package} --repofrompath=${package},${rpm_repo} --whatprovides "$conflict_capability" | awk '{print$1}')
+        conflict=$(repoquery -q --qf "%{NAME}" --disablerepo=\* --enablerepo=${package} --repofrompath=${package},${rpm_repo} --whatprovides "$conflict_capability")
         found_conflict=0
         if [ ! -z "${conflict}" ] && [ ! -z "${RPM_LIST}" ]; then
             for rpm_pkg in ${RPM_LIST} ; do
