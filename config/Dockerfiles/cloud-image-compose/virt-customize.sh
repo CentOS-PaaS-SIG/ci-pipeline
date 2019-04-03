@@ -130,7 +130,7 @@ if [ "${namespace}" != "tests" ]; then
         fi
         RPM_LIST="${RPM_LIST} ${pkg}"
     done
-    if ! virt-customize -v --selinux-relabel --memsize 4096 -a ${DOWNLOADED_IMAGE_LOCATION} --run-command "yum install -y --best --allowerasing --nogpgcheck ${RPM_LIST} && yum clean all" ; then
+    if ! virt-customize -v --selinux-relabel --memsize 4096 -a ${DOWNLOADED_IMAGE_LOCATION} --run-command "dnf install -y --best --allowerasing --nogpgcheck ${RPM_LIST} && dnf clean all" ; then
         echo "failure installing rpms"
         exit 1
     fi
