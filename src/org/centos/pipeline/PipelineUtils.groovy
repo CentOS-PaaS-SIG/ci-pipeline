@@ -322,9 +322,10 @@ def sendMessage(String msgTopic, String msgProps, String msgContent) {
  * @param msgContent - Message content in map form
  * @param msgAuditFile - File containing all past messages. It will get appended to.
  * @param fedmsgRetryCount number of times to keep trying.
+ * @param trackMsg If should check message in datagrepper. Default: true
  * @return
  */
-def sendMessageWithAudit(String msgTopic, String msgProps, String msgContent, String msgAuditFile, fedmsgRetryCount) {
+def sendMessageWithAudit(String msgTopic, String msgProps, String msgContent, String msgAuditFile, fedmsgRetryCount, Boolean trackMsg=true) {
     // Get contents of auditFile
     auditContent = readJSON file: msgAuditFile.replace("\n", "\\n")
 
@@ -341,7 +342,9 @@ def sendMessageWithAudit(String msgTopic, String msgProps, String msgContent, St
 
     archiveArtifacts allowEmptyArchive: false, artifacts: msgAuditFile
 
-    trackMessage(id, fedmsgRetryCount)
+    if (trackMsg) {
+        trackMessage(id, fedmsgRetryCount)
+    }
 }
 
 /**
@@ -986,7 +989,7 @@ def buildImage(String openshiftProject, String buildConfig) {
 
             def describeStr = openshift.selector(out).describe()
             outTrim = describeStr.out.trim()
-            
+
             // --wait is being lost due to socket timeouts
             buildRunning = true
             while (buildRunning) {

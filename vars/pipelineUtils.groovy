@@ -65,10 +65,11 @@ class pipelineUtils implements Serializable {
      * @param msgContent Message content.
      * @param msgAuditFile - File containing all past messages. It will get appended to.
      * @param fedmsgRetryCount number of times to keep trying.
+     * @param trackMsg If should check message in datagrepper. Default: true
      * @return
      */
-    def sendMessageWithAudit(String msgTopic, String msgProps, String msgContent, String msgAuditFile, fedmsgRetryCount) {
-        pipelineUtils.sendMessageWithAudit(msgTopic, msgProps, msgContent, msgAuditFile, fedmsgRetryCount)
+    def sendMessageWithAudit(String msgTopic, String msgProps, String msgContent, String msgAuditFile, fedmsgRetryCount, Boolean trackMsg=true) {
+        pipelineUtils.sendMessageWithAudit(msgTopic, msgProps, msgContent, msgAuditFile, fedmsgRetryCount, trackMsg)
     }
 
     /**
