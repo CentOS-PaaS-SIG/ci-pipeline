@@ -10,6 +10,7 @@ the integration-test.sh script."
 
 # Install all package requirements
 # rpm-build is required by standard-test-source role
+# python3-devel (pathfix.py) is required by some tests that use standard-test-source role
 RUN dnf -y install ansible \
         beakerlib \
         curl \
@@ -21,6 +22,7 @@ RUN dnf -y install ansible \
         libselinux-python \
         python-dnf \
         python-pip \
+        python3-devel \
         qemu-img \
         qemu-kvm \
         rpm-build \
