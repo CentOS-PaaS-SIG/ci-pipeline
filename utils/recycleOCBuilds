@@ -50,12 +50,11 @@ node() {
         try {
             stepName = 'Remove Completed Builds'
             stage(stepName) {
-                // Garbage collect all completed oc builds with -build in their name
-                sh 'oc delete pod $(oc get pods | grep \' Completed \' | grep \'\\-build\' | awk \'{print $1}\')' || true
                 // Delete old PR- tags for images
                 recycleOldTags() || true
                 recycleErrorPods() || true
-                currentBuild.result = 'SUCCESS'
+                // Garbage collect all completed oc builds with -build in their name
+                sh 'oc delete pod $(oc get pods | grep \' Completed \' | grep \'\\-build\' | awk \'{print $1}\')'
             }
         } catch (e) {
             println("Error was " + e)
