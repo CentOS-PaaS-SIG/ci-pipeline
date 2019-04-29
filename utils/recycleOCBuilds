@@ -57,6 +57,8 @@ node() {
                 recycleErrorPods() || true
                 currentBuild.result = 'SUCCESS'
             }
+        } catch (e) {
+            println("Error was " + e)
         }
     }
 }
