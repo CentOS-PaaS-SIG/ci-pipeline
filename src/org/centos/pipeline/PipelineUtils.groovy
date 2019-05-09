@@ -986,7 +986,7 @@ def buildImage(String openshiftProject, String buildConfig) {
 
             def describeStr = openshift.selector(out).describe()
             outTrim = describeStr.out.trim()
-            
+
             // --wait is being lost due to socket timeouts
             buildRunning = true
             while (buildRunning) {
@@ -1321,7 +1321,11 @@ def obtainLock(String fileLocation, int duration, String myuuid) {
         while true ; do
             # Check if lock file exists
             while [ -f "${fileLocation}" ] ; do
-                storeduuid=\$(cat "${fileLocation}")
+                storeduuid=\$(cat "${fileLocation}" || echo "")
+                if [ "\${storeduuid}" == "" ]; then
+                    # Could not read the file, try again...
+                    continue
+                fi
                 lockAge=\$(stat -c %Y "${fileLocation}")
                 ageDiff=\$((\${currentTime} - \${lockAge}))
                 # Break if lock file is too old
