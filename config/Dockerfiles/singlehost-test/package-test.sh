@@ -125,7 +125,7 @@ set -u
 set -xo pipefail
 for playbook in tests*.yml; do
 	if [ -f ${playbook} ]; then
-		timeout 4h ansible-playbook -v --inventory=$ANSIBLE_INVENTORY $PYTHON_INTERPRETER \
+		ANSIBLE_STDOUT_CALLBACK=yaml timeout 4h ansible-playbook -v --inventory=$ANSIBLE_INVENTORY $PYTHON_INTERPRETER \
 			--tags ${TAG} ${playbook} $@ | tee ${TEST_ARTIFACTS}/${playbook}-run.txt
 	fi
 done
