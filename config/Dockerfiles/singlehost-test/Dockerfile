@@ -8,6 +8,8 @@ upstreamfirst.fedorainfracloud.org. It also can run \
 integration tests from the projectatomic repo by calling \
 the integration-test.sh script."
 
+RUN dnf -y module enable standard-test-roles
+
 # Install all package requirements
 # rpm-build is required by standard-test-source role
 # python3-devel (pathfix.py) is required by some tests that use standard-test-source role
