@@ -290,6 +290,11 @@ def setMessageFields(String messageType) {
  */
 def sendMessage(String msgTopic, String msgProps, String msgContent) {
 
+    if (binding.hasVariable('env') && env?.SKIP_UMB_SEND?.trim()) {
+        println "ci-pipeline sendMessage: env var is not empty: SKIP_UMB_SEND. Do not send message."
+        return
+    }
+
     retry(10) {
         try {
             // 1 minute should be more than enough time to send the topic msg
@@ -327,6 +332,11 @@ def sendMessage(String msgTopic, String msgProps, String msgContent) {
 def sendMessageWithAudit(String msgTopic, String msgProps, String msgContent, String msgAuditFile, fedmsgRetryCount) {
     // Get contents of auditFile
     auditContent = readJSON file: msgAuditFile.replace("\n", "\\n")
+
+    if (binding.hasVariable('env') && env?.SKIP_UMB_SEND?.trim()) {
+        println "ci-pipeline sendMessageWithAudit: env var is not empty: SKIP_UMB_SEND. Do not send message."
+        return
+    }
 
     // Send message and get handle on SendResult
     sendResult = sendMessage(msgTopic, msgProps, msgContent)
