@@ -1,0 +1,118 @@
+apiVersion: v1
+kind: Template
+metadata:
+  creationTimestamp: null
+  name: pipeline-reporting
+  annotations:
+    openshift.io/display-name: pipeline-reporting
+    description: |-
+              contra pipeline-reporting template
+    iconClass: icon-jenkins
+    tags: instant-app,pipeline-reporting
+    template.openshift.io/long-description: pipeline reporting container
+    template.openshift.io/provider-display-name: Red Hat, Inc.
+    template.openshift.io/documentation-url: https://docs.openshift.org/latest
+    template.openshift.io/support-url: https://access.redhat.com
+message: A data collector for jenkins metrics.
+  Usage oc new-app -f pipeline-reporting-template.yaml -p JENKINS_API_KEY=jenkins_api_key
+parameters:
+- name: INFLUXDB_USER
+  value: DEFAULT_USER
+  description: The username for influxdb
+- name: INFLUXDB_PASSWORD
+  value: DEFAULT_PASSWORD
+  description: The passwor for influxdb
+- name: CONFLUENCE_PASSWORD
+  value: DEFAULT_PASSWORD
+  description: The passwor for confluence
+- name: CONFLUENCE_USER
+  value: DEFAULT_PASSWORD
+  description: The user for confluence
+- name: CONFLUENCE_URL
+  value: http://confluence-url
+  description: The confluence url
+- name: PIPELINE
+  value: Fedora
+  description: The name of the pipeline to collect data
+- name: IMAGE
+  value: 172.0.0.1/namespace/pipeline-reporting:latest
+  description: The location of the container to use
+- name: SCHEDULE
+  value: "0 12 * * 1"
+  description: The schedule to run on
+- name: COMMAND
+  value: /opt/openshift/pipeline-reporting/print_output.py
+  description: The command to run on a schedule
+- name: GIT_REF
+  value: master
+  description: The branch of the git repo
+- name: GIT_URL
+  value: https://github.com/CentOS-PaaS-SIG/ci-pipeline.git
+  description: Git repo where the dockerfile is
+- name: CONTEXT_DIR
+  value: config/Dockerfiles/pipeline-reporting
+  description: Dockerfile location
+objects:
+- apiVersion: v1
+  kind: ImageStream
+  metadata:
+    annotations:
+    labels:
+    name: pipeline-reporting
+  spec: {}
+- apiVersion: v1
+  kind: BuildConfig
+  metadata:
+    name: pipeline-reporting
+  spec:
+    output:
+      to:
+        kind: ImageStreamTag
+        name: pipeline-reporting:latest
+    resources: {}
+    source:
+      contextDir: ${CONTEXT_DIR}
+      git:
+        ref: ${GIT_REF}
+        uri: ${GIT_URL}
+      type: Git
+    strategy:
+      dockerStrategy:
+      type: Docker
+    triggers:
+    - type: ConfigChange
+- apiVersion: batch/v2alpha1
+  kind: ScheduledJob
+  metadata:
+    name: pipeline-reporting
+  spec:
+    schedule: "${SCHEDULE}"
+    failedJobsHistoryLimit: 1
+    successfulJobsHistoryLimit: 3
+    jobTemplate:             
+      spec:
+        template:
+          metadata:
+            labels:
+              job: pipeline-reporting
+          spec:
+            containers:
+            - name: pipeline-reporting
+              image: ${IMAGE}
+              command: ["${COMMAND}"]
+              env:
+                - name: INFLUXDB_USER
+                  value: "${INFLUXDB_USER}"
+                - name: INFLUXDB_PASSWORD
+                  value: "${INFLUXDB_PASSWORD}"
+                - name: CONFLUENCE_USER
+                  value: "${CONFLUENCE_USER}"
+                - name: CONFLUENCE_PASSWORD
+                  value: "${CONFLUENCE_PASSWORD}"
+                - name: PIPELINE
+                  value: "${PIPELINE}"
+                - name: CONFLUENCE_URL
+                  value: "${CONFLUENCE_URL}"
+            restartPolicy: Never
+labels:
+  template: pipeline-reporting
