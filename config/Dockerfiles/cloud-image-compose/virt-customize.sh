@@ -94,7 +94,7 @@ name=koji-${koji_repo}
 baseurl=https://kojipkgs.fedoraproject.org/repos/${koji_repo}/latest/x86_64/
 priority=999
 enabled=1
-gpgcheck=${gpgcheck}
+gpgcheck=0
 EOF
 
 virt_copy_files="${CURRENTDIR}/testrepo/${package} ${CURRENTDIR}/test-${package}.repo ${CURRENTDIR}/koji-latest.repo /etc/yum.repos.d/"
