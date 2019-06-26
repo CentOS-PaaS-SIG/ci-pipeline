@@ -56,6 +56,9 @@ trap clean_up EXIT SIGHUP SIGINT SIGTERM
 
 mkdir -p ${CURRENTDIR}/images
 
+# Check if the downloaded qcow2 image is valid
+qemu-img check ${DOWNLOADED_IMAGE_LOCATION}
+
 # Make dir for just rpm content
 mkdir -p ${CURRENTDIR}/testrepo/${package}
 # Do there is no packages to copy when running for tests namespace
