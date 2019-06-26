@@ -95,7 +95,6 @@ cat <<EOF > ${CURRENTDIR}/koji-latest.repo
 [koji-${koji_repo}]
 name=koji-${koji_repo}
 baseurl=https://kojipkgs.fedoraproject.org/repos/${koji_repo}/latest/x86_64/
-priority=999
 enabled=1
 gpgcheck=0
 EOF
