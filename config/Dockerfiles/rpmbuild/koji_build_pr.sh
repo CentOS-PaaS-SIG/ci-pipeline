@@ -78,7 +78,7 @@ mkdir -p ${RPMDIR}
 # Create repo
 pushd ${RPMDIR}
 for i in {1..5}; do
-    koji ${KOJI_SERVER} download-build --arch=x86_64 --arch=src --arch=noarch --debuginfo --task-id ${SCRATCHID} || kojii ${KOJI_SERVER} download-task --arch=x86_64 --arch=src --arch=noarch --logs ${SCRATCHID} && break
+    koji ${KOJI_SERVER} download-build --arch=x86_64 --arch=src --arch=noarch --debuginfo --task-id ${SCRATCHID} || koji ${KOJI_SERVER} download-task --arch=x86_64 --arch=src --arch=noarch --logs ${SCRATCHID} && break
     echo "koji build download failed, attempt: $i/5"
     if [[ $i -lt 5 ]]; then
         sleep 10
