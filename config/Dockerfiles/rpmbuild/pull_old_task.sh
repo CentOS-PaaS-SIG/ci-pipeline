@@ -15,6 +15,12 @@ LOGDIR=${CURRENTDIR}/logs
 rm -rf ${LOGDIR}/*
 mkdir ${LOGDIR}
 
+# Allow change koji server to be used
+KOJI_SERVER=${KOJI_SERVER:-}
+if [[ -n ${KOJI_SERVER} ]]; then
+    KOJI_SERVER="-s ${KOJI_SERVER} "
+fi
+
 # Create trap function to archive as many of the variables as we have defined
 function archive_variables {
     set +e
@@ -34,7 +40,7 @@ mkdir somewhere
 pushd somewhere
 # Download koji build so we can archive it
 for i in {1..5}; do
-    koji download-build --arch=x86_64 --arch=src --arch=noarch --debuginfo --task-id ${PROVIDED_KOJI_TASKID} || koji download-task --arch=x86_64 --arch=src --arch=noarch --logs ${PROVIDED_KOJI_TASKID} && break
+    koji ${KOJI_SERVER} download-build --arch=x86_64 --arch=src --arch=noarch --debuginfo --task-id ${PROVIDED_KOJI_TASKID} || koji ${KOJI_SERVER} download-task --arch=x86_64 --arch=src --arch=noarch --logs ${PROVIDED_KOJI_TASKID} && break
     echo "koji build download failed, attempt: $i/5"
     if [[ $i -lt 5 ]]; then
         sleep 10
