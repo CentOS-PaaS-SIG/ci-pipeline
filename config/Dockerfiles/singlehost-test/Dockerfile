@@ -8,7 +8,7 @@ upstreamfirst.fedorainfracloud.org. It also can run \
 integration tests from the projectatomic repo by calling \
 the integration-test.sh script."
 
-RUN dnf -y module enable standard-test-roles
+RUN dnf -y module enable standard-test-roles && dnf clean all
 
 # Install all package requirements
 # rpm-build is required by standard-test-source role
@@ -22,9 +22,9 @@ RUN dnf -y install ansible \
         git \
         libguestfs-tools-c \
         libselinux-python \
-        python-dnf \
-        python-pip \
+        python2-pip \
         python3-devel \
+        python3-dnf \
         qemu-img \
         qemu-kvm \
         rpm-build \
@@ -43,7 +43,7 @@ RUN dnf -y install ansible \
 RUN pip install ansible==2.7.7
 
 # Copy the build scripts to the container
-COPY package-test.sh integration-test.sh upstreamfirst-test.sh verify-rpm.sh rpm-verify.yml resize-qcow2.sh /tmp/
+COPY package-test.sh integration-test.sh upstreamfirst-test.sh verify-rpm.sh rpm-verify.yml resize-qcow2.sh sync-artifacts.yml /tmp/
 
 ENV ANSIBLE_INVENTORY=/usr/share/ansible/inventory/standard-inventory-qcow2
 

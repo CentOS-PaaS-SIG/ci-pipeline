@@ -1,0 +1,17 @@
+---
+- hosts: localhost
+  tags:
+  - always
+  vars:
+    remote_artifacts: /tmp/artifacts/
+    artifacts: "{{ lookup('env', 'TEST_ARTIFACTS')|default('./artifacts', true) }}"
+
+  tasks:
+  - name: Pull out the logs from test environment to test runner
+    synchronize:
+      dest: "{{ artifacts }}/"
+      src: "{{ remote_artifacts }}/"
+      mode: pull
+      ssh_args: "-o UserKnownHostsFile=/dev/null"
+    when: artifacts|default("") != ""
+    ignore_errors: true
