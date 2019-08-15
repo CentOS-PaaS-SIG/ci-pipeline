@@ -20,7 +20,7 @@ def setupStage(String stage, String sshKey) {
     // Currently having an sshKey isn't that useful as we're still hard-coding the public credentialsID entry
     withCredentials([file(credentialsId: sshKey, variable: 'FEDORA_ATOMIC_KEY'),
                      file(credentialsId: 'fedora-atomic-pub-key', variable: 'FEDORA_ATOMIC_PUB_KEY')]) {
-        sh '''
+        sh script: '''
             #!/bin/bash
             set -xeuo pipefail
 
@@ -41,7 +41,8 @@ def setupStage(String stage, String sshKey) {
                 ansible --private-key=${FEDORA_ATOMIC_KEY} -u root -i ${WORKSPACE}/inventory all -m ping
             fi
             exit
-        '''
+        ''',
+        label: "Providing ssh keys"
     }
 }
 
@@ -56,7 +57,7 @@ def runTaskAndReturnLogs(String stage, String duffyKey) {
 
     withCredentials([file(credentialsId: duffyKey, variable: 'DUFFY_KEY'),
                      file(credentialsId: 'fedora-keytab', variable: 'FEDORA_KEYTAB')]) {
-        sh '''
+        sh script: '''
             #!/bin/bash
             set -xeuo pipefail
 
@@ -94,7 +95,8 @@ def runTaskAndReturnLogs(String stage, String duffyKey) {
                 echo 'Build failed, see logs above'; exit 1
             fi
             exit
-        '''
+        ''',
+        label: "Synchronizing files"
     }
 }
 
@@ -106,7 +108,7 @@ def runTaskAndReturnLogs(String stage, String duffyKey) {
 def checkLastImage(String stage) {
     echo "Currently in stage: ${stage} in checkLastImage"
 
-    sh '''
+    sh script: '''
         set +e
 
         header=$(curl -sI "${HTTP_BASE}/${branch}/images/latest-atomic.qcow2"|grep -i '^Last-Modified:')
@@ -127,7 +129,8 @@ def checkLastImage(String stage) {
             touch ${WORKSPACE}/NeedNewImage.txt
 
         fi
-    '''
+    ''',
+    label: "Checking for the last atomic image"
 }
 
 /**
@@ -361,11 +364,11 @@ def sendMessageWithAudit(String msgTopic, String msgProps, String msgContent, St
  */
 def initializeAuditFile(String auditFile) {
     // Ensure auditFile is available
-    sh "rm -f ${auditFile}"
+    sh script: "rm -f ${auditFile}", label: "Removing ${auditFile}"
     String msgAuditFileDir = sh(script: "dirname ${auditFile}", returnStdout: true).trim()
-    sh "mkdir -p ${msgAuditFileDir}"
-    sh "touch ${auditFile}"
-    sh "echo '{}' >> ${auditFile}"
+    sh script: "mkdir -p ${msgAuditFileDir}", label: "Creating directory ${msgAuditFileDir}"
+    sh script: "touch ${auditFile}", label: "Create ${auditFile}"
+    sh script: "echo '{}' >> ${auditFile}", label: "Writing {} to the ${auditFile}"
 }
 /**
  * Check data grepper for presence of a message
@@ -515,7 +518,7 @@ def checkUpdatedPR(String message, String keyword) {
  */
 def prepareCredentials() {
     withCredentials([file(credentialsId: 'fedora-keytab', variable: 'FEDORA_KEYTAB')]) {
-        sh '''
+        sh script: '''
             #!/bin/bash
             set -xeuo pipefail
 
@@ -528,7 +531,8 @@ def prepareCredentials() {
             echo "    StrictHostKeyChecking no" >> ~/.ssh/config
             echo "    UserKnownHostsFile /dev/null" >> ~/.ssh/config
             chmod 600 ~/.ssh/config
-        '''
+        ''',
+        label: "Preparing credentials"
     }
     // Initialize RSYNC_PASSWORD from credentialsId
     env.RSYNC_PASSWORD = getPasswordFromDuffyKey('duffy-key')
@@ -765,7 +769,7 @@ def executeInContainer(String stageName,
         }
     }
 
-    sh "mkdir -p ${stageName}"
+    sh script: "mkdir -p ${stageName}", label: "Creating directory ${stageName}"
     try {
         withEnv(containerEnv) {
             container(containerName) {
@@ -775,13 +779,14 @@ def executeInContainer(String stageName,
     } catch (err) {
         throw err
     } finally {
-        sh """
+        sh script: """
         if [ -d "logs" ]; then
             mv -vf logs ${stageName}/logs || true
         else
             echo "No logs for executeInContainer(). Ignoring this." >&2
         fi
-        """
+        """,
+        label: "Checking for the logs directory"
     }
 }
 
@@ -794,7 +799,7 @@ def ocVerifyPod(String nodeName) {
     def describeStr = openshift.selector("pods", nodeName).describe()
     out = describeStr.out.trim()
 
-    sh 'mkdir -p podInfo'
+    sh script: 'mkdir -p podInfo', label: "Create directory"
 
     writeFile file: 'podInfo/node-pod-description-' + nodeName + '.txt',
                 text: out
@@ -846,7 +851,7 @@ def verifyPod(String openshiftProject, String nodeName) {
  */
 @NonCPS
 def ocGetContainerLogsFromPod(String nodeName) {
-    sh 'mkdir -p podInfo'
+    sh script: 'mkdir -p podInfo', label: "Create directory"
     names       = openshift.raw("get", "pod",  "${env.NODE_NAME}", '-o=jsonpath="{.status.containerStatuses[*].name}"')
     String containerNames = names.out.trim()
 
@@ -882,7 +887,7 @@ def getContainerLogsFromPod(String openshiftProject, String nodeName) {
  * @return
  */
 def sendIRCNotification(String nick, String channel, String message, String ircServer="irc.freenode.net:6697") {
-    sh """
+    sh script: """
         (
         echo NICK ${nick}
         echo USER ${nick} 8 * : ${nick}
@@ -892,7 +897,8 @@ def sendIRCNotification(String nick, String channel, String message, String ircS
         echo "NOTICE ${channel} :${message}"
         echo QUIT
         ) | openssl s_client -connect ${ircServer}
-    """
+    """,
+    label: "Joining the IRC channel"
 }
 
 /**
@@ -940,9 +946,9 @@ def sendPRCommentforTags(imageOperationsList) {
 
     echo "Prepare GHI tool"
     withCredentials([string(credentialsId: 'paas-bot', variable: 'TOKEN')]) {
-        sh "git config --global ghi.token ${TOKEN}"
-        sh 'curl -sL https://raw.githubusercontent.com/stephencelis/ghi/master/ghi > ghi && chmod 755 ghi'
-        sh './ghi comment ' + env.ghprbPullId + ' -m "' + msg + '"'
+        sh script: "git config --global ghi.token ${TOKEN}", label: "Configuring git"
+        sh  script: 'curl -sL https://raw.githubusercontent.com/stephencelis/ghi/master/ghi > ghi && chmod 755 ghi', label: "Cloning repository"
+        sh  script: './ghi comment ' + env.ghprbPullId + ' -m "' + msg + '"', label: "Commenting"
     }
 }
 
@@ -965,7 +971,7 @@ def setupContainerTemplates(String openshiftProject) {
     openshift.withCluster() {
         openshift.withProject(openshiftProject) {
             dir('config/s2i') {
-                sh './create-containers.sh'
+                sh script: './create-containers.sh', label: "Executing create-containers.sh script"
             }
         }
     }
@@ -1257,17 +1263,17 @@ def watchForMessages(String msg_provider, String message) {
  */
 def checkTests(String mypackage, String mybranch, String tag, String pr_id=null, String namespace='rpms') {
     echo "Currently checking if package tests exist"
-    sh "rm -rf ${mypackage}"
+    sh script: "rm -rf ${mypackage}", label: "Deleting ${mypackage}"
     def repo_url = "https://src.fedoraproject.org/${namespace}/${mypackage}/"
-    sh "git clone -b ${mybranch} --single-branch --depth 1 ${repo_url}"
+    sh script: "git clone -b ${mybranch} --single-branch --depth 1 ${repo_url}", label: "Cloning ${repo_url}"
     if (pr_id != null) {
         dir("${mypackage}") {
-            sh "git fetch -fu origin refs/pull/${pr_id}/head:pr"
+            sh script, "git fetch -fu origin refs/pull/${pr_id}/head:pr", label: "Fetching changes"
             // If fail to apply patch do not exit with error, but instead ignore the patch
             // this should avoid the pipeline to exit here without sending any topic to fedmsg
             try {
                 // Setting git config and merge message in case we try to merge a closed PR, like it is done on stage instance
-                sh "git -c 'user.name=Fedora CI' -c 'user.email=ci@lists.fedoraproject.org'  merge pr -m 'Fedora CI pipeline'"
+                sh script: "git -c 'user.name=Fedora CI' -c 'user.email=ci@lists.fedoraproject.org'  merge pr -m 'Fedora CI pipeline'", label: "Merging PR"
             } catch (err) {
                 echo "FAIL to apply patch from PR, ignoring it..."
             }
@@ -1322,9 +1328,9 @@ def skip(String stageName) {
  */
 def obtainLock(String fileLocation, int duration, String myuuid) {
     echo "Currently in obtainLock function"
-    sh """ mkdir -p \$(dirname "${fileLocation}") """
+    sh script: """ mkdir -p \$(dirname "${fileLocation}") """, label: "Creating directory ${fileLocation}"
 
-    sh """
+    sh script: """
         (
         flock 9
         currentTime=\$(date +%s)
@@ -1361,7 +1367,8 @@ def obtainLock(String fileLocation, int duration, String myuuid) {
         done
         # fileLocation.lck isn't important, but redirect somewhere
         ) 9>"${fileLocation}".lck
-    """
+    """,
+    label: "Locking a directory on localhost"
     return myuuid
 }
 
@@ -1375,7 +1382,7 @@ def releaseLock(String fileLocation, String myuuid) {
     if (fileExists(fileLocation)) {
         def storeduuid = readFile(fileLocation).trim()
         if (storeduuid == myuuid) {
-            sh "rm -f ${fileLocation} ${fileLocation}.lck"
+            sh script: "rm -f ${fileLocation} ${fileLocation}.lck", label: "Deleting files: ${fileLocation}, ${fileLocation}"
             return
         } else {
             // We were told to release a lock we didn't have
