@@ -1268,7 +1268,7 @@ def checkTests(String mypackage, String mybranch, String tag, String pr_id=null,
     sh script: "git clone -b ${mybranch} --single-branch --depth 1 ${repo_url}", label: "Cloning ${repo_url}"
     if (pr_id != null) {
         dir("${mypackage}") {
-            sh script, "git fetch -fu origin refs/pull/${pr_id}/head:pr", label: "Fetching changes"
+            sh script: "git fetch -fu origin refs/pull/${pr_id}/head:pr", label: "Fetching changes"
             // If fail to apply patch do not exit with error, but instead ignore the patch
             // this should avoid the pipeline to exit here without sending any topic to fedmsg
             try {
