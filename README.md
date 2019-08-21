@@ -1,3 +1,6 @@
+# CI-Pipeline Architecture and Design
+![CI-Pipeline](continuous-infra-logo.png)
+
 <!-- START doctoc generated TOC please keep comment here to allow auto update -->
 <!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
 **Table of Contents**
@@ -54,9 +57,6 @@
       - [org.centos.prod.ci.pipeline.complete](#orgcentosprodcipipelinecomplete)
 
 <!-- END doctoc generated TOC please keep comment here to allow auto update -->
-
-# CI-Pipeline Architecture and Design
-![CI-Pipeline](continuous-infra-logo.png)
 
 ## What Does CI/CD Mean in the Context of the CI-Pipeline Project?
 
