@@ -40,7 +40,7 @@ RUN dnf -y install ansible \
 #     dnf clean all
 
 # Use Ansible version we know it works
-RUN pip install ansible==2.7.7
+RUN pip install ansible==2.8.0
 
 # Copy the build scripts to the container
 COPY package-test.sh integration-test.sh upstreamfirst-test.sh verify-rpm.sh rpm-verify.yml resize-qcow2.sh sync-artifacts.yml /tmp/
