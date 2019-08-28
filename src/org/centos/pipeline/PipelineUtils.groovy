@@ -210,7 +210,7 @@ def getRsyncBranch() {
     } else {
         def rsync_branch = sh (returnStdout: true, script: '''
             echo $(curl -s https://src.fedoraproject.org/rpms/fedora-release/raw/master/f/fedora-release.spec | awk '/%define dist_version/ {print $3}')
-        ''').trim()
+        ''', label: "Getting dist_version").trim()
         try {
             assert rsync_branch.isNumber()
         }
@@ -365,7 +365,7 @@ def sendMessageWithAudit(String msgTopic, String msgProps, String msgContent, St
 def initializeAuditFile(String auditFile) {
     // Ensure auditFile is available
     sh script: "rm -f ${auditFile}", label: "Removing ${auditFile}"
-    String msgAuditFileDir = sh(script: "dirname ${auditFile}", returnStdout: true).trim()
+    String msgAuditFileDir = sh(script: "dirname ${auditFile}", label: "Getting dirname of ${auditFile}", returnStdout: true).trim()
     sh script: "mkdir -p ${msgAuditFileDir}", label: "Creating directory ${msgAuditFileDir}"
     sh script: "touch ${auditFile}", label: "Create ${auditFile}"
     sh script: "echo '{}' >> ${auditFile}", label: "Writing {} to the ${auditFile}"
@@ -381,7 +381,7 @@ def trackMessage(String messageID, int retryCount) {
         echo "Checking datagrapper for presence of message..."
         def STATUSCODE = sh (returnStdout: true, script: """
             curl --insecure --silent --output /dev/null --write-out "%{http_code}" \'${env.dataGrepperUrl}/id?id=${messageID}&chrome=false&is_raw=false\'
-        """).trim()
+        """, label: "Checking datagrapper for presence of message").trim()
         // We only want to wait if there are 404 errors
         echo "${STATUSCODE}"
         if (STATUSCODE.equals("404")) {
@@ -909,7 +909,7 @@ def sendIRCNotification(String nick, String channel, String message, String ircS
 def getPasswordFromDuffyKey(String credentialsId) {
     withCredentials([file(credentialsId: credentialsId, variable: 'DUFFY_KEY')]) {
         return sh(script: 'cat ' + DUFFY_KEY +
-                ' | cut -c \'-13\'', returnStdout: true).trim()
+                ' | cut -c \'-13\'', label: "Getting password from Duffy Key", returnStdout: true).trim()
     }
 }
 
@@ -1008,12 +1008,13 @@ def buildImage(String openshiftProject, String buildConfig) {
             while (buildRunning) {
                 describeStr = openshift.selector(out).describe()
                 outTrim = describeStr.out.trim()
-                buildRunning = sh(script: "echo \"${outTrim}\" | grep '^Status:' | grep -E 'New|Pending|Running'", returnStatus: true) == 0
+                buildRunning = sh(script: "echo \"${outTrim}\" | grep '^Status:' | grep -E 'New|Pending|Running'", label: "Checking build status", returnStatus: true) == 0
                 sleep 60
             }
 
             def imageHash = sh(
                     script: "echo \"${outTrim}\" | grep 'Image Digest:' | cut -f2- -d:",
+                    label: "Getting Image Hash",
                     returnStdout: true
             ).trim()
             echo "imageHash: ${imageHash}"
@@ -1054,12 +1055,15 @@ def buildStableImage(String openshiftProject, String buildConfig, String buildTa
             while (buildRunning) {
                 describeStr = openshift.selector(out).describe()
                 outTrim = describeStr.out.trim()
-                buildRunning = sh(script: "echo \"${outTrim}\" | grep '^Status:' | grep -E 'New|Pending|Running'", returnStatus: true) == 0
+                buildRunning = sh(script: "echo \"${outTrim}\" | grep '^Status:' | grep -E 'New|Pending|Running'",
+                label: "Checking build status",
+                returnStatus: true) == 0
                 sleep 60
             }
 
             def imageHash = sh(
                     script: "echo \"${outTrim}\" | grep 'Image Digest:' | cut -f2- -d:",
+                    label: "Getting Image Hash",
                     returnStdout: true
             ).trim()
             echo "imageHash: ${imageHash}"
@@ -1268,7 +1272,7 @@ def checkTests(String mypackage, String mybranch, String tag, String pr_id=null,
     sh script: "git clone -b ${mybranch} --single-branch --depth 1 ${repo_url}", label: "Cloning ${repo_url}"
     if (pr_id != null) {
         dir("${mypackage}") {
-            sh script, "git fetch -fu origin refs/pull/${pr_id}/head:pr", label: "Fetching changes"
+            sh script: "git fetch -fu origin refs/pull/${pr_id}/head:pr", label: "Fetching changes"
             // If fail to apply patch do not exit with error, but instead ignore the patch
             // this should avoid the pipeline to exit here without sending any topic to fedmsg
             try {
@@ -1285,17 +1289,17 @@ def checkTests(String mypackage, String mybranch, String tag, String pr_id=null,
         tests_path = "${mypackage}"
     }
 
-    if (sh(returnStatus: true, script: "ls -allh ${tests_path}/tests*.yml") != 0) {
+    if (sh(returnStatus: true, script: "ls -allh ${tests_path}/tests*.yml", label: "Checking if ${tests_path} exist") != 0) {
         return false
     }
 
     // if STR is installed use it to check for tags as it is more reliable
-    if (sh(returnStatus: true, script: """rpm -q standard-test-roles""") == 0) {
+    if (sh(returnStatus: true, script: """rpm -q standard-test-roles""", label: "Checking if STR is installed") == 0) {
         // It should leave with exception if playbook is invalid
-        sh("ansible-playbook --list-tags ${tests_path}/tests*.yml > playbook-tags.txt")
-        return sh (returnStatus: true, script: "grep -e \"TASK TAGS: \\[.*\\<${tag}\\>.*\\]\" playbook-tags.txt") == 0
+        sh(script: "ansible-playbook --list-tags ${tests_path}/tests*.yml > playbook-tags.txt", label: "Getting playbook-tags for the: ${tests_path}")
+        return sh (returnStatus: true, script: "grep -e \"TASK TAGS: \\[.*\\<${tag}\\>.*\\]\" playbook-tags.txt", label: "Checking if playbook is valid") == 0
     } else {
-        return sh (returnStatus: true, script: """grep -r '\\- '${tag}'\$' ${tests_path}""") == 0
+        return sh (returnStatus: true, script: """grep -r '\\- '${tag}'\$' ${tests_path}""", label: "Checking if playbook is valid") == 0
     }
 }
 
