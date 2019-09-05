@@ -378,7 +378,7 @@ podTemplate(name: podName,
                         pipelineUtils.executeInContainer(currentStage + "-rsync-push-netinst", "rsync", "/tmp/rsync.sh")
 
                         String untested_img_loc = "${env.WORKSPACE}/images/untested-atomic.qcow2"
-                        sh "cp -f ${untested_img_loc} ${env.WORKSPACE}/"
+                        sh script: "cp -f ${untested_img_loc} ${env.WORKSPACE}/", label: "Copying ${untested_img_loc} to the ${env.WORKSPACE}/"
                         if (fileExists("${env.WORKSPACE}/NeedNewImage.txt") || ("${env.GENERATE_IMAGE}" == "true")) {
                             // Rsync push images
                             env.rsync_paths = "images"
