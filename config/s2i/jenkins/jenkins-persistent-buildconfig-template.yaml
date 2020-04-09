@@ -75,7 +75,7 @@ objects:
       sourceStrategy:
         from:
           kind: DockerImage
-          name: docker.io/openshift/jenkins-2-centos7:v3.11
+          name: docker.io/openshift/jenkins-2-centos7:v3.6
       type: Source
     triggers:
     - type: ConfigChange
